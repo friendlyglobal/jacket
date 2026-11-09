@@ -48,7 +48,12 @@ object Comic {
             for (i in 0 until minOf(x.size, y.size)) {
                 val p = x[i]; val q = y[i]
                 val c = if (p[0].isDigit() && q[0].isDigit()) {
-                    p.trimStart('0').length.compareTo(q.trimStart('0').length).takeIf { it != 0 } ?: p.compareTo(q)
+                    // Compare numerically: "03" == "3" < "10". Zero padding only breaks ties.
+                    val a = p.trimStart('0')
+                    val b = q.trimStart('0')
+                    a.length.compareTo(b.length).takeIf { it != 0 }
+                        ?: a.compareTo(b).takeIf { it != 0 }
+                        ?: p.length.compareTo(q.length)
                 } else p.compareTo(q)
                 if (c != 0) return c
             }

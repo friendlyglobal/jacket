@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -17,18 +18,22 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,18 +41,25 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import io.github.friendlyglobal.jacket.data.Book
+import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.importer.Comic
+import io.github.friendlyglobal.jacket.importer.DocumentCloser
 import io.github.friendlyglobal.jacket.importer.PdfDocument
 import io.github.friendlyglobal.jacket.library
-import io.github.friendlyglobal.jacket.importer.DocumentCloser
+import io.github.friendlyglobal.jacket.ui.Haptics
+import io.github.friendlyglobal.jacket.ui.PageColors
+import io.github.friendlyglobal.jacket.ui.rememberReadingFontFamily
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
@@ -58,10 +70,10 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.Closeable
 import java.io.File
-import java.util.concurrent.atomic.AtomicReference
 import java.nio.ByteBuffer
 import java.nio.charset.CharacterCodingException
 import java.nio.charset.CodingErrorAction
+import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipFile
 
 /**
@@ -82,8 +94,26 @@ private fun <T : Closeable> rememberDocument(key: Any, open: () -> T): Result<T>
     return doc
 }
 
+/** Left and right edges page back and forward; the middle toggles the reader controls. */
 @Composable
-fun PdfReader(book: Book, nav: ReaderNav, onProgress: ProgressSink) {
+private fun Modifier.tapZones(onPrevious: () -> Unit, onNext: () -> Unit, onCenter: () -> Unit): Modifier {
+    val previous by rememberUpdatedState(onPrevious)
+    val next by rememberUpdatedState(onNext)
+    val center by rememberUpdatedState(onCenter)
+    return pointerInput(Unit) {
+        detectTapGestures { offset ->
+            val x = offset.x / size.width
+            when {
+                x < 0.28f -> previous()
+                x > 0.72f -> next()
+                else -> center()
+            }
+        }
+    }
+}
+
+@Composable
+fun PdfReader(book: Book, page: PageColors, nav: ReaderNav, haptics: Haptics, onProgress: ProgressSink, onCenterTap: () -> Unit) {
     val library = LocalContext.current.library
     val result = rememberDocument(book.id) { PdfDocument(library.fileOf(book)) }
     when {
@@ -91,7 +121,9 @@ fun PdfReader(book: Book, nav: ReaderNav, onProgress: ProgressSink) {
         result.isFailure -> ReaderError("This PDF couldn't be opened. Password-protected PDFs aren't supported yet.")
         else -> {
             val pdf = result.getOrThrow()
-            PagedList(pdf.pageCount, book.position, pdf.firstPageAspect, nav, onProgress) { index, width -> pdf.render(index, width) }
+            PagedList(pdf.pageCount, book.position, pdf.firstPageAspect, page, nav, haptics, onProgress, onCenterTap) { index, width ->
+                pdf.render(index, width)
+            }
         }
     }
 }
@@ -125,7 +157,7 @@ private class ComicDocument(file: File) : Closeable {
 }
 
 @Composable
-fun ComicReader(book: Book, nav: ReaderNav, onProgress: ProgressSink) {
+fun ComicReader(book: Book, page: PageColors, nav: ReaderNav, haptics: Haptics, onProgress: ProgressSink, onCenterTap: () -> Unit) {
     val library = LocalContext.current.library
     val result = rememberDocument(book.id) { ComicDocument(library.fileOf(book)) }
     when {
@@ -133,7 +165,9 @@ fun ComicReader(book: Book, nav: ReaderNav, onProgress: ProgressSink) {
         result.isFailure || result.getOrThrow().pages.isEmpty() -> ReaderError("This comic couldn't be opened.")
         else -> {
             val comic = result.getOrThrow()
-            PagedList(comic.pages.size, book.position, 0.66f, nav, onProgress) { index, width -> comic.render(index, width) }
+            PagedList(comic.pages.size, book.position, 0.66f, page, nav, haptics, onProgress, onCenterTap) { index, width ->
+                comic.render(index, width)
+            }
         }
     }
 }
@@ -143,39 +177,50 @@ private fun PagedList(
     count: Int,
     initial: Int,
     placeholderAspect: Float,
+    page: PageColors,
     nav: ReaderNav,
+    haptics: Haptics,
     onProgress: ProgressSink,
+    onCenterTap: () -> Unit,
     render: suspend (index: Int, width: Int) -> Bitmap?,
 ) {
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = initial.coerceIn(0, (count - 1).coerceAtLeast(0)))
     val scope = rememberCoroutineScope()
     val first by remember { derivedStateOf { listState.firstVisibleItemIndex } }
     SideEffect {
-        nav.canPrevious = first > 0
-        nav.canNext = first < count - 1
-        nav.label = "${first + 1} / $count"
-        nav.onPrevious = { scope.launch { listState.animateScrollToItem((first - 1).coerceAtLeast(0)) } }
-        nav.onNext = { scope.launch { listState.animateScrollToItem((first + 1).coerceAtMost(count - 1)) } }
+        nav.sectionCount = count
+        nav.section = first
+        nav.title = "Page ${first + 1} of $count"
+        nav.footer = nav.title
+        nav.sectionName = { "Page ${it + 1}" }
+        nav.jumpTo = { target -> if (target in 0 until count) scope.launch { listState.animateScrollToItem(target) } }
     }
+    PageTicks(listState, haptics)
     TrackProgress(listState, count, onProgress)
 
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        val maxPage = min(maxWidth, 900.dp)
-        val widthPx = with(LocalDensity.current) { maxPage.roundToPx() }
+    val step = { listState.layoutInfo.viewportSize.height * 0.85f }
+    BoxWithConstraints(
+        Modifier.fillMaxSize().tapZones(
+            onPrevious = { scope.launch { listState.animateScrollBy(-step()) } },
+            onNext = { scope.launch { listState.animateScrollBy(step()) } },
+            onCenter = onCenterTap,
+        ),
+    ) {
+        val widthPx = with(LocalDensity.current) { min(maxWidth, 900.dp).roundToPx() }
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(top = 12.dp, bottom = 120.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 64.dp),
         ) {
-            items(count) { index -> PageImage(index, widthPx, placeholderAspect, render) }
+            items(count) { index -> PageImage(index, widthPx, placeholderAspect, page, render) }
         }
     }
 }
 
 @Composable
-private fun PageImage(index: Int, widthPx: Int, placeholderAspect: Float, render: suspend (Int, Int) -> Bitmap?) {
+private fun PageImage(index: Int, widthPx: Int, placeholderAspect: Float, page: PageColors, render: suspend (Int, Int) -> Bitmap?) {
     val bitmap by produceState<ImageBitmap?>(null, index, widthPx) {
         value = runCatching { render(index, widthPx) }.getOrNull()?.asImageBitmap()
     }
@@ -187,14 +232,23 @@ private fun PageImage(index: Int, widthPx: Int, placeholderAspect: Float, render
             .fillMaxWidth()
             .aspectRatio(aspect)
             .shadow(2.dp)
-            .background(Color.White),
+            .background(if (bitmap == null) page.secondary.copy(alpha = 0.12f) else Color.White),
     ) {
         bitmap?.let { Image(it, "Page ${index + 1}", Modifier.fillMaxSize(), contentScale = ContentScale.Fit) }
     }
 }
 
 @Composable
-fun TextReader(book: Book, textScale: Float, nav: ReaderNav, onProgress: ProgressSink) {
+fun TextReader(
+    book: Book,
+    settings: Settings,
+    page: PageColors,
+    nav: ReaderNav,
+    haptics: Haptics,
+    speaker: Speaker,
+    onProgress: ProgressSink,
+    onCenterTap: () -> Unit,
+) {
     val library = LocalContext.current.library
     val paragraphs by produceState<List<String>?>(null, book.id) {
         value = withContext(Dispatchers.IO) { runCatching { readParagraphs(library.fileOf(book)) }.getOrDefault(emptyList()) }
@@ -204,34 +258,187 @@ fun TextReader(book: Book, textScale: Float, nav: ReaderNav, onProgress: Progres
 
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = book.position.coerceIn(0, text.lastIndex))
     val scope = rememberCoroutineScope()
-    val pct = (book.progress * 100).toInt()
-    // Read here (not inside SideEffect) so changes recompose and refresh the toolbar.
-    val canBack = listState.canScrollBackward
-    val canForward = listState.canScrollForward
+    val first by remember { derivedStateOf { listState.firstVisibleItemIndex } }
+    val percent = book.percent
     SideEffect {
-        nav.canPrevious = canBack
-        nav.canNext = canForward
-        nav.label = "$pct%"
-        val page = { listState.layoutInfo.viewportSize.height * 0.85f }
-        nav.onPrevious = { scope.launch { listState.animateScrollBy(-page()) } }
-        nav.onNext = { scope.launch { listState.animateScrollBy(page()) } }
+        nav.sectionCount = text.size
+        nav.section = first
+        nav.title = "$percent% read"
+        nav.footer = ""
+        nav.sectionName = { "${it * 100 / text.size}%" }
+        nav.jumpTo = { target -> if (target in text.indices) scope.launch { listState.scrollToItem(target) } }
     }
     TrackProgress(listState, text.size, onProgress)
 
+    // Read aloud: which paragraph is being spoken, and which characters of it so far.
+    val listen = nav.listen
+    var spokenParagraph by remember { mutableIntStateOf(-1) }
+    var wordStart by remember { mutableIntStateOf(0) }
+    var wordEnd by remember { mutableIntStateOf(0) }
+    val token = remember { intArrayOf(0) }
+    val controller = remember(book.id, speaker, text) {
+        object : ListenController {
+            fun say(index: Int, from: Int, queue: Boolean) {
+                if (index !in text.indices) {
+                    if (!queue) stop()
+                    return
+                }
+                if (!queue) {
+                    // Remember where we asked to start, so pause/resume works before the first word.
+                    spokenParagraph = index
+                    wordStart = from
+                    wordEnd = from
+                }
+                val start = from.coerceIn(0, text[index].length)
+                speaker.speak(token[0], index, start, text[index].substring(start), queue)
+            }
+
+            fun play(index: Int, from: Int) {
+                if (!speaker.acquire()) {
+                    listen.active = true
+                    listen.playing = false
+                    return
+                }
+                listen.active = true
+                listen.playing = true
+                token[0]++
+                say(index, from, false)
+            }
+
+            override fun start() {
+                speaker.setLanguage(null)
+                play(listState.firstVisibleItemIndex, 0)
+            }
+
+            override fun toggle() = if (listen.playing) pause() else resume()
+
+            fun pause() {
+                token[0]++
+                speaker.stop()
+                speaker.release()
+                listen.playing = false
+            }
+
+            fun resume() {
+                if (spokenParagraph < 0) start() else play(spokenParagraph, wordStart)
+            }
+
+            override fun skip(delta: Int) {
+                speaker.stop()
+                play((spokenParagraph.coerceAtLeast(listState.firstVisibleItemIndex) + delta).coerceAtLeast(0), 0)
+            }
+
+            override fun restart() {
+                if (listen.playing) resume()
+            }
+
+            override fun stop() {
+                token[0]++
+                speaker.stop()
+                speaker.release()
+                listen.active = false
+                listen.playing = false
+                spokenParagraph = -1
+            }
+        }
+    }
+    DisposableEffect(speaker, controller) {
+        speaker.listener = object : Speaker.Listener {
+            override fun onStart(utterance: Utterance) {
+                if (utterance.token != token[0]) return
+                spokenParagraph = utterance.paragraph
+                wordStart = utterance.offset
+                wordEnd = utterance.offset
+                // The first piece of a paragraph queues the next one: no gap between paragraphs.
+                if (utterance.first) controller.say(utterance.paragraph + 1, 0, true)
+            }
+
+            override fun onRange(utterance: Utterance, start: Int, end: Int) {
+                if (utterance.token != token[0]) return
+                spokenParagraph = utterance.paragraph
+                wordStart = utterance.offset + start
+                wordEnd = utterance.offset + end
+            }
+
+            override fun onDone(utterance: Utterance) {
+                if (utterance.token == token[0] && utterance.last && utterance.paragraph >= text.lastIndex) {
+                    haptics.confirm()
+                    controller.stop()
+                }
+            }
+
+            override fun onFailed() {
+                if (listen.playing) controller.toggle()
+            }
+
+            override fun onInterrupted() {
+                if (listen.playing) controller.toggle()
+            }
+        }
+        nav.listenController = controller
+        onDispose {
+            speaker.listener = null
+            nav.listenController = null
+        }
+    }
+    // Keep the spoken paragraph on screen.
+    LaunchedEffect(spokenParagraph) {
+        if (spokenParagraph < 0 || !listen.playing) return@LaunchedEffect
+        val info = listState.layoutInfo
+        val item = info.visibleItemsInfo.firstOrNull { it.index == spokenParagraph }
+        if (item == null || item.offset + item.size > info.viewportEndOffset - 120) listState.animateScrollToItem(spokenParagraph)
+    }
+
+    val family = rememberReadingFontFamily(settings.font)
     val style = MaterialTheme.typography.bodyLarge.copy(
-        fontFamily = FontFamily.Serif, fontSize = 18.sp * textScale, lineHeight = 29.sp * textScale,
+        fontFamily = family, fontSize = 18.sp * settings.textScale, lineHeight = 29.sp * settings.textScale, color = page.text,
     )
-    LazyColumn(
-        state = listState,
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        contentPadding = PaddingValues(top = 16.dp, bottom = 150.dp),
+    val unread = SpanStyle(color = page.text.copy(alpha = 0.4f))
+    val currentWord = SpanStyle(background = page.link.copy(alpha = 0.24f))
+    val step = { listState.layoutInfo.viewportSize.height * 0.85f }
+    Box(
+        Modifier.fillMaxSize().tapZones(
+            onPrevious = { scope.launch { listState.animateScrollBy(-step()) } },
+            onNext = { scope.launch { listState.animateScrollBy(step()) } },
+            onCenter = onCenterTap,
+        ),
     ) {
-        items(text) { paragraph ->
-            Text(
-                paragraph, style = style,
-                modifier = Modifier.widthIn(max = 680.dp).fillMaxWidth().padding(horizontal = 24.dp, vertical = 7.dp),
-            )
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(top = 40.dp, bottom = 72.dp),
+        ) {
+            itemsIndexed(text) { index, paragraph ->
+                // While listening: read text in full ink, unread text soft, the current word marked.
+                val spoken = when {
+                    !listen.active || spokenParagraph < 0 || index < spokenParagraph -> AnnotatedString(paragraph)
+                    index > spokenParagraph -> AnnotatedString(paragraph, unread)
+                    else -> buildAnnotatedString {
+                        append(paragraph)
+                        val end = wordEnd.coerceIn(0, paragraph.length)
+                        addStyle(unread, end, paragraph.length)
+                        val start = wordStart.coerceIn(0, end)
+                        if (end > start) addStyle(currentWord, start, end)
+                    }
+                }
+                Text(
+                    spoken, style = style,
+                    modifier = Modifier.widthIn(max = 680.dp).fillMaxWidth().padding(horizontal = 28.dp, vertical = 7.dp),
+                )
+            }
+        }
+    }
+}
+
+/** A light tick each time a new page scrolls into first place. */
+@Composable
+private fun PageTicks(listState: LazyListState, haptics: Haptics) {
+    LaunchedEffect(listState) {
+        var previous = -1
+        snapshotFlow { listState.firstVisibleItemIndex }.collect { index ->
+            if (previous >= 0 && index != previous) haptics.tick()
+            previous = index
         }
     }
 }

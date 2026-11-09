@@ -42,12 +42,42 @@ data class Book(
 ) {
     val percent: Int get() = (progress * 100).toInt().coerceIn(0, 100)
 
-    val positionLabel: String
-        get() = when (format) {
-            BookFormat.EPUB -> "Chapter ${position + 1}"
-            BookFormat.PDF, BookFormat.CBZ -> "Page ${position + 1}"
-            BookFormat.TXT -> "$percent%"
+    val isNew: Boolean get() = lastOpenedAt == 0L
+
+    /** Short reading status for covers and widgets, e.g. "42% read" or "Page 3 of 40". */
+    val statusLabel: String
+        get() = when {
+            isNew -> "Not started"
+            (format == BookFormat.PDF || format == BookFormat.CBZ) && sectionCount > 0 ->
+                "Page ${position + 1} of $sectionCount"
+            else -> "$percent% read"
         }
+}
+
+enum class ReadingFont(val label: String, val description: String) {
+    LITERATA("Literata", "Google's typeface for long reading"),
+    HYPERLEGIBLE("Atkinson Hyperlegible", "Distinct letterforms for low vision"),
+    SERIF("System serif", "Your phone's serif font"),
+    SANS("System sans", "Your phone's interface font"),
+    ORIGINAL("Book's own", "Whatever the publisher chose"),
+}
+
+enum class PageColor(val label: String) {
+    BOOK("Book"),
+    PAPER("Paper"),
+    DARK("Dark"),
+    BLACK("Black"),
+}
+
+enum class PageLayout(val label: String) {
+    PAGES("Pages"),
+    SCROLL("Scroll"),
+}
+
+enum class LibrarySort(val label: String) {
+    RECENT("Recent"),
+    TITLE("Title"),
+    AUTHOR("Author"),
 }
 
 data class Settings(
@@ -56,6 +86,14 @@ data class Settings(
     val ambientDim: Boolean = true,
     val autoOuterScreen: Boolean = true,
     val textScale: Float = 1f,
+    /** Tint the app with the last-read book's colors; otherwise follow the system palette. */
+    val bookColors: Boolean = true,
+    val font: ReadingFont = ReadingFont.LITERATA,
+    val pageColor: PageColor = PageColor.BOOK,
+    val layout: PageLayout = PageLayout.PAGES,
+    val sort: LibrarySort = LibrarySort.RECENT,
+    /** Read-aloud speed, 1 = the voice's normal pace. */
+    val listenRate: Float = 1f,
 )
 
 data class LibraryState(
@@ -80,6 +118,12 @@ internal object LibraryJson {
             put("ambientDim", state.settings.ambientDim)
             put("autoOuterScreen", state.settings.autoOuterScreen)
             put("textScale", state.settings.textScale.toDouble())
+            put("bookColors", state.settings.bookColors)
+            put("font", state.settings.font.name)
+            put("pageColor", state.settings.pageColor.name)
+            put("layout", state.settings.layout.name)
+            put("sort", state.settings.sort.name)
+            put("listenRate", state.settings.listenRate.toDouble())
         })
         put("books", JSONArray().apply { state.books.forEach { put(it.toJson()) } })
     }.toString()
@@ -97,9 +141,18 @@ internal object LibraryJson {
                 ambientDim = s.optBoolean("ambientDim", true),
                 autoOuterScreen = s.optBoolean("autoOuterScreen", true),
                 textScale = s.optDouble("textScale", 1.0).toFloat(),
+                bookColors = s.optBoolean("bookColors", true),
+                font = enumOr(s.optString("font"), ReadingFont.LITERATA),
+                pageColor = enumOr(s.optString("pageColor"), PageColor.BOOK),
+                layout = enumOr(s.optString("layout"), PageLayout.PAGES),
+                sort = enumOr(s.optString("sort"), LibrarySort.RECENT),
+                listenRate = s.optDouble("listenRate", 1.0).toFloat().takeIf { it.isFinite() && it in 0.5f..3f } ?: 1f,
             ),
         )
     }
+
+    private inline fun <reified E : Enum<E>> enumOr(name: String, default: E): E =
+        runCatching { enumValueOf<E>(name) }.getOrDefault(default)
 
     private fun Book.toJson() = JSONObject().apply {
         put("id", id); put("title", title); put("author", author); put("format", format.name)

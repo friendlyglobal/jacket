@@ -6,20 +6,39 @@ Jacket is an open-source Android reader for foldable phones. While you read on t
 screen, the outer screen shows the book's cover edge to edge, like album art, so the people
 around you see what you're reading. On flip phones, the cover fills the cover-screen widget instead.
 
-The whole UI is Material 3 Expressive, and it re-tints itself from each book's cover.
+It's built with Material 3 Expressive: springy motion, shape morphing, haptics, and colors taken
+from the cover of the book you're reading.
 
-> **Status: 0.1.0, early.** It builds and passes Android lint. It hasn't been tested on real
-> foldable hardware yet. Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome.
+> **Status: early alpha.** The outer-screen cover has been confirmed on a book-style foldable;
+> the rest is young. Test builds are on the [releases page](https://github.com/friendlyglobal/jacket/releases),
+> and reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome.
 
 ## What it does
 
-- **Imports your files:** EPUB, PDF, CBZ comics and plain text. Use the **Add books** button,
-  or *Open with* / *Share* from any file manager. Jacket keeps a private copy, pulls out the title,
-  author and cover, and generates a typographic cover when a file has none.
-- **Reads them:** EPUB chapters in a sandboxed WebView themed to match the book, PDF pages via
-  Android's `PdfRenderer`, comics page by page, text as flowing paragraphs. Your position is saved
-  as you read.
-- **Shows the cover where people can see it:**
+### Reading
+- **Your own files:** EPUB, PDF, CBZ comics and plain text. Use **Add books**, or *Open with* /
+  *Share* from any app (shared text becomes a book too). Jacket keeps a private copy and pulls out
+  the title, author and cover, generating a typographic cover when a file has none.
+- **Real pages for EPUB:** each chapter is laid out page by page, like Kindle. Swipe (the page
+  follows your finger) or tap the edges; tap the middle for the controls. Unfolded, you get a
+  two-page spread with the gutter on the hinge. Or switch to continuous scrolling.
+- **Contents and progress:** the book's own table of contents, chapter names, "pages left in
+  chapter", a scrubber, and progress weighted by how much text each chapter holds.
+- **Typography:** Literata (Google's typeface for long reading) and Atkinson Hyperlegible are
+  bundled, alongside the system serif and sans and the book's own fonts. Text size, and Book,
+  Paper, Dark or Black pages.
+- PDFs render with Android's `PdfRenderer`, comics page by page, text as flowing paragraphs.
+  Your place is saved as you read.
+
+### Listening
+- **Audiobook mode** for EPUB and text: the phone's text-to-speech reads the book in its own
+  language when a voice is installed. As each word is spoken it turns from soft gray to full ink
+  (full white in dark mode), with a marker on the current word. The page turns itself to follow,
+  and reading carries on into the next chapter.
+- Play/pause, skip by paragraph, 0.8× to 2× speed. It pauses when another app plays audio or your
+  headphones come out.
+
+### The cover, where people can see it
 
 | Device | How the cover appears |
 | --- | --- |
@@ -28,10 +47,17 @@ The whole UI is Material 3 Expressive, and it re-tints itself from each book's c
 | Motorola Razr | Open Jacket on the external display. The UI adapts to small, square windows. |
 | Any phone or tablet | The same widget, on the home screen. |
 
-- **Material 3 Expressive throughout:** connected button groups, wavy progress indicators,
-  the floating reader toolbar, shape-morphing loading indicators, the multi-browse cover carousel,
-  expressive motion, and a color scheme seeded from each cover (Palette picks the seed, and the
-  tonal roles are built in OKLCH).
+### Material 3 Expressive
+- The cover flies from the library into the book (a shared-element transition) and "opens" into
+  the first page. Predictive back shrinks the page as you swipe.
+- Covers squash on press, re-sorting springs the grid into place, and the add button tucks away
+  as you scroll.
+- Connected button groups, segmented lists, wavy progress, a floating toolbar with its own
+  action button, shape-morphing loading indicators, and a large collapsing settings header.
+- Haptics throughout: page turns tick, chapter boundaries bump, sliders tick per step, toggles
+  click, and long-presses rumble. All of it follows the system's touch-feedback setting.
+- Colors come from the cover of the book you last read (Palette picks the seed; the tonal
+  roles are built in OKLCH). Turn that off in Settings to use your phone's palette.
 
 ## Privacy
 
@@ -60,20 +86,21 @@ and use the emulator's extended controls to view the rear display.
 ```
 app/src/main/java/io/github/friendlyglobal/jacket/
 ├── data/        Book model, JSON-backed library, settings
-├── importer/    EPUB / PDF / CBZ / TXT parsing, covers, generated title cards
-├── reader/      Reader screen and the per-format views
+├── importer/    EPUB / PDF / CBZ / TXT parsing (incl. EPUB contents), covers, title cards
+├── reader/      Reader screen, paged EPUB engine, per-format views, read-aloud, reading controls
 ├── outer/       Outer-display session (WindowAreaController) and the cover shown on it
 ├── widget/      Glance widget (home screen and Galaxy Z Flip Flex Window)
-└── ui/          Theme (cover-seeded color), home screen, shared pieces
-docs/concept.html  The interactive design concept the app started from
+└── ui/          Theme (cover-seeded color), home, settings, motion and haptics helpers
+app/src/main/assets/fonts/   Bundled reading fonts and their licenses
+docs/concept.html            The interactive design concept the app started from
 ```
 
 ## Roadmap
 
+- Background listening with lock-screen controls (a media session and foreground service)
+- Read-aloud for PDFs (Android 15's PdfRenderer text API)
 - "Currently reading" sync from Hardcover and Open Library, for books you read in other apps
 - ISBN barcode scanning to set a cover for a paper book
-- Cover art from audiobook apps through the media session
-- Two-page spreads on the unfolded inner display
 - More formats (FB2, CBR), password-protected PDFs
 
 Kindle, Google Play Books and other stores don't expose what you're reading, and DRM-protected
@@ -82,9 +109,11 @@ files can't be opened. Jacket won't try to work around either.
 ## Contributing
 
 Issues and pull requests are welcome. If you own a foldable, the most useful thing you can do
-right now is install a debug build and report how the outer screen and the cover-screen widget
+right now is install a test build and report how the outer screen and the cover-screen widget
 behave on your device.
 
 ## License
 
-[Apache License 2.0](LICENSE)
+Jacket is licensed under the [Apache License 2.0](LICENSE).
+Literata and Atkinson Hyperlegible are licensed under the SIL Open Font License 1.1; their license
+texts ship next to the font files in `app/src/main/assets/fonts/`.

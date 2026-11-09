@@ -109,7 +109,7 @@ fun OuterCover(book: Book?, settings: Settings) {
                 LinearWavyProgressIndicator(progress = { book.progress }, modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "${book.positionLabel} · ${book.percent}%",
+                    book.statusLabel,
                     style = MaterialTheme.typography.labelMedium,
                     color = Color.White.copy(alpha = 0.85f),
                 )

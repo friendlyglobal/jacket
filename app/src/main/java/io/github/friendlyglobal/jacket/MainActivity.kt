@@ -4,19 +4,21 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,10 +29,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import io.github.friendlyglobal.jacket.data.ImportReport
 import io.github.friendlyglobal.jacket.outer.OuterCoverHost
 import io.github.friendlyglobal.jacket.outer.OuterDisplay
 import io.github.friendlyglobal.jacket.reader.ReaderScreen
+import io.github.friendlyglobal.jacket.ui.CoverTransition
+import io.github.friendlyglobal.jacket.ui.KeepScreenOn
+import io.github.friendlyglobal.jacket.ui.LocalCoverTransition
 import io.github.friendlyglobal.jacket.ui.home.HomeScreen
+import io.github.friendlyglobal.jacket.ui.rememberHaptics
+import io.github.friendlyglobal.jacket.ui.settings.SettingsScreen
 import io.github.friendlyglobal.jacket.ui.theme.JacketTheme
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +50,7 @@ import java.io.File
 class MainActivity : ComponentActivity() {
     private val openRequests = MutableStateFlow<String?>(null)
     private val importing = MutableStateFlow(false)
-    private val messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
+    private val reports = MutableSharedFlow<ImportReport>(extraBufferCapacity = 8)
     private lateinit var outer: OuterDisplay
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,7 +59,7 @@ class MainActivity : ComponentActivity() {
         outer = OuterDisplay(this) { OuterCoverHost() }
         if (savedInstanceState == null) handle(intent)
         setContent {
-            JacketRoot(outer, openRequests, importing, messages, onImport = { importUris(it) })
+            JacketRoot(outer, openRequests, importing, reports, onImport = { importUris(it) })
         }
     }
 
@@ -103,7 +111,7 @@ class MainActivity : ComponentActivity() {
             } finally {
                 importing.value = false
             }
-            messages.tryEmit(report.message)
+            reports.tryEmit(report)
             if (openAfter) report.imported.firstOrNull()?.let { openRequests.value = it.id }
         }
     }
@@ -113,68 +121,119 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+private const val HOME = "home"
+private const val SETTINGS = "settings"
+private const val READ = "read:"
+
 @Composable
 private fun JacketRoot(
     outer: OuterDisplay,
     openRequests: MutableStateFlow<String?>,
     importing: StateFlow<Boolean>,
-    messages: SharedFlow<String>,
+    reports: SharedFlow<ImportReport>,
     onImport: (List<Uri>) -> Unit,
 ) {
     val library = LocalContext.current.library
+    val haptics = rememberHaptics()
     val state by library.state.collectAsStateWithLifecycle()
     val busy by importing.collectAsStateWithLifecycle()
     val outerAvailable by outer.available.collectAsStateWithLifecycle()
     val request by openRequests.collectAsStateWithLifecycle()
-    var openId by rememberSaveable { mutableStateOf<String?>(null) }
+    var destination by rememberSaveable { mutableStateOf(HOME) }
     val snackbar = remember { SnackbarHostState() }
+
+    val openBook = state.find(destination.takeIf { it.startsWith(READ) }?.removePrefix(READ))
+    // The reader marks the book as opened once its cover has landed; doing it here would
+    // re-render the library mid-flight and move the cover's starting point.
+    val open = { id: String ->
+        haptics.tick()
+        destination = READ + id
+    }
 
     LaunchedEffect(request) {
         val id = request ?: return@LaunchedEffect
-        if (library.state.value.find(id) != null) {
-            library.setCurrent(id)
-            openId = id
-        }
+        if (library.state.value.find(id) != null) open(id)
         openRequests.value = null
     }
     LaunchedEffect(Unit) {
-        messages.collect { if (it.isNotEmpty()) snackbar.showSnackbar(it) }
+        reports.collect { report ->
+            if (report.failed.isEmpty()) haptics.confirm() else haptics.reject()
+            if (report.message.isNotEmpty()) snackbar.showSnackbar(report.message)
+        }
+    }
+    // A removed book can't stay open.
+    LaunchedEffect(destination, openBook) {
+        if (destination.startsWith(READ) && openBook == null) destination = HOME
     }
 
-    val openBook = state.find(openId)
-    val reading = openBook != null
     // The outer display follows "is a book open", not a particular reader screen, so switching
     // books keeps it on. A manual toggle in the reader sticks until reading stops.
+    val reading = openBook != null
     LaunchedEffect(reading, outerAvailable, state.settings.autoOuterScreen) {
         if (!reading) outer.stop()
         else if (outerAvailable && state.settings.autoOuterScreen) outer.start()
     }
+    // Here rather than in the reader: switching books composes two readers for a moment, and the
+    // outgoing one must not turn the screen timeout back on.
+    if (reading) KeepScreenOn()
 
-    JacketTheme(seed = (openBook ?: state.current)?.seedColor) {
+    // Colors: the book you're reading, else the last book you read; the system palette if neither
+    // exists or "Colors from your book" is off. Browsing never re-tints the app.
+    val colorBook = openBook ?: state.current?.takeIf { !it.isNew }
+    val seed = if (state.settings.bookColors) colorBook?.seedColor else null
+
+    JacketTheme(seed = seed) {
         Surface(color = MaterialTheme.colorScheme.background) {
-            AnimatedContent(
-                targetState = openBook?.id,
-                transitionSpec = { (fadeIn(tween(220)) + scaleIn(initialScale = 0.97f)) togetherWith fadeOut(tween(140)) },
-                label = "screen",
-            ) { id ->
-                val book = state.find(id)
-                if (book == null) {
-                    HomeScreen(
-                        state = state,
-                        outerAvailable = outerAvailable,
-                        importing = busy,
-                        snackbar = snackbar,
-                        onImport = onImport,
-                        onOpen = { openId = it.id },
-                        onSelect = { library.setCurrent(it.id) },
-                        onDelete = { library.delete(it.id) },
-                        onSettings = library::updateSettings,
-                    )
-                } else {
-                    ReaderScreen(book, state.settings, outer, onBack = { openId = null })
+            SharedTransitionLayout {
+                AnimatedContent(
+                    targetState = destination,
+                    transitionSpec = {
+                        val spatial = tween<androidx.compose.ui.unit.IntOffset>(380)
+                        when {
+                            targetState == SETTINGS ->
+                                (slideInHorizontally(spatial) { it / 3 } + fadeIn(tween(240))) togetherWith
+                                    (slideOutHorizontally(spatial) { -it / 10 } + fadeOut(tween(160)))
+                            initialState == SETTINGS ->
+                                (slideInHorizontally(spatial) { -it / 10 } + fadeIn(tween(240))) togetherWith
+                                    (slideOutHorizontally(spatial) { it / 3 } + fadeOut(tween(160)))
+                            // Into a book, the flying cover carries the motion; out of one, a crossfade.
+                            else -> fadeIn(tween(260, delayMillis = 60)) togetherWith fadeOut(tween(200))
+                        }
+                    },
+                    label = "screens",
+                ) { target ->
+                    CompositionLocalProvider(LocalCoverTransition provides CoverTransition(this@SharedTransitionLayout, this@AnimatedContent)) {
+                        val book = state.find(target.takeIf { it.startsWith(READ) }?.removePrefix(READ))
+                        when {
+                            target == SETTINGS -> SettingsScreen(
+                                state = state,
+                                outerAvailable = outerAvailable,
+                                onSettings = library::updateSettings,
+                                onBack = { destination = HOME },
+                            )
+                            book != null -> ReaderScreen(
+                                book = book,
+                                settings = state.settings,
+                                outer = outer,
+                                onSettings = library::updateSettings,
+                                onBack = { destination = HOME },
+                            )
+                            else -> HomeScreen(
+                                state = state,
+                                outerAvailable = outerAvailable,
+                                importing = busy,
+                                snackbar = snackbar,
+                                onImport = onImport,
+                                onOpen = { open(it.id) },
+                                onShowOnCover = { library.setCurrent(it.id) },
+                                onDelete = { library.delete(it.id) },
+                                onSort = { sort -> library.updateSettings { it.copy(sort = sort) } },
+                                onOpenSettings = { destination = SETTINGS },
+                            )
+                        }
+                    }
                 }
             }
         }
-        BackHandler(enabled = openId != null) { openId = null }
     }
 }

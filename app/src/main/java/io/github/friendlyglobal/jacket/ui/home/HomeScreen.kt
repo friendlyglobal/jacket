@@ -3,6 +3,7 @@ package io.github.friendlyglobal.jacket.ui.home
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -10,12 +11,15 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,68 +27,67 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
-import androidx.compose.material3.carousel.rememberCarouselState
+import androidx.compose.material3.ripple
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.friendlyglobal.jacket.data.Book
-import io.github.friendlyglobal.jacket.data.CoverStyle
+import io.github.friendlyglobal.jacket.data.LibrarySort
 import io.github.friendlyglobal.jacket.data.LibraryState
-import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.importer.BookImporter
+import io.github.friendlyglobal.jacket.ui.ConnectedChoice
 import io.github.friendlyglobal.jacket.ui.CoverImage
+import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
-
-private val ContentMaxWidth = 720.dp
+import io.github.friendlyglobal.jacket.ui.pressScale
+import io.github.friendlyglobal.jacket.ui.rememberHaptics
+import io.github.friendlyglobal.jacket.ui.sharedCover
 
 @Composable
 fun HomeScreen(
@@ -94,24 +97,40 @@ fun HomeScreen(
     snackbar: SnackbarHostState,
     onImport: (List<Uri>) -> Unit,
     onOpen: (Book) -> Unit,
-    onSelect: (Book) -> Unit,
+    onShowOnCover: (Book) -> Unit,
     onDelete: (Book) -> Unit,
-    onSettings: ((Settings) -> Settings) -> Unit,
+    onSort: (LibrarySort) -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
+    val haptics = rememberHaptics()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         if (uris.isNotEmpty()) onImport(uris)
     }
-    val addBooks = { picker.launch(BookImporter.MIME_TYPES) }
-    val current = state.current
+    val addBooks = { haptics.tick(); picker.launch(BookImporter.MIME_TYPES) }
+    val grid = rememberLazyGridState()
+    val fabExpanded by remember { derivedStateOf { grid.firstVisibleItemIndex == 0 } }
+    var query by rememberSaveable { mutableStateOf("") }
+    val hero = state.current
+    val shown = remember(state.books, state.settings.sort, query) { sortAndFilter(state.books, state.settings.sort, query) }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Brand() }) },
+        topBar = {
+            TopAppBar(
+                title = { Brand() },
+                actions = {
+                    FilledTonalIconButton(onClick = { haptics.tick(); onOpenSettings() }, modifier = Modifier.padding(end = 8.dp)) {
+                        Icon(JacketIcons.Person, "Profile and settings")
+                    }
+                },
+            )
+        },
         floatingActionButton = {
             if (state.books.isNotEmpty()) {
                 ExtendedFloatingActionButton(
-                    onClick = addBooks,
-                    icon = { Icon(JacketIcons.Add, null) },
                     text = { Text("Add books") },
+                    icon = { Icon(JacketIcons.Add, null) },
+                    onClick = addBooks,
+                    expanded = fabExpanded,
                 )
             }
         },
@@ -121,23 +140,52 @@ fun HomeScreen(
             if (state.books.isEmpty()) {
                 EmptyLibrary(Modifier.padding(padding), onAdd = addBooks)
             } else {
-                LazyColumn(
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 112.dp),
+                    state = grid,
                     modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding() + 96.dp),
+                    contentPadding = PaddingValues(
+                        start = 16.dp, end = 16.dp,
+                        top = padding.calculateTopPadding() + 4.dp,
+                        bottom = padding.calculateBottomPadding() + 104.dp,
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(18.dp),
                 ) {
-                    val itemModifier = Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth()
-                    if (current != null) item(key = "now") { NowWearing(current, onOpen, itemModifier) }
-                    item(key = "carousel") { CoverCarousel(state.books, current, onSelect, itemModifier) }
-                    item(key = "settings") { CoverScreenCard(state.settings, outerAvailable, onSettings, itemModifier) }
-                    item(key = "library-header") {
-                        Text(
-                            "Library · ${state.books.size}", style = MaterialTheme.typography.titleMedium,
-                            modifier = itemModifier.padding(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 4.dp),
+                    if (hero != null) {
+                        item(key = "hero", span = { GridItemSpan(maxLineSpan) }) {
+                            ContinueCard(hero, outerAvailable, onOpen)
+                        }
+                    }
+                    item(key = "header", span = { GridItemSpan(maxLineSpan) }) {
+                        LibraryHeader(
+                            count = state.books.size,
+                            sort = state.settings.sort,
+                            onSort = onSort,
+                            query = query,
+                            onQuery = { query = it },
+                            searchable = state.books.size > 6,
                         )
                     }
-                    items(state.books.sortedByDescending { maxOf(it.lastOpenedAt, it.addedAt) }, key = { it.id }) { book ->
-                        LibraryRow(book, book.id == current?.id, onOpen, onSelect, onDelete, itemModifier.animateItem())
+                    if (shown.isEmpty()) {
+                        item(key = "nothing", span = { GridItemSpan(maxLineSpan) }) {
+                            Text(
+                                "No books match “$query”", style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(vertical = 32.dp),
+                            )
+                        }
+                    }
+                    items(shown, key = { it.id }) { book ->
+                        BookTile(
+                            book = book,
+                            onCover = book.id == hero?.id,
+                            haptics = haptics,
+                            onOpen = onOpen,
+                            onShowOnCover = onShowOnCover,
+                            onDelete = onDelete,
+                            modifier = Modifier.animateItem(),
+                        )
                     }
                 }
             }
@@ -151,6 +199,17 @@ fun HomeScreen(
     }
 }
 
+private fun sortAndFilter(books: List<Book>, sort: LibrarySort, query: String): List<Book> {
+    val q = query.trim()
+    val matching = if (q.isEmpty()) books else books.filter { it.title.contains(q, true) || it.author.contains(q, true) }
+    fun titleKey(b: Book) = b.title.lowercase().removePrefix("the ").removePrefix("a ").removePrefix("an ")
+    return when (sort) {
+        LibrarySort.RECENT -> matching.sortedByDescending { maxOf(it.lastOpenedAt, it.addedAt) }
+        LibrarySort.TITLE -> matching.sortedBy(::titleKey)
+        LibrarySort.AUTHOR -> matching.sortedWith(compareBy({ it.author.ifEmpty { "￿" }.lowercase() }, ::titleKey))
+    }
+}
+
 @Composable
 private fun Brand() {
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -160,202 +219,194 @@ private fun Brand() {
     }
 }
 
+/** The book on your cover screen, one tap from where you left off. */
 @Composable
-private fun NowWearing(book: Book, onOpen: (Book) -> Unit, modifier: Modifier) {
-    Column(modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
-        Text(
-            "NOW WEARING", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary,
-            letterSpacing = 1.6.sp, fontWeight = FontWeight.SemiBold,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            book.title, style = MaterialTheme.typography.headlineMediumEmphasized,
-            maxLines = 2, overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            listOf(book.author, book.positionLabel, "${book.percent}%").filter { it.isNotEmpty() }.joinToString(" · "),
-            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1, overflow = TextOverflow.Ellipsis,
-        )
-        Spacer(Modifier.height(14.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Button(onClick = { onOpen(book) }) {
-                Icon(JacketIcons.Play, null, Modifier.size(ButtonDefaults.IconSize))
-                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                Text(if (book.progress > 0f) "Continue reading" else "Start reading")
-            }
-            Spacer(Modifier.width(16.dp))
-            LinearWavyProgressIndicator(progress = { book.progress }, modifier = Modifier.weight(1f))
-        }
-    }
-}
-
-@Composable
-private fun CoverCarousel(books: List<Book>, current: Book?, onSelect: (Book) -> Unit, modifier: Modifier) {
-    val count by rememberUpdatedState(books.size)
-    val carouselState = rememberCarouselState { count }
-    HorizontalMultiBrowseCarousel(
-        state = carouselState,
-        preferredItemWidth = 172.dp,
-        itemSpacing = 8.dp,
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        modifier = modifier.height(256.dp).padding(vertical = 10.dp),
-    ) { index ->
-        val book = books[index]
-        Box(
-            Modifier
-                .fillMaxSize()
-                .maskClip(MaterialTheme.shapes.extraLarge)
-                .clickable(onClickLabel = "Show on cover") { onSelect(book) },
-        ) {
-            CoverImage(book, Modifier.fillMaxSize())
-            if (book.id == current?.id) {
-                Box(
-                    Modifier.align(Alignment.TopEnd).padding(10.dp).size(30.dp)
-                        .clip(MaterialShapes.Cookie9Sided.toShape())
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(JacketIcons.Check, "On the cover", Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onPrimary)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun CoverScreenCard(settings: Settings, outerAvailable: Boolean, onSettings: ((Settings) -> Settings) -> Unit, modifier: Modifier) {
+private fun ContinueCard(book: Book, outerAvailable: Boolean, onOpen: (Book) -> Unit) {
+    val interaction = remember { MutableInteractionSource() }
     Card(
-        modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        onClick = { onOpen(book) },
+        interactionSource = interaction,
         shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        modifier = Modifier.fillMaxWidth().pressScale(interaction, pressed = 0.98f),
     ) {
-        Column(Modifier.padding(20.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Cover screen", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                if (outerAvailable) {
-                    Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.tertiaryContainer) {
-                        Text("Outer screen ready", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
-                    }
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            CoverImage(
+                book,
+                Modifier.width(96.dp).aspectRatio(2f / 3f).sharedCover(book.id).clip(RoundedCornerShape(10.dp)),
+                maxHeight = 600,
+            )
+            Spacer(Modifier.width(18.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    if (book.isNew) "START READING" else "CONTINUE READING",
+                    style = MaterialTheme.typography.labelMedium, letterSpacing = 1.4.sp, fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(book.title, style = MaterialTheme.typography.titleLargeEmphasized, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                if (book.author.isNotEmpty()) {
+                    Text(book.author, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-            }
-            Spacer(Modifier.height(14.dp))
-            Text("Widget style", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.height(8.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
-                val styles = CoverStyle.entries
-                styles.forEachIndexed { index, style ->
-                    val checked = settings.coverStyle == style
-                    ToggleButton(
-                        checked = checked,
-                        onCheckedChange = { onSettings { it.copy(coverStyle = style) } },
-                        modifier = Modifier.weight(1f).semantics { role = Role.RadioButton },
-                        shapes = when (index) {
-                            0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                            styles.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                            else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                        },
-                    ) {
-                        if (checked) {
-                            Icon(JacketIcons.Check, null, Modifier.size(ButtonDefaults.IconSize))
-                            Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.height(12.dp))
+                LinearWavyProgressIndicator(
+                    progress = { book.progress },
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.18f),
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(book.statusLabel, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+                    AnimatedVisibility(outerAvailable) {
+                        Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary) {
+                            Row(Modifier.padding(horizontal = 10.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(JacketIcons.OuterScreen, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                                Spacer(Modifier.width(6.dp))
+                                Text("On your cover", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary)
+                            }
                         }
-                        Text(style.label, maxLines = 1)
                     }
                 }
             }
-            Spacer(Modifier.height(6.dp))
-            SettingRow("Reading progress", "Progress bar and percentage on the cover", settings.showProgress) { v ->
-                onSettings { it.copy(showProgress = v) }
-            }
-            SettingRow("Ambient dim", "The outer screen dims after 30 s untouched", settings.ambientDim) { v ->
-                onSettings { it.copy(ambientDim = v) }
-            }
-            SettingRow("Cover while reading", "Book-style foldables: put the cover on the outer screen when you unfold", settings.autoOuterScreen) { v ->
-                onSettings { it.copy(autoOuterScreen = v) }
-            }
-            Spacer(Modifier.height(10.dp))
+        }
+    }
+}
+
+@Composable
+private fun LibraryHeader(
+    count: Int,
+    sort: LibrarySort,
+    onSort: (LibrarySort) -> Unit,
+    query: String,
+    onQuery: (String) -> Unit,
+    searchable: Boolean,
+) {
+    Column(Modifier.padding(top = 10.dp)) {
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text("Library", style = MaterialTheme.typography.headlineSmallEmphasized, modifier = Modifier.weight(1f))
             Text(
-                "Galaxy Z Flip: add “Jacket cover” under Settings › Cover screen › Widgets. " +
-                    "Motorola Razr: open Jacket from the external display.",
-                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                if (count == 1) "1 book" else "$count books",
+                style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Spacer(Modifier.height(12.dp))
+        ConnectedChoice(
+            options = LibrarySort.entries, selected = sort, label = { it.label }, onSelect = onSort,
+            modifier = Modifier.widthIn(max = 420.dp),
+        )
+        if (searchable || query.isNotEmpty()) {
+            Spacer(Modifier.height(12.dp))
+            TextField(
+                value = query,
+                onValueChange = onQuery,
+                singleLine = true,
+                placeholder = { Text("Search titles and authors") },
+                leadingIcon = { Icon(JacketIcons.Search, null) },
+                trailingIcon = if (query.isNotEmpty()) {
+                    { IconButton(onClick = { onQuery("") }) { Icon(JacketIcons.Close, "Clear search") } }
+                } else null,
+                shape = CircleShape,
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                ),
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
 }
 
 @Composable
-private fun SettingRow(title: String, description: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(
-        Modifier.fillMaxWidth().toggleable(value = checked, role = Role.Switch, onValueChange = onChange).padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge)
-            Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Spacer(Modifier.width(12.dp))
-        Switch(
-            checked = checked,
-            onCheckedChange = null,
-            thumbContent = if (checked) {
-                { Icon(JacketIcons.Check, null, Modifier.size(SwitchDefaults.IconSize)) }
-            } else null,
-        )
-    }
-}
-
-@Composable
-private fun LibraryRow(
+private fun BookTile(
     book: Book,
-    isCurrent: Boolean,
+    onCover: Boolean,
+    haptics: Haptics,
     onOpen: (Book) -> Unit,
-    onSelect: (Book) -> Unit,
+    onShowOnCover: (Book) -> Unit,
     onDelete: (Book) -> Unit,
     modifier: Modifier,
 ) {
     var menu by remember { mutableStateOf(false) }
     var confirm by remember { mutableStateOf(false) }
-    ListItem(
-        onClick = { onOpen(book) },
-        modifier = modifier.padding(horizontal = 4.dp),
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        supportingContent = {
-            val status = if (book.progress > 0f) "${book.percent}%" else "New"
-            Text(
-                listOf(book.author, book.format.label, status).filter { it.isNotEmpty() }.joinToString(" · "),
-                maxLines = 1, overflow = TextOverflow.Ellipsis,
-            )
-        },
-        leadingContent = {
-            CoverImage(book, Modifier.size(width = 44.dp, height = 64.dp).clip(RoundedCornerShape(6.dp)), maxHeight = 200)
-        },
-        trailingContent = {
-            Box {
-                IconButton(onClick = { menu = true }) { Icon(JacketIcons.More, "More options for ${book.title}") }
-                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                    if (!isCurrent) {
-                        DropdownMenuItem(
-                            text = { Text("Show on cover") }, leadingIcon = { Icon(JacketIcons.Pin, null) },
-                            onClick = { menu = false; onSelect(book) },
-                        )
-                    }
-                    DropdownMenuItem(
-                        text = { Text("Remove") }, leadingIcon = { Icon(JacketIcons.Delete, null) },
-                        onClick = { menu = false; confirm = true },
+    val interaction = remember { MutableInteractionSource() }
+    Column(modifier) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(2f / 3f)
+                .pressScale(interaction)
+                .clip(MaterialTheme.shapes.large)
+                .combinedClickable(
+                    interactionSource = interaction,
+                    indication = ripple(),
+                    onClick = { onOpen(book) },
+                    onLongClick = { haptics.longPress(); menu = true },
+                    onLongClickLabel = "More options",
+                ),
+        ) {
+            // The hero card already carries this book's shared cover; keys must be unique on screen.
+            CoverImage(book, Modifier.fillMaxSize().sharedCover(book.id, enabled = !onCover), maxHeight = 600)
+            if (book.isNew) {
+                Surface(
+                    shape = CircleShape, color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
+                ) {
+                    Text(
+                        "New", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onTertiary,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                     )
                 }
             }
-        },
-    ) {
-        Text(book.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (onCover) {
+                Box(
+                    Modifier.align(Alignment.TopEnd).padding(8.dp).size(28.dp)
+                        .clip(MaterialShapes.Cookie9Sided.toShape())
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(JacketIcons.OuterScreen, "On your cover screen", Modifier.size(15.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                }
+            }
+            if (!book.isNew && book.progress > 0f) {
+                Box(
+                    Modifier.align(Alignment.BottomStart).fillMaxWidth(book.progress).height(4.dp)
+                        .background(MaterialTheme.colorScheme.primary),
+                )
+            }
+            DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                DropdownMenuItem(text = { Text("Open") }, leadingIcon = { Icon(JacketIcons.Book, null) }, onClick = { menu = false; onOpen(book) })
+                if (!onCover) {
+                    DropdownMenuItem(
+                        text = { Text("Show on cover screen") }, leadingIcon = { Icon(JacketIcons.OuterScreen, null) },
+                        onClick = { menu = false; haptics.confirm(); onShowOnCover(book) },
+                    )
+                }
+                DropdownMenuItem(
+                    text = { Text("Remove") }, leadingIcon = { Icon(JacketIcons.Delete, null) },
+                    onClick = { menu = false; confirm = true },
+                )
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(book.title, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        if (book.author.isNotEmpty()) {
+            Text(
+                book.author, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1, overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
     if (confirm) {
         AlertDialog(
             onDismissRequest = { confirm = false },
             title = { Text("Remove “${book.title}”?") },
             text = { Text("Jacket deletes its own copy and your reading position. The original file stays where it was.") },
-            confirmButton = { TextButton(onClick = { confirm = false; onDelete(book) }) { Text("Remove") } },
+            confirmButton = { TextButton(onClick = { confirm = false; haptics.confirm(); onDelete(book) }) { Text("Remove") } },
             dismissButton = { TextButton(onClick = { confirm = false }) { Text("Cancel") } },
         )
     }
@@ -385,10 +436,7 @@ private fun EmptyLibrary(modifier: Modifier, onAdd: () -> Unit) {
             )
         }
         Spacer(Modifier.height(28.dp))
-        Text(
-            "Let your foldable wear your book", style = MaterialTheme.typography.headlineSmallEmphasized,
-            textAlign = TextAlign.Center,
-        )
+        Text("Let your foldable wear your book", style = MaterialTheme.typography.headlineSmallEmphasized, textAlign = TextAlign.Center)
         Spacer(Modifier.height(12.dp))
         Text(
             "Add an EPUB, PDF, CBZ comic or text file. Jacket keeps a private copy and puts its cover " +
@@ -397,7 +445,7 @@ private fun EmptyLibrary(modifier: Modifier, onAdd: () -> Unit) {
             textAlign = TextAlign.Center, modifier = Modifier.widthIn(max = 420.dp),
         )
         Spacer(Modifier.height(24.dp))
-        Button(onClick = onAdd) {
+        Button(onClick = onAdd, shapes = ButtonDefaults.shapes()) {
             Icon(JacketIcons.Add, null, Modifier.size(ButtonDefaults.IconSize))
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text("Add books")

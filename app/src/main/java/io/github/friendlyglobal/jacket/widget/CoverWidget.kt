@@ -113,7 +113,7 @@ private class WidgetModel(state: LibraryState) {
     val settings: Settings = state.settings
     private val key = listOf(
         book?.id, book?.title, book?.author, book?.coverFile, book?.seedColor,
-        book?.percent, book?.positionLabel, settings.coverStyle, settings.showProgress,
+        book?.percent, book?.statusLabel, settings.coverStyle, settings.showProgress,
     )
 
     override fun equals(other: Any?) = other is WidgetModel && other.key == key
@@ -181,7 +181,7 @@ private fun Jacket(context: Context, book: Book, cover: Bitmap?, settings: Setti
                     Progress(book)
                     Spacer(GlanceModifier.height(4.dp))
                     Text(
-                        "${book.positionLabel} · ${book.percent}%",
+                        book.statusLabel,
                         style = TextStyle(color = ColorProvider(Color.White), fontSize = 11.sp),
                     )
                 }
@@ -202,7 +202,7 @@ private fun Shelf(context: Context, book: Book, cover: Bitmap?, settings: Settin
                 } else {
                     Label("Reading")
                 }
-                Text(book.positionLabel, style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp))
+                Text(book.statusLabel, style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp))
             }
         }
         Spacer(GlanceModifier.height(10.dp))
