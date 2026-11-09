@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Samsung's Flex Window (Galaxy Z Flip cover screen) lists widgets that declare display="sub_screen". -->
+<samsung-appwidget-provider display="sub_screen" />

@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Jacket</string>
+    <string name="widget_name">Jacket cover</string>
+    <string name="widget_description">The book you\'re reading: its cover and your progress.</string>
+</resources>

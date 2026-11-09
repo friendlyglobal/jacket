@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jacket Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..600&family=Roboto+Flex:opsz,wdth,wght@8..144,25..151,100..1000&display=swap">
+<style>
+@property --h { syntax: '<number>'; inherits: true; initial-value: 200; }
+:root{
+  --h:200;
+  transition: --h .9s cubic-bezier(.2,0,0,1);
+  --font:'Roboto Flex', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --serif:'Literata', Georgia, 'Times New Roman', serif;
+  --spring: linear(0, 0.042 1.2%, 0.156 2.6%, 0.319 4.2%, 0.638 7.6%, 0.778 9.4%, 0.895 11.4%, 0.983 13.6%, 1.04 15.8%, 1.069 17.9%, 1.078 19.9%, 1.074 22.3%, 1.055 25.3%, 1.024 29.4%, 1.005 33.5%, 0.994 38.3%, 0.993 45.3%, 1 61%, 1);
+  --spring-soft: linear(0, 0.02 1.8%, 0.08 3.8%, 0.33 8.4%, 0.58 13%, 0.78 18%, 0.9 22.6%, 0.97 27%, 1.01 32%, 1.028 38%, 1.026 45%, 1.012 55%, 1.002 68%, 1);
+  --emph: cubic-bezier(.2,0,0,1);
+  --pg-fg: var(--foreground, #1c1b1f);
+  --pg-muted: var(--muted-foreground, #5f5e66);
+  --pg-card: var(--card, #f3f2f6);
+  --pg-border: var(--border, #e2e0e7);
+  --pg-radius: var(--radius, 14px);
+  --frame: oklch(.25 .012 var(--h));
+  --frame-hi: oklch(.37 .016 var(--h));
+}
+:root.standalone.dark{--pg-fg:#e6e1e5;--pg-muted:#a9a6ae;--pg-card:#1d1c21;--pg-border:#2f2d34}
+:root.standalone body{background:#fbfafd;padding:24px 16px}
+:root.standalone.dark body{background:#141317}
+:root.standalone .wrap{max-width:760px;margin:0 auto}
+
+/* ---------- Material 3 tonal tokens, seeded from the book's hue ---------- */
+.m3{
+  --primary:oklch(.48 .13 var(--h));--on-primary:oklch(.99 .01 var(--h));
+  --primary-container:oklch(.89 .075 var(--h));--on-primary-container:oklch(.29 .09 var(--h));
+  --secondary-container:oklch(.90 .035 var(--h));--on-secondary-container:oklch(.29 .035 var(--h));
+  --tertiary-container:oklch(.89 .07 calc(var(--h) + 75));--on-tertiary-container:oklch(.29 .08 calc(var(--h) + 75));
+  --surface:oklch(.985 .006 var(--h));
+  --sc-low:oklch(.965 .01 var(--h));--sc:oklch(.948 .013 var(--h));--sc-high:oklch(.928 .015 var(--h));--sc-highest:oklch(.908 .017 var(--h));
+  --on-surface:oklch(.22 .012 var(--h));--on-surface-variant:oklch(.43 .02 var(--h));
+  --outline:oklch(.62 .02 var(--h));--outline-variant:oklch(.85 .014 var(--h));
+  --inverse-surface:oklch(.30 .012 var(--h));--inverse-on-surface:oklch(.95 .01 var(--h));
+}
+:root.dark .m3, .m3-dark{
+  --primary:oklch(.83 .10 var(--h));--on-primary:oklch(.29 .08 var(--h));
+  --primary-container:oklch(.38 .10 var(--h));--on-primary-container:oklch(.91 .06 var(--h));
+  --secondary-container:oklch(.34 .03 var(--h));--on-secondary-container:oklch(.90 .03 var(--h));
+  --tertiary-container:oklch(.38 .08 calc(var(--h) + 75));--on-tertiary-container:oklch(.91 .06 calc(var(--h) + 75));
+  --surface:oklch(.165 .01 var(--h));
+  --sc-low:oklch(.195 .012 var(--h));--sc:oklch(.215 .013 var(--h));--sc-high:oklch(.25 .015 var(--h));--sc-highest:oklch(.285 .016 var(--h));
+  --on-surface:oklch(.92 .01 var(--h));--on-surface-variant:oklch(.79 .018 var(--h));
+  --outline:oklch(.60 .018 var(--h));--outline-variant:oklch(.36 .016 var(--h));
+  --inverse-surface:oklch(.90 .01 var(--h));--inverse-on-surface:oklch(.25 .012 var(--h));
+}
+@media (prefers-color-scheme: dark){
+  :root:not(.light) .m3{
+    --primary:oklch(.83 .10 var(--h));--on-primary:oklch(.29 .08 var(--h));
+    --primary-container:oklch(.38 .10 var(--h));--on-primary-container:oklch(.91 .06 var(--h));
+    --secondary-container:oklch(.34 .03 var(--h));--on-secondary-container:oklch(.90 .03 var(--h));
+    --tertiary-container:oklch(.38 .08 calc(var(--h) + 75));--on-tertiary-container:oklch(.91 .06 calc(var(--h) + 75));
+    --surface:oklch(.165 .01 var(--h));
+    --sc-low:oklch(.195 .012 var(--h));--sc:oklch(.215 .013 var(--h));--sc-high:oklch(.25 .015 var(--h));--sc-highest:oklch(.285 .016 var(--h));
+    --on-surface:oklch(.92 .01 var(--h));--on-surface-variant:oklch(.79 .018 var(--h));
+    --outline:oklch(.60 .018 var(--h));--outline-variant:oklch(.36 .016 var(--h));
+    --inverse-surface:oklch(.90 .01 var(--h));--inverse-on-surface:oklch(.25 .012 var(--h));
+  }
+}
+
+/* ---------- page ---------- */
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--font);color:var(--pg-fg);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+svg{display:block}
+.wrap{display:grid;gap:14px}
+.hint{margin:0;font-size:12.5px;line-height:1.5;color:var(--pg-muted)}
+.hint b{color:var(--pg-fg);font-weight:650}
+.stage{background:var(--pg-card);border:1px solid var(--pg-border);border-radius:var(--pg-radius);padding:16px;min-width:0}
+.stage-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.ov{margin:0 0 4px;font-size:10.5px;font-weight:650;letter-spacing:.1em;text-transform:uppercase;color:var(--pg-muted)}
+.stage-title{margin:0;font-size:17px;line-height:1.22;font-weight:720;font-stretch:108%;letter-spacing:-.01em;max-width:32ch}
+.caption{margin:10px 0 0;font-size:12.5px;line-height:1.5;color:var(--pg-muted)}
+code{font-family:var(--font-mono, ui-monospace, Menlo, monospace);font-size:.92em;color:var(--pg-fg)}
+.row2{display:grid;grid-template-columns:352px minmax(0,1fr);gap:14px;align-items:start}
+.col{display:grid;gap:14px;min-width:0}
+@media (max-width:700px){.row2{grid-template-columns:minmax(0,1fr)}}
+.fit{display:flex;justify-content:center;min-width:0}
+.fit>*{flex:none}
+
+/* ---------- M3 Expressive: connected button group ---------- */
+.cbg{display:flex;gap:2px}
+.stage-head .cbg{min-width:232px}
+.cbg button{flex:1 1 0;height:40px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;gap:4px;background:var(--secondary-container);color:var(--on-secondary-container);font-size:13px;font-weight:620;border-radius:8px;white-space:nowrap;transition:border-radius .45s var(--spring),flex-grow .45s var(--spring),background-color .25s,color .25s}
+.cbg button:first-child{border-radius:20px 8px 8px 20px}
+.cbg button:last-child{border-radius:8px 20px 20px 8px}
+.cbg button.sel{background:var(--primary);color:var(--on-primary);border-radius:20px}
+.cbg button:active{border-radius:6px;flex-grow:1.3}
+.cbg button.sel:active{border-radius:12px}
+.ck{display:inline-block;width:0;height:18px;overflow:hidden;transition:width .4s var(--spring)}
+.ck svg{width:18px;height:18px;fill:currentColor}
+.cbg button.sel .ck{width:18px}
+
+/* ---------- Fold (book-style) ---------- */
+.fold-scene{width:600px;height:510px;perspective:1900px;display:grid;place-items:center;position:relative}
+.fold-shadow{position:absolute;left:100px;right:100px;bottom:4px;height:34px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.32),transparent);filter:blur(5px)}
+.fold3d{position:relative;width:560px;height:464px;transform-style:preserve-3d;transform:rotateX(5deg) rotateY(-6deg);transition:transform 1.4s var(--spring-soft)}
+.fold3d.flipped{transform:rotateX(5deg) rotateY(174deg)}
+.face{position:absolute;inset:0;border-radius:30px;padding:9px;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:linear-gradient(135deg,var(--frame-hi),var(--frame));box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.09),inset 0 -2px 0 rgba(0,0,0,.3);transition:visibility 0s linear .18s}
+.face.backside{transform:rotateY(180deg);display:grid;grid-template-columns:1fr 1fr;gap:6px;visibility:hidden}
+.fold3d.flipped .front{visibility:hidden}
+.fold3d.flipped .backside{visibility:visible}
+
+.inner{position:relative;height:100%;border-radius:22px;overflow:hidden;background:var(--surface);color:var(--on-surface);display:flex;flex-direction:column}
+.crease{position:absolute;top:0;bottom:0;left:50%;width:38px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,rgba(0,0,0,.05) 35%,rgba(255,255,255,.07) 50%,rgba(0,0,0,.05) 65%,transparent);pointer-events:none}
+.punch{position:absolute;top:9px;right:13px;width:9px;height:9px;border-radius:50%;background:#050506}
+.rd-top{height:50px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 34px 0 10px}
+.rd-tl{display:flex;align-items:center;gap:6px;min-width:0}
+.ib{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--on-surface-variant);transition:background-color .2s,border-radius .4s var(--spring)}
+.ib:hover{background:color-mix(in oklab,var(--on-surface) 8%,transparent)}
+.ib:active{border-radius:10px}
+.ib svg{width:20px;height:20px;fill:currentColor}
+.rd-t b{display:block;font-size:13px;font-weight:650;line-height:1.2}
+.rd-t small{display:block;font-size:11px;color:var(--on-surface-variant)}
+.pill{height:30px;padding:0 12px 0 11px;border-radius:15px;background:var(--primary-container);color:var(--on-primary-container);font-size:11.5px;font-weight:620;display:inline-flex;align-items:center;gap:8px;transition:border-radius .4s var(--spring),background-color .3s,color .3s}
+.pill:active{border-radius:8px}
+.pill.off{background:var(--sc-highest);color:var(--on-surface-variant)}
+.pill.off .live::after{animation:none}
+.live{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block;position:relative;flex:none}
+.live::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid currentColor;opacity:0;animation:ping 1.8s var(--emph) infinite}
+@keyframes ping{0%{transform:scale(.6);opacity:.8}100%{transform:scale(1.9);opacity:0}}
+
+.rd-pages{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:0}
+.rd-page{position:relative;padding:6px 30px 24px 28px;min-height:0;display:flex;flex-direction:column}
+.rd-page.r{padding:6px 28px 24px 30px}
+.rd-ov{margin:46px 0 4px;font:650 9.5px/1 var(--font);letter-spacing:.18em;text-transform:uppercase;color:var(--primary)}
+.rd-ch{margin:0 0 12px;font:italic 500 21px/1.15 var(--serif);letter-spacing:-.01em}
+.rd-text{flex:1;min-height:0;overflow:hidden;font:400 11.3px/1.62 var(--serif);text-align:justify;hyphens:auto;-webkit-hyphens:auto;-webkit-mask-image:linear-gradient(#000 82%,transparent);mask-image:linear-gradient(#000 82%,transparent)}
+.rd-text p{margin:0;text-indent:1.4em}
+.rd-page.l .rd-text p:first-child{text-indent:0}
+.rd-page.l .rd-text p:first-child::first-letter{float:left;font:600 41px/.82 var(--serif);padding:4px 6px 0 0;color:var(--primary)}
+.rd-num{position:absolute;bottom:4px;font:500 9.5px var(--font);letter-spacing:.06em;color:var(--on-surface-variant)}
+.rd-page.l .rd-num{left:28px}.rd-page.r .rd-num{right:28px}
+.rd-bottom{height:64px;flex:none;display:grid;grid-template-columns:1fr 1fr;align-items:center}
+.rd-prog{padding:0 30px 0 28px;display:grid;gap:6px}
+.rd-prog span{font-size:10.5px;font-weight:500;color:var(--on-surface-variant)}
+.rd-tools{display:flex;justify-content:center;align-items:center;gap:8px}
+.tb{height:48px;padding:0 5px;border-radius:24px;background:var(--sc-high);display:flex;align-items:center;gap:2px;box-shadow:0 4px 12px -6px rgba(0,0,0,.3)}
+.tb .ib{width:38px;height:38px}
+.tb .aa{font:720 14px var(--font);font-stretch:112%}
+.tb-fab{width:48px;height:48px;border-radius:16px;background:var(--primary);color:var(--on-primary);display:grid;place-items:center;box-shadow:0 4px 12px -4px rgba(0,0,0,.35);transition:border-radius .45s var(--spring),background-color .3s,color .3s}
+.tb-fab:active{border-radius:24px}
+.tb-fab.off{background:var(--tertiary-container);color:var(--on-tertiary-container)}
+.tb-fab svg{width:22px;height:22px;fill:currentColor}
+
+.bk-panel{position:relative;border-radius:22px 5px 5px 22px;background:linear-gradient(160deg,oklch(.42 .02 var(--h)),oklch(.29 .014 var(--h)));box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.bk-cam{position:absolute;top:16px;left:16px;width:54px;padding:8px;border-radius:27px;background:#111114;display:grid;gap:6px;justify-items:center;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 6px 14px -6px rgba(0,0,0,.6)}
+.bk-cam i{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 42% 38%,#4a5b7a 0 2.5px,#0b0d12 3.5px 10px,#25282f 11px 13px,#09090b 14px)}
+.bk-cam b{width:9px;height:9px;border-radius:50%;background:#e9e2cf;opacity:.8;margin:2px 0}
+
+.od{position:relative;border-radius:20px;overflow:hidden;background:#000;color:var(--on-surface);isolation:isolate}
+#odContent{position:absolute;inset:0;transition:opacity .25s}
+.od-bg{position:absolute;inset:-40px;filter:blur(26px) saturate(1.3) brightness(.55);transition:opacity 1.2s}
+.od-bg svg,.od-cover svg{width:100%;height:100%}
+.od-sbar{position:absolute;top:9px;left:18px;right:18px;display:flex;justify-content:space-between;font:600 10.5px var(--font);color:rgba(255,255,255,.85)}
+.od-punch{position:absolute;top:10px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#000;z-index:3}
+.od-cover{position:absolute;left:50%;top:48px;width:196px;height:294px;margin-left:-98px;border-radius:4px 7px 7px 4px;overflow:hidden;box-shadow:0 22px 40px -12px rgba(0,0,0,.7),0 0 0 .5px rgba(255,255,255,.12);transition:filter 1.2s}
+.od-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.3),rgba(255,255,255,.10) 3%,transparent 7%);pointer-events:none}
+.od-info{position:absolute;left:36px;right:36px;top:360px;display:grid;gap:7px;transition:opacity 1.2s}
+.od-ov{display:flex;align-items:center;gap:7px;font:650 10px var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--primary)}
+.od-meta{font-size:11px;color:var(--on-surface-variant)}
+.od-loader{position:absolute;inset:0;display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .2s;z-index:2}
+.od.loading .od-loader{opacity:1}
+.od.loading #odContent{opacity:0}
+.ldr-wrap{width:68px;height:68px;border-radius:50%;background:var(--primary-container);display:grid;place-items:center}
+.ldr{width:44px;height:44px;background:var(--on-primary-container);clip-path:var(--shape-burst);transition:clip-path .36s var(--spring);animation:spin 1.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.od-offmsg{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:6px;color:rgba(255,255,255,.32);font:250 46px/1 var(--font);font-stretch:120%;opacity:0;transition:opacity .4s;pointer-events:none}
+.od-offmsg small{font:600 10px var(--font);letter-spacing:.12em;text-transform:uppercase}
+.od.off #odContent{opacity:0}
+.od.off .od-offmsg{opacity:1}
+.amb{position:absolute;top:28px;right:16px;z-index:4;display:flex;align-items:center;gap:5px;font:600 10px var(--font);color:rgba(255,255,255,.75);opacity:0;transition:opacity .8s;pointer-events:none}
+.amb svg{width:12px;height:12px;fill:currentColor}
+.ambient .amb{opacity:1}
+.ambient .od-bg{opacity:.25}
+.ambient .od-cover{filter:brightness(.5) saturate(.7)}
+.ambient .od-info{opacity:.35}
+.ambient .fw{filter:brightness(.42) saturate(.7)}
+
+/* ---------- Flip (clamshell) ---------- */
+.flip{position:relative;width:250px;height:300px}
+.flip-hinge{position:absolute;left:22px;right:22px;bottom:0;height:26px;border-radius:0 0 14px 14px;background:linear-gradient(180deg,#232326,#6c6c72 45%,#3a3a3f 72%,#1b1b1f)}
+.flip-body{position:absolute;left:0;right:0;top:0;bottom:12px;border-radius:42px 42px 32px 32px;background:linear-gradient(160deg,var(--frame-hi),var(--frame));box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.08),0 26px 40px -22px rgba(0,0,0,.55)}
+.flip-screen{position:absolute;inset:9px;border-radius:34px 34px 24px 24px;background:#000;overflow:hidden;isolation:isolate}
+.fw-host{position:absolute;inset:0}
+.cam{position:absolute;bottom:12px;width:34px;height:34px;border-radius:50%;z-index:5;background:radial-gradient(circle at 42% 38%,#4a5b7a 0 2.5px,#0b0d12 3.5px 9px,#22252b 10px 12px,#09090b 13px);box-shadow:0 0 0 3px #0c0c0e,0 0 0 4px rgba(255,255,255,.1)}
+.fw{position:absolute;inset:0;color:var(--on-surface);transition:filter 1.2s}
+.fw-ov{display:inline-flex;align-items:center;gap:6px;font:650 9.5px var(--font);letter-spacing:.14em;text-transform:uppercase;color:var(--primary)}
+.fw-ov .live{width:6px;height:6px}
+.fw-bg{position:absolute;inset:-36px;filter:blur(22px) saturate(1.35) brightness(.5)}
+.fw-bg svg,.fw-cover svg,.fws-cover svg,.fwg-img svg{width:100%;height:100%}
+.fw-cover{position:absolute;right:16px;top:20px;width:100px;height:150px;border-radius:3px 6px 6px 3px;overflow:hidden;box-shadow:0 14px 28px -8px rgba(0,0,0,.75)}
+.fwj-txt{position:absolute;left:18px;top:24px;width:88px}
+.fwj-txt b{display:block;margin-top:9px;font:780 17px/1.05 var(--font);font-stretch:78%;letter-spacing:-.01em;color:#fff}
+.fw-sub{display:block;margin-top:6px;font-size:10.5px;color:var(--on-surface-variant)}
+.fwj-prog{position:absolute;right:16px;top:184px;width:100px;display:grid;gap:4px;justify-items:end}
+.fwj-prog span{font-size:10.5px;font-weight:500;color:var(--on-surface-variant)}
+.fw-shelf{background:var(--sc)}
+.fws-cover{position:absolute;left:18px;top:20px;width:66px;height:99px;border-radius:3px 5px 5px 3px;overflow:hidden;box-shadow:0 8px 18px -6px rgba(0,0,0,.6)}
+.fws-num{position:absolute;left:98px;top:16px;display:flex;align-items:flex-start;color:var(--primary)}
+.fws-num b{font:820 62px/1 var(--font);font-stretch:112%;letter-spacing:-.04em}
+.fws-num span{font:700 20px/1 var(--font);margin:8px 0 0 2px}
+.fws-ch{position:absolute;left:100px;top:84px;font-size:11px;font-weight:600;color:var(--on-surface-variant)}
+.fws-alt{position:absolute;left:100px;top:30px;display:grid;gap:8px}
+.fws-alt .fws-ch{position:static}
+.fws-title{position:absolute;left:18px;right:18px;top:132px;font:700 15px/1.2 var(--font);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fws-meta{position:absolute;left:18px;right:18px;top:172px;font-size:11px;color:var(--on-surface-variant)}
+.fws-bar{position:absolute;left:18px;top:192px}
+.fws-btn{position:absolute;right:16px;bottom:14px;height:42px;padding:0 18px 0 13px;border-radius:21px;background:var(--primary);color:var(--on-primary);display:inline-flex;align-items:center;gap:6px;font:650 13px var(--font);transition:border-radius .45s var(--spring)}
+.fws-btn:active{border-radius:10px}
+.fws-btn svg{width:18px;height:18px;fill:currentColor}
+.fw-glance{background:radial-gradient(120% 90% at 50% 38%,color-mix(in oklab,var(--primary-container) 75%,#000),#000 72%)}
+.fwg-ring{position:absolute;left:38px;top:22px;width:156px;height:156px}
+.fwg-shape{position:absolute;left:62px;top:46px;width:108px;height:108px;clip-path:var(--shape-cookie9);transition:clip-path .7s var(--spring);animation:spin 30s linear infinite}
+.fwg-shape:hover{clip-path:var(--shape-circle)}
+.fwg-img{position:absolute;inset:0;animation:spin 30s linear infinite reverse}
+.fwg-txt{position:absolute;right:18px;bottom:16px;max-width:124px;text-align:right;display:grid;gap:3px;justify-items:end}
+.fwg-txt b{font:820 30px/1 var(--font);font-stretch:118%;letter-spacing:-.02em;color:var(--primary)}
+.fwg-txt span{font-size:10.5px;color:var(--on-surface-variant)}
+
+/* ---------- Companion app ---------- */
+.phone{width:320px;height:680px;border-radius:44px;padding:8px;background:linear-gradient(150deg,var(--frame-hi),var(--frame));box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.08),0 26px 50px -26px rgba(0,0,0,.55)}
+.screen{position:relative;height:100%;border-radius:36px;overflow:hidden;background:var(--surface);color:var(--on-surface);display:flex;flex-direction:column}
+.sbar{position:relative;height:30px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 22px 0 26px;font:620 12px var(--font)}
+.sb-cam{position:absolute;top:10px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#050506}
+.sb-ic{display:flex;gap:4px;align-items:center}
+.sb-ic i,.sb-ic svg{display:block;width:13px;height:13px;fill:currentColor}
+.app-top{height:52px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 14px 0 20px}
+.brand{display:flex;align-items:center;gap:8px;font:820 22px var(--font);font-stretch:118%;letter-spacing:-.02em}
+.brand-mark{width:22px;height:22px;background:var(--primary);clip-path:var(--shape-cookie9);transition:clip-path .7s var(--spring)}
+.brand:hover .brand-mark{clip-path:var(--shape-clover)}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--tertiary-container);color:var(--on-tertiary-container);display:grid;place-items:center}
+.avatar svg{width:20px;height:20px;fill:currentColor}
+.app-scroll{flex:1;overflow-y:auto;padding:2px 14px 96px;scrollbar-width:none}
+.app-scroll::-webkit-scrollbar{display:none}
+.a-ov{margin:6px 0 4px 4px;font:650 10.5px var(--font);letter-spacing:.12em;text-transform:uppercase;color:var(--primary)}
+.a-title{margin:0 4px;font:780 25px/1.06 var(--font);font-stretch:112%;letter-spacing:-.02em}
+.a-sub{margin:6px 4px 14px;font-size:12.5px;color:var(--on-surface-variant)}
+.carousel{display:flex;gap:8px;height:178px;margin-bottom:14px}
+.ci{flex:none;width:42px;height:100%;border-radius:22px;overflow:hidden;position:relative;transition:width .75s var(--spring),border-radius .5s var(--spring),transform .4s var(--spring)}
+.ci.sel{width:126px;border-radius:28px}
+.ci:not(.sel):hover{transform:scale(.96)}
+.ci svg{width:100%;height:100%}
+.card{background:var(--sc);border-radius:24px;padding:16px;margin-bottom:10px}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.card-h b{font:680 15px var(--font)}
+.tag{font:650 10.5px var(--font);padding:4px 8px;border-radius:8px;background:var(--tertiary-container);color:var(--on-tertiary-container)}
+.lbl{margin:0 0 8px 2px;font:620 11.5px var(--font);color:var(--on-surface-variant)}
+.card .cbg button{height:38px;padding:0 8px;font-size:12.5px}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px 0;margin-top:12px;border-top:1px solid var(--outline-variant)}
+.srow b{display:block;font:580 13.5px var(--font)}
+.srow small{display:block;margin-top:2px;font-size:11.5px;color:var(--on-surface-variant)}
+.switch{flex:none;position:relative;width:52px;height:32px;border-radius:16px;border:2px solid var(--outline);background:var(--sc-highest);transition:background-color .25s,border-color .25s}
+.switch::before{content:'';position:absolute;top:50%;left:6px;width:16px;height:16px;border-radius:50%;background:var(--outline);transform:translateY(-50%);transition:left .45s var(--spring),width .45s var(--spring),height .45s var(--spring),background-color .25s}
+.switch::after{content:'';position:absolute;top:50%;left:26px;width:16px;height:16px;transform:translateY(-50%) scale(0);background:var(--on-primary-container);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9.55 17.6 4.3 12.35l1.4-1.4 3.85 3.85 8.75-8.75 1.4 1.4z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9.55 17.6 4.3 12.35l1.4-1.4 3.85 3.85 8.75-8.75 1.4 1.4z'/%3E%3C/svg%3E") center/contain no-repeat;transition:transform .4s var(--spring)}
+.switch.on{background:var(--primary);border-color:var(--primary)}
+.switch.on::before{left:22px;width:24px;height:24px;background:var(--on-primary)}
+.switch.on::after{transform:translateY(-50%) scale(1)}
+.switch:active::before{width:28px;height:28px;left:2px}
+.switch.on:active::before{left:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--outline-variant);color:var(--on-surface-variant);font:560 12.5px var(--font);display:inline-flex;align-items:center;gap:0;transition:background-color .25s,border-color .25s,border-radius .4s var(--spring),padding .4s var(--spring)}
+.chip:active{border-radius:16px}
+.chip.on{background:var(--secondary-container);border-color:transparent;color:var(--on-secondary-container);padding-left:8px}
+.chip .ck{height:16px}
+.chip .ck svg{width:16px;height:16px}
+.chip.on .ck{width:20px}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.22);opacity:0;pointer-events:none;transition:opacity .3s;z-index:6}
+.fabm{position:absolute;right:16px;bottom:88px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:7}
+.fabm-item{height:52px;padding:0 20px 0 16px;border-radius:26px;background:var(--primary-container);color:var(--on-primary-container);display:inline-flex;align-items:center;gap:10px;font:650 14px var(--font);box-shadow:0 6px 16px -8px rgba(0,0,0,.45);transform:translateY(18px) scale(.5);transform-origin:right center;opacity:0;pointer-events:none;transition:transform .5s var(--spring),opacity .18s,border-radius .4s var(--spring);transition-delay:0s}
+.fabm-item:active{border-radius:14px}
+.fabm-item svg{width:20px;height:20px;fill:currentColor}
+.fab{width:56px;height:56px;border-radius:16px;background:var(--primary-container);color:var(--on-primary-container);display:grid;place-items:center;box-shadow:0 6px 16px -6px rgba(0,0,0,.45);transition:border-radius .5s var(--spring),background-color .25s,color .25s}
+.fab svg{width:24px;height:24px;fill:currentColor;transition:transform .5s var(--spring)}
+.fab-open .scrim{opacity:1;pointer-events:auto}
+.fab-open .fabm-item{transform:none;opacity:1;pointer-events:auto;transition-delay:calc(var(--i) * 45ms)}
+.fab-open .fab{border-radius:28px;background:var(--primary);color:var(--on-primary)}
+.fab-open .fab svg{transform:rotate(135deg)}
+.snack{position:absolute;left:12px;right:12px;bottom:84px;z-index:8;padding:13px 16px;border-radius:12px;background:var(--inverse-surface);color:var(--inverse-on-surface);font-size:12.5px;line-height:1.4;transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .5s var(--spring),opacity .2s}
+.snack.show{transform:none;opacity:1}
+.nav{flex:none;height:72px;display:flex;justify-content:space-around;align-items:center;background:var(--sc);padding:0 8px 6px}
+.nv{display:grid;justify-items:center;gap:4px;width:80px;font:620 11.5px var(--font);color:var(--on-surface-variant)}
+.nv i{width:56px;height:32px;border-radius:16px;display:grid;place-items:center;transition:background-color .3s}
+.nv svg{width:22px;height:22px;fill:currentColor}
+.nv.sel{color:var(--on-surface)}
+.nv.sel i{background:var(--secondary-container);color:var(--on-secondary-container)}
+
+/* ---------- under the hood ---------- */
+.uh{display:grid;gap:12px;margin-top:8px}
+.uh div{display:grid;gap:3px;font-size:12.5px;line-height:1.45;color:var(--pg-muted)}
+.uh b{font-size:13px;font-weight:680;color:var(--pg-fg)}
+
+.wv{animation:wv 1.5s linear infinite}
+@keyframes wv{to{transform:translateX(var(--wl))}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="hint"><b>Interactive.</b> Tap a cover in the phone app and the whole UI re-tints from that book (dynamic color). “Their view” turns the Fold around. All books and covers here are made up.</p>
+
+  <section class="stage">
+    <div class="stage-head">
+      <div>
+        <p class="ov">Book-style foldable · open</p>
+        <h2 class="stage-title">Inside, you read. Outside, people see the cover.</h2>
+      </div>
+      <div class="cbg m3" data-group="view" role="group" aria-label="Viewpoint">
+        <button data-val="front"><span class="ck" data-ic="check"></span>Your view</button>
+        <button data-val="back"><span class="ck" data-ic="check"></span>Their view</button>
+      </div>
+    </div>
+    <div class="fit" data-w="600">
+      <div class="fold-scene">
+        <div class="fold-shadow"></div>
+        <div class="fold3d" id="fold3d">
+          <div class="face front">
+            <div class="inner m3">
+              <div class="rd-top">
+                <div class="rd-tl"><span class="ib" data-ic="back"></span><div class="rd-t"><b id="rdTitle"></b><small id="rdAuthor"></small></div></div>
+                <button class="pill" id="rdPill" title="See the outer screen"><i class="live"></i><span id="rdPillTxt">Cover on outer screen</span></button>
+              </div>
+              <div class="rd-pages" id="rdPages">
+                <article class="rd-page l"><p class="rd-ov" id="rdOv"></p><h4 class="rd-ch" id="rdCh"></h4><div class="rd-text" id="rdL"></div><span class="rd-num" id="rdNL"></span></article>
+                <article class="rd-page r"><div class="rd-text" id="rdR"></div><span class="rd-num" id="rdNR"></span></article>
+              </div>
+              <div class="rd-bottom">
+                <div class="rd-prog"><div id="rdWave"></div><span id="rdMeta"></span></div>
+                <div class="rd-tools">
+                  <div class="tb"><button class="ib" data-ic="toc" aria-label="Contents"></button><button class="ib aa" aria-label="Text settings">Aa</button><button class="ib" data-ic="bookmark" aria-label="Bookmark"></button></div>
+                  <button class="tb-fab" id="tbFab" data-ic="outer" aria-label="Toggle cover on outer screen" title="Cover on outer screen"></button>
+                </div>
+              </div>
+              <span class="punch"></span><span class="crease"></span>
+            </div>
+          </div>
+          <div class="face backside">
+            <div class="bk-panel"><div class="bk-cam"><i></i><i></i><i></i><b></b></div></div>
+            <div class="od m3-dark" id="outer">
+              <div id="odContent"></div>
+              <div class="od-loader"><div class="ldr-wrap"><div class="ldr" id="ldr"></div></div></div>
+              <div class="od-offmsg">10:24<small>Outer screen off</small></div>
+              <span class="od-punch"></span>
+              <span class="amb"><span data-ic="moon"></span>Ambient</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="caption">The outer display turns into a dust jacket while the inner one stays yours. The square button in the reader's toolbar switches it off.</p>
+  </section>
+
+  <div class="row2">
+    <section class="stage">
+      <div class="stage-head"><div><p class="ov">Phone app</p><h2 class="stage-title">Pick the book. Style the cover.</h2></div></div>
+      <div class="fit" data-w="320">
+        <div class="phone">
+          <div class="screen m3" id="app">
+            <div class="sbar"><span>10:24</span><span class="sb-cam"></span><span class="sb-ic"><i data-ic="signal"></i><i data-ic="wifi"></i><i data-ic="battery"></i></span></div>
+            <div class="app-top"><span class="brand"><span class="brand-mark"></span>Jacket</span><span class="avatar" data-ic="person"></span></div>
+            <div class="app-scroll">
+              <p class="a-ov">Now wearing</p>
+              <h3 class="a-title" id="aTitle"></h3>
+              <p class="a-sub" id="aSub"></p>
+              <div class="carousel" id="carousel" role="listbox" aria-label="Books"></div>
+              <section class="card">
+                <div class="card-h"><b>Cover screen</b><span class="tag">Fold + Flip</span></div>
+                <p class="lbl">Style</p>
+                <div class="cbg" data-group="style" role="group" aria-label="Cover style">
+                  <button data-val="jacket"><span class="ck" data-ic="check"></span>Jacket</button>
+                  <button data-val="shelf"><span class="ck" data-ic="check"></span>Shelf</button>
+                  <button data-val="glance"><span class="ck" data-ic="check"></span>Glance</button>
+                </div>
+                <div class="srow"><span><b>Reading progress</b><small>Wavy bar and % on the cover</small></span><button class="switch on" data-key="progress" role="switch" aria-checked="true" aria-label="Reading progress"></button></div>
+                <div class="srow"><span><b>Ambient dim</b><small>Dims after 10 s untouched</small></span><button class="switch on" data-key="dim" role="switch" aria-checked="true" aria-label="Ambient dim"></button></div>
+                <div class="srow"><span><b>Only while reading</b><small>Hide when the book is closed</small></span><button class="switch" data-key="only" role="switch" aria-checked="false" aria-label="Only while reading"></button></div>
+              </section>
+              <section class="card">
+                <div class="card-h"><b>Know my book from</b></div>
+                <div class="chips">
+                  <button class="chip on"><span class="ck" data-ic="check"></span>Jacket library</button>
+                  <button class="chip"><span class="ck" data-ic="check"></span>Hardcover</button>
+                  <button class="chip"><span class="ck" data-ic="check"></span>Open Library</button>
+                  <button class="chip"><span class="ck" data-ic="check"></span>Audiobook app</button>
+                </div>
+              </section>
+            </div>
+            <div class="scrim" id="scrim"></div>
+            <div class="fabm">
+              <button class="fabm-item" style="--i:2" data-msg="Opens the camera, reads the barcode, fetches the cover by ISBN."><span data-ic="barcode"></span>Scan ISBN</button>
+              <button class="fabm-item" style="--i:1" data-msg="Searches Open Library / Hardcover by title or author."><span data-ic="search"></span>Search a title</button>
+              <button class="fabm-item" style="--i:0" data-msg="Imports an EPUB and uses its embedded cover."><span data-ic="file"></span>Import EPUB</button>
+              <button class="fab" id="fab" aria-label="Add a book" data-ic="plus"></button>
+            </div>
+            <div class="snack" id="snack" role="status"></div>
+            <nav class="nav"><button class="nv sel"><i data-ic="book"></i>Now</button><button class="nv"><i data-ic="shelf"></i>Library</button><button class="nv"><i data-ic="tune"></i>Settings</button></nav>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="col">
+      <section class="stage">
+        <div class="stage-head" style="margin-bottom:12px"><div><p class="ov">Flip phone · closed</p><h2 class="stage-title">A cover-screen widget you can read at a glance.</h2></div></div>
+        <div class="cbg m3" data-group="style" role="group" aria-label="Cover style">
+          <button data-val="jacket"><span class="ck" data-ic="check"></span>Jacket</button>
+          <button data-val="shelf"><span class="ck" data-ic="check"></span>Shelf</button>
+          <button data-val="glance"><span class="ck" data-ic="check"></span>Glance</button>
+        </div>
+        <div class="fit" data-w="250" style="margin-top:18px">
+          <div class="flip">
+            <div class="flip-hinge"></div>
+            <div class="flip-body">
+              <div class="flip-screen m3-dark" id="flipScreen">
+                <div class="fw-host" id="fwHost"></div>
+                <span class="cam" style="left:12px"></span><span class="cam" style="left:56px"></span>
+                <span class="amb" style="top:16px;right:20px"><span data-ic="moon"></span>Ambient</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="caption">The layouts keep clear of the camera cut-outs. In Glance, hover the cover to morph its shape.</p>
+      </section>
+
+      <section class="stage">
+        <p class="ov">Under the hood</p>
+        <div class="uh">
+          <div><b>Fold, outer screen</b><span>Jetpack WindowManager <code>WindowAreaController</code> in dual-screen (presentation) mode draws its own view on the outer display. Check the capability at runtime.</span></div>
+          <div><b>Flip, cover screen</b><span>Galaxy Z Flip: a Flex Window widget (<code>display="sub_screen"</code>). Razr: the app itself runs on the external display.</span></div>
+          <div><b>Knowing the book</b><span>Easy if you're the reader app. Kindle and similar apps have no API, so the fallbacks are an ISBN scan, Hardcover or Open Library “currently reading”, or audiobook artwork from the media session.</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const root = document.documentElement;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SPRING = getComputedStyle(root).getPropertyValue('--spring').trim() || 'cubic-bezier(.2,0,0,1)';
+const EMPH = 'cubic-bezier(.2,0,0,1)';
+
+/* theme: follow the host page's background if it has one, else the OS */
+(function theme(){
+  const bg = getComputedStyle(root).getPropertyValue('--background').trim();
+  let dark = null;
+  if (bg) {
+    const cv = document.createElement('canvas'); cv.width = cv.height = 1;
+    const ctx = cv.getContext('2d');
+    for (const v of [bg, `hsl(${bg})`, `oklch(${bg})`]) {
+      ctx.fillStyle = '#010203'; ctx.fillStyle = v;
+      if (ctx.fillStyle !== '#010203') {
+        ctx.clearRect(0,0,1,1); ctx.fillRect(0,0,1,1);
+        const [r,g,b] = ctx.getImageData(0,0,1,1).data;
+        dark = (0.2126*r + 0.7152*g + 0.0722*b) < 128; break;
+      }
+    }
+  } else root.classList.add('standalone');
+  if (dark === null) dark = matchMedia('(prefers-color-scheme: dark)').matches;
+  root.classList.add(dark ? 'dark' : 'light');
+})();
+
+/* icons */
+const IC = {
+  back:'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z',
+  toc:'M3 6h2v2H3zm4 0h14v2H7zM3 11h2v2H3zm4 0h14v2H7zm-4 5h2v2H3zm4 0h14v2H7z',
+  bookmark:'M6 3h12v18l-6-4-6 4z',
+  outer:'M5 3h6v18H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm8 0h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6zm2 2.5v13h3.5v-13z',
+  play:'M8 5.5v13l10.5-6.5z',
+  plus:'M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z',
+  check:'M9.55 17.6 4.3 12.35l1.4-1.4 3.85 3.85 8.75-8.75 1.4 1.4z',
+  barcode:'M3 5h2v14H3zm3 0h1v14H6zm2.5 0h2v14h-2zm3.5 0h1v14h-1zm2 0h3v14h-3zm4 0h1v14h-1zm2 0h2v14h-2z',
+  search:'M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z',
+  file:'M6 2h8l6 6v14H6zm7 1.8V9h5.2zM11 19h2v-4h3l-4-4-4 4h3z',
+  person:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0 2c-3.3 0-8 1.7-8 5v1h16v-1c0-3.3-4.7-5-8-5z',
+  book:'M7 2h11a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3zm0 2a1 1 0 0 0-1 1v11.2c.3-.1.6-.2 1-.2h11V4zm0 14a1 1 0 1 0 0 2h11v-2z',
+  shelf:'M4 3h3v18H4zm5 0h3v18H9zm4.4 1.5 2.9-.8 4.6 16.8-2.9.8z',
+  tune:'M3 17v2h6v-2zm0-12v2h10V5zm10 16v-2h8v-2h-8v-2h-2v6zM7 9v2H3v2h4v2h2V9zm14 4v-2H11v2zm-6-4h2V7h4V5h-4V3h-2z',
+  moon:'M12.3 3A9 9 0 1 0 21 12.7 7 7 0 0 1 12.3 3z',
+  signal:'M2 22h20V2z',
+  wifi:'M12 21 .6 8.6a16.5 16.5 0 0 1 22.8 0z',
+  battery:'M9 2h6v2h2.5a.5.5 0 0 1 .5.5v17a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-17a.5.5 0 0 1 .5-.5H9z'
+};
+const icon = n => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${IC[n]}"/></svg>`;
+$$('[data-ic]').forEach(el => { el.insertAdjacentHTML('afterbegin', icon(el.dataset.ic)); });
+
+/* M3 Expressive shapes as equal-point polygons, so clip-path can morph between them */
+const TAU = Math.PI * 2;
+function poly(fn, n = 96){
+  const s = [];
+  for (let i = 0; i < n; i++){
+    const t = i / n * TAU, r = fn(t), a = t - Math.PI/2;
+    s.push(`${(50 + 50*r*Math.cos(a)).toFixed(2)}% ${(50 + 50*r*Math.sin(a)).toFixed(2)}%`);
+  }
+  return `polygon(${s.join(',')})`;
+}
+const softPoly = (k, round) => t => { const seg = TAU/k; const a = ((t % seg) + seg) % seg - seg/2; const r = Math.cos(Math.PI/k)/Math.cos(a); return (r*(1-round) + round*.92) * .97; };
+const SHAPE = {
+  circle: poly(() => .97),
+  cookie9: poly(t => .885 + .085*Math.cos(9*t)),
+  cookie4: poly(t => .83 + .135*Math.cos(4*t)),
+  sunny: poly(t => .9 + .065*Math.cos(8*t)),
+  clover: poly(t => .64 + .33*Math.pow(Math.abs(Math.cos(2*t)), .55)),
+  pentagon: poly(softPoly(5, .35)),
+  burst: poly(t => .8 + .17*Math.pow((1 + Math.cos(12*t))/2, 1.6))
+};
+Object.entries(SHAPE).forEach(([k, v]) => root.style.setProperty('--shape-' + k, v));
+
+/* made-up books with generated covers */
+const C = (l, c, h) => `oklch(${l} ${c} ${h})`;
+const SANS = 'Roboto Flex, system-ui, sans-serif', SERIF = 'Literata, Georgia, serif';
+const ART = {
+  salt(id){
+    let w = '';
+    for (let i = 0; i < 9; i++){ const y = 166 + i*14, a = (2.2 + i*.5).toFixed(1); let d = `M-20 ${y}`; for (let x = -20; x < 220; x += 20) d += ` q5 -${a} 10 0 t10 0`; w += `<path d="${d}" opacity="${(1 - i*.07).toFixed(2)}"/>`; }
+    return `<defs><linearGradient id="${id}a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C(.26,.05,235)}"/><stop offset=".5" stop-color="${C(.36,.07,215)}"/></linearGradient></defs>
+    <rect width="200" height="300" fill="url(#${id}a)"/>
+    <circle cx="100" cy="150" r="42" fill="${C(.86,.12,75)}"/>
+    <rect y="152" width="200" height="148" fill="${C(.32,.06,212)}"/>
+    <g fill="none" stroke="${C(.74,.07,195)}" stroke-width="1.5" stroke-linecap="round">${w}</g>
+    <g fill="${C(.86,.12,75)}"><rect x="66" y="160" width="68" height="2.4" rx="1.2"/><rect x="76" y="170" width="48" height="2.4" rx="1.2" opacity=".8"/><rect x="86" y="180" width="28" height="2.4" rx="1.2" opacity=".6"/></g>
+    <text x="100" y="50" text-anchor="middle" font-family="${SERIF}" font-size="11" letter-spacing="6" fill="${C(.9,.05,80)}">THE</text>
+    <text x="100" y="82" text-anchor="middle" font-family="${SERIF}" font-size="27" font-weight="600" fill="${C(.96,.03,85)}">Salt Archive</text>
+    <text x="100" y="282" text-anchor="middle" font-family="${SANS}" font-size="8.5" font-weight="600" letter-spacing="3" fill="${C(.86,.05,200)}">INES VARRO</text>`;
+  },
+  static(id){
+    const stars = [[22,40,1],[40,118,.8],[170,30,1.2],[150,104,.9],[186,140,.8],[14,180,1],[60,20,.7],[130,124,.7],[178,74,.9],[28,92,.6],[118,22,.8]].map(([x,y,r]) => `<circle cx="${x}" cy="${y}" r="${r}"/>`).join('');
+    let arcs = ''; [18,32,46,60].forEach((r,i) => arcs += `<path d="M${100-r} 150 A${r} ${r} 0 0 1 ${100+r} 150" opacity="${(1-i*.2).toFixed(2)}"/>`);
+    const L = y => (100 - 22*(y-150)/112).toFixed(1), R = y => (100 + 22*(y-150)/112).toFixed(1);
+    let lat = '<path d="M100 150 L78 262 M100 150 L122 262"/>';
+    for (let y = 166; y < 262; y += 16) lat += `<path d="M${L(y)} ${y} L${R(y+16)} ${y+16} M${R(y)} ${y} L${L(y+16)} ${y+16}"/>`;
+    return `<defs><linearGradient id="${id}a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C(.2,.07,285)}"/><stop offset="1" stop-color="${C(.38,.13,310)}"/></linearGradient></defs>
+    <rect width="200" height="300" fill="url(#${id}a)"/>
+    <g fill="${C(.95,.03,290)}">${stars}</g>
+    <g fill="none" stroke="${C(.8,.14,350)}" stroke-width="3" stroke-linecap="round">${arcs}</g>
+    <g fill="none" stroke="${C(.9,.04,290)}" stroke-width="1.8" stroke-linecap="round">${lat}</g>
+    <circle cx="100" cy="150" r="4" fill="${C(.85,.15,350)}"/>
+    <path d="M0 262 Q60 242 104 256 T200 250 V300 H0Z" fill="${C(.95,.02,290)}"/>
+    <text x="100" y="52" text-anchor="middle" font-family="${SANS}" font-size="22" font-weight="800" letter-spacing="4" fill="${C(.96,.03,300)}">NORTHERN</text>
+    <text x="100" y="88" text-anchor="middle" font-family="${SANS}" font-size="34" font-weight="300" letter-spacing="9" fill="${C(.82,.14,350)}">STATIC</text>
+    <text x="100" y="286" text-anchor="middle" font-family="${SANS}" font-size="8.5" font-weight="700" letter-spacing="3" fill="${C(.38,.09,295)}">HALDEN MOSS</text>`;
+  },
+  garden(id){
+    let petals = ''; for (let i = 0; i < 10; i++) petals += `<ellipse cx="100" cy="122" rx="15" ry="34" transform="rotate(${i*36} 100 160)" fill="${i%2 ? C(.80,.11,55) : C(.72,.15,35)}"/>`;
+    let ticks = ''; for (let i = 0; i < 12; i++) ticks += `<line x1="100" y1="136" x2="100" y2="${i%3 ? 139 : 141}" transform="rotate(${i*30} 100 160)"/>`;
+    const mx = (100 + 19*Math.sin(Math.PI/6)).toFixed(1), my = (160 - 19*Math.cos(Math.PI/6)).toFixed(1);
+    return `<rect width="200" height="300" fill="${C(.94,.035,85)}"/>
+    <path d="M100 190 C98 230 104 262 100 300" stroke="${C(.55,.1,145)}" stroke-width="4" fill="none"/>
+    <ellipse cx="66" cy="246" rx="32" ry="11" transform="rotate(-28 66 246)" fill="${C(.62,.11,145)}"/>
+    <ellipse cx="136" cy="232" rx="30" ry="10" transform="rotate(24 136 232)" fill="${C(.68,.1,135)}"/>
+    ${petals}
+    <circle cx="100" cy="160" r="27" fill="${C(.97,.02,85)}" stroke="${C(.38,.07,35)}" stroke-width="2.2"/>
+    <g stroke="${C(.38,.07,35)}" stroke-width="1.6" stroke-linecap="round">${ticks}<line x1="100" y1="160" x2="100" y2="174"/><line x1="100" y1="160" x2="${mx}" y2="${my}"/></g>
+    <circle cx="100" cy="160" r="2.4" fill="${C(.38,.07,35)}"/>
+    <text x="100" y="40" text-anchor="middle" font-family="${SERIF}" font-style="italic" font-size="14" fill="${C(.45,.1,35)}">a garden of</text>
+    <text x="100" y="72" text-anchor="middle" font-family="${SERIF}" font-size="29" font-weight="600" fill="${C(.30,.07,30)}">Small Hours</text>
+    <text x="100" y="288" text-anchor="middle" font-family="${SANS}" font-size="8.5" font-weight="700" letter-spacing="3" fill="${C(.42,.07,35)}">NOOR CASTELLAN</text>`;
+  },
+  kestrel(id){
+    return `<defs><linearGradient id="${id}a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C(.92,.045,95)}"/><stop offset="1" stop-color="${C(.84,.07,70)}"/></linearGradient></defs>
+    <rect width="200" height="300" fill="url(#${id}a)"/>
+    <circle cx="142" cy="128" r="22" fill="${C(.8,.14,55)}"/>
+    <path d="M0 196 L38 154 L66 176 L108 122 L148 170 L174 148 L200 166 V300 H0Z" fill="${C(.66,.07,155)}"/>
+    <path d="M0 224 L32 198 L64 216 L102 178 L142 212 L172 192 L200 206 V300 H0Z" fill="${C(.51,.08,150)}"/>
+    <path d="M0 256 Q52 228 100 246 T200 238 V300 H0Z" fill="${C(.34,.06,145)}"/>
+    <path d="M84 108 C72 96 58 93 44 97 C57 99 66 104 72 111 C77 113 81 114 84 119 C87 114 91 113 96 111 C102 104 111 99 124 97 C110 93 96 96 84 108Z M82 117 L84 131 L86 117Z" fill="${C(.27,.05,40)}"/>
+    <text x="100" y="52" text-anchor="middle" font-family="${SANS}" font-size="31" font-weight="800" letter-spacing="5" fill="${C(.32,.08,150)}">KESTREL</text>
+    <text x="100" y="74" text-anchor="middle" font-family="${SANS}" font-size="12" font-weight="600" letter-spacing="11" fill="${C(.5,.12,50)}">YEAR</text>
+    <text x="100" y="284" text-anchor="middle" font-family="${SANS}" font-size="8.5" font-weight="700" letter-spacing="3" fill="${C(.9,.04,100)}">ILSE MARROW</text>`;
+  }
+};
+let uid = 0;
+const coverSVG = (b, slice) => `<svg viewBox="0 0 200 300" preserveAspectRatio="xMidYMid ${slice ? 'slice' : 'meet'}" aria-hidden="true">${ART[b.id]('cv' + (uid++))}</svg>`;
+
+const BOOKS = [
+  { id:'salt', title:'The Salt Archive', author:'Ines Varro', h:200, ch:7, chName:'The Lantern Room', p:.42, pages:412, left:'4 h 10 m',
+    text:[["The archive kept its oldest letters below the tideline, in rooms that breathed with the sea. Odile had learned to read the walls before she read the shelves: a dark band meant spring floods, a pale crust meant a dry year, and a single line of green meant someone had left a door open and never come back to close it."],
+          ["She found the lantern room on the third night, behind a cabinet labelled only WEATHER. Inside, a hundred glass jars hung from the ceiling on copper wire, each holding a folded square of paper and a pinch of grey salt.",
+           "“Forecasts,” said Bram, who had followed her down without a light. “Every keeper wrote one before they left. Nobody was allowed to open them until the weather came true.”",
+           "Odile lifted the nearest jar. The paper inside had been folded so many times it was almost a pebble. Through the glass she could read a single date, and it was tomorrow."]] },
+  { id:'static', title:'Northern Static', author:'Halden Moss', h:288, ch:12, chName:'Night Shift at Station Nine', p:.68, pages:356, left:'2 h 05 m',
+    text:[["Every night at 2:14 the receiver at Station Nine picked up a voice reading numbers in a language no one on the ridge could name. Wren logged them the way she had been taught — time, frequency, a careful column of digits — and then, because nobody had told her not to, she started reading back."],
+          ["The first reply came eleven days later. Not numbers this time, but a song, thin and patient, the kind you hum to keep yourself awake on a long drive.",
+           "She played it for Kasimir at breakfast. He listened with his eyes closed, coffee cooling in both hands.",
+           "“That’s a lullaby,” he said finally. “My grandmother sang it. She lived three hundred kilometres from here, and she has been gone for twenty years.”",
+           "Outside, the snow had stopped. The antenna array stood against the white sky like a row of question marks."]] },
+  { id:'garden', title:'A Garden of Small Hours', author:'Noor Castellan', h:38, ch:3, chName:'Seedlings', p:.18, pages:288, left:'5 h 40 m',
+    text:[["My grandfather planted by the clock, not the calendar. Basil at six in the morning, because it liked to wake up with the house. Tomatoes at noon, so they would remember the heat. Moonflowers only after the kettle had boiled for the last time and everyone else had gone to bed."],
+          ["When he died he left me the garden and a notebook with no words in it — only times, pencilled down every page, some underlined twice.",
+           "6:05. 6:40. 11:58. 3:17, circled.",
+           "I spent the first spring trying to make it mean something. I planted at 3:17 every afternoon for a month and grew nothing but impatience. Then one morning, half-asleep, I came downstairs at 6:05 and found the back door already open, the soil already turned, and a pair of his old gloves drying on the step."]] },
+  { id:'kestrel', title:'Kestrel Year', author:'Ilse Marrow', h:145, ch:21, chName:'First Frost', p:.86, pages:390, left:'48 m',
+    text:[["The kestrels left the valley in October, and Jonah stayed. He had promised himself a full year on the mountain — every season, every storm — and the birds leaving felt less like an ending than a test of whether he had meant it."],
+          ["The first frost came on a Tuesday. He woke to a window furred with white and the cabin so quiet he could hear the stove ticking as it cooled.",
+           "He walked the ridge anyway. The grass cracked under his boots like thin sugar, and down in the valley the river smoked in the cold.",
+           "Near the old fence line he stopped. On the top post, small and fierce and perfectly still, sat a single kestrel, watching him the way you watch someone who is late.",
+           "“You stayed too,” he said, and his breath hung between them like a question."]] }
+];
+const WORDS = { 3:'three', 7:'seven', 12:'twelve', 21:'twenty-one' };
+const pct = b => Math.round(b.p * 100);
+const state = { i:-1, style:'jacket', progress:true, dim:true, only:false, outer:true, view:'front' };
+
+/* M3 Expressive wavy progress (linear + circular) */
+let gid = 0;
+function wave(w, p, o = {}){
+  const amp = o.amp ?? 2.2, wl = o.wl ?? 13, sw = o.sw ?? 3.5, h = 12, mid = 6, gap = 5, id = 'wv' + (gid++);
+  const fill = Math.max(0, Math.min(1, p)) * w;
+  let d = `M${-2*wl} ${mid}`;
+  for (let x = -2*wl; x < w + wl; x += wl) d += ` q${wl/4} ${-2*amp} ${wl/2} 0 q${wl/4} ${2*amp} ${wl/2} 0`;
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><defs><clipPath id="${id}"><rect width="${fill.toFixed(1)}" height="${h}"/></clipPath></defs>
+  <line x1="${Math.min(w-2, fill+gap).toFixed(1)}" y1="${mid}" x2="${w-2}" y2="${mid}" stroke="var(--secondary-container)" stroke-width="${sw}" stroke-linecap="round"/>
+  <circle cx="${w-2}" cy="${mid}" r="1.8" fill="var(--primary)"/>
+  <g clip-path="url(#${id})"><path class="wv" style="--wl:${wl}px" d="${d}" fill="none" stroke="var(--primary)" stroke-width="${sw}" stroke-linecap="round"/></g></svg>`;
+}
+function ring(size, p, o = {}){
+  const c = size/2, sw = o.sw ?? 4.5, R = c - 6, amp = o.amp ?? 2.4, n = o.n ?? 14;
+  const start = -Math.PI/2, end = start + TAU*p, steps = Math.max(8, Math.round(360*p/1.5));
+  let d = '';
+  for (let k = 0; k <= steps; k++){ const t = start + (end-start)*k/steps, r = R + amp*Math.sin(n*(t-start)); d += (k ? 'L' : 'M') + (c + r*Math.cos(t)).toFixed(2) + ' ' + (c + r*Math.sin(t)).toFixed(2); }
+  const g = 10*Math.PI/180 + sw/R, ts = end + g, te = start + TAU - g;
+  const track = te > ts ? `<path d="M${(c+R*Math.cos(ts)).toFixed(2)} ${(c+R*Math.sin(ts)).toFixed(2)} A${R} ${R} 0 ${te-ts > Math.PI ? 1 : 0} 1 ${(c+R*Math.cos(te)).toFixed(2)} ${(c+R*Math.sin(te)).toFixed(2)}" fill="none" stroke="var(--secondary-container)" stroke-width="${sw}" stroke-linecap="round"/>` : '';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true">${track}<path d="${d}" fill="none" stroke="var(--primary)" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function ani(el, kf, dur, ease){
+  if (!el || reduce) return;
+  try { el.animate(kf, { duration:dur, easing:ease }); } catch (e) { el.animate(kf, { duration:dur, easing:EMPH }); }
+}
+
+/* renderers */
+function renderReader(b, anim){
+  $('#rdTitle').textContent = b.title; $('#rdAuthor').textContent = b.author;
+  $('#rdOv').textContent = 'Chapter ' + WORDS[b.ch]; $('#rdCh').textContent = b.chName;
+  $('#rdL').innerHTML = b.text[0].map(t => `<p>${t}</p>`).join('');
+  $('#rdR').innerHTML = b.text[1].map(t => `<p>${t}</p>`).join('');
+  const pg = Math.round(b.p * b.pages); $('#rdNL').textContent = pg; $('#rdNR').textContent = pg + 1;
+  $('#rdWave').innerHTML = wave(206, b.p);
+  $('#rdMeta').textContent = `Chapter ${b.ch} · ${pct(b)}% · ${b.left} left`;
+  if (anim) ani($('#rdPages'), [{ opacity:0, transform:'translateY(8px)' }, { opacity:1, transform:'none' }], 550, EMPH);
+}
+const outerHTML = b => `<div class="od-bg">${coverSVG(b, true)}</div>
+  <div class="od-sbar"><span>10:24</span><span>82%</span></div>
+  <div class="od-cover">${coverSVG(b)}</div>
+  <div class="od-info"><span class="od-ov"><i class="live"></i>Reading now</span>${state.progress
+    ? `${wave(196, b.p)}<span class="od-meta">Ch. ${b.ch} · ${pct(b)}% · ${b.left} left</span>`
+    : `<span class="od-meta">${b.title} — ${b.author}</span>`}</div>`;
+let outerT, lt, li = 0;
+const LSEQ = ['burst','cookie9','pentagon','clover','sunny','cookie4'];
+function renderOuter(anim){
+  const od = $('#outer'), host = $('#odContent');
+  if (!anim){ host.innerHTML = outerHTML(BOOKS[state.i]); return; }
+  od.classList.add('loading');
+  clearInterval(lt); lt = setInterval(() => { li = (li + 1) % LSEQ.length; $('#ldr').style.clipPath = SHAPE[LSEQ[li]]; }, 360);
+  clearTimeout(outerT);
+  outerT = setTimeout(() => {
+    host.innerHTML = outerHTML(BOOKS[state.i]);
+    od.classList.remove('loading'); clearInterval(lt);
+    ani($('.od-cover', host), [{ opacity:0, transform:'translateY(24px) scale(.9) rotate(-3deg)' }, { opacity:1, transform:'none' }], 950, SPRING);
+  }, 720);
+}
+const FLIP = {
+  jacket: b => `<div class="fw fw-jacket"><div class="fw-bg">${coverSVG(b, true)}</div><div class="fw-cover">${coverSVG(b)}</div>
+    <div class="fwj-txt"><span class="fw-ov"><i class="live"></i>Reading</span><b>${b.title}</b><span class="fw-sub">${b.author}</span></div>
+    ${state.progress ? `<div class="fwj-prog">${wave(100, b.p, { wl:11, sw:3.2, amp:1.9 })}<span>Ch. ${b.ch} · ${pct(b)}%</span></div>` : ''}</div>`,
+  shelf: b => `<div class="fw fw-shelf"><div class="fws-cover">${coverSVG(b)}</div>
+    ${state.progress ? `<div class="fws-num"><b>${pct(b)}</b><span>%</span></div><div class="fws-ch">Chapter ${b.ch}</div>`
+                     : `<div class="fws-alt"><span class="fw-ov"><i class="live"></i>Reading</span><div class="fws-ch">Chapter ${b.ch}</div></div>`}
+    <b class="fws-title">${b.title}</b><span class="fws-meta">${b.author}${state.progress ? ` · ${b.left} left` : ''}</span>
+    ${state.progress ? `<div class="fws-bar">${wave(196, b.p)}</div>` : ''}
+    <button class="fws-btn">${icon('play')}Resume</button></div>`,
+  glance: b => `<div class="fw fw-glance">${state.progress ? `<div class="fwg-ring">${ring(156, b.p)}</div>` : ''}
+    <div class="fwg-shape"><div class="fwg-img">${coverSVG(b, true)}</div></div>
+    <div class="fwg-txt">${state.progress ? `<b>${pct(b)}%</b><span>${b.left} left</span>` : `<span class="fw-ov"><i class="live"></i>Reading</span><span>${b.title}</span>`}</div></div>`
+};
+function renderFlip(anim){
+  const host = $('#fwHost'); host.innerHTML = FLIP[state.style](BOOKS[state.i]);
+  if (anim) ani(host.firstElementChild, [{ opacity:0, transform:'scale(.9)' }, { opacity:1, transform:'none' }], 750, SPRING);
+}
+function renderApp(){
+  const b = BOOKS[state.i];
+  $('#aTitle').textContent = b.title;
+  $('#aSub').textContent = `${b.author} · Chapter ${b.ch} · ${pct(b)}%`;
+  $$('.ci').forEach((el, i) => { el.classList.toggle('sel', i === state.i); el.setAttribute('aria-selected', i === state.i); });
+}
+function syncGroups(){
+  $$('[data-group]').forEach(g => { const v = state[g.dataset.group]; $$('button', g).forEach(btn => { const on = btn.dataset.val === v; btn.classList.toggle('sel', on); btn.setAttribute('aria-pressed', on); }); });
+}
+function setBook(i){
+  if (i === state.i) return;
+  const first = state.i < 0; state.i = i; const b = BOOKS[i];
+  root.style.setProperty('--h', b.h);
+  renderReader(b, !first); renderApp(); renderFlip(!first); renderOuter(!first);
+}
+function setView(v){ state.view = v; $('#fold3d').classList.toggle('flipped', v === 'back'); syncGroups(); }
+
+/* events */
+$('#carousel').innerHTML = BOOKS.map((b, i) => `<button class="ci" role="option" data-i="${i}" aria-label="${b.title} by ${b.author}">${coverSVG(b, true)}</button>`).join('');
+$('#carousel').addEventListener('click', e => { const c = e.target.closest('.ci'); if (c) setBook(+c.dataset.i); });
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-group] button'); if (!btn) return;
+  const key = btn.parentElement.dataset.group;
+  if (key === 'view') setView(btn.dataset.val);
+  else if (key === 'style' && state.style !== btn.dataset.val){ state.style = btn.dataset.val; renderFlip(true); }
+  syncGroups();
+});
+$$('.switch').forEach(sw => sw.addEventListener('click', () => {
+  const k = sw.dataset.key; state[k] = !state[k];
+  sw.classList.toggle('on', state[k]); sw.setAttribute('aria-checked', state[k]);
+  if (k === 'progress'){ renderFlip(false); renderOuter(false); }
+  if (k === 'dim') wake();
+}));
+$$('.chip').forEach(c => c.addEventListener('click', () => c.classList.toggle('on')));
+const app = $('#app');
+$('#fab').addEventListener('click', () => app.classList.toggle('fab-open'));
+$('#scrim').addEventListener('click', () => app.classList.remove('fab-open'));
+let snackT;
+$$('.fabm-item').forEach(it => it.addEventListener('click', () => {
+  app.classList.remove('fab-open');
+  const s = $('#snack'); s.textContent = it.dataset.msg; s.classList.add('show');
+  clearTimeout(snackT); snackT = setTimeout(() => s.classList.remove('show'), 2800);
+}));
+$('#tbFab').addEventListener('click', () => {
+  state.outer = !state.outer;
+  $('#outer').classList.toggle('off', !state.outer);
+  $('#tbFab').classList.toggle('off', !state.outer);
+  $('#rdPill').classList.toggle('off', !state.outer);
+  $('#rdPillTxt').textContent = state.outer ? 'Cover on outer screen' : 'Outer screen off';
+});
+$('#rdPill').addEventListener('click', () => setView('back'));
+
+/* ambient dim after inactivity */
+let idleT;
+function wake(){
+  $$('.ambient').forEach(e => e.classList.remove('ambient'));
+  clearTimeout(idleT);
+  if (state.dim) idleT = setTimeout(() => { $('#outer').classList.add('ambient'); $('#flipScreen').classList.add('ambient'); }, 10000);
+}
+['pointermove','pointerdown','keydown','wheel','touchstart'].forEach(ev => addEventListener(ev, wake, { passive:true }));
+
+/* scale device mockups to fit narrow widths */
+function fit(){ $$('.fit').forEach(f => { const w = +f.dataset.w; f.firstElementChild.style.zoom = Math.min(1, (f.clientWidth || w) / w); }); }
+new ResizeObserver(fit).observe(document.body);
+
+setBook(0); syncGroups(); wake(); fit();
+})();
+</script>
+</body>
+</html>
