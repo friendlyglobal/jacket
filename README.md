@@ -3,8 +3,8 @@
 **Let your foldable wear the book you're reading.**
 
 Jacket is an open-source Android reader for foldable phones. While you read on the inner
-screen, the outer screen shows the book's cover, like a dust jacket, so the people around you
-see what you're reading. On flip phones, the cover lives in a cover-screen widget instead.
+screen, the outer screen shows the book's cover edge to edge, like album art, so the people
+around you see what you're reading. On flip phones, the cover fills the cover-screen widget instead.
 
 The whole UI is Material 3 Expressive, and it re-tints itself from each book's cover.
 
@@ -23,8 +23,8 @@ The whole UI is Material 3 Expressive, and it re-tints itself from each book's c
 
 | Device | How the cover appears |
 | --- | --- |
-| Book-style foldables (Pixel Fold line, others where supported) | On the **outer display while you read inside**, using Jetpack WindowManager's dual-screen mode (`WindowAreaController`, `OPERATION_PRESENT_ON_AREA`). It dims to an ambient state after 30 seconds. |
-| Galaxy Z Flip | A **Flex Window widget**: the Glance widget declares Samsung's `display="sub_screen"` meta-data. Add it under *Settings › Cover screen › Widgets*. |
+| Book-style foldables (Pixel Fold line, others where supported) | **Full-screen on the outer display while you read inside**, using Jetpack WindowManager's dual-screen mode (`WindowAreaController`, `OPERATION_PRESENT_ON_AREA`). An optional slim progress bar sits at the bottom, and it dims to an ambient state after 30 seconds. |
+| Galaxy Z Flip | A **Flex Window widget**: the Glance widget declares Samsung's `display="sub_screen"` meta-data. Add it under *Settings › Cover screen › Widgets*. The default *Jacket* style fills the cover screen with the cover. |
 | Motorola Razr | Open Jacket on the external display. The UI adapts to small, square windows. |
 | Any phone or tablet | The same widget, on the home screen. |
 

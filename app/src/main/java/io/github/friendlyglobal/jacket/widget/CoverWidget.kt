@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.core.net.toUri
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -33,7 +34,6 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
@@ -44,6 +44,7 @@ import androidx.glance.material3.ColorProviders
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import io.github.friendlyglobal.jacket.MainActivity
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.CoverStyle
@@ -157,27 +158,35 @@ private fun Progress(book: Book, modifier: GlanceModifier = GlanceModifier.fillM
     color = GlanceTheme.colors.primary, backgroundColor = GlanceTheme.colors.secondaryContainer,
 )
 
+/** The cover fills the whole widget (and the whole Flex Window), cropped like album art. */
 @Composable
 private fun Jacket(context: Context, book: Book, cover: Bitmap?, settings: Settings) {
-    val size = LocalSize.current
-    val coverHeight = size.height - 28.dp
-    Row(base(context, book).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-        Column(GlanceModifier.defaultWeight().fillMaxHeight()) {
-            Label("Reading")
-            Spacer(GlanceModifier.height(6.dp))
-            Text(book.title, maxLines = 3, style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 17.sp, fontWeight = FontWeight.Bold))
-            if (book.author.isNotEmpty()) {
-                Text(book.author, maxLines = 1, style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp))
-            }
-            Spacer(GlanceModifier.defaultWeight())
-            if (settings.showProgress) {
-                Progress(book)
-                Spacer(GlanceModifier.height(4.dp))
-                Text("${book.positionLabel} · ${book.percent}%", style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 11.sp))
+    Box(base(context, book)) {
+        if (cover != null) {
+            Image(
+                provider = ImageProvider(cover), contentDescription = "Cover of ${book.title}",
+                modifier = GlanceModifier.fillMaxSize(),
+                contentScale = androidx.glance.layout.ContentScale.Crop,
+            )
+        } else {
+            Column(GlanceModifier.fillMaxSize().padding(14.dp)) {
+                Label("Reading")
+                Spacer(GlanceModifier.height(6.dp))
+                Text(book.title, maxLines = 3, style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 17.sp, fontWeight = FontWeight.Bold))
             }
         }
-        Spacer(GlanceModifier.width(12.dp))
-        Cover(cover, book.title, coverHeight * 0.66f, coverHeight)
+        if (settings.showProgress) {
+            Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
+                Column(GlanceModifier.fillMaxWidth().background(Color.Black.copy(alpha = 0.55f)).padding(horizontal = 14.dp, vertical = 10.dp)) {
+                    Progress(book)
+                    Spacer(GlanceModifier.height(4.dp))
+                    Text(
+                        "${book.positionLabel} · ${book.percent}%",
+                        style = TextStyle(color = ColorProvider(Color.White), fontSize = 11.sp),
+                    )
+                }
+            }
+        }
     }
 }
 
