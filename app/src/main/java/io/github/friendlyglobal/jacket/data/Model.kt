@@ -41,7 +41,11 @@ data class Book(
     val lastOpenedAt: Long = 0L,
     /** Exact reading location as a Readium locator (JSON), for EPUB. */
     val locator: String? = null,
+    /** When the book was marked finished; 0 while unread or in progress. */
+    val finishedAt: Long = 0L,
 ) {
+    val isFinished: Boolean get() = finishedAt > 0L
+
     val percent: Int get() = (progress * 100).toInt().coerceIn(0, 100)
 
     val isNew: Boolean get() = lastOpenedAt == 0L
@@ -49,6 +53,7 @@ data class Book(
     /** Short reading status for covers and widgets, e.g. "42% read" or "Page 3 of 40". */
     val statusLabel: String
         get() = when {
+            isFinished -> "Finished"
             isNew -> "Not started"
             (format == BookFormat.PDF || format == BookFormat.CBZ) && sectionCount > 0 ->
                 "Page ${position + 1} of $sectionCount"
@@ -83,6 +88,46 @@ enum class LibrarySort(val label: String) {
     AUTHOR("Author"),
 }
 
+/** Line spacing; BOOK keeps the publisher's. */
+enum class LineSpacing(val lineHeight: Double?) { BOOK(null), TIGHT(1.25), NORMAL(1.5), LOOSE(1.8) }
+
+/** Side margins around the text. */
+enum class PageMargins(val readium: Double) { NARROW(0.5), NORMAL(1.0), WIDE(1.6) }
+
+/** Text alignment; BOOK keeps the publisher's. Justified text is hyphenated. */
+enum class TextAlignment { BOOK, START, JUSTIFY }
+
+/** Highlight colours, as page-agnostic tints. */
+enum class HighlightColor(val argb: Int) {
+    YELLOW(0xFFF5C518.toInt()),
+    GREEN(0xFF6CC56C.toInt()),
+    BLUE(0xFF5AA9E6.toInt()),
+    PINK(0xFFF06BA8.toInt()),
+    PURPLE(0xFFA98BF0.toInt()),
+}
+
+enum class AnnotationKind { BOOKMARK, HIGHLIGHT }
+
+/**
+ * A bookmark or highlight. EPUB places are Readium locators (JSON); other formats use a page or
+ * paragraph [section].
+ */
+data class Annotation(
+    val id: String,
+    val bookId: String,
+    val kind: AnnotationKind,
+    val locator: String? = null,
+    val section: Int = 0,
+    /** Whole-book progress (0..1), for ordering and display. */
+    val progress: Float = 0f,
+    val chapter: String = "",
+    /** The highlighted text, or a snippet of the bookmarked page. */
+    val text: String = "",
+    val note: String = "",
+    val color: HighlightColor = HighlightColor.YELLOW,
+    val createdAt: Long = 0L,
+)
+
 data class Settings(
     val coverStyle: CoverStyle = CoverStyle.JACKET,
     val showProgress: Boolean = true,
@@ -97,12 +142,20 @@ data class Settings(
     val sort: LibrarySort = LibrarySort.RECENT,
     /** Read-aloud speed, 1 = the voice's normal pace. */
     val listenRate: Float = 1f,
+    val lineSpacing: LineSpacing = LineSpacing.BOOK,
+    val margins: PageMargins = PageMargins.NORMAL,
+    val alignment: TextAlignment = TextAlignment.BOOK,
+    /** Volume buttons turn pages while reading (not while listening). */
+    val volumeKeys: Boolean = false,
+    /** Library filter: false shows the books you're reading and haven't started, true the finished shelf. */
+    val showFinished: Boolean = false,
 )
 
 data class LibraryState(
     val books: List<Book> = emptyList(),
     val currentId: String? = null,
     val settings: Settings = Settings(),
+    val annotations: List<Annotation> = emptyList(),
 ) {
     /** The book the covers show: the one picked, else the one opened most recently. */
     val current: Book?
@@ -127,8 +180,14 @@ internal object LibraryJson {
             put("layout", state.settings.layout.name)
             put("sort", state.settings.sort.name)
             put("listenRate", state.settings.listenRate.toDouble())
+            put("lineSpacing", state.settings.lineSpacing.name)
+            put("margins", state.settings.margins.name)
+            put("alignment", state.settings.alignment.name)
+            put("volumeKeys", state.settings.volumeKeys)
+            put("showFinished", state.settings.showFinished)
         })
         put("books", JSONArray().apply { state.books.forEach { put(it.toJson()) } })
+        put("annotations", JSONArray().apply { state.annotations.forEach { put(it.toJson()) } })
     }.toString()
 
     fun decode(text: String): LibraryState {
@@ -150,7 +209,15 @@ internal object LibraryJson {
                 layout = enumOr(s.optString("layout"), PageLayout.PAGES),
                 sort = enumOr(s.optString("sort"), LibrarySort.RECENT),
                 listenRate = s.optDouble("listenRate", 1.0).toFloat().takeIf { it.isFinite() && it in 0.5f..3f } ?: 1f,
+                lineSpacing = enumOr(s.optString("lineSpacing"), LineSpacing.BOOK),
+                margins = enumOr(s.optString("margins"), PageMargins.NORMAL),
+                alignment = enumOr(s.optString("alignment"), TextAlignment.BOOK),
+                volumeKeys = s.optBoolean("volumeKeys", false),
+                showFinished = s.optBoolean("showFinished", false),
             ),
+            annotations = (root.optJSONArray("annotations") ?: JSONArray()).let { a ->
+                (0 until a.length()).mapNotNull { i -> runCatching { a.getJSONObject(i).toAnnotation() }.getOrNull() }
+            },
         )
     }
 
@@ -166,7 +233,29 @@ internal object LibraryJson {
         put("sectionCount", sectionCount); put("progress", progress.toDouble())
         put("lastOpenedAt", lastOpenedAt)
         put("locator", locator ?: JSONObject.NULL)
+        put("finishedAt", finishedAt)
     }
+
+    private fun Annotation.toJson() = JSONObject().apply {
+        put("id", id); put("bookId", bookId); put("kind", kind.name)
+        put("locator", locator ?: JSONObject.NULL); put("section", section)
+        put("progress", progress.toDouble()); put("chapter", chapter); put("text", text)
+        put("note", note); put("color", color.name); put("createdAt", createdAt)
+    }
+
+    private fun JSONObject.toAnnotation() = Annotation(
+        id = getString("id"),
+        bookId = getString("bookId"),
+        kind = AnnotationKind.valueOf(getString("kind")),
+        locator = if (isNull("locator")) null else optString("locator").takeIf { it.isNotEmpty() },
+        section = optInt("section"),
+        progress = optDouble("progress", 0.0).toFloat().takeIf { it.isFinite() } ?: 0f,
+        chapter = optString("chapter"),
+        text = optString("text"),
+        note = optString("note"),
+        color = enumOr(optString("color"), HighlightColor.YELLOW),
+        createdAt = optLong("createdAt"),
+    )
 
     private fun JSONObject.toBook() = Book(
         id = getString("id"),
@@ -185,5 +274,6 @@ internal object LibraryJson {
         progress = optDouble("progress", 0.0).toFloat(),
         lastOpenedAt = optLong("lastOpenedAt"),
         locator = if (isNull("locator")) null else optString("locator").takeIf { it.isNotEmpty() },
+        finishedAt = optLong("finishedAt"),
     )
 }

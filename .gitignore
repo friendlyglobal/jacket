@@ -11,3 +11,8 @@
 .cxx/
 *.apk
 *.aab
+
+# Release signing (see RELEASING.md)
+keystore.properties
+*.jks
+*.keystore

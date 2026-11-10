@@ -1,6 +1,11 @@
 package io.github.friendlyglobal.jacket.reader
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ResolveInfo
+import android.view.ActionMode
+import android.view.Menu
+import android.view.MenuItem
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.ColorInt
@@ -9,7 +14,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import androidx.fragment.app.FragmentManager
+import io.github.friendlyglobal.jacket.data.LineSpacing
 import io.github.friendlyglobal.jacket.data.PageLayout
+import io.github.friendlyglobal.jacket.data.TextAlignment
 import io.github.friendlyglobal.jacket.data.ReadingFont
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.ui.PageColors
@@ -27,6 +34,7 @@ import org.readium.r2.navigator.html.toCss
 import org.readium.r2.navigator.preferences.Color
 import org.readium.r2.navigator.preferences.FontFamily
 import org.readium.r2.navigator.preferences.Theme
+import org.readium.r2.navigator.preferences.TextAlign as ReadiumTextAlign
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.util.asset.AssetRetriever
 import org.readium.r2.shared.util.getOrElse
@@ -92,7 +100,8 @@ private val HYPERLEGIBLE = FontFamily("Atkinson Hyperlegible")
  * The reader's configuration: bundled fonts, no automatic insets (the screen pads for the system
  * bars itself so pages don't reflow when the bars hide), and the read-along decoration.
  */
-fun readerConfiguration(): EpubNavigatorFragment.Configuration = EpubNavigatorFragment.Configuration {
+fun readerConfiguration(selection: ActionMode.Callback): EpubNavigatorFragment.Configuration = EpubNavigatorFragment.Configuration {
+    selectionActionModeCallback = selection
     servedAssets = listOf("fonts/.*")
     shouldApplyInsetsPadding = false
     // Two pages side by side whenever two comfortable columns fit: an unfolded phone, a tablet,
@@ -139,6 +148,88 @@ fun readerConfiguration(): EpubNavigatorFragment.Configuration = EpubNavigatorFr
                 },
             ),
         )
+        // Your highlights: a marker-pen wash in their colour, underlined when they carry a note.
+        set(
+            Marker::class,
+            HtmlDecorationTemplate(
+                layout = HtmlDecorationTemplate.Layout.BOXES,
+                width = HtmlDecorationTemplate.Width.WRAP,
+                element = { decoration ->
+                    val style = decoration.style as? Marker
+                    val color = style?.color ?: 0
+                    val underline = if (style?.noted == true) "border-bottom: 2px dotted ${color.toCss(alpha = 1.0)};" else ""
+                    "<div style=\"background-color: ${color.toCss(alpha = 0.34)} !important; border-radius: 3px; " +
+                        "margin: -1px 0 0 -1px; padding: 0 2px 2px 0; box-sizing: border-box; $underline\"></div>"
+                },
+            ),
+        )
+    }
+}
+
+/** Decoration style for highlights and search results: a translucent [color] wash. */
+class Marker(@ColorInt val color: Int, val noted: Boolean = false) : Decoration.Style {
+    override fun describeContents() = 0
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeInt(color)
+        dest.writeInt(if (noted) 1 else 0)
+    }
+    override fun equals(other: Any?) = other is Marker && other.color == color && other.noted == noted
+    override fun hashCode() = color * 31 + if (noted) 1 else 0
+
+    companion object CREATOR : Parcelable.Creator<Marker> {
+        override fun createFromParcel(source: Parcel) = Marker(source.readInt(), source.readInt() == 1)
+        override fun newArray(size: Int) = arrayOfNulls<Marker>(size)
+    }
+}
+
+/**
+ * The menu over selected text. Readium's custom menu replaces the web view's own, so it brings
+ * back Copy, Share and the phone's text actions (Translate, Define, ...) next to Highlight and Note.
+ */
+class SelectionMenu(private val context: Context) : ActionMode.Callback {
+    enum class Action { HIGHLIGHT, NOTE, COPY, SHARE, PROCESS }
+
+    /** Called with the action and, for [Action.PROCESS], the text-processing activity to send to. */
+    var onAction: (Action, ResolveInfo?) -> Unit = { _, _ -> }
+    private var processors: List<ResolveInfo> = emptyList()
+
+    override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+        menu.add(Menu.NONE, ID_HIGHLIGHT, 0, "Highlight")
+        menu.add(Menu.NONE, ID_NOTE, 1, "Note")
+        menu.add(Menu.NONE, ID_COPY, 2, android.R.string.copy)
+        menu.add(Menu.NONE, ID_SHARE, 3, "Share")
+        val pm = context.packageManager
+        processors = runCatching {
+            pm.queryIntentActivities(Intent(Intent.ACTION_PROCESS_TEXT).setType("text/plain"), 0)
+        }.getOrDefault(emptyList()).filter { it.activityInfo.packageName != context.packageName }.take(4)
+        processors.forEachIndexed { i, info ->
+            menu.add(Menu.NONE, ID_PROCESS + i, 10 + i, info.loadLabel(pm))
+        }
+        return true
+    }
+
+    override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
+
+    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+        when (item.itemId) {
+            ID_HIGHLIGHT -> onAction(Action.HIGHLIGHT, null)
+            ID_NOTE -> onAction(Action.NOTE, null)
+            ID_COPY -> onAction(Action.COPY, null)
+            ID_SHARE -> onAction(Action.SHARE, null)
+            else -> onAction(Action.PROCESS, processors.getOrNull(item.itemId - ID_PROCESS) ?: return false)
+        }
+        mode.finish()
+        return true
+    }
+
+    override fun onDestroyActionMode(mode: ActionMode) {}
+
+    private companion object {
+        const val ID_HIGHLIGHT = 1
+        const val ID_NOTE = 2
+        const val ID_COPY = 3
+        const val ID_SHARE = 4
+        const val ID_PROCESS = 100
     }
 }
 
@@ -157,6 +248,21 @@ fun epubPreferences(settings: Settings, page: PageColors): EpubPreferences = Epu
     theme = if (page.background.luminance() < 0.4f) Theme.DARK else Theme.LIGHT,
     backgroundColor = Color(page.background.toArgb()),
     textColor = Color(page.text.toArgb()),
+    pageMargins = settings.margins.readium,
+    // Line spacing and alignment override the book's own styles, which Readium only allows with
+    // publisher styles off; leaving both on "Book" keeps the publisher's typography.
+    publisherStyles = settings.lineSpacing == LineSpacing.BOOK && settings.alignment == TextAlignment.BOOK,
+    lineHeight = settings.lineSpacing.lineHeight,
+    textAlign = when (settings.alignment) {
+        TextAlignment.BOOK -> null
+        TextAlignment.START -> ReadiumTextAlign.START
+        TextAlignment.JUSTIFY -> ReadiumTextAlign.JUSTIFY
+    },
+    hyphens = when (settings.alignment) {
+        TextAlignment.BOOK -> null
+        TextAlignment.START -> false
+        TextAlignment.JUSTIFY -> true
+    },
 )
 
 /** Decoration style for read-along: a translucent veil in the page color over unread words. */

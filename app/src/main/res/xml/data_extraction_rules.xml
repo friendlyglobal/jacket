@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Books can be large and are the user's own files: keep them out of cloud backups. -->
+<!--
+  Android 12+. Cloud backup keeps the library list, reading positions, bookmarks, highlights and
+  settings (library.json, a few hundred KB at most), not the books or covers: those can be large,
+  and they're the user's own files. Adding a book again after a restore brings back its place and
+  notes. A phone-to-phone transfer copies everything, books included.
+-->
 <data-extraction-rules>
     <cloud-backup>
-        <exclude domain="file" path="." />
+        <include domain="file" path="library.json" />
     </cloud-backup>
     <device-transfer>
         <include domain="file" path="." />

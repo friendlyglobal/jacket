@@ -1,0 +1,42 @@
+Jacket is an open-source e-reader for foldable phones. While you read on the inner screen, the outer screen shows the cover of your book edge to edge, like album art, so the people around you can see what you're reading.
+
+THE COVER, ON THE OUTSIDE
+• Book-style foldables: the cover fills the outer screen while you read inside, using Android's dual-screen mode.
+• Galaxy Z Flip: a cover-screen widget for the Flex Window.
+• Any phone or tablet: the same widget on your home screen.
+• Turn the outer-screen cover off in Settings at any time.
+
+READING
+• EPUB, PDF, CBZ comics and plain text, from your own files. Use Add books, or Open with or Share from another app.
+• EPUBs are rendered with the open-source Readium toolkit: real pages, a two-page spread when unfolded, or continuous scrolling if you prefer.
+• Contents with sub-chapters, the current chapter tracked as you read, pages left in the chapter, and a scrubber that previews the chapter under your thumb.
+• Bookmarks, highlights in several colors with notes, and full-text search inside EPUBs.
+
+LISTENING
+• Audiobook mode reads EPUB and plain-text books aloud with your phone's text-to-speech voice, highlighting each word as it's spoken.
+• Keeps playing with the screen off, with lock-screen and headphone controls.
+• Sleep timer: stop after a set time or at the end of the chapter.
+
+READING COMFORT
+• Literata, Atkinson Hyperlegible and OpenDyslexic fonts.
+• Text size, line spacing, margins and justification.
+• Book, Paper, Dark and Black page colors.
+• Turn pages with the volume keys.
+
+LIBRARY
+• Search and sort your books.
+• A Finished shelf, and an end-of-book screen when you reach the last page.
+• Export a backup file and import it again later or on another phone.
+
+DESIGN
+• Material 3 Expressive: colors taken from the cover of the book you're reading, springy motion and haptic feedback.
+
+PRIVACY
+• No internet permission: neither Jacket nor the books you open in it can connect to the network.
+• No accounts, no ads, no analytics, no tracking.
+• Free and open source under the Apache License 2.0: https://github.com/friendlyglobal/jacket
+
+GOOD TO KNOW
+• Outer-screen support depends on the phone. On phones without an outer screen, those options are hidden.
+• DRM-protected (copy-protected) books can't be opened.
+• Read-aloud for plain-text books stops when you leave the app. EPUB read-aloud keeps playing in the background.

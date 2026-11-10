@@ -34,13 +34,26 @@ import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import io.github.friendlyglobal.jacket.ui.rememberReadingFontFamily
 import io.github.friendlyglobal.jacket.ui.swatch
 import kotlin.math.roundToInt
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Switch
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import io.github.friendlyglobal.jacket.data.LineSpacing
+import io.github.friendlyglobal.jacket.data.PageMargins
+import io.github.friendlyglobal.jacket.data.TextAlignment
 
 private const val MIN_SCALE = 0.7f
 private const val MAX_SCALE = 2f
 
 /** Text size, typeface, page color and layout. Used in the reader's sheet and in Settings. */
 @Composable
-fun ReadingControls(settings: Settings, onSettings: ((Settings) -> Settings) -> Unit, modifier: Modifier = Modifier) {
+fun ReadingControls(
+    settings: Settings,
+    onSettings: ((Settings) -> Settings) -> Unit,
+    modifier: Modifier = Modifier,
+    forEpub: Boolean = true,
+) {
     val haptics = rememberHaptics()
     Column(modifier) {
         Label("Text size")
@@ -130,6 +143,76 @@ fun ReadingControls(settings: Settings, onSettings: ((Settings) -> Settings) -> 
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 8.dp, start = 4.dp, end = 4.dp),
         )
+
+        if (forEpub) {
+            Label("Line spacing")
+            ConnectedChoice(
+                options = LineSpacing.entries,
+                selected = settings.lineSpacing,
+                label = {
+                    when (it) {
+                        LineSpacing.BOOK -> "Book"
+                        LineSpacing.TIGHT -> "Tight"
+                        LineSpacing.NORMAL -> "Normal"
+                        LineSpacing.LOOSE -> "Loose"
+                    }
+                },
+                onSelect = { choice -> onSettings { it.copy(lineSpacing = choice) } },
+            )
+
+            Label("Margins")
+            ConnectedChoice(
+                options = PageMargins.entries,
+                selected = settings.margins,
+                label = {
+                    when (it) {
+                        PageMargins.NARROW -> "Narrow"
+                        PageMargins.NORMAL -> "Normal"
+                        PageMargins.WIDE -> "Wide"
+                    }
+                },
+                onSelect = { choice -> onSettings { it.copy(margins = choice) } },
+            )
+
+            Label("Alignment")
+            ConnectedChoice(
+                options = TextAlignment.entries,
+                selected = settings.alignment,
+                label = {
+                    when (it) {
+                        TextAlignment.BOOK -> "Book"
+                        TextAlignment.START -> "Left"
+                        TextAlignment.JUSTIFY -> "Justified"
+                    }
+                },
+                onSelect = { choice -> onSettings { it.copy(alignment = choice) } },
+            )
+            Text(
+                "Justified text is hyphenated. “Book” keeps the publisher's own spacing and alignment.",
+                style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp, start = 4.dp, end = 4.dp),
+            )
+        }
+
+        Label("Buttons")
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clip(MaterialTheme.shapes.large)
+                .toggleable(settings.volumeKeys, role = Role.Switch) { on -> onSettings { it.copy(volumeKeys = on) } }
+                .padding(horizontal = 4.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(JacketIcons.Volume, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
+                Text("Turn pages with volume keys", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    "Volume down for the next page, up for the previous. Not while listening.",
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Switch(checked = settings.volumeKeys, onCheckedChange = null)
+        }
         Spacer(Modifier.height(8.dp))
     }
 }

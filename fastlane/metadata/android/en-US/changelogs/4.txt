@@ -1,0 +1,8 @@
+Jacket 1.0, release candidate 1. New in this version:
+• Read-aloud keeps playing with the screen off, with lock-screen and headphone controls and a sleep timer
+• Bookmarks, highlights with notes, and search inside EPUBs
+• Line spacing, margins, justification and volume-key page turns
+• Finished shelf, end-of-book screen, library search and sorting
+• Backup export and import
+
+Known issue: read-aloud for plain-text books stops when you leave the app.

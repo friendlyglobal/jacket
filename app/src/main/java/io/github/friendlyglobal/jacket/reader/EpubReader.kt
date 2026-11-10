@@ -2,6 +2,8 @@ package io.github.friendlyglobal.jacket.reader
 
 import android.app.Application
 import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
@@ -35,7 +37,10 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.fragment.compose.AndroidFragment
+import io.github.friendlyglobal.jacket.data.Annotation
+import io.github.friendlyglobal.jacket.data.AnnotationKind
 import io.github.friendlyglobal.jacket.data.Book
+import io.github.friendlyglobal.jacket.data.HighlightColor
 import io.github.friendlyglobal.jacket.data.PageLayout
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.library
@@ -58,6 +63,7 @@ import org.readium.navigator.media.tts.AndroidTtsNavigator
 import org.readium.navigator.media.tts.AndroidTtsNavigatorFactory
 import org.readium.navigator.media.tts.TtsNavigator
 import org.readium.navigator.media.tts.android.AndroidTtsPreferences
+import org.readium.r2.navigator.DecorableNavigator
 import org.readium.r2.navigator.Decoration
 import org.readium.r2.navigator.OverflowableNavigator
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
@@ -70,10 +76,13 @@ import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.navigator.preferences.ReadingProgression
 import org.readium.r2.shared.publication.services.locateProgression
+import org.readium.r2.shared.publication.services.search.isSearchable
+import org.readium.r2.shared.publication.services.search.search
 import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.util.AbsoluteUrl
 import org.readium.r2.shared.util.getOrElse
 import java.io.File
+import java.util.UUID
 import java.util.zip.ZipFile
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -98,6 +107,7 @@ fun EpubReader(
     page: PageColors,
     nav: ReaderNav,
     haptics: Haptics,
+    annotations: List<Annotation>,
     onCenterTap: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -118,7 +128,7 @@ fun EpubReader(
         return ReaderError("Couldn't open this book.\n${it.message.orEmpty()}")
     }
     if (publication.readingOrder.isEmpty()) return ReaderError("This book has no pages to show.")
-    EpubPages(book, publication, start, settings, page, nav, haptics, onCenterTap)
+    EpubPages(book, publication, start, settings, page, nav, haptics, annotations, onCenterTap)
 }
 
 private data class Opened(val publication: Publication, val start: Locator?)
@@ -137,10 +147,12 @@ private fun EpubPages(
     page: PageColors,
     nav: ReaderNav,
     haptics: Haptics,
+    annotations: List<Annotation>,
     onCenterTap: () -> Unit,
 ) {
     val context = LocalContext.current
     val library = context.library
+    val selectionMenu = remember(publication) { SelectionMenu(context) }
     val scope = rememberCoroutineScope()
     val contents = remember(publication) { Contents(publication) }
     val preferences = epubPreferences(settings, page)
@@ -169,7 +181,7 @@ private fun EpubPages(
                     filePage = next
                 }
             },
-            configuration = readerConfiguration(),
+            configuration = readerConfiguration(selectionMenu),
         )
     }
 
@@ -244,10 +256,153 @@ private fun EpubPages(
     LaunchedEffect(current, located, filePage, scroll, nav.title) {
         val locator = current ?: return@LaunchedEffect
         nav.footer = footerFor(scroll, nav.title, filePage, locator, located)
+        nav.pageKey++
+        // The last page of the last file (or the bottom of it, scrolling): the end of the book.
+        val lastFile = contents.resourceOf(locator.href) == contents.fileCount - 1
+        nav.atEnd = lastFile && if (scroll) {
+            (locator.locations.progression ?: 0.0) >= 0.97
+        } else {
+            filePage.href == locator.href.toString() && filePage.count > 0 && filePage.index >= filePage.count - 1
+        }
+        // The last page is all of the book, though it starts a little before the end.
+        if (nav.atEnd) {
+            val position = ((locator.locations.position ?: 1) - 1).coerceAtLeast(0)
+            library.updateLocator(book.id, locator.toJSON().toString(), 1f, position, positions.size)
+        }
+    }
+
+    // Highlights, drawn over the text; tapping one opens its editor.
+    val highlights = remember(annotations) { annotations.filter { it.kind == AnnotationKind.HIGHLIGHT && it.locator != null } }
+    LaunchedEffect(navigator, highlights) {
+        val n = navigator ?: return@LaunchedEffect
+        val decorations = highlights.mapNotNull { h ->
+            val locator = h.locator?.let { runCatching { Locator.fromJSON(JSONObject(it)) }.getOrNull() } ?: return@mapNotNull null
+            Decoration(h.id, locator, Marker(h.color.argb, noted = h.note.isNotBlank()))
+        }
+        n.applyDecorations(decorations, HIGHLIGHTS)
+    }
+    DisposableEffect(navigator) {
+        val n = navigator ?: return@DisposableEffect onDispose {}
+        val listener = object : DecorableNavigator.Listener {
+            override fun onDecorationActivated(event: DecorableNavigator.OnActivatedEvent): Boolean {
+                haptics.tick()
+                nav.editing = event.decoration.id
+                return true
+            }
+        }
+        n.addDecorationListener(HIGHLIGHTS, listener)
+        onDispose { n.removeDecorationListener(listener) }
+    }
+
+    // Selected text: highlight it, add a note, copy, share, or hand it to Translate and friends.
+    selectionMenu.onAction = { action, processor ->
+        scope.launch {
+            val n = navigator ?: return@launch
+            val selection = n.currentSelection() ?: return@launch
+            val text = selection.locator.text.highlight?.trim().orEmpty()
+            n.clearSelection()
+            if (text.isEmpty()) return@launch
+            when (action) {
+                SelectionMenu.Action.HIGHLIGHT, SelectionMenu.Action.NOTE -> {
+                    haptics.confirm()
+                    val resource = contents.resourceOf(selection.locator.href)
+                    val highlight = Annotation(
+                        id = UUID.randomUUID().toString(),
+                        bookId = book.id,
+                        kind = AnnotationKind.HIGHLIGHT,
+                        locator = selection.locator.toJSON().toString(),
+                        progress = (spans?.total(resource, selection.locator.locations.progression ?: 0.0) ?: 0.0).toFloat(),
+                        chapter = nav.title,
+                        text = text,
+                        color = annotations.lastOrNull { it.kind == AnnotationKind.HIGHLIGHT }?.color ?: HighlightColor.YELLOW,
+                        createdAt = System.currentTimeMillis(),
+                    )
+                    library.addAnnotation(highlight)
+                    if (action == SelectionMenu.Action.NOTE) nav.editing = highlight.id
+                }
+                SelectionMenu.Action.COPY -> {
+                    context.getSystemService(ClipboardManager::class.java)
+                        .setPrimaryClip(ClipData.newPlainText(book.title, text))
+                }
+                SelectionMenu.Action.SHARE -> runCatching {
+                    val send = Intent(Intent.ACTION_SEND).setType("text/plain")
+                        .putExtra(Intent.EXTRA_TEXT, "“$text”\n— ${book.title}${if (book.author.isNotBlank()) ", ${book.author}" else ""}")
+                    context.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                }
+                SelectionMenu.Action.PROCESS -> runCatching {
+                    val info = processor?.activityInfo ?: return@runCatching
+                    context.startActivity(
+                        Intent(Intent.ACTION_PROCESS_TEXT).setType("text/plain")
+                            .setClassName(info.packageName, info.name)
+                            .putExtra(Intent.EXTRA_PROCESS_TEXT, text)
+                            .putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, true)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                    )
+                }
+            }
+        }
+    }
+
+    // Bookmarks: remember the page by the first words on it, and find it again by them.
+    nav.place = place@{
+        val n = navigator ?: return@place null
+        val locator = current ?: return@place null
+        val top = runCatching { n.evaluateJavascript(TOP_TEXT_SCRIPT)?.let(::JSONObject) }.getOrNull()
+        val quote = top?.optString("quote").orEmpty()
+        val marked = if (quote.isNotBlank()) {
+            locator.copy(text = Locator.Text(before = top?.optString("before"), highlight = quote))
+        } else {
+            locator.byProgression()
+        }
+        val resource = contents.resourceOf(locator.href)
+        Place(
+            locator = marked.toJSON().toString(),
+            section = ((locator.locations.position ?: 1) - 1).coerceAtLeast(0),
+            progress = (spans?.total(resource, locator.locations.progression ?: 0.0) ?: 0.0).toFloat(),
+            chapter = nav.title,
+            snippet = top?.optString("text").orEmpty(),
+        )
+    }
+    nav.onScreen = onScreen@{ mark ->
+        val here = current ?: return@onScreen false
+        val at = mark.locator?.let { runCatching { Locator.fromJSON(JSONObject(it)) }.getOrNull() } ?: return@onScreen false
+        if (contents.resourceOf(at.href) != contents.resourceOf(here.href)) return@onScreen false
+        val p = at.locations.progression ?: return@onScreen false
+        val file = filePage
+        if (!scroll && file.href == here.href.toString() && file.count > 0) {
+            p >= file.index.toDouble() / file.count - 1e-6 && p < (file.index + 1.0) / file.count - 1e-6
+        } else {
+            kotlin.math.abs(p - (here.locations.progression ?: 0.0)) < 0.03
+        }
+    }
+    nav.goTo = { mark ->
+        mark.locator?.let { runCatching { Locator.fromJSON(JSONObject(it)) }.getOrNull() }
+            ?.let { navigator?.go(it, animated = false) }
+    }
+    nav.turnPage = { delta -> navigator?.let { if (delta > 0) it.goForward(animated = true) else it.goBackward(animated = true) } }
+
+    // Search the whole book; results stream in as Readium works through it.
+    val search = remember(publication) {
+        if (publication.isSearchable) EpubSearch(publication, contents, { navigator }, scope) else null
+    }
+    search?.tint = page.link.toArgb()
+    nav.search = search
+
+    // Chapter starts as marks on the scrubber.
+    LaunchedEffect(spans, anchors) {
+        val s = spans ?: return@LaunchedEffect
+        nav.marks = contents.entries.mapNotNull { entry ->
+            if (entry.level > 0 || entry.resource < 0) return@mapNotNull null
+            val within = if (entry.fragment == null) 0.0 else {
+                anchors?.takeIf { it.resource == entry.resource }?.starts?.firstOrNull { it.first == contents.entries.indexOf(entry) }?.second
+                    ?: return@mapNotNull null
+            }
+            s.total(entry.resource, within)?.toFloat()
+        }.distinct().sorted()
     }
 
     val listen = remember(publication) {
-        ReadAloud(context, publication, { navigator }, nav.listen, scope)
+        ReadAloud(context, publication, book.id, { navigator }, nav.listen, scope)
     }
     listen.colors = page.link.toArgb() to page.background.toArgb()
     LaunchedEffect(listen, settings.listenRate) { listen.setRate(settings.listenRate) }
@@ -566,12 +721,93 @@ private fun anchorScript(ids: JSONArray, scroll: Boolean) = """
 """.trimIndent()
 
 // ---------------------------------------------------------------------------------------------
+// Highlights, bookmarks and search
+// ---------------------------------------------------------------------------------------------
+
+private const val HIGHLIGHTS = "highlights"
+private const val SEARCH = "search"
+
+/**
+ * The first words on the page: where they start (the word under the top-left of the text), a
+ * short exact quote to find them again, and a tidy snippet for the bookmark list.
+ */
+private val TOP_TEXT_SCRIPT = """
+    (function() {
+      var w = window.innerWidth, h = window.innerHeight, hit = null;
+      for (var y = 0.03; y < 0.6 && !hit; y += 0.03) {
+        for (var x = 0.06; x < 0.45 && !hit; x += 0.1) {
+          var c = document.caretRangeFromPoint(w * x, h * y);
+          if (c && c.startContainer.nodeType === 3 && c.startContainer.textContent.slice(c.startOffset).trim()) hit = c;
+        }
+      }
+      if (!hit) return null;
+      var node = hit.startContainer, t = node.textContent, off = hit.startOffset;
+      while (off > 0 && /\S/.test(t[off - 1])) off--;
+      var quote = t.slice(off, off + 60);
+      var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      walker.currentNode = node;
+      var text = t.slice(off), n = walker.nextNode();
+      while (n && text.length < 200) { text += ' ' + n.textContent; n = walker.nextNode(); }
+      return { before: t.slice(Math.max(0, off - 40), off), quote: quote, text: text.replace(/\s+/g, ' ').trim().slice(0, 160) };
+    })()
+""".trimIndent()
+
+/** Full-text search with Readium's search service; results are marked on the page when shown. */
+private class EpubSearch(
+    private val publication: Publication,
+    private val contents: Contents,
+    private val navigator: () -> EpubNavigatorFragment?,
+    private val scope: CoroutineScope,
+) : BookSearch {
+    var tint: Int = 0
+    private val found = mutableListOf<Locator>()
+
+    override suspend fun search(query: String, onHits: (List<SearchHit>) -> Unit) {
+        found.clear()
+        val iterator = publication.search(query) ?: return
+        try {
+            while (true) {
+                val page = iterator.next().getOrNull() ?: break
+                val batch = page.locators.map { locator ->
+                    found += locator
+                    val chapter = contents.titleOf(contents.chapterAt(contents.resourceOf(locator.href))) ?: locator.title
+                    SearchHit(
+                        index = found.lastIndex,
+                        chapter = chapter.orEmpty(),
+                        before = locator.text.before.orEmpty(),
+                        match = locator.text.highlight.orEmpty(),
+                        after = locator.text.after.orEmpty(),
+                    )
+                }
+                if (batch.isNotEmpty()) onHits(batch)
+            }
+        } finally {
+            iterator.close()
+        }
+    }
+
+    override fun show(hit: SearchHit) {
+        val locator = found.getOrNull(hit.index) ?: return
+        val n = navigator() ?: return
+        n.go(locator, animated = false)
+        scope.launch { n.applyDecorations(listOf(Decoration("hit", locator, Marker(tint))), SEARCH) }
+    }
+
+    override fun clear() {
+        found.clear()
+        val n = navigator() ?: return
+        scope.launch { n.applyDecorations(emptyList(), SEARCH) }
+    }
+}
+
+// ---------------------------------------------------------------------------------------------
 // Read aloud: Readium's TTS, with the words inking in as they're spoken
 // ---------------------------------------------------------------------------------------------
 
 private class ReadAloud(
     private val context: Context,
     private val publication: Publication,
+    private val bookId: String,
     private val navigator: () -> EpubNavigatorFragment?,
     private val listen: ListenState,
     private val scope: CoroutineScope,
@@ -611,6 +847,8 @@ private class ReadAloud(
                 return@launch
             }
             this@ReadAloud.tts = tts
+            // Lock screen, notification and headphone controls; keeps playing with the screen off.
+            ListenService.attach(context.applicationContext, tts.asMedia3Player(), bookId)
             launch {
                 tts.playback.collect { playback ->
                     listen.playing = playback.playWhenReady && playback.state is TtsNavigator.State.Ready
@@ -673,6 +911,7 @@ private class ReadAloud(
     override fun stop() {
         session?.cancel()
         session = null
+        ListenService.detach()
         tts?.close()
         tts = null
         listen.active = false

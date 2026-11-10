@@ -195,6 +195,12 @@ private fun PagedList(
         nav.footer = nav.title
         nav.sectionName = { "Page ${it + 1}" }
         nav.jumpTo = { target -> if (target in 0 until count) scope.launch { listState.animateScrollToItem(target) } }
+        nav.atEnd = count > 0 && first >= count - 1
+        nav.pageKey = first
+        nav.place = { Place(null, first, if (count > 1) first / (count - 1f) else 0f, "", "Page ${first + 1}") }
+        nav.onScreen = { mark -> mark.section == first }
+        nav.goTo = { mark -> nav.jumpTo(mark.section) }
+        nav.turnPage = { delta -> nav.jumpTo(first + delta) }
     }
     PageTicks(listState, haptics)
     TrackProgress(listState, count, onProgress)
@@ -268,6 +274,14 @@ fun TextReader(
         nav.footer = ""
         nav.sectionName = { "${it * 100 / text.size}%" }
         nav.jumpTo = { target -> if (target in text.indices) scope.launch { listState.scrollToItem(target) } }
+        nav.atEnd = !listState.canScrollForward
+        nav.pageKey = first
+        nav.place = { Place(null, first, first / text.size.toFloat(), "", text[first].take(160)) }
+        nav.onScreen = { mark -> mark.section == first }
+        nav.goTo = { mark -> nav.jumpTo(mark.section) }
+        nav.turnPage = { delta ->
+            scope.launch { listState.animateScrollBy(delta * listState.layoutInfo.viewportSize.height * 0.85f) }
+        }
     }
     TrackProgress(listState, text.size, onProgress)
 

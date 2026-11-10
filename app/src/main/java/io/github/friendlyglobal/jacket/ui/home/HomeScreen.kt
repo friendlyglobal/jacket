@@ -1,5 +1,9 @@
 package io.github.friendlyglobal.jacket.ui.home
 
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.AnimatedContent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -101,6 +105,9 @@ fun HomeScreen(
     onDelete: (Book) -> Unit,
     onSort: (LibrarySort) -> Unit,
     onOpenSettings: () -> Unit,
+    missing: Set<String> = emptySet(),
+    onShelf: (Boolean) -> Unit = {},
+    onFinished: (Book, Boolean) -> Unit = { _, _ -> },
 ) {
     val haptics = rememberHaptics()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
@@ -110,8 +117,13 @@ fun HomeScreen(
     val grid = rememberLazyGridState()
     val fabExpanded by remember { derivedStateOf { grid.firstVisibleItemIndex == 0 } }
     var query by rememberSaveable { mutableStateOf("") }
-    val hero = state.current
-    val shown = remember(state.books, state.settings.sort, query) { sortAndFilter(state.books, state.settings.sort, query) }
+    val hero = state.current?.takeIf { !it.isFinished } ?: state.books.filter { !it.isFinished }.maxByOrNull { it.lastOpenedAt }
+    val finished = state.settings.showFinished
+    val finishedCount = state.books.count { it.isFinished }
+    // The finished shelf only exists once something is on it.
+    val onFinishedShelf = finished && finishedCount > 0
+    val shelf = remember(state.books, onFinishedShelf) { state.books.filter { it.isFinished == onFinishedShelf } }
+    val shown = remember(shelf, state.settings.sort, query) { sortAndFilter(shelf, state.settings.sort, query) }
 
     Scaffold(
         topBar = {
@@ -152,25 +164,29 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalArrangement = Arrangement.spacedBy(18.dp),
                 ) {
-                    if (hero != null) {
+                    if (hero != null && !onFinishedShelf) {
                         item(key = "hero", span = { GridItemSpan(maxLineSpan) }) {
                             ContinueCard(hero, outerAvailable, onOpen)
                         }
                     }
                     item(key = "header", span = { GridItemSpan(maxLineSpan) }) {
                         LibraryHeader(
-                            count = state.books.size,
+                            count = shelf.size,
                             sort = state.settings.sort,
                             onSort = onSort,
                             query = query,
                             onQuery = { query = it },
                             searchable = state.books.size > 6,
+                            finishedCount = finishedCount,
+                            onFinishedShelf = onFinishedShelf,
+                            onShelf = { haptics.tick(); onShelf(it) },
                         )
                     }
                     if (shown.isEmpty()) {
                         item(key = "nothing", span = { GridItemSpan(maxLineSpan) }) {
                             Text(
-                                "No books match “$query”", style = MaterialTheme.typography.bodyLarge,
+                                if (query.isBlank()) "Everything here is finished. Add another book!" else "No books match “$query”",
+                                style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center,
                                 modifier = Modifier.padding(vertical = 32.dp),
                             )
@@ -179,11 +195,13 @@ fun HomeScreen(
                     items(shown, key = { it.id }) { book ->
                         BookTile(
                             book = book,
-                            onCover = book.id == hero?.id,
+                            onCover = book.id == hero?.id && !onFinishedShelf,
+                            missing = book.id in missing,
                             haptics = haptics,
-                            onOpen = onOpen,
+                            onOpen = { if (it.id in missing) addBooks() else onOpen(it) },
                             onShowOnCover = onShowOnCover,
                             onDelete = onDelete,
+                            onFinished = onFinished,
                             modifier = Modifier.animateItem(),
                         )
                     }
@@ -283,13 +301,33 @@ private fun LibraryHeader(
     query: String,
     onQuery: (String) -> Unit,
     searchable: Boolean,
+    finishedCount: Int,
+    onFinishedShelf: Boolean,
+    onShelf: (Boolean) -> Unit,
 ) {
     Column(Modifier.padding(top = 10.dp)) {
         Row(verticalAlignment = Alignment.Bottom) {
-            Text("Library", style = MaterialTheme.typography.headlineSmallEmphasized, modifier = Modifier.weight(1f))
+            AnimatedContent(
+                targetState = onFinishedShelf,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "shelf-title",
+                modifier = Modifier.weight(1f),
+            ) { done ->
+                Text(if (done) "Finished" else "Library", style = MaterialTheme.typography.headlineSmallEmphasized)
+            }
             Text(
                 if (count == 1) "1 book" else "$count books",
                 style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (finishedCount > 0) {
+            Spacer(Modifier.height(12.dp))
+            ConnectedChoice(
+                options = listOf(false, true),
+                selected = onFinishedShelf,
+                label = { if (it) "Finished · $finishedCount" else "Reading" },
+                onSelect = onShelf,
+                modifier = Modifier.widthIn(max = 420.dp),
             )
         }
         Spacer(Modifier.height(12.dp))
@@ -325,10 +363,12 @@ private fun LibraryHeader(
 private fun BookTile(
     book: Book,
     onCover: Boolean,
+    missing: Boolean,
     haptics: Haptics,
     onOpen: (Book) -> Unit,
     onShowOnCover: (Book) -> Unit,
     onDelete: (Book) -> Unit,
+    onFinished: (Book, Boolean) -> Unit,
     modifier: Modifier,
 ) {
     var menu by remember { mutableStateOf(false) }
@@ -351,7 +391,31 @@ private fun BookTile(
         ) {
             // The hero card already carries this book's shared cover; keys must be unique on screen.
             CoverImage(book, Modifier.fillMaxSize().sharedCover(book.id, enabled = !onCover), maxHeight = 600)
-            if (book.isNew) {
+            if (missing) {
+                // Restored from a backup without the file: tap to add it again.
+                Box(
+                    Modifier.matchParentSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.55f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(8.dp)) {
+                        Icon(JacketIcons.Upload, null, tint = Color.White)
+                        Text(
+                            "Add the file again", style = MaterialTheme.typography.labelMedium, color = Color.White,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+            } else if (book.isFinished) {
+                Box(
+                    Modifier.align(Alignment.TopStart).padding(8.dp).size(28.dp)
+                        .clip(MaterialShapes.Cookie9Sided.toShape())
+                        .background(MaterialTheme.colorScheme.tertiary),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(JacketIcons.Check, "Finished", Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onTertiary)
+                }
+            }
+            if (book.isNew && !missing) {
                 Surface(
                     shape = CircleShape, color = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
@@ -372,7 +436,7 @@ private fun BookTile(
                     Icon(JacketIcons.OuterScreen, "On your cover screen", Modifier.size(15.dp), tint = MaterialTheme.colorScheme.onPrimary)
                 }
             }
-            if (!book.isNew && book.progress > 0f) {
+            if (!book.isNew && !book.isFinished && book.progress > 0f) {
                 Box(
                     Modifier.align(Alignment.BottomStart).fillMaxWidth(book.progress).height(4.dp)
                         .background(MaterialTheme.colorScheme.primary),
@@ -386,6 +450,11 @@ private fun BookTile(
                         onClick = { menu = false; haptics.confirm(); onShowOnCover(book) },
                     )
                 }
+                DropdownMenuItem(
+                    text = { Text(if (book.isFinished) "Mark as not finished" else "Mark as finished") },
+                    leadingIcon = { Icon(JacketIcons.Check, null) },
+                    onClick = { menu = false; haptics.confirm(); onFinished(book, !book.isFinished) },
+                )
                 DropdownMenuItem(
                     text = { Text("Remove") }, leadingIcon = { Icon(JacketIcons.Delete, null) },
                     onClick = { menu = false; confirm = true },

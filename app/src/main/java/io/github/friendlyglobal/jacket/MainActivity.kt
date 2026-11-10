@@ -3,6 +3,7 @@ package io.github.friendlyglobal.jacket
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
@@ -33,12 +34,14 @@ import io.github.friendlyglobal.jacket.data.ImportReport
 import io.github.friendlyglobal.jacket.outer.OuterCoverHost
 import io.github.friendlyglobal.jacket.outer.OuterDisplay
 import io.github.friendlyglobal.jacket.reader.ReaderFragments
+import io.github.friendlyglobal.jacket.reader.ReaderKeys
 import io.github.friendlyglobal.jacket.reader.ReaderScreen
 import io.github.friendlyglobal.jacket.ui.CoverTransition
 import io.github.friendlyglobal.jacket.ui.KeepScreenOn
 import io.github.friendlyglobal.jacket.ui.LocalCoverTransition
 import io.github.friendlyglobal.jacket.ui.home.HomeScreen
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
+import io.github.friendlyglobal.jacket.ui.settings.LicensesScreen
 import io.github.friendlyglobal.jacket.ui.settings.SettingsScreen
 import io.github.friendlyglobal.jacket.ui.theme.JacketTheme
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -66,6 +69,22 @@ class MainActivity : AppCompatActivity() {
         setContent {
             JacketRoot(outer, openRequests, importing, reports, onImport = { importUris(it) })
         }
+    }
+
+    /** Volume keys turn pages while reading, when that's switched on (see [ReaderKeys]). */
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        val delta = when (event.keyCode) {
+            KeyEvent.KEYCODE_VOLUME_DOWN -> 1
+            KeyEvent.KEYCODE_VOLUME_UP -> -1
+            else -> 0
+        }
+        val handler = ReaderKeys.handler
+        if (delta != 0 && handler != null) {
+            // Both the press and the release are ours, so the volume panel never appears.
+            if (event.action == KeyEvent.ACTION_DOWN) handler(delta)
+            return true
+        }
+        return super.dispatchKeyEvent(event)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -128,6 +147,7 @@ class MainActivity : AppCompatActivity() {
 
 private const val HOME = "home"
 private const val SETTINGS = "settings"
+private const val LICENSES = "licenses"
 private const val READ = "read:"
 
 @Composable
@@ -141,6 +161,7 @@ private fun JacketRoot(
     val library = LocalContext.current.library
     val haptics = rememberHaptics()
     val state by library.state.collectAsStateWithLifecycle()
+    val missing by library.missing.collectAsStateWithLifecycle()
     val busy by importing.collectAsStateWithLifecycle()
     val outerAvailable by outer.available.collectAsStateWithLifecycle()
     val request by openRequests.collectAsStateWithLifecycle()
@@ -195,10 +216,10 @@ private fun JacketRoot(
                     transitionSpec = {
                         val spatial = tween<androidx.compose.ui.unit.IntOffset>(380)
                         when {
-                            targetState == SETTINGS ->
+                            targetState == LICENSES || (targetState == SETTINGS && initialState != LICENSES) ->
                                 (slideInHorizontally(spatial) { it / 3 } + fadeIn(tween(240))) togetherWith
                                     (slideOutHorizontally(spatial) { -it / 10 } + fadeOut(tween(160)))
-                            initialState == SETTINGS ->
+                            initialState == LICENSES || initialState == SETTINGS ->
                                 (slideInHorizontally(spatial) { -it / 10 } + fadeIn(tween(240))) togetherWith
                                     (slideOutHorizontally(spatial) { it / 3 } + fadeOut(tween(160)))
                             // Into a book, the flying cover carries the motion; out of one, a crossfade.
@@ -215,12 +236,15 @@ private fun JacketRoot(
                                 outerAvailable = outerAvailable,
                                 onSettings = library::updateSettings,
                                 onBack = { destination = HOME },
+                                onLicenses = { destination = LICENSES },
                             )
+                            target == LICENSES -> LicensesScreen(onBack = { destination = SETTINGS })
                             book != null -> ReaderScreen(
                                 book = book,
                                 settings = state.settings,
                                 outer = outer,
                                 onSettings = library::updateSettings,
+                                onOpen = { open(it) },
                                 onBack = { destination = HOME },
                             )
                             else -> HomeScreen(
@@ -234,6 +258,9 @@ private fun JacketRoot(
                                 onDelete = { library.delete(it.id) },
                                 onSort = { sort -> library.updateSettings { it.copy(sort = sort) } },
                                 onOpenSettings = { destination = SETTINGS },
+                                missing = missing,
+                                onShelf = { finished -> library.updateSettings { it.copy(showFinished = finished) } },
+                                onFinished = { book, done -> library.setFinished(book.id, done) },
                             )
                         }
                     }

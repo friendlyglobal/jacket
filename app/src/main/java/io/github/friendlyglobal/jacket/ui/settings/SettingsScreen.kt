@@ -53,6 +53,15 @@ import io.github.friendlyglobal.jacket.ui.ConnectedChoice
 import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import kotlinx.coroutines.CancellationException
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import io.github.friendlyglobal.jacket.data.Backup
+import io.github.friendlyglobal.jacket.library
+import kotlinx.coroutines.launch
 
 private const val SOURCE_URL = "https://github.com/friendlyglobal/jacket"
 
@@ -62,8 +71,28 @@ fun SettingsScreen(
     outerAvailable: Boolean,
     onSettings: ((Settings) -> Settings) -> Unit,
     onBack: () -> Unit,
+    onLicenses: () -> Unit = {},
 ) {
     val settings = state.settings
+    val library = LocalContext.current.library
+    val scope = rememberCoroutineScope()
+    var message by remember { mutableStateOf<String?>(null) }
+    val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(Backup.MIME)) { uri ->
+        if (uri != null) scope.launch {
+            message = runCatching { library.exportBackup(uri) }
+                .fold({ "Backup saved." }, { "Couldn't save the backup: ${it.message}" })
+        }
+    }
+    val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) scope.launch {
+            message = runCatching { library.importBackup(uri) }.fold(
+                { missing ->
+                    if (missing == 0) "Backup restored." else "Backup restored. Add the files for $missing book${if (missing == 1) "" else "s"} to reconnect them."
+                },
+                { it.message ?: "Couldn't read that file." },
+            )
+        }
+    }
     val haptics = rememberHaptics()
     val context = LocalContext.current
     val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -176,6 +205,27 @@ fun SettingsScreen(
                 }
             }
 
+            item { GroupTitle("Backup", column) }
+            item {
+                Group(column) {
+                    SegmentedListItem(
+                        onClick = {
+                            haptics.tick()
+                            exporter.launch("Jacket backup ${java.time.LocalDate.now()}.json")
+                        },
+                        shapes = ListItemDefaults.segmentedShapes(0, 2),
+                        leadingContent = { Icon(JacketIcons.Download, null) },
+                        supportingContent = { Text("Your books list, places, bookmarks, highlights and settings. Not the book files.") },
+                    ) { Text("Save a backup") }
+                    SegmentedListItem(
+                        onClick = { haptics.tick(); importer.launch(arrayOf(Backup.MIME, "application/octet-stream", "text/plain")) },
+                        shapes = ListItemDefaults.segmentedShapes(1, 2),
+                        leadingContent = { Icon(JacketIcons.Upload, null) },
+                        supportingContent = { Text("Then add the book files again: each finds its place and notes.") },
+                    ) { Text("Restore from a backup") }
+                }
+            }
+
             item { GroupTitle("About", column) }
             item {
                 Group(column) {
@@ -197,21 +247,29 @@ fun SettingsScreen(
                         supportingContent = { Text("Open source on GitHub") },
                     ) { Text("Source code") }
                     SegmentedListItem(
+                        onClick = { haptics.tick(); onLicenses() },
                         shapes = ListItemDefaults.segmentedShapes(2, 3),
-                        leadingContent = { Icon(JacketIcons.Book, null) },
-                        supportingContent = { Text("App: Apache 2.0. Readium toolkit: BSD 3-Clause. Literata, Atkinson Hyperlegible and OpenDyslexic: SIL Open Font License.") },
-                    ) { Text("Licenses") }
+                        leadingContent = { Icon(JacketIcons.Gavel, null) },
+                        supportingContent = { Text("Jacket is Apache 2.0, built on Readium, Jetpack and open fonts") },
+                    ) { Text("Open-source licenses") }
                 }
             }
         }
+    }
+    message?.let { text ->
+        AlertDialog(
+            onDismissRequest = { message = null },
+            text = { Text(text) },
+            confirmButton = { TextButton(onClick = { message = null }) { Text("OK") } },
+        )
     }
 }
 
 @Composable
 private fun ProfileCard(state: LibraryState, modifier: Modifier) {
     val books = state.books
-    val finished = books.count { it.progress >= 0.99f }
-    val reading = books.count { !it.isNew && it.progress < 0.99f }
+    val finished = books.count { it.isFinished }
+    val reading = books.count { !it.isNew && !it.isFinished }
     Surface(
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.primaryContainer,

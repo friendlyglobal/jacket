@@ -1,4 +1,24 @@
-# The EPUB reader talks to its WebView through a JavaScript interface.
+# Readium's EPUB pages talk to the app through JavaScript interfaces, called by name from JS.
 -keepclassmembers class * {
     @android.webkit.JavascriptInterface <methods>;
 }
+
+# Readium (de)serializes publication metadata and preferences with kotlinx.serialization and
+# reflection on its own model classes; keep them intact.
+-keep class org.readium.** { *; }
+-dontwarn org.readium.**
+
+# Decoration styles are Parcelable and looked up by class name in Readium's HTML templates.
+-keepnames class io.github.friendlyglobal.jacket.reader.UnreadVeil
+-keepnames class io.github.friendlyglobal.jacket.reader.Marker
+
+# Optional dependencies referenced by libraries but not shipped.
+-dontwarn org.slf4j.**
+-dontwarn org.joda.**
+-dontwarn javax.annotation.**
+-dontwarn com.google.errorprone.annotations.**
+
+# WorkManager (used by the cover widget) keeps its jobs in a Room database whose generated
+# implementation is created by reflection.
+-keep class * extends androidx.room.RoomDatabase { <init>(); }
+-keep class androidx.work.impl.WorkDatabase_Impl { *; }

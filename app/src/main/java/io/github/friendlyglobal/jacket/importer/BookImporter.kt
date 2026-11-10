@@ -44,6 +44,18 @@ object BookImporter {
         }
     }.getOrNull() ?: -1L
 
+    /** Copies [uri] to [dest] (via a temporary file, so a failed copy leaves nothing behind). */
+    fun copyInto(context: Context, uri: Uri, dest: File) {
+        val partial = File(dest.parentFile, dest.name + ".part")
+        try {
+            val input = context.contentResolver.openInputStream(uri) ?: error("Can't open $uri")
+            input.use { i -> partial.outputStream().use { i.copyTo(it) } }
+            check(partial.renameTo(dest)) { "Couldn't store ${dest.name}" }
+        } finally {
+            partial.delete()
+        }
+    }
+
     /** Copies the file into app storage, reads its metadata and cover, and returns the new [Book]. */
     fun import(context: Context, uri: Uri, name: String, library: Library): Book {
         val id = UUID.randomUUID().toString()

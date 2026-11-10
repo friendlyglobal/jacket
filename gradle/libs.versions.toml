@@ -20,6 +20,10 @@ readium = "3.4.0"
 fragmentCompose = "1.9.1"
 appcompat = "1.8.0"
 desugarJdkLibs = "2.1.5"
+# Same Media3 as Readium's TTS uses: lock-screen and headphone controls for read-aloud.
+media3 = "1.11.0"
+# Unit tests run on the JVM, where Android's org.json is only a stub.
+orgJson = "20240303"
 
 [libraries]
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -45,6 +49,8 @@ readium-tts = { group = "org.readium.kotlin-toolkit", name = "readium-navigator-
 fragment-compose = { group = "androidx.fragment", name = "fragment-compose", version.ref = "fragmentCompose" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
+media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
+org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
 coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 
 [plugins]

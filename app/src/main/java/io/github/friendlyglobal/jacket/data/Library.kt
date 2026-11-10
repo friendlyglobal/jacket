@@ -54,10 +54,18 @@ class Library(private val context: Context) {
     private val _state = MutableStateFlow(readState())
     val state: StateFlow<LibraryState> = _state.asStateFlow()
 
+    /** Books whose file isn't on this device (e.g. after restoring a backup): add the file again. */
+    private val _missing = MutableStateFlow<Set<String>>(emptySet())
+    val missing: StateFlow<Set<String>> = _missing.asStateFlow()
+
     init {
         // Jacket 0.2 unpacked EPUBs to disk; Readium reads the files directly, so free that space.
         scope.launch(disk) { File(context.filesDir, "unpacked").deleteRecursively() }
+        scope.launch(disk) { _missing.value = scanMissing(_state.value) }
     }
+
+    private fun scanMissing(state: LibraryState): Set<String> =
+        state.books.filterNot { fileOf(it).exists() }.mapTo(HashSet()) { it.id }
 
     fun fileOf(book: Book) = File(booksDir, book.fileName)
     fun coverOf(book: Book): File? = coverPathOf(book)?.takeIf { it.exists() }
@@ -76,7 +84,13 @@ class Library(private val context: Context) {
             val size = BookImporter.size(context, uri)
             val existing = _state.value.books.firstOrNull { it.sourceName == name && it.sizeBytes == size }
             if (existing != null) {
-                imported += existing
+                // Restored from a backup without its file: adding the same file again brings it back,
+                // with its place, bookmarks and highlights.
+                val relinked = fileOf(existing).exists() ||
+                    runCatching { BookImporter.copyInto(context, uri, fileOf(existing)) }
+                        .onFailure { e -> Log.w(TAG, "Re-linking $name failed", e) }
+                        .isSuccess
+                if (relinked) imported += existing else failed += name
                 continue
             }
             runCatching { BookImporter.import(context, uri, name, this@Library) }
@@ -89,7 +103,10 @@ class Library(private val context: Context) {
                     failed += name
                 }
         }
-        if (imported.isNotEmpty()) changed(saveNow = true)
+        if (imported.isNotEmpty()) {
+            _missing.value = scanMissing(_state.value)
+            changed(saveNow = true)
+        }
         ImportReport(imported, failed)
     }
 
@@ -135,6 +152,51 @@ class Library(private val context: Context) {
         changed()
     }
 
+    /** Marks a book finished (or back to reading). */
+    fun setFinished(id: String, finished: Boolean) {
+        val now = System.currentTimeMillis()
+        _state.update { s ->
+            s.copy(books = s.books.map { if (it.id == id) it.copy(finishedAt = if (finished) now else 0L) else it })
+        }
+        changed()
+    }
+
+    fun addAnnotation(annotation: Annotation) {
+        _state.update { it.copy(annotations = it.annotations + annotation) }
+        changed()
+    }
+
+    fun updateAnnotation(id: String, transform: (Annotation) -> Annotation) {
+        _state.update { s -> s.copy(annotations = s.annotations.map { if (it.id == id) transform(it) else it }) }
+        changed()
+    }
+
+    fun deleteAnnotation(id: String) {
+        _state.update { s -> s.copy(annotations = s.annotations.filterNot { it.id == id }) }
+        changed()
+    }
+
+    /** Writes a backup of the library (not the book files) to [uri]. */
+    suspend fun exportBackup(uri: Uri) = withContext(Dispatchers.IO) {
+        val text = Backup.write(_state.value)
+        val out = context.contentResolver.openOutputStream(uri, "wt") ?: error("Can't write the backup file")
+        out.use { it.write(text.toByteArray(Charsets.UTF_8)) }
+    }
+
+    /**
+     * Restores a backup from [uri], merged into what's here. Returns how many books in it still
+     * need their file added again.
+     */
+    suspend fun importBackup(uri: Uri): Int = withContext(Dispatchers.IO) {
+        val input = context.contentResolver.openInputStream(uri) ?: error("Can't open the backup file")
+        val backup = Backup.read(input.use { String(it.readBytes(), Charsets.UTF_8) })
+        _state.update { Backup.merge(it, backup) }
+        val missing = scanMissing(_state.value)
+        _missing.value = missing
+        changed(saveNow = true)
+        missing.size
+    }
+
     fun updateSettings(transform: (Settings) -> Settings) {
         _state.update { it.copy(settings = transform(it.settings)) }
         changed()
@@ -143,7 +205,11 @@ class Library(private val context: Context) {
     fun delete(id: String) {
         val book = _state.value.find(id) ?: return
         _state.update { s ->
-            s.copy(books = s.books.filterNot { it.id == id }, currentId = s.currentId.takeIf { it != id })
+            s.copy(
+                books = s.books.filterNot { it.id == id },
+                currentId = s.currentId.takeIf { it != id },
+                annotations = s.annotations.filterNot { it.bookId == id },
+            )
         }
         changed(saveNow = true)
         scope.launch(disk) {
