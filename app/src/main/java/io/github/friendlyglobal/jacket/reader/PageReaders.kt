@@ -1,5 +1,6 @@
 package io.github.friendlyglobal.jacket.reader
 
+import android.widget.Toast
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
@@ -276,8 +277,11 @@ fun TextReader(
     var wordStart by remember { mutableIntStateOf(0) }
     var wordEnd by remember { mutableIntStateOf(0) }
     val token = remember { intArrayOf(0) }
+    val context = LocalContext.current
     val controller = remember(book.id, speaker, text) {
         object : ListenController {
+            override val unit = "paragraph"
+
             fun say(index: Int, from: Int, queue: Boolean) {
                 if (index !in text.indices) {
                     if (!queue) stop()
@@ -306,6 +310,11 @@ fun TextReader(
             }
 
             override fun start() {
+                if (speaker.unavailable) {
+                    haptics.reject()
+                    Toast.makeText(context, "This phone has no text-to-speech voice installed.", Toast.LENGTH_LONG).show()
+                    return
+                }
                 speaker.setLanguage(null)
                 play(listState.firstVisibleItemIndex, 0)
             }
@@ -328,7 +337,9 @@ fun TextReader(
                 play((spokenParagraph.coerceAtLeast(listState.firstVisibleItemIndex) + delta).coerceAtLeast(0), 0)
             }
 
-            override fun restart() {
+            override fun setRate(rate: Float) {
+                speaker.setRate(rate)
+                // Re-speak from the current word at the new pace.
                 if (listen.playing) resume()
             }
 

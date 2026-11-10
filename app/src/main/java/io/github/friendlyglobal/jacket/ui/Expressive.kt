@@ -200,7 +200,7 @@ fun PageColor.swatch(book: Color): Color = when (this) {
     PageColor.BLACK -> Color.Black
 }
 
-/** Compose font families for the bundled reading fonts (files in assets/fonts). */
+/** Compose font families for the bundled reading fonts (files in assets). */
 @Composable
 fun rememberReadingFontFamily(font: ReadingFont): FontFamily {
     val assets = LocalContext.current.assets
@@ -216,37 +216,12 @@ fun rememberReadingFontFamily(font: ReadingFont): FontFamily {
                 Font("fonts/AtkinsonHyperlegible-Bold.ttf", assets, FontWeight.Bold),
                 Font("fonts/AtkinsonHyperlegible-Italic.ttf", assets, FontWeight.Normal, FontStyle.Italic),
             )
+            // Bundled with Readium, which serves it to EPUB pages too.
+            ReadingFont.OPEN_DYSLEXIC -> FontFamily(Font("readium/fonts/OpenDyslexic-Regular.otf", assets))
             ReadingFont.SERIF, ReadingFont.ORIGINAL -> FontFamily.Serif
             ReadingFont.SANS -> FontFamily.SansSerif
         }
     }
-}
-
-/** The same fonts for EPUB pages, served to the WebView from the app's assets. */
-object ReaderFontCss {
-    private const val BASE = "https://appassets.androidplatform.net/assets/fonts/"
-
-    fun of(font: ReadingFont): String = when (font) {
-        ReadingFont.LITERATA ->
-            face("Jacket Literata", "Literata.ttf", "normal", "200 900") +
-                face("Jacket Literata", "Literata-Italic.ttf", "italic", "200 900") +
-                family("'Jacket Literata', serif")
-        ReadingFont.HYPERLEGIBLE ->
-            face("Jacket Hyperlegible", "AtkinsonHyperlegible-Regular.ttf", "normal", "400") +
-                face("Jacket Hyperlegible", "AtkinsonHyperlegible-Bold.ttf", "normal", "700") +
-                face("Jacket Hyperlegible", "AtkinsonHyperlegible-Italic.ttf", "italic", "400") +
-                face("Jacket Hyperlegible", "AtkinsonHyperlegible-BoldItalic.ttf", "italic", "700") +
-                family("'Jacket Hyperlegible', sans-serif")
-        ReadingFont.SERIF -> family("serif")
-        ReadingFont.SANS -> family("sans-serif")
-        ReadingFont.ORIGINAL -> ""
-    }
-
-    private fun face(name: String, file: String, style: String, weight: String) =
-        "@font-face{font-family:'$name';src:url('$BASE$file') format('truetype');font-style:$style;font-weight:$weight;}"
-
-    private fun family(stack: String) =
-        "body,body *:not(code):not(pre):not(kbd):not(samp){font-family:$stack !important;}"
 }
 
 // ---------------------------------------------------------------------------------------------

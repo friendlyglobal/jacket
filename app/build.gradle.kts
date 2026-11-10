@@ -11,8 +11,8 @@ android {
         applicationId = "io.github.friendlyglobal.jacket"
         minSdk = 26
         targetSdk = 37
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
     }
 
     buildTypes {
@@ -25,6 +25,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // Readium needs newer Java library APIs than minSdk 26 ships; desugaring backports them.
+        isCoreLibraryDesugaringEnabled = true
     }
 
     buildFeatures {
@@ -38,6 +40,8 @@ kotlin {
             "androidx.compose.material3.ExperimentalMaterial3Api",
             "androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
             "androidx.window.core.ExperimentalWindowApi",
+            "org.readium.r2.shared.ExperimentalReadiumApi",
+            "androidx.compose.foundation.layout.ExperimentalLayoutApi",
         )
     }
 }
@@ -60,6 +64,13 @@ dependencies {
     implementation(libs.webkit)
     implementation(libs.graphics.shapes)
     implementation(libs.coroutines.android)
+    implementation(libs.appcompat)
+    implementation(libs.fragment.compose)
+    implementation(libs.readium.shared)
+    implementation(libs.readium.streamer)
+    implementation(libs.readium.navigator)
+    implementation(libs.readium.tts)
 
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     testImplementation(libs.junit)
 }

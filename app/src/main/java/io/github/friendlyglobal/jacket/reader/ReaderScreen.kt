@@ -1,6 +1,5 @@
 package io.github.friendlyglobal.jacket.reader
 
-import android.widget.Toast
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -25,7 +24,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsIgnoringVisibility
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -93,12 +94,12 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
-/** A table-of-contents line, resolved to a section (chapter file or page) of the open book. */
-data class TocItem(val title: String, val level: Int, val section: Int, val fragment: String?)
+/** A table-of-contents line: its title, nesting depth, and its index in [ReaderNav.toc]. */
+data class TocItem(val title: String, val level: Int, val index: Int)
 
 /**
  * What the reader chrome shows and can ask for. Each format view fills it in: sections are
- * chapter files for EPUB, pages for PDF and comics, paragraphs for text.
+ * positions (about a page each) for EPUB, pages for PDF and comics, paragraphs for text.
  */
 @Stable
 class ReaderNav {
@@ -111,8 +112,13 @@ class ReaderNav {
     var toc by mutableStateOf<List<TocItem>>(emptyList())
     var tocIndex by mutableIntStateOf(-1)
     var sectionName: (Int) -> String = { "" }
+    /** Sections in the same group (e.g. chapter) share a value: the scrubber ticks between groups. */
+    var sectionGroup: (Int) -> Int = { it }
     var jumpTo: (Int) -> Unit = {}
     var openToc: (TocItem) -> Unit = {}
+    /** Previous/next buttons: by chapter for EPUB, by page or paragraph otherwise. */
+    var step: (Int) -> Unit = { jumpTo(section + it) }
+    var canStep: (Int) -> Boolean = { section + it in 0 until sectionCount }
 
     /** Audiobook mode; [listenController] is null for formats that can't be read aloud. */
     val listen = ListenState()
@@ -134,10 +140,8 @@ fun ReaderScreen(
     val context = LocalContext.current
     val library = context.library
     val haptics = rememberHaptics()
-    // Only books that can be read aloud get a speech engine.
-    val speaker = remember(book.id) {
-        if (book.format == BookFormat.EPUB || book.format == BookFormat.TXT) Speaker(context) else null
-    }
+    // Plain text is read aloud with Jacket's own speech engine; EPUB uses Readium's.
+    val speaker = remember(book.id) { if (book.format == BookFormat.TXT) Speaker(context) else null }
     DisposableEffect(speaker) { onDispose { speaker?.shutdown() } }
     LaunchedEffect(speaker, settings.listenRate) { speaker?.setRate(settings.listenRate) }
     val outerAvailable by outer.available.collectAsStateWithLifecycle()
@@ -200,7 +204,7 @@ fun ReaderScreen(
             .background(page.background),
     ) {
         when (book.format) {
-            BookFormat.EPUB -> EpubReader(book, settings, page, nav, haptics, requireNotNull(speaker), onProgress, toggleChrome)
+            BookFormat.EPUB -> EpubReader(book, settings, page, nav, haptics, toggleChrome)
             BookFormat.PDF -> PdfReader(book, page, nav, haptics, onProgress, toggleChrome)
             BookFormat.CBZ -> ComicReader(book, page, nav, haptics, onProgress, toggleChrome)
             BookFormat.TXT -> TextReader(book, settings, page, nav, haptics, requireNotNull(speaker), onProgress, toggleChrome)
@@ -239,18 +243,12 @@ fun ReaderScreen(
                 rate = settings.listenRate,
                 onRate = { rate ->
                     onSettings { it.copy(listenRate = rate) }
-                    speaker?.setRate(rate)
-                    nav.listenController?.restart()
+                    nav.listenController?.setRate(rate)
                 },
                 onListen = {
-                    if (speaker == null || speaker.unavailable) {
-                        haptics.reject()
-                        Toast.makeText(context, "This phone has no text-to-speech voice installed.", Toast.LENGTH_LONG).show()
-                    } else {
-                        haptics.confirm()
-                        chrome = false
-                        nav.listenController?.start()
-                    }
+                    haptics.confirm()
+                    chrome = false
+                    nav.listenController?.start()
                 },
                 onContents = { sheet = Sheet.CONTENTS },
                 onText = { sheet = Sheet.TEXT },
@@ -265,6 +263,8 @@ fun ReaderScreen(
             ContentsList(nav, haptics) { item ->
                 nav.openToc(item)
                 sheet = Sheet.NONE
+                // You picked where to go: get out of the way and let them read.
+                chrome = false
             }
         }
         Sheet.TEXT -> ModalBottomSheet(onDismissRequest = { sheet = Sheet.NONE }) {
@@ -364,21 +364,26 @@ private fun ReaderBottomBar(
                     if (controller != null) {
                         IconButton(onClick = onListen) { Icon(JacketIcons.Headphones, "Listen: read aloud") }
                     }
+                    val unit = when {
+                        nav.toc.isNotEmpty() -> "chapter"
+                        book.format == BookFormat.TXT -> "paragraph"
+                        else -> "page"
+                    }
                     IconButton(
-                        onClick = { haptics.tick(); nav.jumpTo(nav.section - 1) },
-                        enabled = nav.section > 0,
-                    ) { Icon(JacketIcons.Previous, "Previous section") }
+                        onClick = { haptics.tick(); nav.step(-1) },
+                        enabled = nav.canStep(-1),
+                    ) { Icon(JacketIcons.Previous, "Previous $unit") }
                     IconButton(
-                        onClick = { haptics.tick(); nav.jumpTo(nav.section + 1) },
-                        enabled = nav.section < nav.sectionCount - 1,
-                    ) { Icon(JacketIcons.Next, "Next section") }
+                        onClick = { haptics.tick(); nav.step(1) },
+                        enabled = nav.canStep(1),
+                    ) { Icon(JacketIcons.Next, "Next $unit") }
                 }
             }
         }
     }
 }
 
-/** Drag through the book by section, with a tick per section and a preview of where you'll land. */
+/** Drag through the book, with a tick per chapter and a preview of where you'll land. */
 @Composable
 private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics) {
     var preview by remember { mutableStateOf<Float?>(null) }
@@ -403,14 +408,15 @@ private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics) {
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    "${book.percent}%", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary,
+                    if (preview != null) "${target * 100 / last}%" else "${book.percent}%",
+                    style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
                 )
             }
             Slider(
                 state = slider,
                 onValueChange = { value ->
-                    if (value.roundToInt() != target) haptics.frequentTick()
+                    if (nav.sectionGroup(value.roundToInt()) != nav.sectionGroup(target)) haptics.frequentTick()
                     preview = value
                     slider.value = value
                 },
@@ -427,7 +433,10 @@ private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics) {
 @Composable
 private fun ReaderFooter(nav: ReaderNav, book: Book, page: PageColors) {
     Row(
-        Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.displayCutout).padding(horizontal = 24.dp, vertical = 14.dp),
+        Modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.navigationBarsIgnoringVisibility.union(WindowInsets.displayCutout))
+            .padding(horizontal = 24.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(

@@ -31,14 +31,16 @@ data class Book(
     val sourceName: String,
     val sizeBytes: Long,
     val addedAt: Long,
-    /** Chapter index for EPUB, page index for PDF/CBZ, paragraph index for TXT. */
+    /** Readium position for EPUB, page index for PDF/CBZ, paragraph index for TXT. */
     val position: Int = 0,
     /** Scroll fraction within the current chapter (EPUB only). */
     val positionOffset: Float = 0f,
-    /** Chapters (EPUB) or pages (PDF/CBZ); 0 when unknown until first opened. */
+    /** Positions (EPUB) or pages (PDF/CBZ); 0 when unknown until first opened. */
     val sectionCount: Int = 0,
     val progress: Float = 0f,
     val lastOpenedAt: Long = 0L,
+    /** Exact reading location as a Readium locator (JSON), for EPUB. */
+    val locator: String? = null,
 ) {
     val percent: Int get() = (progress * 100).toInt().coerceIn(0, 100)
 
@@ -57,6 +59,7 @@ data class Book(
 enum class ReadingFont(val label: String, val description: String) {
     LITERATA("Literata", "Google's typeface for long reading"),
     HYPERLEGIBLE("Atkinson Hyperlegible", "Distinct letterforms for low vision"),
+    OPEN_DYSLEXIC("OpenDyslexic", "Weighted letters that resist flipping"),
     SERIF("System serif", "Your phone's serif font"),
     SANS("System sans", "Your phone's interface font"),
     ORIGINAL("Book's own", "Whatever the publisher chose"),
@@ -162,6 +165,7 @@ internal object LibraryJson {
         put("position", position); put("positionOffset", positionOffset.toDouble())
         put("sectionCount", sectionCount); put("progress", progress.toDouble())
         put("lastOpenedAt", lastOpenedAt)
+        put("locator", locator ?: JSONObject.NULL)
     }
 
     private fun JSONObject.toBook() = Book(
@@ -180,5 +184,6 @@ internal object LibraryJson {
         sectionCount = optInt("sectionCount"),
         progress = optDouble("progress", 0.0).toFloat(),
         lastOpenedAt = optLong("lastOpenedAt"),
+        locator = if (isNull("locator")) null else optString("locator").takeIf { it.isNotEmpty() },
     )
 }

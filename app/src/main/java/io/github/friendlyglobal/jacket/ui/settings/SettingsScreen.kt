@@ -199,7 +199,7 @@ fun SettingsScreen(
                     SegmentedListItem(
                         shapes = ListItemDefaults.segmentedShapes(2, 3),
                         leadingContent = { Icon(JacketIcons.Book, null) },
-                        supportingContent = { Text("App: Apache 2.0. Literata and Atkinson Hyperlegible: SIL Open Font License.") },
+                        supportingContent = { Text("App: Apache 2.0. Readium toolkit: BSD 3-Clause. Literata, Atkinson Hyperlegible and OpenDyslexic: SIL Open Font License.") },
                     ) { Text("Licenses") }
                 }
             }

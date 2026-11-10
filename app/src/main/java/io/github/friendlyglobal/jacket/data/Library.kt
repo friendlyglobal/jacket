@@ -50,17 +50,20 @@ class Library(private val context: Context) {
 
     val booksDir = File(context.filesDir, "books").apply { mkdirs() }
     val coversDir = File(context.filesDir, "covers").apply { mkdirs() }
-    private val unpackedRoot = File(context.filesDir, "unpacked")
 
     private val _state = MutableStateFlow(readState())
     val state: StateFlow<LibraryState> = _state.asStateFlow()
+
+    init {
+        // Jacket 0.2 unpacked EPUBs to disk; Readium reads the files directly, so free that space.
+        scope.launch(disk) { File(context.filesDir, "unpacked").deleteRecursively() }
+    }
 
     fun fileOf(book: Book) = File(booksDir, book.fileName)
     fun coverOf(book: Book): File? = coverPathOf(book)?.takeIf { it.exists() }
 
     /** Where the cover lives, without touching the disk (safe to call during composition). */
     fun coverPathOf(book: Book): File? = book.coverFile?.let { File(coversDir, it) }
-    fun unpackedDirOf(book: Book) = File(unpackedRoot, book.id)
 
     /** Serialized, so a picker import and a share arriving together can't both add the same file. */
     suspend fun import(uris: List<Uri>): ImportReport = importLock.withLock { importNow(uris) }
@@ -116,6 +119,22 @@ class Library(private val context: Context) {
         changed()
     }
 
+    /** Saves an EPUB reading location: Readium [locator] JSON, overall [progress] and its position of [positions]. */
+    fun updateLocator(id: String, locator: String, progress: Float, position: Int, positions: Int) {
+        if (!progress.isFinite()) return
+        _state.update { s ->
+            s.copy(books = s.books.map {
+                if (it.id == id) it.copy(
+                    locator = locator,
+                    progress = progress.coerceIn(0f, 1f),
+                    position = position.coerceAtLeast(0),
+                    sectionCount = positions.coerceAtLeast(0),
+                ) else it
+            })
+        }
+        changed()
+    }
+
     fun updateSettings(transform: (Settings) -> Settings) {
         _state.update { it.copy(settings = transform(it.settings)) }
         changed()
@@ -130,7 +149,6 @@ class Library(private val context: Context) {
         scope.launch(disk) {
             fileOf(book).delete()
             coverOf(book)?.delete()
-            unpackedDirOf(book).deleteRecursively()
         }
     }
 

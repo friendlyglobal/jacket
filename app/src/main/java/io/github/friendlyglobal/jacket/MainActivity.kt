@@ -3,7 +3,6 @@ package io.github.friendlyglobal.jacket
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
@@ -25,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,6 +32,7 @@ import androidx.lifecycle.lifecycleScope
 import io.github.friendlyglobal.jacket.data.ImportReport
 import io.github.friendlyglobal.jacket.outer.OuterCoverHost
 import io.github.friendlyglobal.jacket.outer.OuterDisplay
+import io.github.friendlyglobal.jacket.reader.ReaderFragments
 import io.github.friendlyglobal.jacket.reader.ReaderScreen
 import io.github.friendlyglobal.jacket.ui.CoverTransition
 import io.github.friendlyglobal.jacket.ui.KeepScreenOn
@@ -47,7 +48,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 
-class MainActivity : ComponentActivity() {
+// AppCompat because Readium's reader is a Fragment that needs an AppCompat activity and theme.
+class MainActivity : AppCompatActivity() {
     private val openRequests = MutableStateFlow<String?>(null)
     private val importing = MutableStateFlow(false)
     private val reports = MutableSharedFlow<ImportReport>(extraBufferCapacity = 8)
@@ -55,7 +57,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
+        // Must be in place before super.onCreate, which restores fragments.
+        supportFragmentManager.fragmentFactory = ReaderFragments
         super.onCreate(savedInstanceState)
+        ReaderFragments.removeRestoredReaders(supportFragmentManager)
         outer = OuterDisplay(this) { OuterCoverHost() }
         if (savedInstanceState == null) handle(intent)
         setContent {

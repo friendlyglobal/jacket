@@ -35,16 +35,18 @@ class ListenState {
 
 /** Implemented by each format that can be read aloud (EPUB and plain text). */
 interface ListenController {
-    /** Starts reading from the top of what's on screen. */
+    /** What a skip moves by, for labels: "sentence" or "paragraph". */
+    val unit: String
+
+    /** Starts reading from the top of what's on screen; explains itself if it can't. */
     fun start()
 
     fun toggle()
 
-    /** Jumps by paragraphs: -1 back, +1 forward. */
+    /** Jumps by [unit]: -1 back, +1 forward. */
     fun skip(delta: Int)
 
-    /** Re-speaks from the current word, e.g. after a speed change. */
-    fun restart()
+    fun setRate(rate: Float)
 
     fun stop()
 }
@@ -85,8 +87,8 @@ fun ListenBar(
             }
         },
     ) {
-        IconButton(onClick = { haptics.tick(); controller.skip(-1) }) { Icon(JacketIcons.SkipBack, "Previous paragraph") }
-        IconButton(onClick = { haptics.tick(); controller.skip(1) }) { Icon(JacketIcons.SkipForward, "Next paragraph") }
+        IconButton(onClick = { haptics.tick(); controller.skip(-1) }) { Icon(JacketIcons.SkipBack, "Previous ${controller.unit}") }
+        IconButton(onClick = { haptics.tick(); controller.skip(1) }) { Icon(JacketIcons.SkipForward, "Next ${controller.unit}") }
         TextButton(
             onClick = {
                 haptics.tick()
