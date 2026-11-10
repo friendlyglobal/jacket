@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -91,6 +92,7 @@ import io.github.friendlyglobal.jacket.data.LibraryState
 import io.github.friendlyglobal.jacket.importer.BookImporter
 import io.github.friendlyglobal.jacket.ui.ConnectedChoice
 import io.github.friendlyglobal.jacket.ui.CoverImage
+import io.github.friendlyglobal.jacket.ui.CoverSpot
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.pressScale
@@ -104,7 +106,7 @@ fun HomeScreen(
     importing: Boolean,
     snackbar: SnackbarHostState,
     onImport: (List<Uri>) -> Unit,
-    onOpen: (Book) -> Unit,
+    onOpen: (Book, CoverSpot) -> Unit,
     onShowOnCover: (Book) -> Unit,
     onDelete: (Book) -> Unit,
     onSort: (LibrarySort) -> Unit,
@@ -112,22 +114,18 @@ fun HomeScreen(
     missing: Set<String> = emptySet(),
     onShelf: (Boolean) -> Unit = {},
     onFinished: (Book, Boolean) -> Unit = { _, _ -> },
+    grid: LazyGridState = rememberLazyGridState(),
 ) {
     val haptics = rememberHaptics()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         if (uris.isNotEmpty()) onImport(uris)
     }
     val addBooks = { haptics.tick(); picker.launch(BookImporter.MIME_TYPES) }
-    val grid = rememberLazyGridState()
     val fabExpanded by remember { derivedStateOf { grid.firstVisibleItemIndex == 0 } }
     var query by rememberSaveable { mutableStateOf("") }
-    // The hero is the book you're reading, if its file is here (after a restore it may not be yet).
-    val hero = state.current?.takeIf { !it.isFinished && it.id !in missing }
-        ?: state.books.filter { !it.isFinished && it.id !in missing }.maxByOrNull { maxOf(it.lastOpenedAt, it.addedAt) }
-    val finished = state.settings.showFinished
+    val hero = state.heroBook(missing)
     val finishedCount = state.books.count { it.isFinished }
-    // The finished shelf only exists once something is on it.
-    val onFinishedShelf = finished && finishedCount > 0
+    val onFinishedShelf = state.onFinishedShelf
     val shelf = remember(state.books, onFinishedShelf) { state.books.filter { it.isFinished == onFinishedShelf } }
     val shown = remember(shelf, state.settings.sort, query) { sortAndFilter(shelf, state.settings.sort, query) }
 
@@ -172,7 +170,7 @@ fun HomeScreen(
                 ) {
                     if (hero != null && !onFinishedShelf) {
                         item(key = "hero", span = { GridItemSpan(maxLineSpan) }) {
-                            ContinueCard(hero, outerAvailable, onOpen)
+                            ContinueCard(hero, outerAvailable, onOpen = { onOpen(it, CoverSpot.HERO) })
                         }
                     }
                     item(key = "header", span = { GridItemSpan(maxLineSpan) }) {
@@ -204,7 +202,7 @@ fun HomeScreen(
                             onCover = book.id == hero?.id && !onFinishedShelf,
                             missing = book.id in missing,
                             haptics = haptics,
-                            onOpen = { if (it.id in missing) addBooks() else onOpen(it) },
+                            onOpen = { if (it.id in missing) addBooks() else onOpen(it, CoverSpot.TILE) },
                             onShowOnCover = onShowOnCover,
                             onDelete = onDelete,
                             onFinished = onFinished,
@@ -222,6 +220,17 @@ fun HomeScreen(
         }
     }
 }
+
+/**
+ * The book on the "Continue reading" card: the one you're reading, if its file is here (after a
+ * restore it may not be yet).
+ */
+internal fun LibraryState.heroBook(missing: Set<String>): Book? =
+    current?.takeIf { !it.isFinished && it.id !in missing }
+        ?: books.filter { !it.isFinished && it.id !in missing }.maxByOrNull { maxOf(it.lastOpenedAt, it.addedAt) }
+
+/** Showing the finished shelf, which only exists once something is on it (and has no hero card). */
+internal val LibraryState.onFinishedShelf: Boolean get() = settings.showFinished && books.any { it.isFinished }
 
 private fun sortAndFilter(books: List<Book>, sort: LibrarySort, query: String): List<Book> {
     val q = query.trim()
@@ -260,7 +269,8 @@ private fun ContinueCard(book: Book, outerAvailable: Boolean, onOpen: (Book) -> 
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             CoverImage(
                 book,
-                Modifier.width(96.dp).aspectRatio(2f / 3f).sharedCover(book.id).clip(RoundedCornerShape(10.dp)),
+                // The clip stays outside the shared cover: in flight it is drawn scaled, corners and all.
+                Modifier.width(96.dp).aspectRatio(2f / 3f).clip(RoundedCornerShape(10.dp)).sharedCover(book.id, CoverSpot.HERO),
                 maxHeight = 600,
             )
             Spacer(Modifier.width(18.dp))
@@ -401,8 +411,8 @@ private fun BookTile(
                     onLongClickLabel = stringResource(R.string.library_more_options),
                 ),
         ) {
-            // The hero card already carries this book's shared cover; keys must be unique on screen.
-            CoverImage(book, Modifier.fillMaxSize().sharedCover(book.id, enabled = !onCover), maxHeight = 600)
+            // The hero card may show this book too: each spot has its own key (see CoverSpot).
+            CoverImage(book, Modifier.fillMaxSize().sharedCover(book.id, CoverSpot.TILE), maxHeight = 600)
             if (missing) {
                 // Restored from a backup without the file: tap to add it again.
                 Box(

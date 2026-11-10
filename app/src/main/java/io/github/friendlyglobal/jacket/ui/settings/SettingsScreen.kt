@@ -160,7 +160,7 @@ fun SettingsScreen(
             item { GroupTitle(stringResource(R.string.settings_group_cover_screen), column) }
             item {
                 Group(column) {
-                    val count = 5
+                    val count = 6
                     SegmentedListItem(
                         shapes = ListItemDefaults.segmentedShapes(0, count),
                         leadingContent = { Icon(JacketIcons.OuterScreen, null) },
@@ -176,34 +176,35 @@ fun SettingsScreen(
                             else stringResource(R.string.settings_outer_unavailable),
                         )
                     }
+                    // What it will look like, following every switch below.
                     SegmentedListItem(shapes = ListItemDefaults.segmentedShapes(1, count)) {
+                        CoverScreenPreview(state.current, settings)
+                    }
+                    SegmentedListItem(shapes = ListItemDefaults.segmentedShapes(2, count)) {
                         Column(Modifier.padding(vertical = 4.dp)) {
                             Text(stringResource(R.string.settings_widget_style))
                             Text(
                                 stringResource(R.string.settings_widget_style_description),
                                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            Spacer(Modifier.height(10.dp))
-                            ConnectedChoice(
-                                options = CoverStyle.entries, selected = settings.coverStyle, label = { stringResource(it.label) },
-                                onSelect = { style -> onSettings { it.copy(coverStyle = style) } },
-                            )
+                            Spacer(Modifier.height(12.dp))
+                            WidgetStylePicker(state.current, settings, haptics) { style -> onSettings { it.copy(coverStyle = style) } }
                         }
                     }
                     SwitchRow(
-                        2, count, stringResource(R.string.settings_show_progress),
+                        3, count, stringResource(R.string.settings_show_progress),
                         stringResource(R.string.settings_show_progress_description), settings.showProgress,
                     ) {
                         toggle(it) { s -> s.copy(showProgress = it) }
                     }
                     SwitchRow(
-                        3, count, stringResource(R.string.settings_ambient_dim),
+                        4, count, stringResource(R.string.settings_ambient_dim),
                         stringResource(R.string.settings_ambient_dim_description), settings.ambientDim,
                     ) {
                         toggle(it) { s -> s.copy(ambientDim = it) }
                     }
                     SwitchRow(
-                        4, count, stringResource(R.string.settings_auto_outer),
+                        5, count, stringResource(R.string.settings_auto_outer),
                         stringResource(R.string.settings_auto_outer_description), settings.autoOuterScreen,
                     ) {
                         toggle(it) { s -> s.copy(autoOuterScreen = it) }

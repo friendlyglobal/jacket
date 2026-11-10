@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jacket</string>
+    <string name="widget_name">Jacket कवर</string>
+    <string name="widget_description">आप जो किताब पढ़ रहे हैं: उसका कवर और आपकी प्रगति।</string>
+
+    <string name="common_back">वापस</string>
+    <string name="common_cancel">रद्द करें</string>
+    <string name="common_ok">ठीक है</string>
+    <string name="percent">%1$d%%</string>
+    <string name="cover_of">%1$s का कवर</string>
+
+    <string name="format_comic">कॉमिक</string>
+    <string name="format_text">टेक्स्ट</string>
+
+    <string name="book_status_finished">पूरी हुई</string>
+    <string name="book_status_not_started">शुरू नहीं की</string>
+    <string name="book_status_page_of">पेज %1$d / %2$d</string>
+    <string name="book_status_percent_read">%1$d%% पढ़ी गई</string>
+    <string name="book_untitled">बिना शीर्षक</string>
+
+    <string name="cover_style_jacket">Jacket</string>
+    <string name="cover_style_shelf">शेल्फ़</string>
+    <string name="cover_style_glance">झलक</string>
+
+    <string name="font_literata_description">लंबे समय तक पढ़ने के लिए Google का टाइपफ़ेस</string>
+    <string name="font_hyperlegible_description">कम दृष्टि वालों के लिए साफ़ पहचाने जाने वाले अक्षर</string>
+    <string name="font_open_dyslexic_description">नीचे से भारी अक्षर, जो उलटे नहीं दिखते</string>
+    <string name="font_serif">सिस्टम सेरिफ़</string>
+    <string name="font_serif_description">आपके फ़ोन का सेरिफ़ फ़ॉन्ट</string>
+    <string name="font_sans">सिस्टम सैन्स</string>
+    <string name="font_sans_description">आपके फ़ोन का इंटरफ़ेस फ़ॉन्ट</string>
+    <string name="font_original">किताब का अपना</string>
+    <string name="font_original_description">प्रकाशक ने जो भी चुना हो</string>
+
+    <string name="page_color_book">किताब</string>
+    <string name="page_color_paper">कागज़</string>
+    <string name="page_color_dark">गहरा</string>
+    <string name="page_color_black">काला</string>
+
+    <string name="layout_pages">पेज</string>
+    <string name="layout_scroll">स्क्रॉल</string>
+
+    <string name="sort_recent">हाल ही में</string>
+    <string name="sort_title">शीर्षक</string>
+    <string name="sort_author">लेखक</string>
+
+    <string name="import_added_one">“%1$s” जोड़ी गई</string>
+    <plurals name="import_added_books">
+        <item quantity="one">%1$d किताब जोड़ी गई</item>
+        <item quantity="other">%1$d किताबें जोड़ी गईं</item>
+    </plurals>
+    <string name="import_failed">%1$s को पढ़ा नहीं जा सका</string>
+    <string name="import_added_and_failed">%1$s। %2$s</string>
+
+    <string name="library_profile_and_settings">प्रोफ़ाइल और सेटिंग</string>
+    <string name="library_add_books">किताबें जोड़ें</string>
+    <string name="library_all_finished">यहाँ की सभी किताबें पूरी हो गई हैं। कोई और किताब जोड़ें!</string>
+    <string name="library_no_match">“%1$s” से मेल खाने वाली कोई किताब नहीं</string>
+    <string name="library_start_reading">पढ़ना शुरू करें</string>
+    <string name="library_continue_reading">पढ़ना जारी रखें</string>
+    <string name="library_on_your_cover">आपके कवर पर</string>
+    <string name="library_title">लाइब्रेरी</string>
+    <string name="library_title_finished">पूरी हुईं</string>
+    <plurals name="library_book_count">
+        <item quantity="one">%1$d किताब</item>
+        <item quantity="other">%1$d किताबें</item>
+    </plurals>
+    <string name="library_shelf_reading">पढ़ी जा रहीं</string>
+    <string name="library_shelf_finished_count">पूरी हुईं · %1$d</string>
+    <string name="library_search_placeholder">शीर्षक और लेखक खोजें</string>
+    <string name="library_clear_search">खोज मिटाएँ</string>
+    <string name="library_more_options">ज़्यादा विकल्प</string>
+    <string name="library_add_file_again">फ़ाइल फिर से जोड़ें</string>
+    <string name="library_finished_badge">पूरी हुई</string>
+    <string name="library_new_badge">नई</string>
+    <string name="library_on_cover_screen">आपकी कवर स्क्रीन पर</string>
+    <string name="library_menu_open">खोलें</string>
+    <string name="library_menu_show_on_cover">कवर स्क्रीन पर दिखाएँ</string>
+    <string name="library_menu_mark_finished">पूरी हुई मार्क करें</string>
+    <string name="library_menu_mark_unfinished">अधूरी मार्क करें</string>
+    <string name="library_menu_remove">हटाएँ</string>
+    <string name="library_remove_title">“%1$s” को हटाएँ?</string>
+    <string name="library_remove_message">Jacket अपनी कॉपी और आपकी पढ़ने की जगह मिटा देता है। मूल फ़ाइल जहाँ थी, वहीं रहती है।</string>
+    <string name="library_remove_confirm">हटाएँ</string>
+    <string name="library_empty_title">अपने फ़ोल्डेबल को अपनी किताब पहनाएँ</string>
+    <string name="library_empty_message">कोई EPUB, PDF, CBZ कॉमिक या टेक्स्ट फ़ाइल जोड़ें। Jacket उसकी एक निजी कॉपी रखता है और आपके पढ़ते समय उसका कवर बाहरी स्क्रीन पर या कवर-स्क्रीन विजेट में दिखाता है।</string>
+
+    <string name="settings_title">सेटिंग</string>
+    <string name="settings_subtitle">प्रोफ़ाइल, कवर स्क्रीन और पढ़ना</string>
+    <string name="settings_profile_title">आपकी लाइब्रेरी</string>
+    <plurals name="settings_profile_books">
+        <item quantity="one">%1$d किताब</item>
+        <item quantity="other">%1$d किताबें</item>
+    </plurals>
+    <plurals name="settings_profile_reading">
+        <item quantity="one">%1$d पढ़ी जा रही</item>
+        <item quantity="other">%1$d पढ़ी जा रहीं</item>
+    </plurals>
+    <plurals name="settings_profile_finished">
+        <item quantity="one">%1$d पूरी हुई</item>
+        <item quantity="other">%1$d पूरी हुईं</item>
+    </plurals>
+    <string name="settings_profile_summary">%1$s · %2$s · %3$s</string>
+    <string name="settings_profile_on_cover">आपके कवर पर: %1$s</string>
+    <string name="settings_group_cover_screen">कवर स्क्रीन</string>
+    <string name="settings_outer_ready">बाहरी स्क्रीन तैयार है</string>
+    <string name="settings_outer_ready_description">अंदर पढ़ते समय आपका फ़ोन अपनी बाहरी स्क्रीन पर कवर दिखा सकता है।</string>
+    <string name="settings_outer_unavailable">बाहरी स्क्रीन अभी उपलब्ध नहीं है</string>
+    <string name="settings_outer_unavailable_description">बाहरी स्क्रीन इस्तेमाल करने के लिए किताब की तरह खुलने वाला फ़ोल्डेबल खोलें। फ़्लिप फ़ोन नीचे दिए गए विजेट का इस्तेमाल करते हैं।</string>
+    <string name="settings_widget_style">विजेट स्टाइल</string>
+    <string name="settings_widget_style_description">Galaxy Z Flip की कवर स्क्रीन और होम स्क्रीन के लिए</string>
+    <string name="settings_show_progress">पढ़ने की प्रगति</string>
+    <string name="settings_show_progress_description">कवर पर पतली प्रोग्रेस बार और प्रतिशत</string>
+    <string name="settings_ambient_dim">अपने-आप डिम</string>
+    <string name="settings_ambient_dim_description">30 सेकंड तक न छूने पर बाहरी स्क्रीन डिम हो जाती है</string>
+    <string name="settings_auto_outer">पढ़ते समय कवर</string>
+    <string name="settings_auto_outer_description">पढ़ने के लिए फ़ोन खोलते ही बाहरी स्क्रीन पर कवर दिखाएँ</string>
+    <string name="settings_preview_outer">बाहरी स्क्रीन</string>
+    <string name="settings_preview_widget">विजेट</string>
+    <string name="settings_preview_description">आपकी मौजूदा सेटिंग के साथ कवर स्क्रीन की झलक</string>
+    <string name="settings_cover_hint">Galaxy Z Flip: सेटिंग › कवर स्क्रीन › विजेट में जाकर “Jacket कवर” जोड़ें। Motorola Razr: बाहरी डिस्प्ले से Jacket खोलें।</string>
+    <string name="settings_group_reading">पढ़ना</string>
+    <string name="settings_group_appearance">दिखावट</string>
+    <string name="settings_book_colors">आपकी किताब के रंग</string>
+    <string name="settings_book_colors_description">Jacket को उस किताब के कवर के रंगों में रंगें जो आप पढ़ रहे हैं। बंद होने पर: आपके फ़ोन का पैलेट।</string>
+    <string name="settings_group_backup">बैकअप</string>
+    <string name="settings_backup_save">बैकअप सेव करें</string>
+    <string name="settings_backup_save_description">आपकी किताबों की सूची, पढ़ने की जगहें, बुकमार्क, हाइलाइट और सेटिंग। किताबों की फ़ाइलें नहीं।</string>
+    <string name="settings_backup_restore">बैकअप से वापस लाएँ</string>
+    <string name="settings_backup_restore_description">फिर किताबों की फ़ाइलें दोबारा जोड़ें: हर किताब को अपनी जगह और नोट मिल जाएँगे।</string>
+    <string name="settings_backup_saved">बैकअप सेव हो गया।</string>
+    <string name="settings_backup_save_failed">बैकअप सेव नहीं हो सका: %1$s</string>
+    <string name="settings_backup_restored">बैकअप वापस आ गया।</string>
+    <plurals name="settings_backup_restored_missing">
+        <item quantity="one">बैकअप वापस आ गया। %1$d किताब को फिर से जोड़ने के लिए उसकी फ़ाइल जोड़ें।</item>
+        <item quantity="other">बैकअप वापस आ गया। %1$d किताबों को फिर से जोड़ने के लिए उनकी फ़ाइलें जोड़ें।</item>
+    </plurals>
+    <string name="settings_backup_not_a_backup">यह Jacket की बैकअप फ़ाइल नहीं है।</string>
+    <string name="settings_backup_unreadable">वह फ़ाइल पढ़ी नहीं जा सकी।</string>
+    <string name="settings_backup_cant_open">बैकअप फ़ाइल नहीं खुल रही</string>
+    <string name="settings_backup_cant_write">बैकअप फ़ाइल में नहीं लिखा जा सकता</string>
+    <string name="settings_group_about">जानकारी</string>
+    <string name="settings_about_version">वर्शन %1$s</string>
+    <string name="settings_about_source">सोर्स कोड</string>
+    <string name="settings_about_source_description">GitHub पर ओपन सोर्स</string>
+    <string name="settings_about_licenses">ओपन सोर्स लाइसेंस</string>
+    <string name="settings_about_licenses_description">Jacket, Apache 2.0 के तहत है और Readium, Jetpack व ओपन फ़ॉन्ट पर बना है</string>
+
+    <string name="licenses_title">ओपन सोर्स लाइसेंस</string>
+    <string name="licenses_subtitle">Jacket मुक्त सॉफ़्टवेयर है, जो दूसरों के काम पर बना है</string>
+
+    <string name="reading_text_size">टेक्स्ट का साइज़</string>
+    <string name="reading_text_size_sample">अ</string>
+    <string name="reading_typeface">टाइपफ़ेस</string>
+    <string name="reading_typeface_sample">Aa</string>
+    <string name="reading_selected">चुना गया</string>
+    <string name="reading_page">पेज</string>
+    <string name="reading_layout">लेआउट</string>
+    <string name="reading_layout_hint">पेज किताब की तरह पलटते हैं: स्वाइप करें या किनारों पर टैप करें। फ़ोन खोलने पर दो पेज एक साथ दिखते हैं।</string>
+    <string name="reading_line_spacing">लाइन स्पेसिंग</string>
+    <string name="reading_line_spacing_book">किताब</string>
+    <string name="reading_line_spacing_tight">कम</string>
+    <string name="reading_line_spacing_normal">सामान्य</string>
+    <string name="reading_line_spacing_loose">ज़्यादा</string>
+    <string name="reading_margins">मार्जिन</string>
+    <string name="reading_margins_narrow">पतले</string>
+    <string name="reading_margins_normal">सामान्य</string>
+    <string name="reading_margins_wide">चौड़े</string>
+    <string name="reading_alignment">अलाइनमेंट</string>
+    <string name="reading_alignment_book">किताब</string>
+    <string name="reading_alignment_left">बाएँ</string>
+    <string name="reading_alignment_justified">जस्टिफ़ाइड</string>
+    <string name="reading_alignment_hint">जस्टिफ़ाइड टेक्स्ट में शब्द हाइफ़न से तोड़े जाते हैं। “किताब” प्रकाशक की अपनी स्पेसिंग और अलाइनमेंट बनाए रखता है।</string>
+    <string name="reading_buttons">बटन</string>
+    <string name="reading_volume_keys">वॉल्यूम बटन से पेज पलटें</string>
+    <string name="reading_volume_keys_description">वॉल्यूम कम करने पर अगला पेज, बढ़ाने पर पिछला। सुनते समय काम नहीं करता।</string>
+
+    <string name="reader_back_to_library">लाइब्रेरी पर वापस जाएँ</string>
+    <string name="reader_search">किताब में खोजें</string>
+    <string name="reader_bookmark_add">इस पेज को बुकमार्क करें</string>
+    <string name="reader_bookmark_remove">बुकमार्क हटाएँ</string>
+    <string name="reader_outer_show">बाहरी स्क्रीन पर कवर दिखाएँ</string>
+    <string name="reader_outer_hide">बाहरी स्क्रीन से कवर छिपाएँ</string>
+    <string name="reader_text_settings">टेक्स्ट और पेज की सेटिंग</string>
+    <string name="reader_contents_and_notes">विषय-सूची, बुकमार्क और हाइलाइट</string>
+    <string name="reader_notes">बुकमार्क और हाइलाइट</string>
+    <string name="reader_listen">सुनें: पढ़कर सुनाएँ</string>
+    <string name="reader_previous_chapter">पिछला अध्याय</string>
+    <string name="reader_next_chapter">अगला अध्याय</string>
+    <string name="reader_previous_paragraph">पिछला पैराग्राफ़</string>
+    <string name="reader_next_paragraph">अगला पैराग्राफ़</string>
+    <string name="reader_previous_page">पिछला पेज</string>
+    <string name="reader_next_page">अगला पेज</string>
+    <string name="reader_page_number">पेज %1$d</string>
+    <string name="reader_page_of">पेज %1$d / %2$d</string>
+    <string name="reader_percent_read">%1$d%% पढ़ी गई</string>
+    <string name="reader_footer_last_page">अध्याय का आखिरी पेज</string>
+    <plurals name="reader_footer_pages_left">
+        <item quantity="one">अध्याय में %1$d पेज बाकी</item>
+        <item quantity="other">अध्याय में %1$d पेज बाकी</item>
+    </plurals>
+    <string name="reader_error_open_book">यह किताब खोली नहीं जा सकी।\n%1$s</string>
+    <string name="reader_error_no_pages">इस किताब में दिखाने के लिए कोई पेज नहीं है।</string>
+    <string name="reader_error_pdf">यह PDF खोली नहीं जा सकी। पासवर्ड से सुरक्षित PDF अभी काम नहीं करतीं।</string>
+    <string name="reader_error_comic">यह कॉमिक खोली नहीं जा सकी।</string>
+    <string name="reader_error_text">यह फ़ाइल खाली है या पढ़ी नहीं जा सकी।</string>
+    <string name="reader_no_app_for_link">कोई भी ऐप यह लिंक नहीं खोल सकता।</string>
+    <string name="reader_share_quote">“%1$s”\n— %2$s</string>
+    <string name="reader_share_quote_author">“%1$s”\n— %2$s, %3$s</string>
+
+    <string name="selection_highlight">हाइलाइट</string>
+    <string name="selection_note">नोट</string>
+    <string name="selection_share">शेयर करें</string>
+
+    <string name="notes_tab_contents">विषय-सूची</string>
+    <string name="notes_tab_bookmarks">बुकमार्क</string>
+    <string name="notes_tab_bookmarks_count">बुकमार्क · %1$d</string>
+    <string name="notes_tab_highlights">हाइलाइट</string>
+    <string name="notes_tab_highlights_count">हाइलाइट · %1$d</string>
+    <string name="notes_no_bookmarks">अभी कोई बुकमार्क नहीं है</string>
+    <string name="notes_no_bookmarks_hint">अपनी जगह याद रखने के लिए पेज के ऊपर रिबन पर टैप करें।</string>
+    <string name="notes_no_highlights">अभी कोई हाइलाइट नहीं है</string>
+    <string name="notes_no_highlights_hint">टेक्स्ट को दबाकर रखें, फिर हाइलाइट या नोट चुनें।</string>
+    <string name="notes_edit">नोट और रंग बदलें</string>
+    <string name="notes_delete">मिटाएँ</string>
+    <string name="notes_bookmark_page_at">%1$d%% पर पेज</string>
+    <string name="notes_highlight_quote">“%1$s”</string>
+    <string name="notes_note">नोट</string>
+    <string name="notes_done">हो गया</string>
+
+    <string name="search_placeholder">इस किताब में खोजें</string>
+    <string name="search_clear">मिटाएँ</string>
+    <string name="search_no_results">“%1$s” के लिए कोई नतीजा नहीं</string>
+    <plurals name="search_result_count">
+        <item quantity="one">%1$d नतीजा</item>
+        <item quantity="other">%1$d नतीजे</item>
+    </plurals>
+
+    <string name="finished_title_finished">पूरी हुई</string>
+    <string name="finished_title_end">समाप्त</string>
+    <string name="finished_keep_reading">पढ़ते रहें</string>
+    <string name="finished_mark">पूरी हुई मार्क करें</string>
+    <string name="finished_back_to_library">लाइब्रेरी पर वापस जाएँ</string>
+    <string name="finished_next">अगली: %1$s</string>
+
+    <string name="listen_play">चलाएँ</string>
+    <string name="listen_pause">रोकें</string>
+    <string name="listen_previous_sentence">पिछला वाक्य</string>
+    <string name="listen_next_sentence">अगला वाक्य</string>
+    <string name="listen_previous_paragraph">पिछला पैराग्राफ़</string>
+    <string name="listen_next_paragraph">अगला पैराग्राफ़</string>
+    <string name="listen_rate">%1$s×</string>
+    <string name="listen_stop">सुनना बंद करें</string>
+    <string name="listen_sleep_timer">स्लीप टाइमर</string>
+    <string name="listen_sleep_timer_end_of_chapter">स्लीप टाइमर: अध्याय के अंत तक</string>
+    <plurals name="listen_sleep_minutes_left">
+        <item quantity="one">स्लीप टाइमर: %1$d मिनट बाकी</item>
+        <item quantity="other">स्लीप टाइमर: %1$d मिनट बाकी</item>
+    </plurals>
+    <string name="listen_sleep_off">बंद</string>
+    <string name="listen_sleep_15_minutes">15 मिनट</string>
+    <string name="listen_sleep_30_minutes">30 मिनट</string>
+    <string name="listen_sleep_1_hour">1 घंटा</string>
+    <string name="listen_sleep_end_of_chapter">अध्याय के अंत तक</string>
+    <string name="listen_no_voice">इस फ़ोन में कोई टेक्स्ट-टू-स्पीच आवाज़ इंस्टॉल नहीं है।</string>
+    <string name="listen_no_readable_text">इस किताब में ऐसा कोई टेक्स्ट नहीं है जिसे पढ़कर सुनाया जा सके।</string>
+    <string name="listen_stopped_error">पढ़कर सुनाना रुक गया: %1$s</string>
+    <string name="listen_voice_stopped">आवाज़ रुक गई। अपनी टेक्स्ट-टू-स्पीच सेटिंग देखें।</string>
+
+    <string name="widget_reading">पढ़ी जा रही</string>
+    <string name="widget_empty">कवर पहनाने के लिए कोई किताब जोड़ें</string>
+    <string name="listen_notification_channel">पढ़कर सुनाना</string>
+</resources>

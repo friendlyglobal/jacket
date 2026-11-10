@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jacket</string>
+    <string name="widget_name">Jacket 표지</string>
+    <string name="widget_description">읽고 있는 책의 표지와 진행률을 보여 줍니다.</string>
+
+    <string name="common_back">뒤로</string>
+    <string name="common_cancel">취소</string>
+    <string name="common_ok">확인</string>
+    <string name="percent">%1$d%%</string>
+    <string name="cover_of">%1$s 표지</string>
+
+    <string name="format_comic">만화</string>
+    <string name="format_text">텍스트</string>
+
+    <string name="book_status_finished">완독</string>
+    <string name="book_status_not_started">읽기 전</string>
+    <string name="book_status_page_of">%1$d / %2$d페이지</string>
+    <string name="book_status_percent_read">%1$d%% 읽음</string>
+    <string name="book_untitled">제목 없음</string>
+
+    <string name="cover_style_jacket">Jacket</string>
+    <string name="cover_style_shelf">책장</string>
+    <string name="cover_style_glance">한눈에</string>
+
+    <string name="font_literata_description">긴 글을 읽기 위한 Google 서체</string>
+    <string name="font_hyperlegible_description">저시력자도 구별하기 쉬운 글자꼴</string>
+    <string name="font_open_dyslexic_description">아래를 무겁게 해 글자가 뒤집혀 보이지 않게</string>
+    <string name="font_serif">시스템 명조</string>
+    <string name="font_serif_description">휴대전화의 명조 글꼴</string>
+    <string name="font_sans">시스템 고딕</string>
+    <string name="font_sans_description">휴대전화의 인터페이스 글꼴</string>
+    <string name="font_original">책 기본 글꼴</string>
+    <string name="font_original_description">출판사가 고른 글꼴 그대로</string>
+
+    <string name="page_color_book">책</string>
+    <string name="page_color_paper">종이</string>
+    <string name="page_color_dark">어두움</string>
+    <string name="page_color_black">검정</string>
+
+    <string name="layout_pages">페이지</string>
+    <string name="layout_scroll">스크롤</string>
+
+    <string name="sort_recent">최근</string>
+    <string name="sort_title">제목</string>
+    <string name="sort_author">저자</string>
+
+    <string name="import_added_one">“%1$s” 추가됨</string>
+    <plurals name="import_added_books">
+        <item quantity="other">책 %1$d권 추가됨</item>
+    </plurals>
+    <string name="import_failed">읽을 수 없는 파일: %1$s</string>
+    <string name="import_added_and_failed">%1$s. %2$s</string>
+
+    <string name="library_profile_and_settings">프로필 및 설정</string>
+    <string name="library_add_books">책 추가</string>
+    <string name="library_all_finished">모든 책을 다 읽었습니다. 다른 책을 추가해 보세요!</string>
+    <string name="library_no_match">“%1$s”에 해당하는 책이 없습니다</string>
+    <string name="library_start_reading">읽기 시작</string>
+    <string name="library_continue_reading">이어 읽기</string>
+    <string name="library_on_your_cover">커버 화면에 표시 중</string>
+    <string name="library_title">서재</string>
+    <string name="library_title_finished">완독</string>
+    <plurals name="library_book_count">
+        <item quantity="other">책 %1$d권</item>
+    </plurals>
+    <string name="library_shelf_reading">읽는 중</string>
+    <string name="library_shelf_finished_count">완독 · %1$d</string>
+    <string name="library_search_placeholder">제목 및 저자 검색</string>
+    <string name="library_clear_search">검색어 지우기</string>
+    <string name="library_more_options">옵션 더보기</string>
+    <string name="library_add_file_again">파일 다시 추가</string>
+    <string name="library_finished_badge">완독</string>
+    <string name="library_new_badge">새 책</string>
+    <string name="library_on_cover_screen">커버 화면에 표시됨</string>
+    <string name="library_menu_open">열기</string>
+    <string name="library_menu_show_on_cover">커버 화면에 표시</string>
+    <string name="library_menu_mark_finished">완독으로 표시</string>
+    <string name="library_menu_mark_unfinished">완독 표시 해제</string>
+    <string name="library_menu_remove">삭제</string>
+    <string name="library_remove_title">“%1$s” 책을 삭제하시겠습니까?</string>
+    <string name="library_remove_message">Jacket에 저장된 사본과 읽던 위치가 삭제됩니다. 원본 파일은 그대로 유지됩니다.</string>
+    <string name="library_remove_confirm">삭제</string>
+    <string name="library_empty_title">폴더블에 책을 입혀 보세요</string>
+    <string name="library_empty_message">EPUB, PDF, CBZ 만화 또는 텍스트 파일을 추가하세요. Jacket은 비공개 사본을 보관하고, 읽는 동안 외부 화면이나 커버 화면 위젯에 표지를 보여 줍니다.</string>
+
+    <string name="settings_title">설정</string>
+    <string name="settings_subtitle">프로필, 커버 화면, 읽기</string>
+    <string name="settings_profile_title">내 서재</string>
+    <plurals name="settings_profile_books">
+        <item quantity="other">책 %1$d권</item>
+    </plurals>
+    <plurals name="settings_profile_reading">
+        <item quantity="other">읽는 중 %1$d</item>
+    </plurals>
+    <plurals name="settings_profile_finished">
+        <item quantity="other">완독 %1$d</item>
+    </plurals>
+    <string name="settings_profile_summary">%1$s · %2$s · %3$s</string>
+    <string name="settings_profile_on_cover">커버 화면에 표시 중: %1$s</string>
+    <string name="settings_group_cover_screen">커버 화면</string>
+    <string name="settings_outer_ready">외부 화면 사용 가능</string>
+    <string name="settings_outer_ready_description">안쪽 화면으로 읽는 동안 외부 화면에 표지를 표시할 수 있습니다.</string>
+    <string name="settings_outer_unavailable">현재 외부 화면을 사용할 수 없음</string>
+    <string name="settings_outer_unavailable_description">외부 화면을 사용하려면 폴드형 폴더블을 펼치세요. 플립형은 아래 위젯을 사용합니다.</string>
+    <string name="settings_widget_style">위젯 스타일</string>
+    <string name="settings_widget_style_description">Galaxy Z Flip 커버 화면 및 홈 화면용</string>
+    <string name="settings_show_progress">읽기 진행률</string>
+    <string name="settings_show_progress_description">표지에 얇은 진행률 막대와 퍼센트 표시</string>
+    <string name="settings_ambient_dim">자동 어둡게</string>
+    <string name="settings_ambient_dim_description">30초 동안 터치하지 않으면 외부 화면이 어두워집니다</string>
+    <string name="settings_auto_outer">읽는 동안 표지 표시</string>
+    <string name="settings_auto_outer_description">펼쳐서 읽을 때마다 외부 화면에 표지를 표시합니다</string>
+    <string name="settings_preview_outer">외부 화면</string>
+    <string name="settings_preview_widget">위젯</string>
+    <string name="settings_preview_description">현재 설정이 적용된 커버 화면 미리보기</string>
+    <string name="settings_cover_hint">Galaxy Z Flip: 설정 › 커버 화면 › 위젯에서 “Jacket 표지”를 추가하세요. Motorola Razr: 외부 디스플레이에서 Jacket을 여세요.</string>
+    <string name="settings_group_reading">읽기</string>
+    <string name="settings_group_appearance">모양</string>
+    <string name="settings_book_colors">책에서 가져온 색상</string>
+    <string name="settings_book_colors_description">읽고 있는 책의 표지 색으로 Jacket을 물들입니다. 끄면 휴대전화의 색상 팔레트를 사용합니다.</string>
+    <string name="settings_group_backup">백업</string>
+    <string name="settings_backup_save">백업 저장</string>
+    <string name="settings_backup_save_description">책 목록, 읽던 위치, 북마크, 하이라이트, 설정. 책 파일은 포함되지 않습니다.</string>
+    <string name="settings_backup_restore">백업에서 복원</string>
+    <string name="settings_backup_restore_description">그런 다음 책 파일을 다시 추가하면 각 책의 읽던 위치와 메모가 다시 연결됩니다.</string>
+    <string name="settings_backup_saved">백업을 저장했습니다.</string>
+    <string name="settings_backup_save_failed">백업을 저장할 수 없습니다: %1$s</string>
+    <string name="settings_backup_restored">백업을 복원했습니다.</string>
+    <plurals name="settings_backup_restored_missing">
+        <item quantity="other">백업을 복원했습니다. 책 %1$d권의 파일을 추가하면 다시 연결됩니다.</item>
+    </plurals>
+    <string name="settings_backup_not_a_backup">Jacket 백업 파일이 아닙니다.</string>
+    <string name="settings_backup_unreadable">파일을 읽을 수 없습니다.</string>
+    <string name="settings_backup_cant_open">백업 파일을 열 수 없습니다</string>
+    <string name="settings_backup_cant_write">백업 파일을 쓸 수 없습니다</string>
+    <string name="settings_group_about">정보</string>
+    <string name="settings_about_version">버전 %1$s</string>
+    <string name="settings_about_source">소스 코드</string>
+    <string name="settings_about_source_description">GitHub에 공개된 오픈소스</string>
+    <string name="settings_about_licenses">오픈소스 라이선스</string>
+    <string name="settings_about_licenses_description">Jacket은 Apache 2.0 라이선스이며 Readium, Jetpack, 오픈 글꼴로 만들어졌습니다</string>
+
+    <string name="licenses_title">오픈소스 라이선스</string>
+    <string name="licenses_subtitle">Jacket은 다른 이들의 작업 위에 만들어진 자유 소프트웨어입니다</string>
+
+    <string name="reading_text_size">글자 크기</string>
+    <string name="reading_text_size_sample">가</string>
+    <string name="reading_typeface">글꼴</string>
+    <string name="reading_typeface_sample">Aa</string>
+    <string name="reading_selected">선택됨</string>
+    <string name="reading_page">페이지</string>
+    <string name="reading_layout">레이아웃</string>
+    <string name="reading_layout_hint">책처럼 페이지를 넘깁니다. 스와이프하거나 가장자리를 탭하세요. 펼치면 두 페이지가 나란히 표시됩니다.</string>
+    <string name="reading_line_spacing">줄 간격</string>
+    <string name="reading_line_spacing_book">책</string>
+    <string name="reading_line_spacing_tight">좁게</string>
+    <string name="reading_line_spacing_normal">보통</string>
+    <string name="reading_line_spacing_loose">넓게</string>
+    <string name="reading_margins">여백</string>
+    <string name="reading_margins_narrow">좁게</string>
+    <string name="reading_margins_normal">보통</string>
+    <string name="reading_margins_wide">넓게</string>
+    <string name="reading_alignment">정렬</string>
+    <string name="reading_alignment_book">책</string>
+    <string name="reading_alignment_left">왼쪽</string>
+    <string name="reading_alignment_justified">양쪽 맞춤</string>
+    <string name="reading_alignment_hint">양쪽 맞춤에서는 하이픈 넣기가 적용됩니다. “책”은 출판사가 지정한 간격과 정렬을 그대로 유지합니다.</string>
+    <string name="reading_buttons">버튼</string>
+    <string name="reading_volume_keys">볼륨 버튼으로 페이지 넘기기</string>
+    <string name="reading_volume_keys_description">볼륨 낮추기는 다음 페이지, 높이기는 이전 페이지로 이동합니다. 듣는 중에는 작동하지 않습니다.</string>
+
+    <string name="reader_back_to_library">서재로 돌아가기</string>
+    <string name="reader_search">책에서 검색</string>
+    <string name="reader_bookmark_add">이 페이지 북마크</string>
+    <string name="reader_bookmark_remove">북마크 삭제</string>
+    <string name="reader_outer_show">외부 화면에 표지 표시</string>
+    <string name="reader_outer_hide">외부 화면에서 표지 숨기기</string>
+    <string name="reader_text_settings">텍스트 및 페이지 설정</string>
+    <string name="reader_contents_and_notes">목차, 북마크, 하이라이트</string>
+    <string name="reader_notes">북마크 및 하이라이트</string>
+    <string name="reader_listen">듣기: 소리 내어 읽기</string>
+    <string name="reader_previous_chapter">이전 장</string>
+    <string name="reader_next_chapter">다음 장</string>
+    <string name="reader_previous_paragraph">이전 단락</string>
+    <string name="reader_next_paragraph">다음 단락</string>
+    <string name="reader_previous_page">이전 페이지</string>
+    <string name="reader_next_page">다음 페이지</string>
+    <string name="reader_page_number">%1$d페이지</string>
+    <string name="reader_page_of">%1$d / %2$d페이지</string>
+    <string name="reader_percent_read">%1$d%% 읽음</string>
+    <string name="reader_footer_last_page">이 장의 마지막 페이지</string>
+    <plurals name="reader_footer_pages_left">
+        <item quantity="other">이 장에 %1$d페이지 남음</item>
+    </plurals>
+    <string name="reader_error_open_book">이 책을 열 수 없습니다.\n%1$s</string>
+    <string name="reader_error_no_pages">이 책에는 표시할 페이지가 없습니다.</string>
+    <string name="reader_error_pdf">이 PDF를 열 수 없습니다. 비밀번호로 보호된 PDF는 아직 지원되지 않습니다.</string>
+    <string name="reader_error_comic">이 만화를 열 수 없습니다.</string>
+    <string name="reader_error_text">파일이 비어 있거나 읽을 수 없습니다.</string>
+    <string name="reader_no_app_for_link">이 링크를 열 수 있는 앱이 없습니다.</string>
+    <string name="reader_share_quote">“%1$s”\n— 『%2$s』</string>
+    <string name="reader_share_quote_author">“%1$s”\n— %3$s, 『%2$s』</string>
+
+    <string name="selection_highlight">하이라이트</string>
+    <string name="selection_note">메모</string>
+    <string name="selection_share">공유</string>
+
+    <string name="notes_tab_contents">목차</string>
+    <string name="notes_tab_bookmarks">북마크</string>
+    <string name="notes_tab_bookmarks_count">북마크 · %1$d</string>
+    <string name="notes_tab_highlights">하이라이트</string>
+    <string name="notes_tab_highlights_count">하이라이트 · %1$d</string>
+    <string name="notes_no_bookmarks">아직 북마크가 없습니다</string>
+    <string name="notes_no_bookmarks_hint">페이지 상단의 리본을 탭하면 그 위치를 저장할 수 있습니다.</string>
+    <string name="notes_no_highlights">아직 하이라이트가 없습니다</string>
+    <string name="notes_no_highlights_hint">텍스트를 길게 누른 다음 하이라이트 또는 메모를 선택하세요.</string>
+    <string name="notes_edit">메모 및 색상 수정</string>
+    <string name="notes_delete">삭제</string>
+    <string name="notes_bookmark_page_at">%1$d%% 지점의 페이지</string>
+    <string name="notes_highlight_quote">“%1$s”</string>
+    <string name="notes_note">메모</string>
+    <string name="notes_done">완료</string>
+
+    <string name="search_placeholder">이 책에서 검색</string>
+    <string name="search_clear">지우기</string>
+    <string name="search_no_results">“%1$s”에 대한 검색결과가 없습니다</string>
+    <plurals name="search_result_count">
+        <item quantity="other">검색결과 %1$d개</item>
+    </plurals>
+
+    <string name="finished_title_finished">완독</string>
+    <string name="finished_title_end">끝</string>
+    <string name="finished_keep_reading">계속 읽기</string>
+    <string name="finished_mark">완독으로 표시</string>
+    <string name="finished_back_to_library">서재로 돌아가기</string>
+    <string name="finished_next">다음 책: %1$s</string>
+
+    <string name="listen_play">재생</string>
+    <string name="listen_pause">일시중지</string>
+    <string name="listen_previous_sentence">이전 문장</string>
+    <string name="listen_next_sentence">다음 문장</string>
+    <string name="listen_previous_paragraph">이전 단락</string>
+    <string name="listen_next_paragraph">다음 단락</string>
+    <string name="listen_rate">%1$s×</string>
+    <string name="listen_stop">듣기 중지</string>
+    <string name="listen_sleep_timer">수면 타이머</string>
+    <string name="listen_sleep_timer_end_of_chapter">수면 타이머: 이 장 끝까지</string>
+    <plurals name="listen_sleep_minutes_left">
+        <item quantity="other">수면 타이머: %1$d분 남음</item>
+    </plurals>
+    <string name="listen_sleep_off">끄기</string>
+    <string name="listen_sleep_15_minutes">15분</string>
+    <string name="listen_sleep_30_minutes">30분</string>
+    <string name="listen_sleep_1_hour">1시간</string>
+    <string name="listen_sleep_end_of_chapter">장 끝까지</string>
+    <string name="listen_no_voice">이 휴대전화에는 텍스트 음성 변환(TTS) 음성이 설치되어 있지 않습니다.</string>
+    <string name="listen_no_readable_text">이 책에는 소리 내어 읽을 수 있는 텍스트가 없습니다.</string>
+    <string name="listen_stopped_error">소리 내어 읽기가 중지되었습니다: %1$s</string>
+    <string name="listen_voice_stopped">음성이 중지되었습니다. 텍스트 음성 변환 설정을 확인하세요.</string>
+
+    <string name="widget_reading">읽는 중</string>
+    <string name="widget_empty">책을 추가해 표지를 입혀 보세요</string>
+    <string name="listen_notification_channel">소리 내어 읽기</string>
+</resources>

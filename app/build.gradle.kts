@@ -19,8 +19,8 @@ android {
         applicationId = "io.github.friendlyglobal.jacket"
         minSdk = 26
         targetSdk = 37
-        versionCode = 4
-        versionName = "1.0.0-rc.1"
+        versionCode = 5
+        versionName = "1.0.0-rc.2"
     }
 
     signingConfigs {
@@ -53,6 +53,11 @@ android {
 
     buildFeatures {
         compose = true
+    }
+
+    androidResources {
+        // Lists the app's languages for Android 13+'s per-app language setting.
+        generateLocaleConfig = true
     }
 }
 

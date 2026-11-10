@@ -1,0 +1,42 @@
+Jacket è un e-reader open source per telefoni pieghevoli. Mentre leggi sullo schermo interno, lo schermo esterno mostra la copertina del tuo libro da bordo a bordo, come la copertina di un album, così chi ti sta intorno può vedere cosa stai leggendo.
+
+LA COPERTINA, ALL'ESTERNO
+• Pieghevoli a libro: la copertina riempie lo schermo esterno mentre leggi all'interno, grazie alla modalità doppio schermo di Android.
+• Galaxy Z Flip: un widget per lo schermo esterno Flex Window.
+• Qualsiasi telefono o tablet: lo stesso widget nella schermata Home.
+• Disattiva la copertina sullo schermo esterno quando vuoi dalle Impostazioni.
+
+LETTURA
+• EPUB, PDF, fumetti CBZ e testo semplice, dai tuoi file. Usa Aggiungi libri, oppure Apri con o Condividi da un'altra app.
+• Gli EPUB sono visualizzati con Readium, il toolkit open source: pagine vere, due pagine affiancate con il telefono aperto o scorrimento continuo, se preferisci.
+• Indice con sottocapitoli, il capitolo corrente sempre in evidenza durante la lettura, le pagine rimanenti nel capitolo e una barra che mostra l'anteprima del capitolo sotto il pollice.
+• Segnalibri, evidenziazioni in più colori con note e ricerca nel testo completo degli EPUB.
+
+ASCOLTO
+• La modalità audiolibro legge ad alta voce i libri EPUB e di testo semplice con la sintesi vocale del telefono, evidenziando ogni parola mentre viene pronunciata.
+• Continua a leggere a schermo spento, con i controlli sulla schermata di blocco e sulle cuffie.
+• Timer di spegnimento: si ferma dopo un tempo stabilito o alla fine del capitolo.
+
+COMFORT DI LETTURA
+• Font Literata, Atkinson Hyperlegible e OpenDyslexic.
+• Dimensione del testo, interlinea, margini e giustificazione.
+• Colori di pagina Libro, Carta, Scuro e Nero.
+• Gira le pagine con i tasti del volume.
+
+LIBRERIA
+• Cerca e ordina i tuoi libri.
+• Uno scaffale per i libri terminati e una schermata di fine libro quando arrivi all'ultima pagina.
+• Esporta un file di backup e reimportalo più tardi o su un altro telefono.
+
+DESIGN
+• Material 3 Expressive: colori presi dalla copertina del libro che stai leggendo, animazioni elastiche e feedback aptico.
+
+PRIVACY
+• Nessuna autorizzazione Internet: né Jacket né i libri che apri al suo interno possono connettersi alla rete.
+• Nessun account, nessuna pubblicità, nessuna analisi, nessun tracciamento.
+• Libero e open source con Apache License 2.0: https://github.com/friendlyglobal/jacket
+
+BUONO A SAPERSI
+• Il supporto dello schermo esterno dipende dal telefono. Sui telefoni senza schermo esterno, queste opzioni sono nascoste.
+• I libri protetti da DRM (protezione dalla copia) non possono essere aperti.
+• La lettura ad alta voce dei libri di testo semplice si interrompe quando esci dall'app. Quella degli EPUB continua in background.

@@ -1,0 +1,42 @@
+Jacket ist ein Open-Source-E-Reader für faltbare Smartphones. Während du auf dem inneren Display liest, zeigt das Außendisplay das Cover deines Buchs randlos wie ein Albumcover, damit die Leute um dich herum sehen, was du liest.
+
+DAS COVER, AUSSEN
+• Foldables im Buchformat: Das Cover füllt das Außendisplay, während du innen liest – über den Dual-Screen-Modus von Android.
+• Galaxy Z Flip: ein Cover-Display-Widget für das Flex Window.
+• Jedes Smartphone oder Tablet: dasselbe Widget auf dem Startbildschirm.
+• Das Cover auf dem Außendisplay lässt sich jederzeit in den Einstellungen abschalten.
+
+LESEN
+• EPUB, PDF, CBZ-Comics und reiner Text aus deinen eigenen Dateien. Nutze „Bücher hinzufügen“ oder „Öffnen mit“ bzw. „Teilen“ in einer anderen App.
+• EPUBs werden mit dem Open-Source-Toolkit Readium dargestellt: echte Seiten, aufgeklappt eine Doppelseite oder auf Wunsch durchgehendes Scrollen.
+• Inhaltsverzeichnis mit Unterkapiteln, Anzeige des aktuellen Kapitels beim Lesen, verbleibende Seiten im Kapitel und eine Leiste, die das Kapitel unter deinem Daumen in der Vorschau zeigt.
+• Lesezeichen, Markierungen in mehreren Farben mit Notizen und Volltextsuche in EPUBs.
+
+ZUHÖREN
+• Der Hörbuchmodus liest EPUB- und Textbücher mit der Sprachausgabe deines Smartphones vor und hebt jedes Wort hervor, während es gesprochen wird.
+• Läuft bei ausgeschaltetem Display weiter, mit Steuerung auf dem Sperrbildschirm und über Kopfhörer.
+• Sleep-Timer: stoppt nach einer festen Zeit oder am Kapitelende.
+
+LESEKOMFORT
+• Die Schriften Literata, Atkinson Hyperlegible und OpenDyslexic.
+• Textgröße, Zeilenabstand, Ränder und Blocksatz.
+• Die Seitenfarben Buch, Papier, Dunkel und Schwarz.
+• Blättern mit den Lautstärketasten.
+
+BIBLIOTHEK
+• Bücher durchsuchen und sortieren.
+• Ein Regal für ausgelesene Bücher und ein Abschlussbildschirm auf der letzten Seite.
+• Sicherungsdatei exportieren und später oder auf einem anderen Smartphone wieder importieren.
+
+DESIGN
+• Material 3 Expressive: Farben aus dem Cover des Buchs, das du gerade liest, federnde Animationen und haptisches Feedback.
+
+DATENSCHUTZ
+• Keine Internetberechtigung: Weder Jacket noch die Bücher, die du darin öffnest, können sich mit dem Netzwerk verbinden.
+• Keine Konten, keine Werbung, keine Analysen, kein Tracking.
+• Frei und Open Source unter der Apache License 2.0: https://github.com/friendlyglobal/jacket
+
+GUT ZU WISSEN
+• Ob das Außendisplay unterstützt wird, hängt vom Smartphone ab. Auf Smartphones ohne Außendisplay sind diese Optionen ausgeblendet.
+• Bücher mit DRM (Kopierschutz) lassen sich nicht öffnen.
+• Das Vorlesen von Textbüchern stoppt, wenn du die App verlässt. EPUBs werden auch im Hintergrund weiter vorgelesen.

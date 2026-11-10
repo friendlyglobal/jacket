@@ -137,6 +137,9 @@
     <string name="settings_ambient_dim_description">The outer screen dims after 30 seconds untouched</string>
     <string name="settings_auto_outer">Cover while reading</string>
     <string name="settings_auto_outer_description">Put the cover on the outer screen whenever you unfold to read</string>
+    <string name="settings_preview_outer">Outer screen</string>
+    <string name="settings_preview_widget">Widget</string>
+    <string name="settings_preview_description">Preview of the cover screen with your current settings</string>
     <string name="settings_cover_hint">Galaxy Z Flip: add “Jacket cover” under Settings › Cover screen › Widgets. Motorola Razr: open Jacket from the external display.</string>
     <string name="settings_group_reading">Reading</string>
     <string name="settings_group_appearance">Appearance</string>

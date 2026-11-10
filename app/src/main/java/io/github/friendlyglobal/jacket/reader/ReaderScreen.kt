@@ -4,7 +4,10 @@ import android.os.SystemClock
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -17,14 +20,11 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.displayCutout
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,7 +38,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.FilledTonalIconToggleButton
@@ -57,26 +56,28 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -92,18 +93,19 @@ import io.github.friendlyglobal.jacket.data.BookFormat
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.outer.OuterDisplay
-import io.github.friendlyglobal.jacket.ui.CoverImage
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
+import io.github.friendlyglobal.jacket.ui.LocalCoverTransition
 import io.github.friendlyglobal.jacket.ui.PageColors
 import io.github.friendlyglobal.jacket.ui.SystemBarsHidden
+import io.github.friendlyglobal.jacket.ui.motionRemoved
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import io.github.friendlyglobal.jacket.ui.rememberPageColors
-import io.github.friendlyglobal.jacket.ui.sharedCover
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.roundToInt
 
 /** A table-of-contents line: its title, nesting depth, and its index in [ReaderNav.toc]. */
@@ -154,7 +156,13 @@ class ReaderNav {
     var editing by mutableStateOf<String?>(null)
     /** Turns a page for the volume keys: +1 forward, -1 back. */
     var turnPage: (Int) -> Unit = { step(it) }
+
+    /** The first page is on screen (or nothing more is coming): the opening cover may lift. */
+    var contentReady by mutableStateOf(false)
 }
+
+/** The open book's [ReaderNav], for views that only need to report in (see [ReaderError]). */
+internal val LocalReaderNav = compositionLocalOf<ReaderNav?> { null }
 
 /** Where the activity sends volume-key presses while a book is open and volume paging is on. */
 object ReaderKeys {
@@ -172,6 +180,7 @@ fun ReaderScreen(
     outer: OuterDisplay,
     onSettings: ((Settings) -> Settings) -> Unit,
     onOpen: (String) -> Unit,
+    onClose: () -> Unit,
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -191,16 +200,6 @@ fun ReaderScreen(
     var sheet by rememberSaveable { mutableStateOf(Sheet.NONE) }
     // Once you touch the controls, they stay until you dismiss them.
     var touchedChrome by remember(book.id) { mutableStateOf(false) }
-
-    LaunchedEffect(book.id) {
-        // After the cover's flight, so the library doesn't reshuffle underneath it.
-        delay(800)
-        library.markOpened(book.id)
-        // Show the controls long enough to be discovered, then get out of the way.
-        delay(1_800)
-        if (!touchedChrome) chrome = false
-    }
-    SystemBarsHidden(hidden = !chrome && sheet == Sheet.NONE)
     val noticeTouches = Modifier.pointerInput(Unit) {
         awaitPointerEventScope {
             while (true) {
@@ -210,28 +209,103 @@ fun ReaderScreen(
         }
     }
 
-    // Closing: the cover comes back over the page, then flies home to its place in the library.
+    // Opening and closing the book (see BookOpening): the cover lands, waits for the first page,
+    // swings open; closing folds the page back under it and sends it home to the library.
+    val opening = remember(book.id) { BookOpening() }
+    val flight = LocalCoverTransition.current?.visibility?.transition
     var closing by remember(book.id) { mutableStateOf(false) }
+    // The library has been asked to take over, and the cover is flying home.
+    var left by remember(book.id) { mutableStateOf(false) }
+    // Which controls have made their entrance: none, the top bar, then the toolbar too.
+    var entrance by remember(book.id) { mutableIntStateOf(0) }
+    // The page itself is built once the cover is down. Building it is heavy (for an EPUB,
+    // Readium inflates a fragment and three web views on the main thread), and done mid-flight
+    // it would cost the cover most of its frames; a cover lying still can spare them.
+    var staged by remember(book.id) { mutableStateOf(flight == null || flight.landed) }
+    // The book opened before its page was there (a slow one): a loading indicator stands in.
+    var waiting by remember(book.id) { mutableStateOf(false) }
+    val leave by rememberUpdatedState(onBack)
     val scope = rememberCoroutineScope()
-    val close: () -> Unit = {
-        if (!closing) {
-            closing = true
-            nav.listenController?.stop()
-            scope.launch {
-                delay(CLOSE_FADE_MS.toLong())
-                onBack()
+    LaunchedEffect(opening, closing) {
+        if (closing) {
+            entrance = 0
+            // With animations removed there is nothing to fold: the page gives way to the library.
+            if (!motionRemoved()) opening.fold()
+            left = true
+            leave()
+            return@LaunchedEffect
+        }
+        if (flight != null && !flight.landed) {
+            // The flight is a spring: the cover is down, give or take a pixel or two, well before
+            // the spring calls it finished. That is the moment for the tick, and to start on the page.
+            val takeoff = withFrameNanos { it }
+            var flown = 0L
+            while (!flight.landed && flown < TOUCHDOWN_NANOS) flown = withFrameNanos { it } - takeoff
+            haptics.tick()
+        }
+        staged = true
+        if (flight != null) snapshotFlow { flight.landed }.first { it }
+        // The library has left the screen: marking the book as opened earlier would reshuffle it
+        // mid-flight and move the cover's starting point.
+        repeat(2) { withFrameNanos { } }
+        library.markOpened(book.id)
+        if (!nav.contentReady) {
+            val breathing = launch { opening.breathe() }
+            withTimeoutOrNull(HOLD_CAP_MS) { snapshotFlow { nav.contentReady }.first { it } }
+            breathing.cancel()
+        }
+        if (!nav.contentReady) {
+            waiting = true
+            launch {
+                withTimeoutOrNull(WAITING_CAP_MS) { snapshotFlow { nav.contentReady }.first { it } }
+                waiting = false
+            }
+        }
+        // A frame for the page to reach the screen, behind the cover.
+        withFrameNanos { }
+        launch {
+            // The controls arrive once the page is there, one after the other...
+            snapshotFlow { opening.open.value >= BookOpening.REVEALED }.first { it }
+            entrance = 1
+            if (!motionRemoved()) delay(CHROME_STAGGER_MS)
+            entrance = 2
+            // ...stay long enough to be discovered, then get out of the way.
+            delay(CHROME_SHOWN_MS)
+            if (!touchedChrome) chrome = false
+        }
+        opening.reveal()
+    }
+    // Opened again while its cover was still flying home: start over from the closed book.
+    if (flight != null) {
+        LaunchedEffect(flight.targetState) {
+            if (left && flight.targetState == EnterExitState.Visible) {
+                left = false
+                closing = false
             }
         }
     }
+    // Closing shows the system bars straight away, so the library has its final layout (and the
+    // cover its landing spot) by the time it appears.
+    SystemBarsHidden(hidden = !chrome && sheet == Sheet.NONE && !closing)
 
-    // Predictive back: the page shrinks and rounds as you swipe, then lands in the library.
-    var backProgress by remember { mutableFloatStateOf(0f) }
-    PredictiveBackHandler(enabled = !closing) { events ->
+    val close: () -> Unit = {
+        if (!closing) {
+            // First, so the cover is made knowing where in the library it will land.
+            onClose()
+            closing = true
+            nav.listenController?.stop()
+        }
+    }
+
+    // Back: the page starts to fold under your thumb. Let go and the book closes; change your mind
+    // and it springs flat again. Once it is closing, further presses are swallowed.
+    PredictiveBackHandler { events ->
+        if (closing) return@PredictiveBackHandler events.collect { }
         try {
-            events.collect { backProgress = it.progress }
+            events.collect { if (opening.settled) opening.peek(it.progress) }
             close()
         } catch (e: CancellationException) {
-            backProgress = 0f
+            if (opening.settled) scope.launch { opening.unpeek() }
             throw e
         }
     }
@@ -281,113 +355,120 @@ fun ReaderScreen(
         chrome = !chrome
     }
 
-    Box(
-        Modifier
-            .fillMaxSize()
-            .graphicsLayer {
-                val scale = 1f - 0.08f * backProgress
-                scaleX = scale
-                scaleY = scale
-                shape = RoundedCornerShape((32 * backProgress).dp)
-                clip = backProgress > 0f
-            }
-            .background(page.background),
-    ) {
-        when (book.format) {
-            BookFormat.EPUB -> EpubReader(book, settings, page, nav, haptics, annotations, toggleChrome)
-            BookFormat.PDF -> PdfReader(book, page, nav, haptics, onProgress, toggleChrome)
-            BookFormat.CBZ -> ComicReader(book, page, nav, haptics, onProgress, toggleChrome)
-            BookFormat.TXT -> TextReader(book, settings, page, nav, haptics, requireNotNull(speaker), onProgress, toggleChrome)
-        }
-
-        AnimatedVisibility(
-            visible = !chrome && !nav.listen.active,
-            enter = fadeIn(MaterialTheme.motionScheme.slowEffectsSpec()),
-            exit = fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()),
-            modifier = Modifier.align(Alignment.BottomCenter),
-        ) { ReaderFooter(nav, book, page) }
-
-        AnimatedVisibility(
-            visible = chrome,
-            enter = slideInVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) { -it } + fadeIn(),
-            exit = slideOutVertically(MaterialTheme.motionScheme.fastSpatialSpec()) { -it } + fadeOut(),
-            modifier = Modifier.align(Alignment.TopCenter).then(noticeTouches),
-        ) {
-            val marked = remember(nav.pageKey, annotations) {
-                annotations.firstOrNull { it.kind == AnnotationKind.BOOKMARK && nav.onScreen(it) }
-            }
-            ReaderTopBar(
-                book = book, nav = nav, outerAvailable = outerAvailable, outerActive = outerActive,
-                bookmarked = marked != null,
-                onBookmark = {
-                    if (marked != null) {
-                        haptics.toggle(false)
-                        library.deleteAnnotation(marked.id)
-                    } else {
-                        scope.launch {
-                            val here = nav.place() ?: return@launch
-                            haptics.toggle(true)
-                            library.addAnnotation(
-                                Annotation(
-                                    id = java.util.UUID.randomUUID().toString(), bookId = book.id,
-                                    kind = AnnotationKind.BOOKMARK, locator = here.locator, section = here.section,
-                                    progress = here.progress, chapter = here.chapter, text = here.snippet,
-                                    createdAt = System.currentTimeMillis(),
-                                ),
-                            )
-                        }
+    val motion = MaterialTheme.motionScheme
+    Box(Modifier.fillMaxSize().background(page.background)) {
+        // The page and its controls. They grow with the window the backdrop opens on them: a page
+        // the size of the book under the cover, the whole screen once it is open.
+        Box(Modifier.fillMaxSize().openingPage(opening)) {
+            if (staged) {
+                CompositionLocalProvider(LocalReaderNav provides nav) {
+                    when (book.format) {
+                        BookFormat.EPUB -> EpubReader(book, settings, page, nav, haptics, annotations, toggleChrome)
+                        BookFormat.PDF -> PdfReader(book, page, nav, haptics, onProgress, toggleChrome)
+                        BookFormat.CBZ -> ComicReader(book, page, nav, haptics, onProgress, toggleChrome)
+                        BookFormat.TXT -> TextReader(book, settings, page, nav, haptics, requireNotNull(speaker), onProgress, toggleChrome)
                     }
-                },
-                onSearch = { haptics.tick(); sheet = Sheet.SEARCH },
-                onOuter = { on -> haptics.toggle(on); outer.toggle() },
-                onBack = close,
-            )
+                }
+            }
+            // The page fades in under the indicator when it does arrive, rather than popping up.
+            AnimatedVisibility(visible = waiting, enter = EnterTransition.None, exit = fadeOut(motion.slowEffectsSpec())) {
+                Box(Modifier.fillMaxSize().background(page.background)) { ReaderLoading() }
+            }
+
+            AnimatedVisibility(
+                visible = !chrome && !nav.listen.active,
+                enter = fadeIn(motion.slowEffectsSpec()),
+                exit = fadeOut(motion.fastEffectsSpec()),
+                modifier = Modifier.align(Alignment.BottomCenter),
+            ) { ReaderFooter(nav, book, page) }
+
+            AnimatedVisibility(
+                visible = chrome && entrance >= 1,
+                enter = slideInVertically(motion.defaultSpatialSpec()) { -it } + fadeIn(motion.defaultEffectsSpec()),
+                exit = slideOutVertically(motion.fastSpatialSpec()) { -it } + fadeOut(),
+                modifier = Modifier.align(Alignment.TopCenter).then(noticeTouches),
+            ) {
+                val marked = remember(nav.pageKey, annotations) {
+                    annotations.firstOrNull { it.kind == AnnotationKind.BOOKMARK && nav.onScreen(it) }
+                }
+                ReaderTopBar(
+                    book = book, nav = nav, outerAvailable = outerAvailable, outerActive = outerActive,
+                    bookmarked = marked != null,
+                    onBookmark = {
+                        if (marked != null) {
+                            haptics.toggle(false)
+                            library.deleteAnnotation(marked.id)
+                        } else {
+                            scope.launch {
+                                val here = nav.place() ?: return@launch
+                                haptics.toggle(true)
+                                library.addAnnotation(
+                                    Annotation(
+                                        id = java.util.UUID.randomUUID().toString(), bookId = book.id,
+                                        kind = AnnotationKind.BOOKMARK, locator = here.locator, section = here.section,
+                                        progress = here.progress, chapter = here.chapter, text = here.snippet,
+                                        createdAt = System.currentTimeMillis(),
+                                    ),
+                                )
+                            }
+                        }
+                    },
+                    onSearch = { haptics.tick(); sheet = Sheet.SEARCH },
+                    onOuter = { on -> haptics.toggle(on); outer.toggle() },
+                    onBack = close,
+                )
+            }
+
+            // While listening, the player stays even when the rest of the controls are hidden. The
+            // toolbar floats, so it can afford more spring than the bar pinned to the top edge.
+            AnimatedVisibility(
+                visible = (chrome || nav.listen.active) && entrance >= 2,
+                enter = slideInVertically(motion.fastSpatialSpec()) { it } +
+                    scaleIn(motion.fastSpatialSpec(), initialScale = 0.88f) + fadeIn(motion.defaultEffectsSpec()),
+                exit = slideOutVertically(motion.fastSpatialSpec()) { it } + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter).then(noticeTouches),
+            ) {
+                ReaderBottomBar(
+                    nav = nav, book = book, haptics = haptics,
+                    showScrubber = chrome,
+                    rate = settings.listenRate,
+                    onRate = { rate ->
+                        onSettings { it.copy(listenRate = rate) }
+                        nav.listenController?.setRate(rate)
+                    },
+                    onListen = {
+                        haptics.confirm()
+                        chrome = false
+                        nav.listenController?.start()
+                    },
+                    onContents = { sheet = Sheet.CONTENTS },
+                    onText = { sheet = Sheet.TEXT },
+                )
+            }
+
+            // The last page: celebrate, and offer what's next.
+            AnimatedVisibility(
+                visible = nav.atEnd && !finishedDismissed && !chrome && !nav.listen.active && opening.settled,
+                enter = slideInVertically(motion.defaultSpatialSpec()) { it } + fadeIn(),
+                exit = slideOutVertically(motion.fastSpatialSpec()) { it } + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 48.dp),
+            ) {
+                LaunchedEffect(Unit) { haptics.confirm() }
+                FinishedCard(
+                    book = book,
+                    next = next,
+                    onFinish = { haptics.confirm(); library.setFinished(book.id, true) },
+                    onNext = { onOpen(it.id) },
+                    onLibrary = close,
+                    onDismiss = { haptics.tick(); finishedDismissed = true },
+                )
+            }
         }
 
-        // While listening, the player stays even when the rest of the controls are hidden.
-        AnimatedVisibility(
-            visible = chrome || nav.listen.active,
-            enter = slideInVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) { it } + fadeIn(),
-            exit = slideOutVertically(MaterialTheme.motionScheme.fastSpatialSpec()) { it } + fadeOut(),
-            modifier = Modifier.align(Alignment.BottomCenter).then(noticeTouches),
-        ) {
-            ReaderBottomBar(
-                nav = nav, book = book, haptics = haptics,
-                showScrubber = chrome,
-                rate = settings.listenRate,
-                onRate = { rate ->
-                    onSettings { it.copy(listenRate = rate) }
-                    nav.listenController?.setRate(rate)
-                },
-                onListen = {
-                    haptics.confirm()
-                    chrome = false
-                    nav.listenController?.start()
-                },
-                onContents = { sheet = Sheet.CONTENTS },
-                onText = { sheet = Sheet.TEXT },
-            )
-        }
-
-        // The last page: celebrate, and offer what's next.
-        AnimatedVisibility(
-            visible = nav.atEnd && !finishedDismissed && !chrome && !nav.listen.active,
-            enter = slideInVertically(MaterialTheme.motionScheme.defaultSpatialSpec()) { it } + fadeIn(),
-            exit = slideOutVertically(MaterialTheme.motionScheme.fastSpatialSpec()) { it } + fadeOut(),
-            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 48.dp),
-        ) {
-            LaunchedEffect(Unit) { haptics.confirm() }
-            FinishedCard(
-                book = book,
-                next = next,
-                onFinish = { haptics.confirm(); library.setFinished(book.id, true) },
-                onNext = { onOpen(it.id) },
-                onLibrary = close,
-                onDismiss = { haptics.tick(); finishedDismissed = true },
-            )
-        }
-
-        OpeningCover(book, closing)
+        // Over everything, so nothing of the reader shows until the book opens: the backdrop the
+        // closed book lies on, and the cover itself (not needed while reading).
+        OpeningBackdrop(opening, MaterialTheme.colorScheme.primaryContainer)
+        if (!opening.settled) OpeningCover(book, opening)
     }
 
     when (sheet) {
@@ -446,8 +527,24 @@ fun ReaderScreen(
     }
 }
 
-/** How long the cover takes to come back over the page before flying home. */
-private const val CLOSE_FADE_MS = 160
+/** The longest the landed cover waits for the first page; after that the book opens on a loading indicator. */
+private const val HOLD_CAP_MS = 2_500L
+
+/** ...which gives way to whatever is there after this long, page or no page. */
+private const val WAITING_CAP_MS = 8_000L
+
+/** Animation time into the cover's flight by which it has touched down, though the spring hasn't settled. */
+private const val TOUCHDOWN_NANOS = 340_000_000L
+
+/** The cover has landed in the reader: its flight (the screen transition it belongs to) is over. */
+private val Transition<EnterExitState>.landed: Boolean
+    get() = currentState == EnterExitState.Visible && targetState == EnterExitState.Visible && !isRunning
+
+/** The toolbar follows the top bar in by this much. */
+private const val CHROME_STAGGER_MS = 90L
+
+/** How long the controls stay after arriving, unless you touch them. */
+private const val CHROME_SHOWN_MS = 2_400L
 
 @Composable
 private fun ReaderTopBar(
@@ -674,36 +771,6 @@ private fun ReaderFooter(nav: ReaderNav, book: Book, page: PageColors) {
     }
 }
 
-/**
- * The cover the book was opened from lands here (shared element), holds for a beat, then
- * dissolves into the first page, like opening a book. When [closing], it comes back over the
- * page so it can fly home to the library.
- */
-@Composable
-private fun BoxScope.OpeningCover(book: Book, closing: Boolean) {
-    var opening by remember(book.id) { mutableStateOf(true) }
-    LaunchedEffect(book.id) {
-        delay(700)
-        opening = false
-    }
-    AnimatedVisibility(
-        visible = opening || closing,
-        enter = fadeIn(tween(if (closing) CLOSE_FADE_MS else 0)) + scaleIn(tween(CLOSE_FADE_MS), initialScale = 1.06f),
-        exit = fadeOut(tween(420)) + scaleOut(tween(420), targetScale = 1.06f),
-        modifier = Modifier.matchParentSize(),
-    ) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CoverImage(
-                book,
-                Modifier.fillMaxHeight(0.7f).aspectRatio(2f / 3f).sharedCover(book.id).clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop,
-                // Same size the library decoded, so the flying cover is already in the cache.
-                maxHeight = 600,
-            )
-        }
-    }
-}
-
 @Composable
 internal fun ReaderLoading() {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { ContainedLoadingIndicator() }
@@ -711,6 +778,9 @@ internal fun ReaderLoading() {
 
 @Composable
 internal fun ReaderError(message: String) {
+    // Nothing more is coming: the cover may open on the message.
+    val nav = LocalReaderNav.current
+    SideEffect { nav?.contentReady = true }
     Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
         Text(message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
     }

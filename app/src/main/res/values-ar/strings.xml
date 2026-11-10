@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jacket</string>
+    <string name="widget_name">غلاف Jacket</string>
+    <string name="widget_description">الكتاب الذي تقرؤه: غلافه ومدى تقدّمك فيه.</string>
+
+    <string name="common_back">رجوع</string>
+    <string name="common_cancel">إلغاء</string>
+    <string name="common_ok">حسنًا</string>
+    <string name="percent">%1$d%%</string>
+    <string name="cover_of">غلاف %1$s</string>
+
+    <string name="format_comic">قصة مصوّرة</string>
+    <string name="format_text">نص</string>
+
+    <string name="book_status_finished">مكتمل</string>
+    <string name="book_status_not_started">لم يبدأ</string>
+    <string name="book_status_page_of">صفحة %1$d من %2$d</string>
+    <string name="book_status_percent_read">تمت قراءة %1$d%%</string>
+    <string name="book_untitled">بلا عنوان</string>
+
+    <string name="cover_style_jacket">Jacket</string>
+    <string name="cover_style_shelf">رف</string>
+    <string name="cover_style_glance">لمحة</string>
+
+    <string name="font_literata_description">خط من Google للقراءة الطويلة</string>
+    <string name="font_hyperlegible_description">حروف واضحة التمايز لضعاف البصر</string>
+    <string name="font_open_dyslexic_description">حروف مثقّلة القاعدة تقاوم الانقلاب</string>
+    <string name="font_serif">خط النظام المذيّل</string>
+    <string name="font_serif_description">الخط المذيّل في هاتفك</string>
+    <string name="font_sans">خط النظام البسيط</string>
+    <string name="font_sans_description">خط واجهة هاتفك</string>
+    <string name="font_original">خط الكتاب</string>
+    <string name="font_original_description">ما اختاره الناشر</string>
+
+    <string name="page_color_book">كتاب</string>
+    <string name="page_color_paper">ورق</string>
+    <string name="page_color_dark">داكن</string>
+    <string name="page_color_black">أسود</string>
+
+    <string name="layout_pages">صفحات</string>
+    <string name="layout_scroll">تمرير</string>
+
+    <string name="sort_recent">الأحدث</string>
+    <string name="sort_title">العنوان</string>
+    <string name="sort_author">المؤلف</string>
+
+    <string name="import_added_one">تمت إضافة «%1$s»</string>
+    <plurals name="import_added_books">
+        <item quantity="zero">تمت إضافة %1$d كتاب</item>
+        <item quantity="one">تمت إضافة %1$d كتاب</item>
+        <item quantity="two">تمت إضافة %1$d كتاب</item>
+        <item quantity="few">تمت إضافة %1$d كتب</item>
+        <item quantity="many">تمت إضافة %1$d كتابًا</item>
+        <item quantity="other">تمت إضافة %1$d كتاب</item>
+    </plurals>
+    <string name="import_failed">تعذّرت قراءة %1$s</string>
+    <string name="import_added_and_failed">%1$s. %2$s</string>
+
+    <string name="library_profile_and_settings">الملف الشخصي والإعدادات</string>
+    <string name="library_add_books">إضافة كتب</string>
+    <string name="library_all_finished">انتهيت من كل الكتب هنا. أضف كتابًا آخر!</string>
+    <string name="library_no_match">لا توجد كتب تطابق «%1$s»</string>
+    <string name="library_start_reading">ابدأ القراءة</string>
+    <string name="library_continue_reading">تابع القراءة</string>
+    <string name="library_on_your_cover">على شاشة الغطاء</string>
+    <string name="library_title">المكتبة</string>
+    <string name="library_title_finished">المكتملة</string>
+    <plurals name="library_book_count">
+        <item quantity="zero">%1$d كتاب</item>
+        <item quantity="one">%1$d كتاب</item>
+        <item quantity="two">%1$d كتاب</item>
+        <item quantity="few">%1$d كتب</item>
+        <item quantity="many">%1$d كتابًا</item>
+        <item quantity="other">%1$d كتاب</item>
+    </plurals>
+    <string name="library_shelf_reading">قيد القراءة</string>
+    <string name="library_shelf_finished_count">المكتملة · %1$d</string>
+    <string name="library_search_placeholder">ابحث في العناوين والمؤلفين</string>
+    <string name="library_clear_search">محو البحث</string>
+    <string name="library_more_options">خيارات إضافية</string>
+    <string name="library_add_file_again">إضافة الملف مجددًا</string>
+    <string name="library_finished_badge">مكتمل</string>
+    <string name="library_new_badge">جديد</string>
+    <string name="library_on_cover_screen">على شاشة الغطاء</string>
+    <string name="library_menu_open">فتح</string>
+    <string name="library_menu_show_on_cover">عرض على شاشة الغطاء</string>
+    <string name="library_menu_mark_finished">تحديد كمكتمل</string>
+    <string name="library_menu_mark_unfinished">تحديد كغير مكتمل</string>
+    <string name="library_menu_remove">إزالة</string>
+    <string name="library_remove_title">هل تريد إزالة «%1$s»؟</string>
+    <string name="library_remove_message">سيحذف تطبيق Jacket نسخته الخاصة وموضع قراءتك. ويبقى الملف الأصلي في مكانه.</string>
+    <string name="library_remove_confirm">إزالة</string>
+    <string name="library_empty_title">دَع هاتفك القابل للطي يرتدي كتابك</string>
+    <string name="library_empty_message">أضف ملف EPUB أو PDF أو قصة مصوّرة CBZ أو ملفًا نصيًا. يحتفظ تطبيق Jacket بنسخة خاصة، ويعرض غلافها على الشاشة الخارجية أو في أداة شاشة الغطاء أثناء قراءتك.</string>
+
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_subtitle">الملف الشخصي وشاشة الغطاء والقراءة</string>
+    <string name="settings_profile_title">مكتبتك</string>
+    <plurals name="settings_profile_books">
+        <item quantity="zero">%1$d كتاب</item>
+        <item quantity="one">%1$d كتاب</item>
+        <item quantity="two">%1$d كتاب</item>
+        <item quantity="few">%1$d كتب</item>
+        <item quantity="many">%1$d كتابًا</item>
+        <item quantity="other">%1$d كتاب</item>
+    </plurals>
+    <plurals name="settings_profile_reading">
+        <item quantity="zero">%1$d قيد القراءة</item>
+        <item quantity="one">%1$d قيد القراءة</item>
+        <item quantity="two">%1$d قيد القراءة</item>
+        <item quantity="few">%1$d قيد القراءة</item>
+        <item quantity="many">%1$d قيد القراءة</item>
+        <item quantity="other">%1$d قيد القراءة</item>
+    </plurals>
+    <plurals name="settings_profile_finished">
+        <item quantity="zero">%1$d مكتمل</item>
+        <item quantity="one">%1$d مكتمل</item>
+        <item quantity="two">%1$d مكتمل</item>
+        <item quantity="few">%1$d مكتملة</item>
+        <item quantity="many">%1$d مكتملًا</item>
+        <item quantity="other">%1$d مكتمل</item>
+    </plurals>
+    <string name="settings_profile_summary">%1$s · %2$s · %3$s</string>
+    <string name="settings_profile_on_cover">على شاشة الغطاء: %1$s</string>
+    <string name="settings_group_cover_screen">شاشة الغطاء</string>
+    <string name="settings_outer_ready">الشاشة الخارجية جاهزة</string>
+    <string name="settings_outer_ready_description">يمكن لهاتفك عرض الغلاف على شاشته الخارجية أثناء قراءتك على الشاشة الداخلية.</string>
+    <string name="settings_outer_unavailable">الشاشة الخارجية غير متاحة حاليًا</string>
+    <string name="settings_outer_unavailable_description">افتح هاتفك القابل للطي على شكل كتاب لاستخدام شاشته الخارجية. أما الهواتف القلّابة فتستخدم الأداة أدناه.</string>
+    <string name="settings_widget_style">نمط الأداة</string>
+    <string name="settings_widget_style_description">لشاشة الغطاء في Galaxy Z Flip وللشاشات الرئيسية</string>
+    <string name="settings_show_progress">تقدّم القراءة</string>
+    <string name="settings_show_progress_description">شريط تقدّم رفيع ونسبة مئوية على الغلاف</string>
+    <string name="settings_ambient_dim">التعتيم التلقائي</string>
+    <string name="settings_ambient_dim_description">تخفت الشاشة الخارجية بعد 30 ثانية دون لمس</string>
+    <string name="settings_auto_outer">الغلاف أثناء القراءة</string>
+    <string name="settings_auto_outer_description">عرض الغلاف على الشاشة الخارجية كلما فتحت الهاتف للقراءة</string>
+    <string name="settings_preview_outer">الشاشة الخارجية</string>
+    <string name="settings_preview_widget">الأداة</string>
+    <string name="settings_preview_description">معاينة لشاشة الغطاء بإعداداتك الحالية</string>
+    <string name="settings_cover_hint">في Galaxy Z Flip: أضف «غلاف Jacket» من الإعدادات › شاشة الغطاء › الأدوات. وفي Motorola Razr: افتح Jacket من الشاشة الخارجية.</string>
+    <string name="settings_group_reading">القراءة</string>
+    <string name="settings_group_appearance">المظهر</string>
+    <string name="settings_book_colors">ألوان من كتابك</string>
+    <string name="settings_book_colors_description">لوّن تطبيق Jacket بألوان غلاف الكتاب الذي تقرؤه. عند الإيقاف: تُستخدم لوحة ألوان هاتفك.</string>
+    <string name="settings_group_backup">النسخ الاحتياطي</string>
+    <string name="settings_backup_save">حفظ نسخة احتياطية</string>
+    <string name="settings_backup_save_description">قائمة كتبك ومواضع القراءة والإشارات المرجعية والتمييزات والإعدادات، من دون ملفات الكتب.</string>
+    <string name="settings_backup_restore">الاستعادة من نسخة احتياطية</string>
+    <string name="settings_backup_restore_description">ثم أضف ملفات الكتب مجددًا: سيجد كلٌّ منها موضعه وملاحظاته.</string>
+    <string name="settings_backup_saved">تم حفظ النسخة الاحتياطية.</string>
+    <string name="settings_backup_save_failed">تعذّر حفظ النسخة الاحتياطية: %1$s</string>
+    <string name="settings_backup_restored">تمت استعادة النسخة الاحتياطية.</string>
+    <plurals name="settings_backup_restored_missing">
+        <item quantity="zero">تمت استعادة النسخة الاحتياطية. أضف ملفات %1$d كتاب لإعادة ربطها.</item>
+        <item quantity="one">تمت استعادة النسخة الاحتياطية. أضف ملف %1$d كتاب لإعادة ربطه.</item>
+        <item quantity="two">تمت استعادة النسخة الاحتياطية. أضف ملفات %1$d كتاب لإعادة ربطها.</item>
+        <item quantity="few">تمت استعادة النسخة الاحتياطية. أضف ملفات %1$d كتب لإعادة ربطها.</item>
+        <item quantity="many">تمت استعادة النسخة الاحتياطية. أضف ملفات %1$d كتابًا لإعادة ربطها.</item>
+        <item quantity="other">تمت استعادة النسخة الاحتياطية. أضف ملفات %1$d كتاب لإعادة ربطها.</item>
+    </plurals>
+    <string name="settings_backup_not_a_backup">هذا ليس ملف نسخة احتياطية من Jacket.</string>
+    <string name="settings_backup_unreadable">تعذّرت قراءة هذا الملف.</string>
+    <string name="settings_backup_cant_open">يتعذّر فتح ملف النسخة الاحتياطية</string>
+    <string name="settings_backup_cant_write">يتعذّر الكتابة في ملف النسخة الاحتياطية</string>
+    <string name="settings_group_about">حول التطبيق</string>
+    <string name="settings_about_version">الإصدار %1$s</string>
+    <string name="settings_about_source">الرمز المصدري</string>
+    <string name="settings_about_source_description">مفتوح المصدر على GitHub</string>
+    <string name="settings_about_licenses">تراخيص البرامج مفتوحة المصدر</string>
+    <string name="settings_about_licenses_description">تطبيق Jacket مرخّص بموجب Apache 2.0، ومبني على Readium وJetpack وخطوط مفتوحة</string>
+
+    <string name="licenses_title">تراخيص البرامج مفتوحة المصدر</string>
+    <string name="licenses_subtitle">تطبيق Jacket برنامج حر، مبني على عمل الآخرين</string>
+
+    <string name="reading_text_size">حجم النص</string>
+    <string name="reading_text_size_sample">أ</string>
+    <string name="reading_typeface">نوع الخط</string>
+    <string name="reading_typeface_sample">Aa</string>
+    <string name="reading_selected">محدّد</string>
+    <string name="reading_page">الصفحة</string>
+    <string name="reading_layout">التخطيط</string>
+    <string name="reading_layout_hint">تُقلَب الصفحات كما في الكتاب: اسحب أو انقر على الحواف. وعند فتح الهاتف، تظهر صفحتان متجاورتان.</string>
+    <string name="reading_line_spacing">تباعد الأسطر</string>
+    <string name="reading_line_spacing_book">كتاب</string>
+    <string name="reading_line_spacing_tight">ضيّق</string>
+    <string name="reading_line_spacing_normal">عادي</string>
+    <string name="reading_line_spacing_loose">واسع</string>
+    <string name="reading_margins">الهوامش</string>
+    <string name="reading_margins_narrow">ضيّقة</string>
+    <string name="reading_margins_normal">عادية</string>
+    <string name="reading_margins_wide">عريضة</string>
+    <string name="reading_alignment">المحاذاة</string>
+    <string name="reading_alignment_book">كتاب</string>
+    <string name="reading_alignment_left">البداية</string>
+    <string name="reading_alignment_justified">ضبط</string>
+    <string name="reading_alignment_hint">تُقسَّم الكلمات بالواصلة في النص المضبوط. ويحافظ خيار «كتاب» على تباعد الناشر ومحاذاته.</string>
+    <string name="reading_buttons">الأزرار</string>
+    <string name="reading_volume_keys">قلب الصفحات بمفاتيح الصوت</string>
+    <string name="reading_volume_keys_description">خفض الصوت للصفحة التالية ورفعه للسابقة. لا يعمل أثناء الاستماع.</string>
+
+    <string name="reader_back_to_library">العودة إلى المكتبة</string>
+    <string name="reader_search">البحث في الكتاب</string>
+    <string name="reader_bookmark_add">إضافة إشارة مرجعية لهذه الصفحة</string>
+    <string name="reader_bookmark_remove">إزالة الإشارة المرجعية</string>
+    <string name="reader_outer_show">عرض الغلاف على الشاشة الخارجية</string>
+    <string name="reader_outer_hide">إخفاء الغلاف من الشاشة الخارجية</string>
+    <string name="reader_text_settings">إعدادات النص والصفحة</string>
+    <string name="reader_contents_and_notes">المحتويات والإشارات المرجعية والتمييزات</string>
+    <string name="reader_notes">الإشارات المرجعية والتمييزات</string>
+    <string name="reader_listen">استماع: القراءة بصوت عالٍ</string>
+    <string name="reader_previous_chapter">الفصل السابق</string>
+    <string name="reader_next_chapter">الفصل التالي</string>
+    <string name="reader_previous_paragraph">الفقرة السابقة</string>
+    <string name="reader_next_paragraph">الفقرة التالية</string>
+    <string name="reader_previous_page">الصفحة السابقة</string>
+    <string name="reader_next_page">الصفحة التالية</string>
+    <string name="reader_page_number">صفحة %1$d</string>
+    <string name="reader_page_of">صفحة %1$d من %2$d</string>
+    <string name="reader_percent_read">تمت قراءة %1$d%%</string>
+    <string name="reader_footer_last_page">آخر صفحة في الفصل</string>
+    <plurals name="reader_footer_pages_left">
+        <item quantity="zero">تبقّت %1$d صفحة في الفصل</item>
+        <item quantity="one">تبقّت %1$d صفحة في الفصل</item>
+        <item quantity="two">تبقّت %1$d صفحة في الفصل</item>
+        <item quantity="few">تبقّت %1$d صفحات في الفصل</item>
+        <item quantity="many">تبقّت %1$d صفحةً في الفصل</item>
+        <item quantity="other">تبقّت %1$d صفحة في الفصل</item>
+    </plurals>
+    <string name="reader_error_open_book">تعذّر فتح هذا الكتاب.\n%1$s</string>
+    <string name="reader_error_no_pages">لا يحتوي هذا الكتاب على صفحات لعرضها.</string>
+    <string name="reader_error_pdf">تعذّر فتح ملف PDF هذا. ملفات PDF المحمية بكلمة مرور غير مدعومة بعد.</string>
+    <string name="reader_error_comic">تعذّر فتح هذه القصة المصوّرة.</string>
+    <string name="reader_error_text">هذا الملف فارغ أو تعذّرت قراءته.</string>
+    <string name="reader_no_app_for_link">لا يوجد تطبيق يمكنه فتح هذا الرابط.</string>
+    <string name="reader_share_quote">«%1$s»\n— %2$s</string>
+    <string name="reader_share_quote_author">«%1$s»\n— %2$s، %3$s</string>
+
+    <string name="selection_highlight">تمييز</string>
+    <string name="selection_note">ملاحظة</string>
+    <string name="selection_share">مشاركة</string>
+
+    <string name="notes_tab_contents">المحتويات</string>
+    <string name="notes_tab_bookmarks">الإشارات</string>
+    <string name="notes_tab_bookmarks_count">الإشارات · %1$d</string>
+    <string name="notes_tab_highlights">التمييزات</string>
+    <string name="notes_tab_highlights_count">التمييزات · %1$d</string>
+    <string name="notes_no_bookmarks">لا توجد إشارات مرجعية بعد</string>
+    <string name="notes_no_bookmarks_hint">انقر على الشريط أعلى الصفحة لحفظ موضعك فيها.</string>
+    <string name="notes_no_highlights">لا توجد تمييزات بعد</string>
+    <string name="notes_no_highlights_hint">اضغط مع الاستمرار على النص، ثم اختر «تمييز» أو «ملاحظة».</string>
+    <string name="notes_edit">تعديل الملاحظة واللون</string>
+    <string name="notes_delete">حذف</string>
+    <string name="notes_bookmark_page_at">الصفحة عند %1$d%%</string>
+    <string name="notes_highlight_quote">«%1$s»</string>
+    <string name="notes_note">ملاحظة</string>
+    <string name="notes_done">تم</string>
+
+    <string name="search_placeholder">ابحث في هذا الكتاب</string>
+    <string name="search_clear">محو</string>
+    <string name="search_no_results">لا توجد نتائج عن «%1$s»</string>
+    <plurals name="search_result_count">
+        <item quantity="zero">%1$d نتيجة</item>
+        <item quantity="one">%1$d نتيجة</item>
+        <item quantity="two">%1$d نتيجة</item>
+        <item quantity="few">%1$d نتائج</item>
+        <item quantity="many">%1$d نتيجةً</item>
+        <item quantity="other">%1$d نتيجة</item>
+    </plurals>
+
+    <string name="finished_title_finished">مكتمل</string>
+    <string name="finished_title_end">النهاية</string>
+    <string name="finished_keep_reading">متابعة القراءة</string>
+    <string name="finished_mark">تحديد كمكتمل</string>
+    <string name="finished_back_to_library">العودة إلى المكتبة</string>
+    <string name="finished_next">التالي: %1$s</string>
+
+    <string name="listen_play">تشغيل</string>
+    <string name="listen_pause">إيقاف مؤقت</string>
+    <string name="listen_previous_sentence">الجملة السابقة</string>
+    <string name="listen_next_sentence">الجملة التالية</string>
+    <string name="listen_previous_paragraph">الفقرة السابقة</string>
+    <string name="listen_next_paragraph">الفقرة التالية</string>
+    <string name="listen_rate">%1$s×</string>
+    <string name="listen_stop">إيقاف الاستماع</string>
+    <string name="listen_sleep_timer">مؤقت النوم</string>
+    <string name="listen_sleep_timer_end_of_chapter">مؤقت النوم: نهاية الفصل</string>
+    <plurals name="listen_sleep_minutes_left">
+        <item quantity="zero">مؤقت النوم: تبقّت %1$d دقيقة</item>
+        <item quantity="one">مؤقت النوم: تبقّت %1$d دقيقة</item>
+        <item quantity="two">مؤقت النوم: تبقّت %1$d دقيقة</item>
+        <item quantity="few">مؤقت النوم: تبقّت %1$d دقائق</item>
+        <item quantity="many">مؤقت النوم: تبقّت %1$d دقيقةً</item>
+        <item quantity="other">مؤقت النوم: تبقّت %1$d دقيقة</item>
+    </plurals>
+    <string name="listen_sleep_off">إيقاف</string>
+    <string name="listen_sleep_15_minutes">15 دقيقة</string>
+    <string name="listen_sleep_30_minutes">30 دقيقة</string>
+    <string name="listen_sleep_1_hour">ساعة واحدة</string>
+    <string name="listen_sleep_end_of_chapter">نهاية الفصل</string>
+    <string name="listen_no_voice">لا يوجد صوت مثبَّت لتحويل النص إلى كلام على هذا الهاتف.</string>
+    <string name="listen_no_readable_text">لا يحتوي هذا الكتاب على نص يمكن قراءته بصوت عالٍ.</string>
+    <string name="listen_stopped_error">توقفت القراءة بصوت عالٍ: %1$s</string>
+    <string name="listen_voice_stopped">توقف الصوت. تحقّق من إعدادات تحويل النص إلى كلام.</string>
+
+    <string name="widget_reading">قيد القراءة</string>
+    <string name="widget_empty">أضف كتابًا ليظهر غلافه هنا</string>
+    <string name="listen_notification_channel">القراءة بصوت عالٍ</string>
+</resources>

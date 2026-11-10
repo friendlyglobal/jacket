@@ -1,0 +1,42 @@
+Jacket es un lector de libros electrónicos de código abierto para teléfonos plegables. Mientras lees en la pantalla interior, la pantalla externa muestra la portada de tu libro de borde a borde, como la carátula de un disco, para que la gente a tu alrededor vea lo que estás leyendo.
+
+LA PORTADA, POR FUERA
+• Plegables tipo libro: la portada ocupa la pantalla externa mientras lees dentro, gracias al modo de doble pantalla de Android.
+• Galaxy Z Flip: un widget para la pantalla externa Flex Window.
+• Cualquier teléfono o tablet: el mismo widget en tu pantalla de inicio.
+• Desactiva la portada en la pantalla externa cuando quieras desde Ajustes.
+
+LECTURA
+• EPUB, PDF, cómics CBZ y texto plano, desde tus propios archivos. Usa Añadir libros, o Abrir con o Compartir desde otra app.
+• Los EPUB se muestran con Readium, el kit de herramientas de código abierto: páginas reales, dos páginas a la vez al desplegar el teléfono, o desplazamiento continuo si lo prefieres.
+• Índice con subcapítulos, el capítulo actual siempre localizado mientras lees, las páginas que quedan del capítulo y una barra que previsualiza el capítulo bajo tu pulgar.
+• Marcadores, resaltados en varios colores con notas y búsqueda de texto completo en los EPUB.
+
+ESCUCHAR
+• El modo audiolibro lee en voz alta libros EPUB y de texto plano con la voz de texto a voz de tu teléfono, y resalta cada palabra a medida que se pronuncia.
+• Sigue sonando con la pantalla apagada, con controles en la pantalla de bloqueo y en los auriculares.
+• Temporizador de apagado: se detiene tras el tiempo que elijas o al final del capítulo.
+
+COMODIDAD DE LECTURA
+• Fuentes Literata, Atkinson Hyperlegible y OpenDyslexic.
+• Tamaño del texto, interlineado, márgenes y justificación.
+• Colores de página Libro, Papel, Oscuro y Negro.
+• Pasa las páginas con los botones de volumen.
+
+BIBLIOTECA
+• Busca y ordena tus libros.
+• Un estante de terminados y una pantalla de fin de libro al llegar a la última página.
+• Exporta un archivo de copia de seguridad y vuelve a importarlo más tarde o en otro teléfono.
+
+DISEÑO
+• Material 3 Expressive: colores tomados de la portada del libro que estás leyendo, animaciones elásticas y respuesta háptica.
+
+PRIVACIDAD
+• Sin permiso de internet: ni Jacket ni los libros que abres en él pueden conectarse a la red.
+• Sin cuentas, sin anuncios, sin analíticas, sin rastreo.
+• Libre y de código abierto bajo la Apache License 2.0: https://github.com/friendlyglobal/jacket
+
+CONVIENE SABER
+• La compatibilidad con la pantalla externa depende del teléfono. En teléfonos sin pantalla externa, esas opciones se ocultan.
+• Los libros con DRM (protegidos contra copia) no se pueden abrir.
+• La lectura en voz alta de libros de texto plano se detiene al salir de la app. La de los EPUB sigue sonando en segundo plano.

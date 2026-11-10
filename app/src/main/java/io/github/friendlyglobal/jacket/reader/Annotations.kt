@@ -67,7 +67,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -142,7 +143,7 @@ fun NotesSheet(
         add(NotesTab.HIGHLIGHTS)
     }
     var tab by rememberSaveable { mutableStateOf(tabs.first()) }
-    val roomy = LocalConfiguration.current.screenWidthDp >= 600
+    val roomy = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() } >= 600.dp
     if (tab !in tabs) tab = tabs.first()
 
     Column(Modifier.fillMaxWidth()) {

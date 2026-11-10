@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jacket</string>
+    <string name="widget_name">Jacket kapağı</string>
+    <string name="widget_description">Okuduğunuz kitap: kapağı ve ilerlemeniz.</string>
+
+    <string name="common_back">Geri</string>
+    <string name="common_cancel">İptal</string>
+    <string name="common_ok">Tamam</string>
+    <string name="percent">%%%1$d</string>
+    <string name="cover_of">%1$s kapağı</string>
+
+    <string name="format_comic">Çizgi roman</string>
+    <string name="format_text">Metin</string>
+
+    <string name="book_status_finished">Bitti</string>
+    <string name="book_status_not_started">Başlanmadı</string>
+    <string name="book_status_page_of">Sayfa %1$d / %2$d</string>
+    <string name="book_status_percent_read">%%%1$d okundu</string>
+    <string name="book_untitled">Adsız</string>
+
+    <string name="cover_style_jacket">Jacket</string>
+    <string name="cover_style_shelf">Raf</string>
+    <string name="cover_style_glance">Bakış</string>
+
+    <string name="font_literata_description">Google\'ın uzun okumalar için yazı tipi</string>
+    <string name="font_hyperlegible_description">Az görenler için belirgin harf biçimleri</string>
+    <string name="font_open_dyslexic_description">Ters dönmeye direnen ağırlıklı harfler</string>
+    <string name="font_serif">Sistem serif</string>
+    <string name="font_serif_description">Telefonunuzun serif yazı tipi</string>
+    <string name="font_sans">Sistem sans</string>
+    <string name="font_sans_description">Telefonunuzun arayüz yazı tipi</string>
+    <string name="font_original">Kitabınki</string>
+    <string name="font_original_description">Yayıncı ne seçtiyse</string>
+
+    <string name="page_color_book">Kitap</string>
+    <string name="page_color_paper">Kâğıt</string>
+    <string name="page_color_dark">Koyu</string>
+    <string name="page_color_black">Siyah</string>
+
+    <string name="layout_pages">Sayfalar</string>
+    <string name="layout_scroll">Kaydırma</string>
+
+    <string name="sort_recent">Son okunan</string>
+    <string name="sort_title">Başlık</string>
+    <string name="sort_author">Yazar</string>
+
+    <string name="import_added_one">“%1$s” eklendi</string>
+    <plurals name="import_added_books">
+        <item quantity="one">%1$d kitap eklendi</item>
+        <item quantity="other">%1$d kitap eklendi</item>
+    </plurals>
+    <string name="import_failed">%1$s okunamadı</string>
+    <string name="import_added_and_failed">%1$s. %2$s</string>
+
+    <string name="library_profile_and_settings">Profil ve ayarlar</string>
+    <string name="library_add_books">Kitap ekle</string>
+    <string name="library_all_finished">Buradaki tüm kitaplar bitti. Yeni bir kitap ekleyin!</string>
+    <string name="library_no_match">“%1$s” ile eşleşen kitap yok</string>
+    <string name="library_start_reading">OKUMAYA BAŞLAYIN</string>
+    <string name="library_continue_reading">OKUMAYA DEVAM EDİN</string>
+    <string name="library_on_your_cover">Kapak ekranında</string>
+    <string name="library_title">Kitaplık</string>
+    <string name="library_title_finished">Bitenler</string>
+    <plurals name="library_book_count">
+        <item quantity="one">%1$d kitap</item>
+        <item quantity="other">%1$d kitap</item>
+    </plurals>
+    <string name="library_shelf_reading">Okunuyor</string>
+    <string name="library_shelf_finished_count">Bitenler · %1$d</string>
+    <string name="library_search_placeholder">Başlık ve yazar arayın</string>
+    <string name="library_clear_search">Aramayı temizle</string>
+    <string name="library_more_options">Diğer seçenekler</string>
+    <string name="library_add_file_again">Dosyayı tekrar ekle</string>
+    <string name="library_finished_badge">Bitti</string>
+    <string name="library_new_badge">Yeni</string>
+    <string name="library_on_cover_screen">Kapak ekranınızda</string>
+    <string name="library_menu_open">Aç</string>
+    <string name="library_menu_show_on_cover">Kapak ekranında göster</string>
+    <string name="library_menu_mark_finished">Bitti olarak işaretle</string>
+    <string name="library_menu_mark_unfinished">Bitmedi olarak işaretle</string>
+    <string name="library_menu_remove">Kaldır</string>
+    <string name="library_remove_title">“%1$s” kaldırılsın mı?</string>
+    <string name="library_remove_message">Jacket kendi kopyasını ve okuma konumunuzu siler. Orijinal dosya olduğu yerde kalır.</string>
+    <string name="library_remove_confirm">Kaldır</string>
+    <string name="library_empty_title">Katlanabilir telefonunuz kitabınızı giysin</string>
+    <string name="library_empty_message">Bir EPUB, PDF, CBZ çizgi roman veya metin dosyası ekleyin. Jacket özel bir kopya saklar ve siz okurken kitabın kapağını dış ekranda ya da kapak ekranı widget\'ında gösterir.</string>
+
+    <string name="settings_title">Ayarlar</string>
+    <string name="settings_subtitle">Profil, kapak ekranı ve okuma</string>
+    <string name="settings_profile_title">Kitaplığınız</string>
+    <plurals name="settings_profile_books">
+        <item quantity="one">%1$d kitap</item>
+        <item quantity="other">%1$d kitap</item>
+    </plurals>
+    <plurals name="settings_profile_reading">
+        <item quantity="one">%1$d okunuyor</item>
+        <item quantity="other">%1$d okunuyor</item>
+    </plurals>
+    <plurals name="settings_profile_finished">
+        <item quantity="one">%1$d bitti</item>
+        <item quantity="other">%1$d bitti</item>
+    </plurals>
+    <string name="settings_profile_summary">%1$s · %2$s · %3$s</string>
+    <string name="settings_profile_on_cover">Kapak ekranında: %1$s</string>
+    <string name="settings_group_cover_screen">Kapak ekranı</string>
+    <string name="settings_outer_ready">Dış ekran hazır</string>
+    <string name="settings_outer_ready_description">Telefonunuz, siz içeride okurken kapağı dış ekranında gösterebilir.</string>
+    <string name="settings_outer_unavailable">Dış ekran şu anda kullanılamıyor</string>
+    <string name="settings_outer_unavailable_description">Dış ekranı kullanmak için kitap tipi katlanabilir telefonunuzu açın. Flip telefonlar aşağıdaki widget\'ı kullanır.</string>
+    <string name="settings_widget_style">Widget stili</string>
+    <string name="settings_widget_style_description">Galaxy Z Flip kapak ekranı ve ana ekranlar için</string>
+    <string name="settings_show_progress">Okuma ilerlemesi</string>
+    <string name="settings_show_progress_description">Kapakta ince bir ilerleme çubuğu ve yüzde</string>
+    <string name="settings_ambient_dim">Otomatik karartma</string>
+    <string name="settings_ambient_dim_description">Dış ekran, 30 saniye dokunulmadığında kararır</string>
+    <string name="settings_auto_outer">Okurken kapak</string>
+    <string name="settings_auto_outer_description">Okumak için telefonu her açtığınızda kapak dış ekrana gelir</string>
+    <string name="settings_preview_outer">Dış ekran</string>
+    <string name="settings_preview_widget">Widget</string>
+    <string name="settings_preview_description">Geçerli ayarlarınızla kapak ekranının önizlemesi</string>
+    <string name="settings_cover_hint">Galaxy Z Flip: “Jacket kapağı” widget\'ını Ayarlar › Kapak ekranı › Widget\'lar bölümünden ekleyin. Motorola Razr: Jacket\'i harici ekrandan açın.</string>
+    <string name="settings_group_reading">Okuma</string>
+    <string name="settings_group_appearance">Görünüm</string>
+    <string name="settings_book_colors">Kitabınızdan renkler</string>
+    <string name="settings_book_colors_description">Jacket\'i okuduğunuz kitabın kapağıyla renklendirin. Kapalıyken telefonunuzun paleti kullanılır.</string>
+    <string name="settings_group_backup">Yedekleme</string>
+    <string name="settings_backup_save">Yedek kaydet</string>
+    <string name="settings_backup_save_description">Kitap listeniz, konumlarınız, yer işaretleriniz, vurgularınız ve ayarlarınız. Kitap dosyaları dahil değildir.</string>
+    <string name="settings_backup_restore">Yedekten geri yükle</string>
+    <string name="settings_backup_restore_description">Ardından kitap dosyalarını tekrar ekleyin: her biri kaldığı yeri ve notlarını bulur.</string>
+    <string name="settings_backup_saved">Yedek kaydedildi.</string>
+    <string name="settings_backup_save_failed">Yedek kaydedilemedi: %1$s</string>
+    <string name="settings_backup_restored">Yedek geri yüklendi.</string>
+    <plurals name="settings_backup_restored_missing">
+        <item quantity="one">Yedek geri yüklendi. Yeniden bağlamak için %1$d kitabın dosyasını ekleyin.</item>
+        <item quantity="other">Yedek geri yüklendi. Yeniden bağlamak için %1$d kitabın dosyalarını ekleyin.</item>
+    </plurals>
+    <string name="settings_backup_not_a_backup">Bu bir Jacket yedek dosyası değil.</string>
+    <string name="settings_backup_unreadable">Bu dosya okunamadı.</string>
+    <string name="settings_backup_cant_open">Yedek dosyası açılamıyor</string>
+    <string name="settings_backup_cant_write">Yedek dosyası yazılamıyor</string>
+    <string name="settings_group_about">Hakkında</string>
+    <string name="settings_about_version">Sürüm %1$s</string>
+    <string name="settings_about_source">Kaynak kodu</string>
+    <string name="settings_about_source_description">GitHub\'da açık kaynak</string>
+    <string name="settings_about_licenses">Açık kaynak lisansları</string>
+    <string name="settings_about_licenses_description">Jacket, Apache 2.0 lisanslıdır; Readium, Jetpack ve açık yazı tipleri üzerine kuruludur</string>
+
+    <string name="licenses_title">Açık kaynak lisansları</string>
+    <string name="licenses_subtitle">Jacket, başkalarının emeği üzerine kurulu özgür bir yazılımdır</string>
+
+    <string name="reading_text_size">Metin boyutu</string>
+    <string name="reading_text_size_sample">A</string>
+    <string name="reading_typeface">Yazı tipi</string>
+    <string name="reading_typeface_sample">Aa</string>
+    <string name="reading_selected">Seçili</string>
+    <string name="reading_page">Sayfa</string>
+    <string name="reading_layout">Düzen</string>
+    <string name="reading_layout_hint">Sayfalar kitap gibi çevrilir: kaydırın veya kenarlara dokunun. Telefon açıkken iki sayfa yan yana görünür.</string>
+    <string name="reading_line_spacing">Satır aralığı</string>
+    <string name="reading_line_spacing_book">Kitap</string>
+    <string name="reading_line_spacing_tight">Sık</string>
+    <string name="reading_line_spacing_normal">Normal</string>
+    <string name="reading_line_spacing_loose">Geniş</string>
+    <string name="reading_margins">Kenar boşlukları</string>
+    <string name="reading_margins_narrow">Dar</string>
+    <string name="reading_margins_normal">Normal</string>
+    <string name="reading_margins_wide">Geniş</string>
+    <string name="reading_alignment">Hizalama</string>
+    <string name="reading_alignment_book">Kitap</string>
+    <string name="reading_alignment_left">Sola</string>
+    <string name="reading_alignment_justified">İki yana</string>
+    <string name="reading_alignment_hint">İki yana yaslı metinde heceleme yapılır. “Kitap”, yayıncının kendi aralık ve hizalamasını korur.</string>
+    <string name="reading_buttons">Düğmeler</string>
+    <string name="reading_volume_keys">Ses tuşlarıyla sayfa çevirme</string>
+    <string name="reading_volume_keys_description">Sesi kısma tuşu sonraki, açma tuşu önceki sayfaya geçer. Dinlerken çalışmaz.</string>
+
+    <string name="reader_back_to_library">Kitaplığa dön</string>
+    <string name="reader_search">Kitapta ara</string>
+    <string name="reader_bookmark_add">Bu sayfaya yer işareti koy</string>
+    <string name="reader_bookmark_remove">Yer işaretini kaldır</string>
+    <string name="reader_outer_show">Kapağı dış ekranda göster</string>
+    <string name="reader_outer_hide">Kapağı dış ekranda gizle</string>
+    <string name="reader_text_settings">Metin ve sayfa ayarları</string>
+    <string name="reader_contents_and_notes">İçindekiler, yer işaretleri ve vurgular</string>
+    <string name="reader_notes">Yer işaretleri ve vurgular</string>
+    <string name="reader_listen">Dinle: sesli oku</string>
+    <string name="reader_previous_chapter">Önceki bölüm</string>
+    <string name="reader_next_chapter">Sonraki bölüm</string>
+    <string name="reader_previous_paragraph">Önceki paragraf</string>
+    <string name="reader_next_paragraph">Sonraki paragraf</string>
+    <string name="reader_previous_page">Önceki sayfa</string>
+    <string name="reader_next_page">Sonraki sayfa</string>
+    <string name="reader_page_number">Sayfa %1$d</string>
+    <string name="reader_page_of">Sayfa %1$d / %2$d</string>
+    <string name="reader_percent_read">%%%1$d okundu</string>
+    <string name="reader_footer_last_page">Bölümün son sayfası</string>
+    <plurals name="reader_footer_pages_left">
+        <item quantity="one">Bölümde %1$d sayfa kaldı</item>
+        <item quantity="other">Bölümde %1$d sayfa kaldı</item>
+    </plurals>
+    <string name="reader_error_open_book">Bu kitap açılamadı.\n%1$s</string>
+    <string name="reader_error_no_pages">Bu kitapta gösterilecek sayfa yok.</string>
+    <string name="reader_error_pdf">Bu PDF açılamadı. Parola korumalı PDF\'ler henüz desteklenmiyor.</string>
+    <string name="reader_error_comic">Bu çizgi roman açılamadı.</string>
+    <string name="reader_error_text">Bu dosya boş veya okunamadı.</string>
+    <string name="reader_no_app_for_link">Bu bağlantıyı açabilecek bir uygulama yok.</string>
+    <string name="reader_share_quote">“%1$s”\n— %2$s</string>
+    <string name="reader_share_quote_author">“%1$s”\n— %2$s, %3$s</string>
+
+    <string name="selection_highlight">Vurgula</string>
+    <string name="selection_note">Not</string>
+    <string name="selection_share">Paylaş</string>
+
+    <string name="notes_tab_contents">İçindekiler</string>
+    <string name="notes_tab_bookmarks">Yer işaretleri</string>
+    <string name="notes_tab_bookmarks_count">Yer işaretleri · %1$d</string>
+    <string name="notes_tab_highlights">Vurgular</string>
+    <string name="notes_tab_highlights_count">Vurgular · %1$d</string>
+    <string name="notes_no_bookmarks">Henüz yer işareti yok</string>
+    <string name="notes_no_bookmarks_hint">Kaldığınız yeri işaretlemek için sayfanın üstündeki şeride dokunun.</string>
+    <string name="notes_no_highlights">Henüz vurgu yok</string>
+    <string name="notes_no_highlights_hint">Metne basılı tutun, ardından Vurgula veya Not seçeneğine dokunun.</string>
+    <string name="notes_edit">Notu ve rengi düzenle</string>
+    <string name="notes_delete">Sil</string>
+    <string name="notes_bookmark_page_at">%%%1$d konumundaki sayfa</string>
+    <string name="notes_highlight_quote">“%1$s”</string>
+    <string name="notes_note">Not</string>
+    <string name="notes_done">Bitti</string>
+
+    <string name="search_placeholder">Bu kitapta arayın</string>
+    <string name="search_clear">Temizle</string>
+    <string name="search_no_results">“%1$s” için sonuç yok</string>
+    <plurals name="search_result_count">
+        <item quantity="one">%1$d sonuç</item>
+        <item quantity="other">%1$d sonuç</item>
+    </plurals>
+
+    <string name="finished_title_finished">Bitti</string>
+    <string name="finished_title_end">Son</string>
+    <string name="finished_keep_reading">Okumaya devam et</string>
+    <string name="finished_mark">Bitti olarak işaretle</string>
+    <string name="finished_back_to_library">Kitaplığa dön</string>
+    <string name="finished_next">Sıradaki: %1$s</string>
+
+    <string name="listen_play">Oynat</string>
+    <string name="listen_pause">Duraklat</string>
+    <string name="listen_previous_sentence">Önceki cümle</string>
+    <string name="listen_next_sentence">Sonraki cümle</string>
+    <string name="listen_previous_paragraph">Önceki paragraf</string>
+    <string name="listen_next_paragraph">Sonraki paragraf</string>
+    <string name="listen_rate">%1$s×</string>
+    <string name="listen_stop">Dinlemeyi durdur</string>
+    <string name="listen_sleep_timer">Uyku zamanlayıcısı</string>
+    <string name="listen_sleep_timer_end_of_chapter">Uyku zamanlayıcısı: bölüm sonu</string>
+    <plurals name="listen_sleep_minutes_left">
+        <item quantity="one">Uyku zamanlayıcısı: %1$d dakika kaldı</item>
+        <item quantity="other">Uyku zamanlayıcısı: %1$d dakika kaldı</item>
+    </plurals>
+    <string name="listen_sleep_off">Kapalı</string>
+    <string name="listen_sleep_15_minutes">15 dakika</string>
+    <string name="listen_sleep_30_minutes">30 dakika</string>
+    <string name="listen_sleep_1_hour">1 saat</string>
+    <string name="listen_sleep_end_of_chapter">Bölüm sonu</string>
+    <string name="listen_no_voice">Bu telefonda yüklü bir metin okuma sesi yok.</string>
+    <string name="listen_no_readable_text">Bu kitapta sesli okunabilecek metin yok.</string>
+    <string name="listen_stopped_error">Sesli okuma durdu: %1$s</string>
+    <string name="listen_voice_stopped">Ses durdu. Metin okuma ayarlarınızı kontrol edin.</string>
+
+    <string name="widget_reading">Okunuyor</string>
+    <string name="widget_empty">Kapağını giymek için bir kitap ekleyin</string>
+    <string name="listen_notification_channel">Sesli okuma</string>
+</resources>

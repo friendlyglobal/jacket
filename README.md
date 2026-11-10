@@ -20,8 +20,10 @@ from the cover of the book you're reading.
   *Share* from any app (shared text becomes a book too). Jacket keeps a private copy and pulls out
   the title, author and cover, generating a typographic cover when a file has none.
 - **Real pages for EPUB**, rendered by [Readium](https://readium.org), the open-source toolkit
-  behind many reading apps: proper pagination, publisher styles, images and links. Swipe or tap
-  the outer edges to turn the page; tap anywhere else for the controls. Unfolded (or in
+  behind many reading apps: proper pagination, publisher styles, images and links. Pages turn
+  like paper: the page lifts off under your finger and slides over the next with a soft shadow,
+  then settles with a spring. Swipe or tap the outer edges to turn; tap anywhere else for the
+  controls. Unfolded (or in
   landscape), you get a two-page spread. Or switch to continuous scrolling, where taps only
   bring up the controls.
 - **Contents and progress:** the book's own table of contents, sub-chapters included, with the
@@ -51,6 +53,12 @@ from the cover of the book you're reading.
 - Play/pause, skip by sentence (EPUB) or paragraph (text), 0.8× to 2× speed. It pauses when
   another app plays audio or your headphones come out.
 
+### In your language
+English, Spanish, Brazilian Portuguese, French, Italian, German, Dutch, Polish, Russian, Ukrainian,
+Turkish, Arabic (right to left), Hindi, Indonesian, Japanese, Korean, and Simplified and Traditional
+Chinese. Android 13+ lets you pick Jacket's language on its own in system settings. Translations
+are a first pass; corrections from native speakers are welcome (`app/src/main/res/values-*/`).
+
 ### Your data
 - **Backup:** Settings › Backup saves your books list, places, bookmarks, highlights and settings
   to a file you choose (not the book files). Restore it on a new phone, then add the books again:
@@ -66,9 +74,11 @@ from the cover of the book you're reading.
 | Any phone or tablet | The same widget, on the home screen. |
 
 ### Material 3 Expressive
-- The cover flies from the library into the book (a shared-element transition) and "opens" into
-  the first page; closing the book flies it back to its place. Predictive back shrinks the page
-  as you swipe.
+- Opening a book: the library recedes, the cover flies in, breathes while the first page
+  loads, then swings open on its spine as the page grows to fill the screen. Closing folds the
+  page back into the cover, which flies home to its exact spot. Predictive back drives the
+  same fold as you swipe.
+- Settings show a live preview of your cover screen and of each widget style.
 - The play button morphs into a slowly turning cookie while it reads, over a wavy progress line
   that goes flat when paused. The bookmark ribbon drops in with a bounce, and finishing a book
   gets a small celebration.
@@ -123,7 +133,6 @@ docs/concept.html            The interactive design concept the app started from
 ## Roadmap
 
 - Read-aloud for PDFs (Android 15's PdfRenderer text API), and in the background for plain text
-- Translations (the UI text lives in `res/values/strings.xml`)
 - Collections and reading stats
 - "Currently reading" sync from Hardcover and Open Library, for books you read in other apps
 - ISBN barcode scanning to set a cover for a paper book

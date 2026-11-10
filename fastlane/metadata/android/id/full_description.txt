@@ -1,0 +1,42 @@
+Jacket adalah e-reader sumber terbuka untuk ponsel lipat. Selagi Anda membaca di layar dalam, layar luar menampilkan sampul buku Anda dari tepi ke tepi, seperti sampul album, sehingga orang-orang di sekitar Anda bisa melihat apa yang sedang Anda baca.
+
+SAMPUL, DI BAGIAN LUAR
+• Ponsel lipat bergaya buku: sampul memenuhi layar luar selagi Anda membaca di dalam, menggunakan mode layar ganda Android.
+• Galaxy Z Flip: widget layar depan untuk Flex Window.
+• Ponsel atau tablet apa pun: widget yang sama di layar utama Anda.
+• Matikan sampul di layar luar kapan saja melalui Setelan.
+
+MEMBACA
+• EPUB, PDF, komik CBZ, dan teks biasa dari file Anda sendiri. Gunakan Tambah buku, atau Buka dengan atau Bagikan dari aplikasi lain.
+• EPUB dirender dengan toolkit sumber terbuka Readium: halaman sungguhan, dua halaman berdampingan saat ponsel dibuka, atau gulir bersambung jika Anda lebih suka.
+• Daftar isi dengan subbab, bab saat ini yang terlacak selagi Anda membaca, sisa halaman di bab, dan penggeser yang menampilkan pratinjau bab di bawah ibu jari Anda.
+• Bookmark, sorotan dalam beberapa warna dengan catatan, dan penelusuran teks lengkap di dalam EPUB.
+
+MENDENGARKAN
+• Mode buku audio membacakan buku EPUB dan teks biasa dengan suara teks ke ucapan ponsel Anda, sambil menyorot setiap kata saat diucapkan.
+• Tetap diputar saat layar mati, dengan kontrol di layar kunci dan headphone.
+• Timer tidur: berhenti setelah waktu tertentu atau di akhir bab.
+
+KENYAMANAN MEMBACA
+• Font Literata, Atkinson Hyperlegible, dan OpenDyslexic.
+• Ukuran teks, spasi baris, margin, dan rata kiri-kanan.
+• Warna halaman Buku, Kertas, Gelap, dan Hitam.
+• Balik halaman dengan tombol volume.
+
+PUSTAKA
+• Telusuri dan urutkan buku Anda.
+• Rak Selesai, dan layar akhir buku saat Anda mencapai halaman terakhir.
+• Ekspor file cadangan, lalu impor lagi nanti atau di ponsel lain.
+
+DESAIN
+• Material 3 Expressive: warna yang diambil dari sampul buku yang sedang Anda baca, gerakan yang lentur, dan respons haptik.
+
+PRIVASI
+• Tanpa izin internet: baik Jacket maupun buku yang Anda buka di dalamnya tidak dapat terhubung ke jaringan.
+• Tanpa akun, tanpa iklan, tanpa analitik, tanpa pelacakan.
+• Gratis dan sumber terbuka dengan lisensi Apache License 2.0: https://github.com/friendlyglobal/jacket
+
+PERLU DIKETAHUI
+• Dukungan layar luar bergantung pada ponsel. Di ponsel tanpa layar luar, opsi tersebut disembunyikan.
+• Buku yang dilindungi DRM (proteksi salinan) tidak dapat dibuka.
+• Fitur bacakan untuk buku teks biasa berhenti saat Anda keluar dari aplikasi. Fitur bacakan untuk EPUB tetap berjalan di latar belakang.

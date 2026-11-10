@@ -1,0 +1,42 @@
+Jacket, katlanabilir telefonlar için açık kaynaklı bir e-okuyucudur. Siz iç ekranda okurken dış ekran, kitabınızın kapağını bir albüm kapağı gibi kenardan kenara gösterir; böylece çevrenizdekiler ne okuduğunuzu görebilir.
+
+KAPAK, DIŞARIDA
+• Kitap tipi katlanabilir telefonlar: siz içeride okurken kapak, Android'in çift ekran modu sayesinde dış ekranı doldurur.
+• Galaxy Z Flip: Flex Window için bir kapak ekranı widget'ı.
+• Her telefon veya tablet: aynı widget, ana ekranınızda.
+• Dış ekrandaki kapağı istediğiniz zaman Ayarlar'dan kapatabilirsiniz.
+
+OKUMA
+• Kendi dosyalarınızdan EPUB, PDF, CBZ çizgi roman ve düz metin. Kitap ekle'yi kullanın ya da başka bir uygulamada Birlikte aç veya Paylaş'ı seçin.
+• EPUB'lar açık kaynaklı Readium araç setiyle işlenir: gerçek sayfalar, telefon açıkken yan yana iki sayfa veya dilerseniz kesintisiz kaydırma.
+• Alt bölümleriyle içindekiler, okurken takip edilen geçerli bölüm, bölümde kalan sayfalar ve başparmağınızın altındaki bölümü önizleyen bir kaydırma çubuğu.
+• Yer işaretleri, notlarla birlikte farklı renklerde vurgular ve EPUB'larda tam metin arama.
+
+DİNLEME
+• Sesli kitap modu, EPUB ve düz metin kitapları telefonunuzun metin okuma sesiyle yüksek sesle okur ve okunan her kelimeyi vurgular.
+• Ekran kapalıyken de çalmaya devam eder; kilit ekranından ve kulaklıktan kontrol edilebilir.
+• Uyku zamanlayıcısı: belirlediğiniz bir süre sonra veya bölüm sonunda durur.
+
+OKUMA KONFORU
+• Literata, Atkinson Hyperlegible ve OpenDyslexic yazı tipleri.
+• Metin boyutu, satır aralığı, kenar boşlukları ve iki yana yaslama.
+• Kitap, Kâğıt, Koyu ve Siyah sayfa renkleri.
+• Ses tuşlarıyla sayfa çevirme.
+
+KİTAPLIK
+• Kitaplarınızı arayın ve sıralayın.
+• Bitenler rafı ve son sayfaya ulaştığınızda bir kitap sonu ekranı.
+• Bir yedek dosyasını dışa aktarın, daha sonra ya da başka bir telefonda yeniden içe aktarın.
+
+TASARIM
+• Material 3 Expressive: okuduğunuz kitabın kapağından alınan renkler, yaylı animasyonlar ve dokunsal geri bildirim.
+
+GİZLİLİK
+• İnternet izni yok: ne Jacket ne de onunla açtığınız kitaplar ağa bağlanabilir.
+• Hesap yok, reklam yok, analiz yok, izleme yok.
+• Apache License 2.0 kapsamında ücretsiz ve açık kaynak: https://github.com/friendlyglobal/jacket
+
+BİLMENİZDE YARAR VAR
+• Dış ekran desteği telefona bağlıdır. Dış ekranı olmayan telefonlarda bu seçenekler gizlenir.
+• DRM korumalı (kopya korumalı) kitaplar açılamaz.
+• Düz metin kitaplarda sesli okuma, uygulamadan çıktığınızda durur. EPUB'larda sesli okuma arka planda devam eder.

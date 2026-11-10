@@ -1,0 +1,3 @@
+• Płynniejsze przewracanie stron: strony podążają za palcem i równo się układają.
+• Ustawienia pokazują podgląd na żywo ekranu zewnętrznego i każdego stylu widżetu.
+• Jacket mówi teraz w 17 językach: angielskim, hiszpańskim, portugalskim, francuskim, niemieckim, włoskim, niderlandzkim, polskim, rosyjskim, ukraińskim, tureckim, arabskim, hindi, indonezyjskim, japońskim, koreańskim i chińskim. Wybierz język aplikacji w ustawieniach języka Androida.

@@ -68,6 +68,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -230,15 +231,24 @@ private fun PagedList(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             contentPadding = PaddingValues(top = 16.dp, bottom = 64.dp),
         ) {
-            items(count) { index -> PageImage(index, widthPx, placeholderAspect, page, render) }
+            // The first page to render lets the opening cover lift.
+            items(count) { index -> PageImage(index, widthPx, placeholderAspect, page, render) { nav.contentReady = true } }
         }
     }
 }
 
 @Composable
-private fun PageImage(index: Int, widthPx: Int, placeholderAspect: Float, page: PageColors, render: suspend (Int, Int) -> Bitmap?) {
+private fun PageImage(
+    index: Int,
+    widthPx: Int,
+    placeholderAspect: Float,
+    page: PageColors,
+    render: suspend (Int, Int) -> Bitmap?,
+    onRendered: () -> Unit,
+) {
     val bitmap by produceState<ImageBitmap?>(null, index, widthPx) {
         value = runCatching { render(index, widthPx) }.getOrNull()?.asImageBitmap()
+        onRendered()
     }
     val aspect = bitmap?.let { it.width / it.height.toFloat() } ?: placeholderAspect
     Box(
@@ -273,6 +283,11 @@ fun TextReader(
     if (text.isEmpty()) return ReaderError(stringResource(R.string.reader_error_text))
 
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = book.position.coerceIn(0, text.lastIndex))
+    // The opening cover lifts once the first paragraphs are laid out.
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo.visibleItemsInfo.isNotEmpty() }.first { it }
+        nav.contentReady = true
+    }
     val scope = rememberCoroutineScope()
     val first by remember { derivedStateOf { listState.firstVisibleItemIndex } }
     val textAtEnd by remember { derivedStateOf { !listState.canScrollForward } }

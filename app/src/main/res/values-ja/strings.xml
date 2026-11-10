@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jacket</string>
+    <string name="widget_name">Jacket 表紙</string>
+    <string name="widget_description">読んでいる本の表紙と進み具合を表示します。</string>
+
+    <string name="common_back">戻る</string>
+    <string name="common_cancel">キャンセル</string>
+    <string name="common_ok">OK</string>
+    <string name="percent">%1$d%%</string>
+    <string name="cover_of">「%1$s」の表紙</string>
+
+    <string name="format_comic">コミック</string>
+    <string name="format_text">テキスト</string>
+
+    <string name="book_status_finished">読了</string>
+    <string name="book_status_not_started">未読</string>
+    <string name="book_status_page_of">%1$d / %2$d ページ</string>
+    <string name="book_status_percent_read">%1$d%% 読了</string>
+    <string name="book_untitled">無題</string>
+
+    <string name="cover_style_jacket">Jacket</string>
+    <string name="cover_style_shelf">本棚</string>
+    <string name="cover_style_glance">ひと目</string>
+
+    <string name="font_literata_description">長文を読むための Google の書体</string>
+    <string name="font_hyperlegible_description">弱視の方にも見分けやすい字形</string>
+    <string name="font_open_dyslexic_description">下部を重くして文字の反転を防ぐ書体</string>
+    <string name="font_serif">システム明朝</string>
+    <string name="font_serif_description">スマートフォンの明朝体フォント</string>
+    <string name="font_sans">システムゴシック</string>
+    <string name="font_sans_description">スマートフォンの UI フォント</string>
+    <string name="font_original">本のフォント</string>
+    <string name="font_original_description">出版社が選んだフォント</string>
+
+    <string name="page_color_book">ブック</string>
+    <string name="page_color_paper">ペーパー</string>
+    <string name="page_color_dark">ダーク</string>
+    <string name="page_color_black">ブラック</string>
+
+    <string name="layout_pages">ページ</string>
+    <string name="layout_scroll">スクロール</string>
+
+    <string name="sort_recent">最近</string>
+    <string name="sort_title">タイトル</string>
+    <string name="sort_author">著者</string>
+
+    <string name="import_added_one">「%1$s」を追加しました</string>
+    <plurals name="import_added_books">
+        <item quantity="other">%1$d 冊を追加しました</item>
+    </plurals>
+    <string name="import_failed">%1$s を読み込めませんでした</string>
+    <string name="import_added_and_failed">%1$s。%2$s</string>
+
+    <string name="library_profile_and_settings">プロフィールと設定</string>
+    <string name="library_add_books">本を追加</string>
+    <string name="library_all_finished">ここにある本はすべて読み終えました。新しい本を追加しましょう！</string>
+    <string name="library_no_match">「%1$s」に一致する本はありません</string>
+    <string name="library_start_reading">読みはじめる</string>
+    <string name="library_continue_reading">続きを読む</string>
+    <string name="library_on_your_cover">カバー画面に表示中</string>
+    <string name="library_title">ライブラリ</string>
+    <string name="library_title_finished">読了</string>
+    <plurals name="library_book_count">
+        <item quantity="other">%1$d 冊</item>
+    </plurals>
+    <string name="library_shelf_reading">読書中</string>
+    <string name="library_shelf_finished_count">読了 · %1$d</string>
+    <string name="library_search_placeholder">タイトルや著者で検索</string>
+    <string name="library_clear_search">検索をクリア</string>
+    <string name="library_more_options">その他のオプション</string>
+    <string name="library_add_file_again">ファイルを再度追加</string>
+    <string name="library_finished_badge">読了</string>
+    <string name="library_new_badge">NEW</string>
+    <string name="library_on_cover_screen">カバー画面に表示されています</string>
+    <string name="library_menu_open">開く</string>
+    <string name="library_menu_show_on_cover">カバー画面に表示</string>
+    <string name="library_menu_mark_finished">読了にする</string>
+    <string name="library_menu_mark_unfinished">読了を取り消す</string>
+    <string name="library_menu_remove">削除</string>
+    <string name="library_remove_title">「%1$s」を削除しますか？</string>
+    <string name="library_remove_message">Jacket 内のコピーと読書位置が削除されます。元のファイルはそのまま残ります。</string>
+    <string name="library_remove_confirm">削除</string>
+    <string name="library_empty_title">折りたたみスマホに本をまとわせよう</string>
+    <string name="library_empty_message">EPUB、PDF、CBZ コミック、テキスト ファイルを追加してください。Jacket は非公開のコピーを保存し、読書中は表紙を外側の画面またはカバー画面のウィジェットに表示します。</string>
+
+    <string name="settings_title">設定</string>
+    <string name="settings_subtitle">プロフィール、カバー画面、読書</string>
+    <string name="settings_profile_title">マイライブラリ</string>
+    <plurals name="settings_profile_books">
+        <item quantity="other">%1$d 冊</item>
+    </plurals>
+    <plurals name="settings_profile_reading">
+        <item quantity="other">読書中 %1$d</item>
+    </plurals>
+    <plurals name="settings_profile_finished">
+        <item quantity="other">読了 %1$d</item>
+    </plurals>
+    <string name="settings_profile_summary">%1$s · %2$s · %3$s</string>
+    <string name="settings_profile_on_cover">カバー画面に表示中：%1$s</string>
+    <string name="settings_group_cover_screen">カバー画面</string>
+    <string name="settings_outer_ready">外側の画面を使用できます</string>
+    <string name="settings_outer_ready_description">内側の画面で読んでいる間、外側の画面に表紙を表示できます。</string>
+    <string name="settings_outer_unavailable">現在、外側の画面は使用できません</string>
+    <string name="settings_outer_unavailable_description">横折りタイプの折りたたみスマホを開くと、外側の画面を使えます。縦折りタイプでは下のウィジェットを使用します。</string>
+    <string name="settings_widget_style">ウィジェットのスタイル</string>
+    <string name="settings_widget_style_description">Galaxy Z Flip のカバー画面とホーム画面用</string>
+    <string name="settings_show_progress">読書の進捗</string>
+    <string name="settings_show_progress_description">表紙に細い進捗バーとパーセンテージを表示</string>
+    <string name="settings_ambient_dim">自動減光</string>
+    <string name="settings_ambient_dim_description">30 秒間操作しないと外側の画面が暗くなります</string>
+    <string name="settings_auto_outer">読書中は表紙を表示</string>
+    <string name="settings_auto_outer_description">開いて読むたびに外側の画面に表紙を表示します</string>
+    <string name="settings_preview_outer">外側の画面</string>
+    <string name="settings_preview_widget">ウィジェット</string>
+    <string name="settings_preview_description">現在の設定でのカバー画面のプレビュー</string>
+    <string name="settings_cover_hint">Galaxy Z Flip：「設定 › カバー画面 › ウィジェット」で「Jacket 表紙」を追加します。Motorola Razr：外部ディスプレイで Jacket を開きます。</string>
+    <string name="settings_group_reading">読書</string>
+    <string name="settings_group_appearance">外観</string>
+    <string name="settings_book_colors">本のカラー</string>
+    <string name="settings_book_colors_description">読んでいる本の表紙の色で Jacket を彩ります。オフにするとスマートフォンのパレットを使用します。</string>
+    <string name="settings_group_backup">バックアップ</string>
+    <string name="settings_backup_save">バックアップを保存</string>
+    <string name="settings_backup_save_description">本のリスト、読書位置、ブックマーク、ハイライト、設定。本のファイルは含まれません。</string>
+    <string name="settings_backup_restore">バックアップから復元</string>
+    <string name="settings_backup_restore_description">その後、本のファイルを再度追加すると、それぞれの読書位置とメモが戻ります。</string>
+    <string name="settings_backup_saved">バックアップを保存しました。</string>
+    <string name="settings_backup_save_failed">バックアップを保存できませんでした：%1$s</string>
+    <string name="settings_backup_restored">バックアップを復元しました。</string>
+    <plurals name="settings_backup_restored_missing">
+        <item quantity="other">バックアップを復元しました。%1$d 冊の本のファイルを追加すると、再びつながります。</item>
+    </plurals>
+    <string name="settings_backup_not_a_backup">Jacket のバックアップ ファイルではありません。</string>
+    <string name="settings_backup_unreadable">そのファイルを読み込めませんでした。</string>
+    <string name="settings_backup_cant_open">バックアップ ファイルを開けません</string>
+    <string name="settings_backup_cant_write">バックアップ ファイルに書き込めません</string>
+    <string name="settings_group_about">このアプリについて</string>
+    <string name="settings_about_version">バージョン %1$s</string>
+    <string name="settings_about_source">ソースコード</string>
+    <string name="settings_about_source_description">GitHub でオープンソースとして公開中</string>
+    <string name="settings_about_licenses">オープンソース ライセンス</string>
+    <string name="settings_about_licenses_description">Jacket は Apache 2.0 ライセンスで、Readium、Jetpack、オープンフォントを使用しています</string>
+
+    <string name="licenses_title">オープンソース ライセンス</string>
+    <string name="licenses_subtitle">Jacket は、多くの人の成果の上に作られた自由ソフトウェアです</string>
+
+    <string name="reading_text_size">文字サイズ</string>
+    <string name="reading_text_size_sample">あ</string>
+    <string name="reading_typeface">フォント</string>
+    <string name="reading_typeface_sample">Aa</string>
+    <string name="reading_selected">選択中</string>
+    <string name="reading_page">ページ</string>
+    <string name="reading_layout">レイアウト</string>
+    <string name="reading_layout_hint">本のようにページをめくります。スワイプするか、端をタップしてください。開いた状態では見開きで表示されます。</string>
+    <string name="reading_line_spacing">行間</string>
+    <string name="reading_line_spacing_book">書籍</string>
+    <string name="reading_line_spacing_tight">狭い</string>
+    <string name="reading_line_spacing_normal">標準</string>
+    <string name="reading_line_spacing_loose">広い</string>
+    <string name="reading_margins">余白</string>
+    <string name="reading_margins_narrow">狭い</string>
+    <string name="reading_margins_normal">標準</string>
+    <string name="reading_margins_wide">広い</string>
+    <string name="reading_alignment">文字揃え</string>
+    <string name="reading_alignment_book">書籍</string>
+    <string name="reading_alignment_left">左揃え</string>
+    <string name="reading_alignment_justified">両端揃え</string>
+    <string name="reading_alignment_hint">両端揃えではハイフネーションが適用されます。「書籍」は出版社が指定した間隔と配置をそのまま使います。</string>
+    <string name="reading_buttons">ボタン</string>
+    <string name="reading_volume_keys">音量ボタンでページをめくる</string>
+    <string name="reading_volume_keys_description">音量小で次のページ、音量大で前のページへ移動します。読み上げ中は無効です。</string>
+
+    <string name="reader_back_to_library">ライブラリに戻る</string>
+    <string name="reader_search">本の中を検索</string>
+    <string name="reader_bookmark_add">このページをブックマーク</string>
+    <string name="reader_bookmark_remove">ブックマークを削除</string>
+    <string name="reader_outer_show">外側の画面に表紙を表示</string>
+    <string name="reader_outer_hide">外側の画面の表紙を非表示</string>
+    <string name="reader_text_settings">文字とページの設定</string>
+    <string name="reader_contents_and_notes">目次、ブックマーク、ハイライト</string>
+    <string name="reader_notes">ブックマークとハイライト</string>
+    <string name="reader_listen">聴く：読み上げ</string>
+    <string name="reader_previous_chapter">前の章</string>
+    <string name="reader_next_chapter">次の章</string>
+    <string name="reader_previous_paragraph">前の段落</string>
+    <string name="reader_next_paragraph">次の段落</string>
+    <string name="reader_previous_page">前のページ</string>
+    <string name="reader_next_page">次のページ</string>
+    <string name="reader_page_number">%1$d ページ</string>
+    <string name="reader_page_of">%1$d / %2$d ページ</string>
+    <string name="reader_percent_read">%1$d%% 読了</string>
+    <string name="reader_footer_last_page">この章の最後のページ</string>
+    <plurals name="reader_footer_pages_left">
+        <item quantity="other">この章の残り %1$d ページ</item>
+    </plurals>
+    <string name="reader_error_open_book">この本を開けませんでした。\n%1$s</string>
+    <string name="reader_error_no_pages">この本には表示できるページがありません。</string>
+    <string name="reader_error_pdf">この PDF を開けませんでした。パスワードで保護された PDF にはまだ対応していません。</string>
+    <string name="reader_error_comic">このコミックを開けませんでした。</string>
+    <string name="reader_error_text">このファイルは空か、読み込めませんでした。</string>
+    <string name="reader_no_app_for_link">このリンクを開けるアプリがありません。</string>
+    <string name="reader_share_quote">「%1$s」\n— 『%2$s』</string>
+    <string name="reader_share_quote_author">「%1$s」\n— %3$s『%2$s』</string>
+
+    <string name="selection_highlight">ハイライト</string>
+    <string name="selection_note">メモ</string>
+    <string name="selection_share">共有</string>
+
+    <string name="notes_tab_contents">目次</string>
+    <string name="notes_tab_bookmarks">ブックマーク</string>
+    <string name="notes_tab_bookmarks_count">ブックマーク · %1$d</string>
+    <string name="notes_tab_highlights">ハイライト</string>
+    <string name="notes_tab_highlights_count">ハイライト · %1$d</string>
+    <string name="notes_no_bookmarks">ブックマークはまだありません</string>
+    <string name="notes_no_bookmarks_hint">ページ上部のリボンをタップすると、その場所を残せます。</string>
+    <string name="notes_no_highlights">ハイライトはまだありません</string>
+    <string name="notes_no_highlights_hint">テキストを長押しして、「ハイライト」または「メモ」を選んでください。</string>
+    <string name="notes_edit">メモと色を編集</string>
+    <string name="notes_delete">削除</string>
+    <string name="notes_bookmark_page_at">%1$d%% の位置のページ</string>
+    <string name="notes_highlight_quote">「%1$s」</string>
+    <string name="notes_note">メモ</string>
+    <string name="notes_done">完了</string>
+
+    <string name="search_placeholder">この本を検索</string>
+    <string name="search_clear">クリア</string>
+    <string name="search_no_results">「%1$s」の検索結果はありません</string>
+    <plurals name="search_result_count">
+        <item quantity="other">%1$d 件の結果</item>
+    </plurals>
+
+    <string name="finished_title_finished">読了</string>
+    <string name="finished_title_end">おわり</string>
+    <string name="finished_keep_reading">読み続ける</string>
+    <string name="finished_mark">読了にする</string>
+    <string name="finished_back_to_library">ライブラリに戻る</string>
+    <string name="finished_next">次の本：%1$s</string>
+
+    <string name="listen_play">再生</string>
+    <string name="listen_pause">一時停止</string>
+    <string name="listen_previous_sentence">前の文</string>
+    <string name="listen_next_sentence">次の文</string>
+    <string name="listen_previous_paragraph">前の段落</string>
+    <string name="listen_next_paragraph">次の段落</string>
+    <string name="listen_rate">%1$s×</string>
+    <string name="listen_stop">読み上げを停止</string>
+    <string name="listen_sleep_timer">スリープタイマー</string>
+    <string name="listen_sleep_timer_end_of_chapter">スリープタイマー：章の終わり</string>
+    <plurals name="listen_sleep_minutes_left">
+        <item quantity="other">スリープタイマー：残り %1$d 分</item>
+    </plurals>
+    <string name="listen_sleep_off">オフ</string>
+    <string name="listen_sleep_15_minutes">15 分</string>
+    <string name="listen_sleep_30_minutes">30 分</string>
+    <string name="listen_sleep_1_hour">1 時間</string>
+    <string name="listen_sleep_end_of_chapter">章の終わり</string>
+    <string name="listen_no_voice">このスマートフォンにはテキスト読み上げの音声がインストールされていません。</string>
+    <string name="listen_no_readable_text">この本には読み上げられるテキストがありません。</string>
+    <string name="listen_stopped_error">読み上げが停止しました：%1$s</string>
+    <string name="listen_voice_stopped">音声が停止しました。テキスト読み上げの設定を確認してください。</string>
+
+    <string name="widget_reading">読書中</string>
+    <string name="widget_empty">本を追加すると、その表紙をまといます</string>
+    <string name="listen_notification_channel">読み上げ</string>
+</resources>

@@ -1,0 +1,282 @@
+<resources>
+    <string name="app_name">Jacket</string>
+    <string name="widget_name">Couverture Jacket</string>
+    <string name="widget_description">Le livre que vous lisez : sa couverture et votre progression.</string>
+
+    <string name="common_back">Retour</string>
+    <string name="common_cancel">Annuler</string>
+    <string name="common_ok">OK</string>
+    <string name="percent">%1$d %%</string>
+    <string name="cover_of">Couverture de %1$s</string>
+
+    <string name="format_comic">BD</string>
+    <string name="format_text">Texte</string>
+
+    <string name="book_status_finished">Terminé</string>
+    <string name="book_status_not_started">Pas commencé</string>
+    <string name="book_status_page_of">Page %1$d sur %2$d</string>
+    <string name="book_status_percent_read">%1$d %% lu</string>
+    <string name="book_untitled">Sans titre</string>
+
+    <string name="cover_style_jacket">Jacket</string>
+    <string name="cover_style_shelf">Étagère</string>
+    <string name="cover_style_glance">Coup d\'œil</string>
+
+    <string name="font_literata_description">La police de Google pour les longues lectures</string>
+    <string name="font_hyperlegible_description">Des lettres bien distinctes pour la basse vision</string>
+    <string name="font_open_dyslexic_description">Des lettres lestées qui ne s\'inversent pas</string>
+    <string name="font_serif">Serif du système</string>
+    <string name="font_serif_description">La police serif de votre téléphone</string>
+    <string name="font_sans">Sans serif du système</string>
+    <string name="font_sans_description">La police de l\'interface de votre téléphone</string>
+    <string name="font_original">Celle du livre</string>
+    <string name="font_original_description">Celle qu\'a choisie l\'éditeur</string>
+
+    <string name="page_color_book">Livre</string>
+    <string name="page_color_paper">Papier</string>
+    <string name="page_color_dark">Sombre</string>
+    <string name="page_color_black">Noir</string>
+
+    <string name="layout_pages">Pages</string>
+    <string name="layout_scroll">Défilement</string>
+
+    <string name="sort_recent">Récents</string>
+    <string name="sort_title">Titre</string>
+    <string name="sort_author">Auteur</string>
+
+    <string name="import_added_one">« %1$s » ajouté</string>
+    <plurals name="import_added_books">
+        <item quantity="one">%1$d livre ajouté</item>
+        <item quantity="many">%1$d livres ajoutés</item>
+        <item quantity="other">%1$d livres ajoutés</item>
+    </plurals>
+    <string name="import_failed">Impossible de lire %1$s</string>
+    <string name="import_added_and_failed">%1$s. %2$s</string>
+
+    <string name="library_profile_and_settings">Profil et paramètres</string>
+    <string name="library_add_books">Ajouter des livres</string>
+    <string name="library_all_finished">Vous avez tout terminé. Ajoutez un autre livre !</string>
+    <string name="library_no_match">Aucun livre ne correspond à « %1$s »</string>
+    <string name="library_start_reading">COMMENCER LA LECTURE</string>
+    <string name="library_continue_reading">REPRENDRE LA LECTURE</string>
+    <string name="library_on_your_cover">En couverture</string>
+    <string name="library_title">Bibliothèque</string>
+    <string name="library_title_finished">Terminés</string>
+    <plurals name="library_book_count">
+        <item quantity="one">%1$d livre</item>
+        <item quantity="many">%1$d livres</item>
+        <item quantity="other">%1$d livres</item>
+    </plurals>
+    <string name="library_shelf_reading">En cours</string>
+    <string name="library_shelf_finished_count">Terminés · %1$d</string>
+    <string name="library_search_placeholder">Rechercher titres et auteurs</string>
+    <string name="library_clear_search">Effacer la recherche</string>
+    <string name="library_more_options">Plus d\'options</string>
+    <string name="library_add_file_again">Ajouter à nouveau le fichier</string>
+    <string name="library_finished_badge">Terminé</string>
+    <string name="library_new_badge">Nouveau</string>
+    <string name="library_on_cover_screen">Sur votre écran externe</string>
+    <string name="library_menu_open">Ouvrir</string>
+    <string name="library_menu_show_on_cover">Afficher sur l\'écran externe</string>
+    <string name="library_menu_mark_finished">Marquer comme terminé</string>
+    <string name="library_menu_mark_unfinished">Marquer comme non terminé</string>
+    <string name="library_menu_remove">Retirer</string>
+    <string name="library_remove_title">Retirer « %1$s » ?</string>
+    <string name="library_remove_message">Jacket supprime sa propre copie et votre position de lecture. Le fichier d\'origine reste où il était.</string>
+    <string name="library_remove_confirm">Retirer</string>
+    <string name="library_empty_title">Habillez votre pliable de votre livre</string>
+    <string name="library_empty_message">Ajoutez un EPUB, un PDF, une BD CBZ ou un fichier texte. Jacket en garde une copie privée et affiche sa couverture sur votre écran externe, ou dans un widget, pendant que vous lisez.</string>
+
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_subtitle">Profil, écran externe et lecture</string>
+    <string name="settings_profile_title">Votre bibliothèque</string>
+    <plurals name="settings_profile_books">
+        <item quantity="one">%1$d livre</item>
+        <item quantity="many">%1$d livres</item>
+        <item quantity="other">%1$d livres</item>
+    </plurals>
+    <plurals name="settings_profile_reading">
+        <item quantity="one">%1$d en cours</item>
+        <item quantity="many">%1$d en cours</item>
+        <item quantity="other">%1$d en cours</item>
+    </plurals>
+    <plurals name="settings_profile_finished">
+        <item quantity="one">%1$d terminé</item>
+        <item quantity="many">%1$d terminés</item>
+        <item quantity="other">%1$d terminés</item>
+    </plurals>
+    <string name="settings_profile_summary">%1$s · %2$s · %3$s</string>
+    <string name="settings_profile_on_cover">En couverture : %1$s</string>
+    <string name="settings_group_cover_screen">Écran externe</string>
+    <string name="settings_outer_ready">Écran externe prêt</string>
+    <string name="settings_outer_ready_description">Votre téléphone peut afficher la couverture sur son écran externe pendant que vous lisez à l\'intérieur.</string>
+    <string name="settings_outer_unavailable">Écran externe indisponible pour le moment</string>
+    <string name="settings_outer_unavailable_description">Dépliez un pliable au format livre pour utiliser son écran externe. Les pliables à clapet utilisent le widget ci-dessous.</string>
+    <string name="settings_widget_style">Style du widget</string>
+    <string name="settings_widget_style_description">Pour l\'écran externe du Galaxy Z Flip et les écrans d\'accueil</string>
+    <string name="settings_show_progress">Progression de lecture</string>
+    <string name="settings_show_progress_description">Une fine barre de progression et le pourcentage sur la couverture</string>
+    <string name="settings_ambient_dim">Atténuation auto</string>
+    <string name="settings_ambient_dim_description">L\'écran externe s\'assombrit après 30 secondes sans contact</string>
+    <string name="settings_auto_outer">Couverture pendant la lecture</string>
+    <string name="settings_auto_outer_description">Afficher la couverture sur l\'écran externe dès que vous dépliez le téléphone pour lire</string>
+    <string name="settings_preview_outer">Écran externe</string>
+    <string name="settings_preview_widget">Widget</string>
+    <string name="settings_preview_description">Aperçu de l\'écran externe avec vos paramètres actuels</string>
+    <string name="settings_cover_hint">Galaxy Z Flip : ajoutez « Couverture Jacket » dans Paramètres › Écran externe › Widgets. Motorola Razr : ouvrez Jacket depuis l\'écran externe.</string>
+    <string name="settings_group_reading">Lecture</string>
+    <string name="settings_group_appearance">Apparence</string>
+    <string name="settings_book_colors">Couleurs de votre livre</string>
+    <string name="settings_book_colors_description">Jacket prend les couleurs de la couverture du livre que vous lisez. Désactivé : la palette de votre téléphone.</string>
+    <string name="settings_group_backup">Sauvegarde</string>
+    <string name="settings_backup_save">Créer une sauvegarde</string>
+    <string name="settings_backup_save_description">Votre liste de livres, positions, signets, surlignages et paramètres. Pas les fichiers des livres.</string>
+    <string name="settings_backup_restore">Restaurer une sauvegarde</string>
+    <string name="settings_backup_restore_description">Ajoutez ensuite à nouveau les fichiers des livres : chacun retrouve sa position et ses notes.</string>
+    <string name="settings_backup_saved">Sauvegarde enregistrée.</string>
+    <string name="settings_backup_save_failed">Impossible d\'enregistrer la sauvegarde : %1$s</string>
+    <string name="settings_backup_restored">Sauvegarde restaurée.</string>
+    <plurals name="settings_backup_restored_missing">
+        <item quantity="one">Sauvegarde restaurée. Ajoutez le fichier de %1$d livre pour le reconnecter.</item>
+        <item quantity="many">Sauvegarde restaurée. Ajoutez les fichiers de %1$d livres pour les reconnecter.</item>
+        <item quantity="other">Sauvegarde restaurée. Ajoutez les fichiers de %1$d livres pour les reconnecter.</item>
+    </plurals>
+    <string name="settings_backup_not_a_backup">Ce fichier n\'est pas une sauvegarde Jacket.</string>
+    <string name="settings_backup_unreadable">Impossible de lire ce fichier.</string>
+    <string name="settings_backup_cant_open">Impossible d\'ouvrir le fichier de sauvegarde</string>
+    <string name="settings_backup_cant_write">Impossible d\'écrire le fichier de sauvegarde</string>
+    <string name="settings_group_about">À propos</string>
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_source">Code source</string>
+    <string name="settings_about_source_description">Open source sur GitHub</string>
+    <string name="settings_about_licenses">Licences open source</string>
+    <string name="settings_about_licenses_description">Jacket est sous licence Apache 2.0 et repose sur Readium, Jetpack et des polices libres</string>
+
+    <string name="licenses_title">Licences open source</string>
+    <string name="licenses_subtitle">Jacket est un logiciel libre, bâti sur le travail d\'autres personnes</string>
+
+    <string name="reading_text_size">Taille du texte</string>
+    <string name="reading_text_size_sample">A</string>
+    <string name="reading_typeface">Police</string>
+    <string name="reading_typeface_sample">Aa</string>
+    <string name="reading_selected">Sélectionné</string>
+    <string name="reading_page">Page</string>
+    <string name="reading_layout">Mise en page</string>
+    <string name="reading_layout_hint">Les pages se tournent comme dans un livre : balayez ou touchez les bords. Téléphone déplié, vous voyez deux pages côte à côte.</string>
+    <string name="reading_line_spacing">Interligne</string>
+    <string name="reading_line_spacing_book">Livre</string>
+    <string name="reading_line_spacing_tight">Serré</string>
+    <string name="reading_line_spacing_normal">Normal</string>
+    <string name="reading_line_spacing_loose">Aéré</string>
+    <string name="reading_margins">Marges</string>
+    <string name="reading_margins_narrow">Étroites</string>
+    <string name="reading_margins_normal">Normales</string>
+    <string name="reading_margins_wide">Larges</string>
+    <string name="reading_alignment">Alignement</string>
+    <string name="reading_alignment_book">Livre</string>
+    <string name="reading_alignment_left">Gauche</string>
+    <string name="reading_alignment_justified">Justifié</string>
+    <string name="reading_alignment_hint">Le texte justifié est coupé avec des traits d\'union. « Livre » conserve l\'espacement et l\'alignement choisis par l\'éditeur.</string>
+    <string name="reading_buttons">Boutons</string>
+    <string name="reading_volume_keys">Tourner les pages avec les touches de volume</string>
+    <string name="reading_volume_keys_description">Volume bas pour la page suivante, haut pour la précédente. Pas pendant l\'écoute.</string>
+
+    <string name="reader_back_to_library">Retour à la bibliothèque</string>
+    <string name="reader_search">Rechercher dans le livre</string>
+    <string name="reader_bookmark_add">Ajouter un signet à cette page</string>
+    <string name="reader_bookmark_remove">Supprimer le signet</string>
+    <string name="reader_outer_show">Afficher la couverture sur l\'écran externe</string>
+    <string name="reader_outer_hide">Masquer la couverture de l\'écran externe</string>
+    <string name="reader_text_settings">Paramètres du texte et de la page</string>
+    <string name="reader_contents_and_notes">Sommaire, signets et surlignages</string>
+    <string name="reader_notes">Signets et surlignages</string>
+    <string name="reader_listen">Écouter : lecture à voix haute</string>
+    <string name="reader_previous_chapter">Chapitre précédent</string>
+    <string name="reader_next_chapter">Chapitre suivant</string>
+    <string name="reader_previous_paragraph">Paragraphe précédent</string>
+    <string name="reader_next_paragraph">Paragraphe suivant</string>
+    <string name="reader_previous_page">Page précédente</string>
+    <string name="reader_next_page">Page suivante</string>
+    <string name="reader_page_number">Page %1$d</string>
+    <string name="reader_page_of">Page %1$d sur %2$d</string>
+    <string name="reader_percent_read">%1$d %% lu</string>
+    <string name="reader_footer_last_page">Dernière page du chapitre</string>
+    <plurals name="reader_footer_pages_left">
+        <item quantity="one">%1$d page restante dans le chapitre</item>
+        <item quantity="many">%1$d pages restantes dans le chapitre</item>
+        <item quantity="other">%1$d pages restantes dans le chapitre</item>
+    </plurals>
+    <string name="reader_error_open_book">Impossible d\'ouvrir ce livre.\n%1$s</string>
+    <string name="reader_error_no_pages">Ce livre n\'a aucune page à afficher.</string>
+    <string name="reader_error_pdf">Impossible d\'ouvrir ce PDF. Les PDF protégés par mot de passe ne sont pas encore pris en charge.</string>
+    <string name="reader_error_comic">Impossible d\'ouvrir cette BD.</string>
+    <string name="reader_error_text">Ce fichier est vide ou illisible.</string>
+    <string name="reader_no_app_for_link">Aucune application ne peut ouvrir ce lien.</string>
+    <string name="reader_share_quote">« %1$s »\n— %2$s</string>
+    <string name="reader_share_quote_author">« %1$s »\n— %2$s, %3$s</string>
+
+    <string name="selection_highlight">Surligner</string>
+    <string name="selection_note">Note</string>
+    <string name="selection_share">Partager</string>
+
+    <string name="notes_tab_contents">Sommaire</string>
+    <string name="notes_tab_bookmarks">Signets</string>
+    <string name="notes_tab_bookmarks_count">Signets · %1$d</string>
+    <string name="notes_tab_highlights">Surlignages</string>
+    <string name="notes_tab_highlights_count">Surlignages · %1$d</string>
+    <string name="notes_no_bookmarks">Aucun signet pour l\'instant</string>
+    <string name="notes_no_bookmarks_hint">Touchez le ruban en haut d\'une page pour y marquer votre place.</string>
+    <string name="notes_no_highlights">Aucun surlignage pour l\'instant</string>
+    <string name="notes_no_highlights_hint">Appuyez de manière prolongée sur le texte, puis choisissez Surligner ou Note.</string>
+    <string name="notes_edit">Modifier la note et la couleur</string>
+    <string name="notes_delete">Supprimer</string>
+    <string name="notes_bookmark_page_at">Page à %1$d %%</string>
+    <string name="notes_highlight_quote">« %1$s »</string>
+    <string name="notes_note">Note</string>
+    <string name="notes_done">OK</string>
+
+    <string name="search_placeholder">Rechercher dans ce livre</string>
+    <string name="search_clear">Effacer</string>
+    <string name="search_no_results">Aucun résultat pour « %1$s »</string>
+    <plurals name="search_result_count">
+        <item quantity="one">%1$d résultat</item>
+        <item quantity="many">%1$d résultats</item>
+        <item quantity="other">%1$d résultats</item>
+    </plurals>
+
+    <string name="finished_title_finished">Terminé</string>
+    <string name="finished_title_end">Fin</string>
+    <string name="finished_keep_reading">Continuer la lecture</string>
+    <string name="finished_mark">Marquer comme terminé</string>
+    <string name="finished_back_to_library">Retour à la bibliothèque</string>
+    <string name="finished_next">À suivre : %1$s</string>
+
+    <string name="listen_play">Lecture</string>
+    <string name="listen_pause">Pause</string>
+    <string name="listen_previous_sentence">Phrase précédente</string>
+    <string name="listen_next_sentence">Phrase suivante</string>
+    <string name="listen_previous_paragraph">Paragraphe précédent</string>
+    <string name="listen_next_paragraph">Paragraphe suivant</string>
+    <string name="listen_rate">%1$s×</string>
+    <string name="listen_stop">Arrêter l\'écoute</string>
+    <string name="listen_sleep_timer">Minuteur de veille</string>
+    <string name="listen_sleep_timer_end_of_chapter">Minuteur de veille : fin du chapitre</string>
+    <plurals name="listen_sleep_minutes_left">
+        <item quantity="one">Minuteur de veille : %1$d minute restante</item>
+        <item quantity="many">Minuteur de veille : %1$d minutes restantes</item>
+        <item quantity="other">Minuteur de veille : %1$d minutes restantes</item>
+    </plurals>
+    <string name="listen_sleep_off">Désactivé</string>
+    <string name="listen_sleep_15_minutes">15 minutes</string>
+    <string name="listen_sleep_30_minutes">30 minutes</string>
+    <string name="listen_sleep_1_hour">1 heure</string>
+    <string name="listen_sleep_end_of_chapter">Fin du chapitre</string>
+    <string name="listen_no_voice">Aucune voix de synthèse vocale n\'est installée sur ce téléphone.</string>
+    <string name="listen_no_readable_text">Ce livre ne contient aucun texte pouvant être lu à voix haute.</string>
+    <string name="listen_stopped_error">Lecture à voix haute arrêtée : %1$s</string>
+    <string name="listen_voice_stopped">La voix s\'est arrêtée. Vérifiez vos paramètres de synthèse vocale.</string>
+
+    <string name="widget_reading">En cours</string>
+    <string name="widget_empty">Ajoutez un livre pour arborer sa couverture</string>
+    <string name="listen_notification_channel">Lecture à voix haute</string>
+</resources>

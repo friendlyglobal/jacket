@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jacket</string>
+    <string name="widget_name">Sampul Jacket</string>
+    <string name="widget_description">Buku yang sedang Anda baca: sampulnya dan progres Anda.</string>
+
+    <string name="common_back">Kembali</string>
+    <string name="common_cancel">Batal</string>
+    <string name="common_ok">Oke</string>
+    <string name="percent">%1$d%%</string>
+    <string name="cover_of">Sampul %1$s</string>
+
+    <string name="format_comic">Komik</string>
+    <string name="format_text">Teks</string>
+
+    <string name="book_status_finished">Selesai</string>
+    <string name="book_status_not_started">Belum dimulai</string>
+    <string name="book_status_page_of">Halaman %1$d dari %2$d</string>
+    <string name="book_status_percent_read">%1$d%% dibaca</string>
+    <string name="book_untitled">Tanpa judul</string>
+
+    <string name="cover_style_jacket">Jacket</string>
+    <string name="cover_style_shelf">Rak</string>
+    <string name="cover_style_glance">Sekilas</string>
+
+    <string name="font_literata_description">Jenis huruf Google untuk membaca lama</string>
+    <string name="font_hyperlegible_description">Bentuk huruf yang jelas untuk penglihatan rendah</string>
+    <string name="font_open_dyslexic_description">Huruf berbobot yang tidak mudah terlihat terbalik</string>
+    <string name="font_serif">Serif sistem</string>
+    <string name="font_serif_description">Font serif ponsel Anda</string>
+    <string name="font_sans">Sans sistem</string>
+    <string name="font_sans_description">Font antarmuka ponsel Anda</string>
+    <string name="font_original">Bawaan buku</string>
+    <string name="font_original_description">Apa pun pilihan penerbit</string>
+
+    <string name="page_color_book">Buku</string>
+    <string name="page_color_paper">Kertas</string>
+    <string name="page_color_dark">Gelap</string>
+    <string name="page_color_black">Hitam</string>
+
+    <string name="layout_pages">Halaman</string>
+    <string name="layout_scroll">Gulir</string>
+
+    <string name="sort_recent">Terbaru</string>
+    <string name="sort_title">Judul</string>
+    <string name="sort_author">Penulis</string>
+
+    <string name="import_added_one">“%1$s” ditambahkan</string>
+    <plurals name="import_added_books">
+        <item quantity="other">%1$d buku ditambahkan</item>
+    </plurals>
+    <string name="import_failed">Tidak dapat membaca %1$s</string>
+    <string name="import_added_and_failed">%1$s. %2$s</string>
+
+    <string name="library_profile_and_settings">Profil dan setelan</string>
+    <string name="library_add_books">Tambah buku</string>
+    <string name="library_all_finished">Semua buku di sini sudah selesai. Tambahkan buku lain!</string>
+    <string name="library_no_match">Tidak ada buku yang cocok dengan “%1$s”</string>
+    <string name="library_start_reading">MULAI MEMBACA</string>
+    <string name="library_continue_reading">LANJUTKAN MEMBACA</string>
+    <string name="library_on_your_cover">Di layar depan</string>
+    <string name="library_title">Pustaka</string>
+    <string name="library_title_finished">Selesai</string>
+    <plurals name="library_book_count">
+        <item quantity="other">%1$d buku</item>
+    </plurals>
+    <string name="library_shelf_reading">Sedang dibaca</string>
+    <string name="library_shelf_finished_count">Selesai · %1$d</string>
+    <string name="library_search_placeholder">Telusuri judul dan penulis</string>
+    <string name="library_clear_search">Hapus penelusuran</string>
+    <string name="library_more_options">Opsi lainnya</string>
+    <string name="library_add_file_again">Tambahkan file lagi</string>
+    <string name="library_finished_badge">Selesai</string>
+    <string name="library_new_badge">Baru</string>
+    <string name="library_on_cover_screen">Di layar depan Anda</string>
+    <string name="library_menu_open">Buka</string>
+    <string name="library_menu_show_on_cover">Tampilkan di layar depan</string>
+    <string name="library_menu_mark_finished">Tandai selesai</string>
+    <string name="library_menu_mark_unfinished">Tandai belum selesai</string>
+    <string name="library_menu_remove">Hapus</string>
+    <string name="library_remove_title">Hapus “%1$s”?</string>
+    <string name="library_remove_message">Jacket menghapus salinannya sendiri dan posisi baca Anda. File aslinya tetap di tempatnya.</string>
+    <string name="library_remove_confirm">Hapus</string>
+    <string name="library_empty_title">Biarkan ponsel lipat Anda memakai buku Anda</string>
+    <string name="library_empty_message">Tambahkan file EPUB, PDF, komik CBZ, atau teks. Jacket menyimpan salinan pribadi dan menampilkan sampulnya di layar luar, atau di widget layar depan, selagi Anda membaca.</string>
+
+    <string name="settings_title">Setelan</string>
+    <string name="settings_subtitle">Profil, layar depan, dan membaca</string>
+    <string name="settings_profile_title">Pustaka Anda</string>
+    <plurals name="settings_profile_books">
+        <item quantity="other">%1$d buku</item>
+    </plurals>
+    <plurals name="settings_profile_reading">
+        <item quantity="other">%1$d sedang dibaca</item>
+    </plurals>
+    <plurals name="settings_profile_finished">
+        <item quantity="other">%1$d selesai</item>
+    </plurals>
+    <string name="settings_profile_summary">%1$s · %2$s · %3$s</string>
+    <string name="settings_profile_on_cover">Di layar depan: %1$s</string>
+    <string name="settings_group_cover_screen">Layar depan</string>
+    <string name="settings_outer_ready">Layar luar siap</string>
+    <string name="settings_outer_ready_description">Ponsel Anda dapat menampilkan sampul di layar luarnya selagi Anda membaca di layar dalam.</string>
+    <string name="settings_outer_unavailable">Layar luar tidak tersedia saat ini</string>
+    <string name="settings_outer_unavailable_description">Buka ponsel lipat bergaya buku untuk menggunakan layar luarnya. Ponsel flip menggunakan widget di bawah.</string>
+    <string name="settings_widget_style">Gaya widget</string>
+    <string name="settings_widget_style_description">Untuk layar depan Galaxy Z Flip dan layar utama</string>
+    <string name="settings_show_progress">Progres membaca</string>
+    <string name="settings_show_progress_description">Bilah progres tipis dan persentase di sampul</string>
+    <string name="settings_ambient_dim">Redup otomatis</string>
+    <string name="settings_ambient_dim_description">Layar luar meredup setelah 30 detik tidak disentuh</string>
+    <string name="settings_auto_outer">Sampul saat membaca</string>
+    <string name="settings_auto_outer_description">Tampilkan sampul di layar luar setiap kali Anda membuka ponsel untuk membaca</string>
+    <string name="settings_preview_outer">Layar luar</string>
+    <string name="settings_preview_widget">Widget</string>
+    <string name="settings_preview_description">Pratinjau layar depan dengan setelan Anda saat ini</string>
+    <string name="settings_cover_hint">Galaxy Z Flip: tambahkan “Sampul Jacket” di Setelan › Layar depan › Widget. Motorola Razr: buka Jacket dari layar eksternal.</string>
+    <string name="settings_group_reading">Membaca</string>
+    <string name="settings_group_appearance">Tampilan</string>
+    <string name="settings_book_colors">Warna dari buku Anda</string>
+    <string name="settings_book_colors_description">Warnai Jacket sesuai sampul buku yang sedang Anda baca. Nonaktif: gunakan palet ponsel Anda.</string>
+    <string name="settings_group_backup">Cadangan</string>
+    <string name="settings_backup_save">Simpan cadangan</string>
+    <string name="settings_backup_save_description">Daftar buku, posisi baca, bookmark, sorotan, dan setelan Anda. Tidak termasuk file buku.</string>
+    <string name="settings_backup_restore">Pulihkan dari cadangan</string>
+    <string name="settings_backup_restore_description">Lalu tambahkan lagi file bukunya: masing-masing akan menemukan posisi dan catatannya.</string>
+    <string name="settings_backup_saved">Cadangan disimpan.</string>
+    <string name="settings_backup_save_failed">Tidak dapat menyimpan cadangan: %1$s</string>
+    <string name="settings_backup_restored">Cadangan dipulihkan.</string>
+    <plurals name="settings_backup_restored_missing">
+        <item quantity="other">Cadangan dipulihkan. Tambahkan file untuk %1$d buku agar terhubung kembali.</item>
+    </plurals>
+    <string name="settings_backup_not_a_backup">Ini bukan file cadangan Jacket.</string>
+    <string name="settings_backup_unreadable">Tidak dapat membaca file itu.</string>
+    <string name="settings_backup_cant_open">Tidak dapat membuka file cadangan</string>
+    <string name="settings_backup_cant_write">Tidak dapat menulis file cadangan</string>
+    <string name="settings_group_about">Tentang</string>
+    <string name="settings_about_version">Versi %1$s</string>
+    <string name="settings_about_source">Kode sumber</string>
+    <string name="settings_about_source_description">Sumber terbuka di GitHub</string>
+    <string name="settings_about_licenses">Lisensi sumber terbuka</string>
+    <string name="settings_about_licenses_description">Jacket berlisensi Apache 2.0, dibangun dengan Readium, Jetpack, dan font terbuka</string>
+
+    <string name="licenses_title">Lisensi sumber terbuka</string>
+    <string name="licenses_subtitle">Jacket adalah perangkat lunak bebas, dibangun di atas karya orang lain</string>
+
+    <string name="reading_text_size">Ukuran teks</string>
+    <string name="reading_text_size_sample">A</string>
+    <string name="reading_typeface">Jenis huruf</string>
+    <string name="reading_typeface_sample">Aa</string>
+    <string name="reading_selected">Dipilih</string>
+    <string name="reading_page">Halaman</string>
+    <string name="reading_layout">Tata letak</string>
+    <string name="reading_layout_hint">Halaman dibalik seperti buku: geser, atau ketuk tepinya. Saat ponsel dibuka, dua halaman tampil berdampingan.</string>
+    <string name="reading_line_spacing">Spasi baris</string>
+    <string name="reading_line_spacing_book">Buku</string>
+    <string name="reading_line_spacing_tight">Rapat</string>
+    <string name="reading_line_spacing_normal">Normal</string>
+    <string name="reading_line_spacing_loose">Longgar</string>
+    <string name="reading_margins">Margin</string>
+    <string name="reading_margins_narrow">Sempit</string>
+    <string name="reading_margins_normal">Normal</string>
+    <string name="reading_margins_wide">Lebar</string>
+    <string name="reading_alignment">Perataan</string>
+    <string name="reading_alignment_book">Buku</string>
+    <string name="reading_alignment_left">Kiri</string>
+    <string name="reading_alignment_justified">Rata penuh</string>
+    <string name="reading_alignment_hint">Teks rata penuh diberi tanda hubung. “Buku” mempertahankan spasi dan perataan dari penerbit.</string>
+    <string name="reading_buttons">Tombol</string>
+    <string name="reading_volume_keys">Balik halaman dengan tombol volume</string>
+    <string name="reading_volume_keys_description">Volume turun untuk halaman berikutnya, naik untuk sebelumnya. Tidak berlaku saat mendengarkan.</string>
+
+    <string name="reader_back_to_library">Kembali ke pustaka</string>
+    <string name="reader_search">Telusuri di buku</string>
+    <string name="reader_bookmark_add">Bookmark halaman ini</string>
+    <string name="reader_bookmark_remove">Hapus bookmark</string>
+    <string name="reader_outer_show">Tampilkan sampul di layar luar</string>
+    <string name="reader_outer_hide">Sembunyikan sampul di layar luar</string>
+    <string name="reader_text_settings">Setelan teks dan halaman</string>
+    <string name="reader_contents_and_notes">Daftar isi, bookmark, dan sorotan</string>
+    <string name="reader_notes">Bookmark dan sorotan</string>
+    <string name="reader_listen">Dengarkan: bacakan</string>
+    <string name="reader_previous_chapter">Bab sebelumnya</string>
+    <string name="reader_next_chapter">Bab berikutnya</string>
+    <string name="reader_previous_paragraph">Paragraf sebelumnya</string>
+    <string name="reader_next_paragraph">Paragraf berikutnya</string>
+    <string name="reader_previous_page">Halaman sebelumnya</string>
+    <string name="reader_next_page">Halaman berikutnya</string>
+    <string name="reader_page_number">Halaman %1$d</string>
+    <string name="reader_page_of">Halaman %1$d dari %2$d</string>
+    <string name="reader_percent_read">%1$d%% dibaca</string>
+    <string name="reader_footer_last_page">Halaman terakhir di bab ini</string>
+    <plurals name="reader_footer_pages_left">
+        <item quantity="other">%1$d halaman lagi di bab ini</item>
+    </plurals>
+    <string name="reader_error_open_book">Tidak dapat membuka buku ini.\n%1$s</string>
+    <string name="reader_error_no_pages">Buku ini tidak memiliki halaman untuk ditampilkan.</string>
+    <string name="reader_error_pdf">PDF ini tidak dapat dibuka. PDF yang dilindungi sandi belum didukung.</string>
+    <string name="reader_error_comic">Komik ini tidak dapat dibuka.</string>
+    <string name="reader_error_text">File ini kosong atau tidak dapat dibaca.</string>
+    <string name="reader_no_app_for_link">Tidak ada aplikasi yang dapat membuka link ini.</string>
+    <string name="reader_share_quote">“%1$s”\n— %2$s</string>
+    <string name="reader_share_quote_author">“%1$s”\n— %2$s, %3$s</string>
+
+    <string name="selection_highlight">Sorot</string>
+    <string name="selection_note">Catatan</string>
+    <string name="selection_share">Bagikan</string>
+
+    <string name="notes_tab_contents">Daftar isi</string>
+    <string name="notes_tab_bookmarks">Bookmark</string>
+    <string name="notes_tab_bookmarks_count">Bookmark · %1$d</string>
+    <string name="notes_tab_highlights">Sorotan</string>
+    <string name="notes_tab_highlights_count">Sorotan · %1$d</string>
+    <string name="notes_no_bookmarks">Belum ada bookmark</string>
+    <string name="notes_no_bookmarks_hint">Ketuk pita di bagian atas halaman untuk menandai posisi Anda di sana.</string>
+    <string name="notes_no_highlights">Belum ada sorotan</string>
+    <string name="notes_no_highlights_hint">Tekan lama teks, lalu pilih Sorot atau Catatan.</string>
+    <string name="notes_edit">Edit catatan dan warna</string>
+    <string name="notes_delete">Hapus</string>
+    <string name="notes_bookmark_page_at">Halaman di %1$d%%</string>
+    <string name="notes_highlight_quote">“%1$s”</string>
+    <string name="notes_note">Catatan</string>
+    <string name="notes_done">Selesai</string>
+
+    <string name="search_placeholder">Telusuri buku ini</string>
+    <string name="search_clear">Hapus</string>
+    <string name="search_no_results">Tidak ada hasil untuk “%1$s”</string>
+    <plurals name="search_result_count">
+        <item quantity="other">%1$d hasil</item>
+    </plurals>
+
+    <string name="finished_title_finished">Selesai</string>
+    <string name="finished_title_end">Tamat</string>
+    <string name="finished_keep_reading">Lanjutkan membaca</string>
+    <string name="finished_mark">Tandai selesai</string>
+    <string name="finished_back_to_library">Kembali ke pustaka</string>
+    <string name="finished_next">Berikutnya: %1$s</string>
+
+    <string name="listen_play">Putar</string>
+    <string name="listen_pause">Jeda</string>
+    <string name="listen_previous_sentence">Kalimat sebelumnya</string>
+    <string name="listen_next_sentence">Kalimat berikutnya</string>
+    <string name="listen_previous_paragraph">Paragraf sebelumnya</string>
+    <string name="listen_next_paragraph">Paragraf berikutnya</string>
+    <string name="listen_rate">%1$s×</string>
+    <string name="listen_stop">Berhenti mendengarkan</string>
+    <string name="listen_sleep_timer">Timer tidur</string>
+    <string name="listen_sleep_timer_end_of_chapter">Timer tidur: akhir bab</string>
+    <plurals name="listen_sleep_minutes_left">
+        <item quantity="other">Timer tidur: %1$d menit lagi</item>
+    </plurals>
+    <string name="listen_sleep_off">Nonaktif</string>
+    <string name="listen_sleep_15_minutes">15 menit</string>
+    <string name="listen_sleep_30_minutes">30 menit</string>
+    <string name="listen_sleep_1_hour">1 jam</string>
+    <string name="listen_sleep_end_of_chapter">Akhir bab</string>
+    <string name="listen_no_voice">Ponsel ini tidak memiliki suara teks ke ucapan yang terinstal.</string>
+    <string name="listen_no_readable_text">Buku ini tidak memiliki teks yang dapat dibacakan.</string>
+    <string name="listen_stopped_error">Pembacaan berhenti: %1$s</string>
+    <string name="listen_voice_stopped">Suara berhenti. Periksa setelan teks ke ucapan Anda.</string>
+
+    <string name="widget_reading">Sedang dibaca</string>
+    <string name="widget_empty">Tambahkan buku untuk memakai sampulnya</string>
+    <string name="listen_notification_channel">Bacakan</string>
+</resources>

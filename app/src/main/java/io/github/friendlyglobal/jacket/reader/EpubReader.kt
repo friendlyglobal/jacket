@@ -13,6 +13,7 @@ import android.os.SystemClock
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.areSystemBarsVisible
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsIgnoringVisibility
@@ -32,8 +33,10 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
@@ -74,7 +77,6 @@ import org.readium.r2.navigator.epub.EpubNavigatorFactory
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.navigator.input.InputListener
 import org.readium.r2.navigator.input.TapEvent
-import org.readium.r2.navigator.util.DirectionalNavigationAdapter
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
@@ -163,6 +165,7 @@ private fun EpubPages(
     val preferences = epubPreferences(settings, page)
     val scroll = settings.layout == PageLayout.SCROLL
     val tap by rememberUpdatedState(onCenterTap)
+    val turner = remember { PageTurner(scope) }
     var navigator by remember { mutableStateOf<EpubNavigatorFragment?>(null) }
     var positions by remember { mutableStateOf<List<Locator>>(emptyList()) }
     // Page within the current chapter file, as Readium lays it out.
@@ -177,12 +180,16 @@ private fun EpubPages(
             },
             paginationListener = object : EpubNavigatorFragment.PaginationListener {
                 override fun onPageChanged(pageIndex: Int, totalPages: Int, locator: Locator) {
+                    // The chapter on screen has loaded and found its place: the opening cover may lift.
+                    // (onPageLoaded can't tell: it also fires for the neighbours Readium preloads.)
+                    nav.contentReady = true
                     val next = FilePage(locator.href.toString(), pageIndex, totalPages)
                     val old = filePage
                     // A page turn ticks; a re-flow (new size, new font) changes the page count and doesn't.
                     val turned = old.href.isNotEmpty() &&
                         (next.href != old.href || (next.count == old.count && next.index != old.index))
-                    if (turned && !navigatorScrolls(navigator)) haptics.tick()
+                    // During an animated turn the tick comes when the page settles, not when it starts.
+                    if (turned && !navigatorScrolls(navigator) && !turner.busy) haptics.tick()
                     filePage = next
                 }
             },
@@ -194,10 +201,42 @@ private fun EpubPages(
     // Settings apply live: Readium re-flows the pages and keeps your place.
     LaunchedEffect(navigator, preferences) { navigator?.submitPreferences(preferences) }
 
+    // Page turns that slide like paper (see PageTurner): drags, edge taps, arrow and volume keys.
+    // Only while the controls are hidden, so the page copy never carries the toolbars with it.
+    val barsVisible = WindowInsets.areSystemBarsVisible
+    val chromeShowing by rememberUpdatedState(barsVisible)
+    turner.navigator = navigator
+    turner.enabled = { !scroll && !chromeShowing }
+    turner.onTurned = { haptics.tick() }
+    val minEdgePx = with(LocalDensity.current) { 80.dp.toPx() }
+
     // Taps: the outer thirds turn pages (not while scrolling), anything else toggles the controls.
     DisposableEffect(navigator) {
         val n = navigator ?: return@DisposableEffect onDispose {}
-        val edges = DirectionalNavigationAdapter(n, animatedTransition = true)
+        val minEdge = minEdgePx
+        val edges = object : InputListener {
+            override fun onTap(event: TapEvent): Boolean {
+                if (n.overflow.value.scroll) return false
+                val width = n.publicationView.width.toFloat()
+                val edge = maxOf(width * 0.3f, minEdge)
+                return when {
+                    event.point.x < edge -> { turner.turnToward(toRight = false); true }
+                    event.point.x > width - edge -> { turner.turnToward(toRight = true); true }
+                    else -> false
+                }
+            }
+
+            override fun onKey(event: org.readium.r2.navigator.input.KeyEvent): Boolean {
+                if (event.type != org.readium.r2.navigator.input.KeyEvent.Type.Down || event.modifiers.isNotEmpty()) return false
+                return when (event.key) {
+                    org.readium.r2.navigator.input.Key.ArrowLeft -> { turner.turnToward(toRight = false); true }
+                    org.readium.r2.navigator.input.Key.ArrowRight -> { turner.turnToward(toRight = true); true }
+                    org.readium.r2.navigator.input.Key.ArrowDown, org.readium.r2.navigator.input.Key.Space -> { turner.turn(1); true }
+                    org.readium.r2.navigator.input.Key.ArrowUp -> { turner.turn(-1); true }
+                    else -> false
+                }
+            }
+        }
         val center = object : InputListener {
             override fun onTap(event: TapEvent): Boolean {
                 tap()
@@ -391,7 +430,7 @@ private fun EpubPages(
         mark.locator?.let { runCatching { Locator.fromJSON(JSONObject(it)) }.getOrNull() }
             ?.let { navigator?.go(it, animated = false) }
     }
-    nav.turnPage = { delta -> navigator?.let { if (delta > 0) it.goForward(animated = true) else it.goBackward(animated = true) } }
+    nav.turnPage = { delta -> turner.turn(delta) }
 
     // Search the whole book; results stream in as Readium works through it.
     val search = remember(publication) {
@@ -417,6 +456,23 @@ private fun EpubPages(
         ReadAloud(context, publication, book.id, { navigator }, nav.listen, scope) { href -> contents.resourceOf(href) }
     }
     listen.colors = page.link.toArgb() to page.background.toArgb()
+    // Closing the player gives the text its room back and the pages re-flow: land on the sentence
+    // the voice was reading, not where you were when listening started.
+    listen.onStopped = stopped@{ spoken ->
+        spoken ?: return@stopped
+        resize.place = null
+        resize.target = spoken
+        resize.resumeAt = spoken
+        scope.launch {
+            // If the page area didn't change size after all, go there directly.
+            delay(900)
+            if (resize.resumeAt === spoken) {
+                resize.resumeAt = null
+                resize.target = null
+                navigator?.go(spoken, animated = false)
+            }
+        }
+    }
     LaunchedEffect(listen, settings.listenRate) { listen.setRate(settings.listenRate) }
 
     DisposableEffect(navigator, spans, anchors, contents) {
@@ -462,6 +518,7 @@ private fun EpubPages(
             // Readium loses your place when the page area changes size (it computes the corrected
             // scroll offset but never applies it): folding, unfolding, rotating, the player
             // appearing. Remember where you were and go back once the pages have re-flowed.
+            .pointerInput(turner) { pageTurnGestures(turner) }
             .onSizeChanged { size ->
                 val old = resize.size
                 resize.size = size
@@ -475,6 +532,7 @@ private fun EpubPages(
                     val pages = n.awaitLayout(size)
                     val target = resize.target ?: return@launch
                     resize.target = null
+                    resize.resumeAt = null
                     n.go(target.onPage(pages, n.overflow.value), animated = false)
                     resize.place = target
                     resize.restoredAt = SystemClock.uptimeMillis()
@@ -486,7 +544,9 @@ private fun EpubPages(
             ReaderFragments.epub = factory
             onDispose { if (ReaderFragments.epub === factory) ReaderFragments.epub = null }
         }
-        AndroidFragment<EpubNavigatorFragment>(Modifier.fillMaxSize()) { fragment -> navigator = fragment }
+        PageBelow(turner)
+        AndroidFragment<EpubNavigatorFragment>(Modifier.fillMaxSize().livePage(turner)) { fragment -> navigator = fragment }
+        PageAbove(turner)
     }
 }
 
@@ -497,6 +557,8 @@ private class ResizeKeeper {
     var job: Job? = null
     /** The place the last restore aimed for, until the reader moves on. */
     var place: Locator? = null
+    /** Where read-aloud stopped, until the re-flow after it has been restored. */
+    var resumeAt: Locator? = null
     var restoredAt = 0L
 }
 
@@ -829,6 +891,9 @@ private class ReadAloud(
     /** Which chapter file a locator is in, so the sleep timer knows when one ends. */
     private val fileOf: (org.readium.r2.shared.util.Url) -> Int,
 ) : ListenController {
+    /** The sentence being read when listening stopped (null if it never started): the page stays there. */
+    var onStopped: (Locator?) -> Unit = {}
+    private var lastSpoken: Locator? = null
     private var mediaSession: androidx.media3.session.MediaSession? = null
     /** Highlight tint and page color, for the read-along decorations. */
     var colors: Pair<Int, Int> = 0 to 0
@@ -882,6 +947,7 @@ private class ReadAloud(
                 var utterance: Locator? = null
                 tts.location.collect { location ->
                     listen.spokenFile = fileOf(location.href)
+                    lastSpoken = location.utteranceLocator
                     val n = navigator() ?: return@collect
                     // Turn the page to follow the voice.
                     if (location.utteranceLocator != utterance) {
@@ -929,6 +995,9 @@ private class ReadAloud(
     }
 
     override fun stop() {
+        val wasListening = listen.active
+        val spoken = lastSpoken
+        lastSpoken = null
         session?.cancel()
         session = null
         mediaSession?.let(ListenService::detach)
@@ -939,6 +1008,7 @@ private class ReadAloud(
         listen.active = false
         listen.playing = false
         navigator()?.let { n -> scope.launch { n.applyDecorations(emptyList(), GROUP) } }
+        if (wasListening) onStopped(spoken)
     }
 
     private fun fail(message: String) {

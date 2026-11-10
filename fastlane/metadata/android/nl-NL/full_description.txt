@@ -1,0 +1,42 @@
+Jacket is een opensource e-reader voor vouwbare telefoons. Terwijl je op het binnenscherm leest, toont het buitenscherm de omslag van je boek van rand tot rand, als een albumhoes, zodat de mensen om je heen kunnen zien wat je leest.
+
+DE OMSLAG, AAN DE BUITENKANT
+• Boekvormige foldables: de omslag vult het buitenscherm terwijl je binnen leest, via de dual-screenmodus van Android.
+• Galaxy Z Flip: een coverschermwidget voor het Flex Window.
+• Elke telefoon of tablet: dezelfde widget op je startscherm.
+• Zet de omslag op het buitenscherm op elk moment uit in Instellingen.
+
+LEZEN
+• EPUB, PDF, CBZ-strips en platte tekst, uit je eigen bestanden. Gebruik Boeken toevoegen, of Openen met of Delen vanuit een andere app.
+• EPUB's worden weergegeven met de opensource toolkit Readium: echte pagina's, twee pagina's naast elkaar als je telefoon opengevouwen is, of doorlopend scrollen als je dat liever hebt.
+• Inhoudsopgave met subhoofdstukken, het huidige hoofdstuk dat meeloopt terwijl je leest, resterende pagina's in het hoofdstuk en een schuifbalk die het hoofdstuk onder je duim laat zien.
+• Bladwijzers, markeringen in meerdere kleuren met notities, en zoeken in de volledige tekst van EPUB's.
+
+LUISTEREN
+• De luisterboekmodus leest EPUB- en tekstboeken voor met de tekst-naar-spraakstem van je telefoon en markeert elk woord terwijl het wordt uitgesproken.
+• Speelt door met het scherm uit, met bediening op het vergrendelscherm en via je koptelefoon.
+• Slaaptimer: stopt na een ingestelde tijd of aan het einde van het hoofdstuk.
+
+LEESCOMFORT
+• De lettertypen Literata, Atkinson Hyperlegible en OpenDyslexic.
+• Tekstgrootte, regelafstand, marges en uitvullen.
+• De paginakleuren Boek, Papier, Donker en Zwart.
+• Bladeren met de volumeknoppen.
+
+BIBLIOTHEEK
+• Doorzoek en sorteer je boeken.
+• Een plank met uitgelezen boeken en een eindscherm als je de laatste pagina bereikt.
+• Exporteer een back-upbestand en importeer het later opnieuw of op een andere telefoon.
+
+ONTWERP
+• Material 3 Expressive: kleuren uit de omslag van het boek dat je leest, verende animaties en haptische feedback.
+
+PRIVACY
+• Geen internettoestemming: Jacket en de boeken die je erin opent, kunnen geen verbinding maken met het netwerk.
+• Geen accounts, geen advertenties, geen analyses, geen tracking.
+• Vrij en opensource onder de Apache License 2.0: https://github.com/friendlyglobal/jacket
+
+GOED OM TE WETEN
+• Ondersteuning voor het buitenscherm hangt af van de telefoon. Op telefoons zonder buitenscherm zijn die opties verborgen.
+• Boeken met DRM (kopieerbeveiliging) kunnen niet worden geopend.
+• Voorlezen van tekstboeken stopt als je de app verlaat. EPUB's worden ook op de achtergrond voorgelezen.

@@ -1,0 +1,42 @@
+O Jacket é um leitor de e-books de código aberto para celulares dobráveis. Enquanto você lê na tela interna, a tela externa mostra a capa do seu livro de ponta a ponta, como a capa de um álbum, para que as pessoas ao seu redor vejam o que você está lendo.
+
+A CAPA, DO LADO DE FORA
+• Dobráveis tipo livro: a capa ocupa a tela externa enquanto você lê por dentro, usando o modo de tela dupla do Android.
+• Galaxy Z Flip: um widget para a tela externa Flex Window.
+• Qualquer celular ou tablet: o mesmo widget na sua tela inicial.
+• Desative a capa na tela externa quando quiser, nas Configurações.
+
+LEITURA
+• EPUB, PDF, quadrinhos CBZ e texto simples, a partir dos seus próprios arquivos. Use Adicionar livros, ou Abrir com ou Compartilhar em outro app.
+• Os EPUBs são renderizados com o kit de código aberto Readium: páginas de verdade, duas páginas lado a lado com o celular aberto ou rolagem contínua, se preferir.
+• Sumário com subcapítulos, o capítulo atual acompanhado durante a leitura, as páginas que faltam no capítulo e uma barra que mostra uma prévia do capítulo sob o seu polegar.
+• Marcadores, destaques em várias cores com notas e pesquisa no texto completo dos EPUBs.
+
+OUVIR
+• O modo audiolivro lê em voz alta livros EPUB e de texto simples com a voz de conversão de texto em voz do celular, destacando cada palavra enquanto ela é falada.
+• Continua tocando com a tela desligada, com controles na tela de bloqueio e nos fones de ouvido.
+• Timer para dormir: para depois de um tempo definido ou no fim do capítulo.
+
+CONFORTO DE LEITURA
+• Fontes Literata, Atkinson Hyperlegible e OpenDyslexic.
+• Tamanho do texto, espaçamento entre linhas, margens e justificação.
+• Cores de página Livro, Papel, Escuro e Preto.
+• Vire as páginas com as teclas de volume.
+
+BIBLIOTECA
+• Pesquise e ordene seus livros.
+• Uma estante de concluídos e uma tela de fim de livro quando você chega à última página.
+• Exporte um arquivo de backup e importe-o de novo mais tarde ou em outro celular.
+
+DESIGN
+• Material 3 Expressive: cores tiradas da capa do livro que você está lendo, animações com efeito de mola e resposta tátil.
+
+PRIVACIDADE
+• Sem permissão de internet: nem o Jacket nem os livros que você abre nele podem se conectar à rede.
+• Sem contas, sem anúncios, sem análises, sem rastreamento.
+• Gratuito e de código aberto sob a Apache License 2.0: https://github.com/friendlyglobal/jacket
+
+BOM SABER
+• O suporte à tela externa depende do celular. Em celulares sem tela externa, essas opções ficam ocultas.
+• Livros com DRM (proteção contra cópia) não podem ser abertos.
+• A leitura em voz alta de livros de texto simples para quando você sai do app. A de EPUB continua tocando em segundo plano.

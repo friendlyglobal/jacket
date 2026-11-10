@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Jacket</string>
+    <string name="widget_name">Jacket 封面</string>
+    <string name="widget_description">正在讀的書：封面與閱讀進度。</string>
+
+    <string name="common_back">返回</string>
+    <string name="common_cancel">取消</string>
+    <string name="common_ok">確定</string>
+    <string name="percent">%1$d%%</string>
+    <string name="cover_of">《%1$s》的封面</string>
+
+    <string name="format_comic">漫畫</string>
+    <string name="format_text">文字</string>
+
+    <string name="book_status_finished">已讀完</string>
+    <string name="book_status_not_started">尚未開始</string>
+    <string name="book_status_page_of">第 %1$d / %2$d 頁</string>
+    <string name="book_status_percent_read">已讀 %1$d%%</string>
+    <string name="book_untitled">無標題</string>
+
+    <string name="cover_style_jacket">Jacket</string>
+    <string name="cover_style_shelf">書架</string>
+    <string name="cover_style_glance">速覽</string>
+
+    <string name="font_literata_description">Google 專為長篇閱讀設計的字型</string>
+    <string name="font_hyperlegible_description">字形清晰易辨，適合弱視讀者</string>
+    <string name="font_open_dyslexic_description">字母底部加重，不易看反</string>
+    <string name="font_serif">系統襯線體</string>
+    <string name="font_serif_description">手機內建的襯線字型</string>
+    <string name="font_sans">系統無襯線體</string>
+    <string name="font_sans_description">手機的介面字型</string>
+    <string name="font_original">書籍內建</string>
+    <string name="font_original_description">出版社選用的字型</string>
+
+    <string name="page_color_book">書頁</string>
+    <string name="page_color_paper">紙張</string>
+    <string name="page_color_dark">深色</string>
+    <string name="page_color_black">黑色</string>
+
+    <string name="layout_pages">翻頁</string>
+    <string name="layout_scroll">捲動</string>
+
+    <string name="sort_recent">最近</string>
+    <string name="sort_title">書名</string>
+    <string name="sort_author">作者</string>
+
+    <string name="import_added_one">已新增《%1$s》</string>
+    <plurals name="import_added_books">
+        <item quantity="other">已新增 %1$d 本書</item>
+    </plurals>
+    <string name="import_failed">無法讀取 %1$s</string>
+    <string name="import_added_and_failed">%1$s。%2$s</string>
+
+    <string name="library_profile_and_settings">個人資料和設定</string>
+    <string name="library_add_books">新增書籍</string>
+    <string name="library_all_finished">這裡的書都讀完了，再新增一本吧！</string>
+    <string name="library_no_match">沒有符合「%1$s」的書</string>
+    <string name="library_start_reading">開始閱讀</string>
+    <string name="library_continue_reading">繼續閱讀</string>
+    <string name="library_on_your_cover">外螢幕顯示中</string>
+    <string name="library_title">書庫</string>
+    <string name="library_title_finished">已讀完</string>
+    <plurals name="library_book_count">
+        <item quantity="other">%1$d 本書</item>
+    </plurals>
+    <string name="library_shelf_reading">閱讀中</string>
+    <string name="library_shelf_finished_count">已讀完 · %1$d</string>
+    <string name="library_search_placeholder">搜尋書名和作者</string>
+    <string name="library_clear_search">清除搜尋</string>
+    <string name="library_more_options">更多選項</string>
+    <string name="library_add_file_again">重新新增檔案</string>
+    <string name="library_finished_badge">已讀完</string>
+    <string name="library_new_badge">新書</string>
+    <string name="library_on_cover_screen">正在外螢幕上顯示</string>
+    <string name="library_menu_open">開啟</string>
+    <string name="library_menu_show_on_cover">在外螢幕顯示</string>
+    <string name="library_menu_mark_finished">標示為已讀完</string>
+    <string name="library_menu_mark_unfinished">標示為未讀完</string>
+    <string name="library_menu_remove">移除</string>
+    <string name="library_remove_title">要移除《%1$s》嗎？</string>
+    <string name="library_remove_message">Jacket 會刪除自己保存的副本和你的閱讀位置，原始檔案仍會留在原處。</string>
+    <string name="library_remove_confirm">移除</string>
+    <string name="library_empty_title">讓摺疊手機穿上你的書</string>
+    <string name="library_empty_message">新增 EPUB、PDF、CBZ 漫畫或文字檔。Jacket 會保留一份私人副本，並在你閱讀時將封面顯示在外螢幕或外螢幕小工具上。</string>
+
+    <string name="settings_title">設定</string>
+    <string name="settings_subtitle">個人資料、外螢幕和閱讀</string>
+    <string name="settings_profile_title">我的書庫</string>
+    <plurals name="settings_profile_books">
+        <item quantity="other">%1$d 本書</item>
+    </plurals>
+    <plurals name="settings_profile_reading">
+        <item quantity="other">閱讀中 %1$d</item>
+    </plurals>
+    <plurals name="settings_profile_finished">
+        <item quantity="other">已讀完 %1$d</item>
+    </plurals>
+    <string name="settings_profile_summary">%1$s · %2$s · %3$s</string>
+    <string name="settings_profile_on_cover">外螢幕顯示：%1$s</string>
+    <string name="settings_group_cover_screen">外螢幕</string>
+    <string name="settings_outer_ready">外螢幕已就緒</string>
+    <string name="settings_outer_ready_description">你在內螢幕閱讀時，手機可以在外螢幕顯示封面。</string>
+    <string name="settings_outer_unavailable">外螢幕目前無法使用</string>
+    <string name="settings_outer_unavailable_description">展開書本式摺疊手機即可使用外螢幕。翻蓋式摺疊手機請使用下方的小工具。</string>
+    <string name="settings_widget_style">小工具樣式</string>
+    <string name="settings_widget_style_description">適用於 Galaxy Z Flip 外螢幕和主畫面</string>
+    <string name="settings_show_progress">閱讀進度</string>
+    <string name="settings_show_progress_description">在封面上顯示細進度條和百分比</string>
+    <string name="settings_ambient_dim">自動調暗</string>
+    <string name="settings_ambient_dim_description">外螢幕 30 秒未操作後會自動變暗</string>
+    <string name="settings_auto_outer">閱讀時顯示封面</string>
+    <string name="settings_auto_outer_description">每次展開閱讀時都在外螢幕顯示封面</string>
+    <string name="settings_preview_outer">外螢幕</string>
+    <string name="settings_preview_widget">小工具</string>
+    <string name="settings_preview_description">依目前設定預覽外螢幕</string>
+    <string name="settings_cover_hint">Galaxy Z Flip：在「設定 › 封面螢幕 › 小工具」中新增「Jacket 封面」。Motorola Razr：在外螢幕上開啟 Jacket。</string>
+    <string name="settings_group_reading">閱讀</string>
+    <string name="settings_group_appearance">外觀</string>
+    <string name="settings_book_colors">使用書籍配色</string>
+    <string name="settings_book_colors_description">以正在讀的書的封面顏色為 Jacket 配色。關閉時使用手機的調色盤。</string>
+    <string name="settings_group_backup">備份</string>
+    <string name="settings_backup_save">儲存備份</string>
+    <string name="settings_backup_save_description">書單、閱讀位置、書籤、畫線和設定，不含書籍檔案。</string>
+    <string name="settings_backup_restore">從備份還原</string>
+    <string name="settings_backup_restore_description">接著重新新增書籍檔案，每本書都會找回閱讀位置和筆記。</string>
+    <string name="settings_backup_saved">備份已儲存。</string>
+    <string name="settings_backup_save_failed">無法儲存備份：%1$s</string>
+    <string name="settings_backup_restored">備份已還原。</string>
+    <plurals name="settings_backup_restored_missing">
+        <item quantity="other">備份已還原。新增 %1$d 本書的檔案即可重新連結。</item>
+    </plurals>
+    <string name="settings_backup_not_a_backup">這不是 Jacket 備份檔案。</string>
+    <string name="settings_backup_unreadable">無法讀取該檔案。</string>
+    <string name="settings_backup_cant_open">無法開啟備份檔案</string>
+    <string name="settings_backup_cant_write">無法寫入備份檔案</string>
+    <string name="settings_group_about">關於</string>
+    <string name="settings_about_version">版本 %1$s</string>
+    <string name="settings_about_source">原始碼</string>
+    <string name="settings_about_source_description">在 GitHub 上開放原始碼</string>
+    <string name="settings_about_licenses">開放原始碼授權</string>
+    <string name="settings_about_licenses_description">Jacket 採用 Apache 2.0 授權，以 Readium、Jetpack 和開放字型打造</string>
+
+    <string name="licenses_title">開放原始碼授權</string>
+    <string name="licenses_subtitle">Jacket 是自由軟體，建立在他人的心血之上</string>
+
+    <string name="reading_text_size">字體大小</string>
+    <string name="reading_text_size_sample">A</string>
+    <string name="reading_typeface">字型</string>
+    <string name="reading_typeface_sample">Aa</string>
+    <string name="reading_selected">已選取</string>
+    <string name="reading_page">頁面</string>
+    <string name="reading_layout">版面</string>
+    <string name="reading_layout_hint">像書一樣翻頁：滑動或輕觸螢幕邊緣。展開後會以雙頁顯示。</string>
+    <string name="reading_line_spacing">行距</string>
+    <string name="reading_line_spacing_book">書籍</string>
+    <string name="reading_line_spacing_tight">緊密</string>
+    <string name="reading_line_spacing_normal">標準</string>
+    <string name="reading_line_spacing_loose">寬鬆</string>
+    <string name="reading_margins">邊界</string>
+    <string name="reading_margins_narrow">窄</string>
+    <string name="reading_margins_normal">標準</string>
+    <string name="reading_margins_wide">寬</string>
+    <string name="reading_alignment">對齊</string>
+    <string name="reading_alignment_book">書籍</string>
+    <string name="reading_alignment_left">靠左</string>
+    <string name="reading_alignment_justified">左右對齊</string>
+    <string name="reading_alignment_hint">左右對齊時會自動斷字。「書籍」會保留出版社原有的間距與對齊方式。</string>
+    <string name="reading_buttons">按鍵</string>
+    <string name="reading_volume_keys">使用音量鍵翻頁</string>
+    <string name="reading_volume_keys_description">按音量降低鍵翻到下一頁，音量提高鍵翻到上一頁。聆聽時無法使用。</string>
+
+    <string name="reader_back_to_library">返回書庫</string>
+    <string name="reader_search">在書中搜尋</string>
+    <string name="reader_bookmark_add">將此頁加入書籤</string>
+    <string name="reader_bookmark_remove">移除書籤</string>
+    <string name="reader_outer_show">在外螢幕顯示封面</string>
+    <string name="reader_outer_hide">隱藏外螢幕封面</string>
+    <string name="reader_text_settings">文字和頁面設定</string>
+    <string name="reader_contents_and_notes">目錄、書籤和畫線</string>
+    <string name="reader_notes">書籤和畫線</string>
+    <string name="reader_listen">聆聽：朗讀</string>
+    <string name="reader_previous_chapter">上一章</string>
+    <string name="reader_next_chapter">下一章</string>
+    <string name="reader_previous_paragraph">上一段</string>
+    <string name="reader_next_paragraph">下一段</string>
+    <string name="reader_previous_page">上一頁</string>
+    <string name="reader_next_page">下一頁</string>
+    <string name="reader_page_number">第 %1$d 頁</string>
+    <string name="reader_page_of">第 %1$d 頁，共 %2$d 頁</string>
+    <string name="reader_percent_read">已讀 %1$d%%</string>
+    <string name="reader_footer_last_page">本章最後一頁</string>
+    <plurals name="reader_footer_pages_left">
+        <item quantity="other">本章還剩 %1$d 頁</item>
+    </plurals>
+    <string name="reader_error_open_book">無法開啟這本書。\n%1$s</string>
+    <string name="reader_error_no_pages">這本書沒有可顯示的頁面。</string>
+    <string name="reader_error_pdf">無法開啟這個 PDF。目前尚不支援受密碼保護的 PDF。</string>
+    <string name="reader_error_comic">無法開啟這本漫畫。</string>
+    <string name="reader_error_text">這個檔案是空的或無法讀取。</string>
+    <string name="reader_no_app_for_link">沒有可開啟這個連結的應用程式。</string>
+    <string name="reader_share_quote">「%1$s」\n——《%2$s》</string>
+    <string name="reader_share_quote_author">「%1$s」\n——%3$s《%2$s》</string>
+
+    <string name="selection_highlight">畫線</string>
+    <string name="selection_note">筆記</string>
+    <string name="selection_share">分享</string>
+
+    <string name="notes_tab_contents">目錄</string>
+    <string name="notes_tab_bookmarks">書籤</string>
+    <string name="notes_tab_bookmarks_count">書籤 · %1$d</string>
+    <string name="notes_tab_highlights">畫線</string>
+    <string name="notes_tab_highlights_count">畫線 · %1$d</string>
+    <string name="notes_no_bookmarks">尚無書籤</string>
+    <string name="notes_no_bookmarks_hint">輕觸頁面頂端的緞帶，即可記住目前位置。</string>
+    <string name="notes_no_highlights">尚無畫線</string>
+    <string name="notes_no_highlights_hint">按住文字，然後選擇「畫線」或「筆記」。</string>
+    <string name="notes_edit">編輯筆記和顏色</string>
+    <string name="notes_delete">刪除</string>
+    <string name="notes_bookmark_page_at">位於 %1$d%% 的頁面</string>
+    <string name="notes_highlight_quote">「%1$s」</string>
+    <string name="notes_note">筆記</string>
+    <string name="notes_done">完成</string>
+
+    <string name="search_placeholder">在本書中搜尋</string>
+    <string name="search_clear">清除</string>
+    <string name="search_no_results">找不到「%1$s」的結果</string>
+    <plurals name="search_result_count">
+        <item quantity="other">%1$d 個結果</item>
+    </plurals>
+
+    <string name="finished_title_finished">已讀完</string>
+    <string name="finished_title_end">全書完</string>
+    <string name="finished_keep_reading">繼續閱讀</string>
+    <string name="finished_mark">標示為已讀完</string>
+    <string name="finished_back_to_library">返回書庫</string>
+    <string name="finished_next">下一本：《%1$s》</string>
+
+    <string name="listen_play">播放</string>
+    <string name="listen_pause">暫停</string>
+    <string name="listen_previous_sentence">上一句</string>
+    <string name="listen_next_sentence">下一句</string>
+    <string name="listen_previous_paragraph">上一段</string>
+    <string name="listen_next_paragraph">下一段</string>
+    <string name="listen_rate">%1$s×</string>
+    <string name="listen_stop">停止聆聽</string>
+    <string name="listen_sleep_timer">睡眠定時器</string>
+    <string name="listen_sleep_timer_end_of_chapter">睡眠定時器：本章結束時</string>
+    <plurals name="listen_sleep_minutes_left">
+        <item quantity="other">睡眠定時器：還剩 %1$d 分鐘</item>
+    </plurals>
+    <string name="listen_sleep_off">關閉</string>
+    <string name="listen_sleep_15_minutes">15 分鐘</string>
+    <string name="listen_sleep_30_minutes">30 分鐘</string>
+    <string name="listen_sleep_1_hour">1 小時</string>
+    <string name="listen_sleep_end_of_chapter">本章結束</string>
+    <string name="listen_no_voice">這支手機尚未安裝文字轉語音的語音。</string>
+    <string name="listen_no_readable_text">這本書沒有可朗讀的文字。</string>
+    <string name="listen_stopped_error">朗讀已停止：%1$s</string>
+    <string name="listen_voice_stopped">語音已停止，請檢查文字轉語音設定。</string>
+
+    <string name="widget_reading">閱讀中</string>
+    <string name="widget_empty">新增一本書，穿上它的封面</string>
+    <string name="listen_notification_channel">朗讀</string>
+</resources>

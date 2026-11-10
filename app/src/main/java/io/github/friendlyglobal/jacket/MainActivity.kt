@@ -7,13 +7,22 @@ import android.view.KeyEvent
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -26,21 +35,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.zIndex
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import io.github.friendlyglobal.jacket.data.ImportReport
+import io.github.friendlyglobal.jacket.data.LibrarySort
 import io.github.friendlyglobal.jacket.outer.OuterCoverHost
 import io.github.friendlyglobal.jacket.outer.OuterDisplay
 import io.github.friendlyglobal.jacket.reader.ReaderFragments
 import io.github.friendlyglobal.jacket.reader.ReaderKeys
 import io.github.friendlyglobal.jacket.reader.ReaderScreen
+import io.github.friendlyglobal.jacket.ui.CoverSpot
 import io.github.friendlyglobal.jacket.ui.CoverTransition
 import io.github.friendlyglobal.jacket.ui.KeepScreenOn
+import io.github.friendlyglobal.jacket.ui.LocalCoverSpot
 import io.github.friendlyglobal.jacket.ui.LocalCoverTransition
 import io.github.friendlyglobal.jacket.ui.home.HomeScreen
+import io.github.friendlyglobal.jacket.ui.home.heroBook
+import io.github.friendlyglobal.jacket.ui.home.onFinishedShelf
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import io.github.friendlyglobal.jacket.ui.settings.LicensesScreen
 import io.github.friendlyglobal.jacket.ui.settings.SettingsScreen
@@ -169,18 +187,24 @@ private fun JacketRoot(
     val request by openRequests.collectAsStateWithLifecycle()
     var destination by rememberSaveable { mutableStateOf(HOME) }
     val snackbar = remember { SnackbarHostState() }
+    // Kept here so closing a book can bring the place its cover lands into view.
+    val libraryGrid = rememberLazyGridState()
 
     val openBook = state.find(destination.takeIf { it.startsWith(READ) }?.removePrefix(READ))
+    // Where the open book's cover took off from in the library, then where it will land.
+    var coverSpot by rememberSaveable { mutableStateOf(CoverSpot.HERO) }
     // The reader marks the book as opened once its cover has landed; doing it here would
     // re-render the library mid-flight and move the cover's starting point.
-    val open = { id: String ->
+    val open = { id: String, spot: CoverSpot? ->
         haptics.tick()
+        // Not opened from a cover (a widget, the next book): its hero card if it has one.
+        coverSpot = spot ?: if (state.heroBook(missing)?.id == id) CoverSpot.HERO else CoverSpot.TILE
         destination = READ + id
     }
 
     LaunchedEffect(request) {
         val id = request ?: return@LaunchedEffect
-        if (library.state.value.find(id) != null) open(id)
+        if (library.state.value.find(id) != null) open(id, null)
         openRequests.value = null
     }
     LaunchedEffect(Unit) {
@@ -206,18 +230,24 @@ private fun JacketRoot(
     // outgoing one must not turn the screen timeout back on.
     if (reading) KeepScreenOn()
 
-    // Colors: the book you're reading, else the last book you read; the system palette if neither
-    // exists or "Colors from your book" is off. Browsing never re-tints the app.
-    val colorBook = openBook ?: state.current?.takeIf { !it.isNew }
-    val seed = if (state.settings.bookColors) colorBook?.seedColor else null
+    // Colors: the library wears the last book you read; the system palette if there is none or
+    // "Colors from your book" is off. Browsing never re-tints the app. A reader brings its own
+    // book's colors with it instead of re-tinting everything as it opens: the theme's colors
+    // can't change without recomposing the whole screen, frame after frame, under the flying
+    // cover. The library takes up the new book's colors while it is out of sight.
+    val bookColors = state.settings.bookColors
+    val librarySeed = if (bookColors) state.current?.takeIf { !it.isNew }?.seedColor else null
 
-    JacketTheme(seed = seed) {
+    JacketTheme(seed = librarySeed, animated = openBook == null) {
+        val motion = MaterialTheme.motionScheme
         Surface(color = MaterialTheme.colorScheme.background) {
             SharedTransitionLayout {
-                AnimatedContent(
-                    targetState = destination,
+                val screens = updateTransition(destination, label = "screens")
+                screens.AnimatedContent(
                     transitionSpec = {
                         val spatial = tween<androidx.compose.ui.unit.IntOffset>(380)
+                        val fromBook = initialState.startsWith(READ)
+                        val toBook = targetState.startsWith(READ)
                         when {
                             targetState == LICENSES || (targetState == SETTINGS && initialState != LICENSES) ->
                                 (slideInHorizontally(spatial) { it / 3 } + fadeIn(tween(240))) togetherWith
@@ -225,14 +255,32 @@ private fun JacketRoot(
                             initialState == LICENSES || initialState == SETTINGS ->
                                 (slideInHorizontally(spatial) { -it / 10 } + fadeIn(tween(240))) togetherWith
                                     (slideOutHorizontally(spatial) { it / 3 } + fadeOut(tween(160)))
-                            // Into a book, the flying cover carries the motion; out of one, a crossfade.
-                            else -> fadeIn(tween(260, delayMillis = 60)) togetherWith fadeOut(tween(200))
+                            // Book to book: a crossfade, and the next book opens its own cover.
+                            fromBook && toBook -> fadeIn(tween(260, delayMillis = 60)) togetherWith fadeOut(tween(200))
+                            // Into a book: the library recedes behind the flying cover, dimmed by the
+                            // reader's backdrop coming up over it on the same spring, so the two
+                            // read as one movement. It stays underneath until the cover has landed:
+                            // nothing shows through the fade.
+                            toBook -> fadeIn(motion.slowSpatialSpec()) togetherWith
+                                (scaleOut(motion.slowSpatialSpec(), targetScale = RECEDED) + ExitTransition.KeepUntilTransitionsFinished)
+                            // Out of one: the backdrop clears and the library comes forward again
+                            // underneath it, while the cover flies home.
+                            else -> (scaleIn(motion.defaultSpatialSpec(), initialScale = RECEDED) togetherWith fadeOut(motion.defaultSpatialSpec()))
+                                .apply { targetContentZIndex = -1f }
                         }
                     },
-                    label = "screens",
                 ) { target ->
-                    CompositionLocalProvider(LocalCoverTransition provides CoverTransition(this@SharedTransitionLayout, this@AnimatedContent)) {
+                    CompositionLocalProvider(
+                        LocalCoverTransition provides CoverTransition(this@SharedTransitionLayout, this@AnimatedContent),
+                        LocalCoverSpot provides coverSpot,
+                    ) {
                         val book = state.find(target.takeIf { it.startsWith(READ) }?.removePrefix(READ))
+                        // A screen on its way out, or the library while a cover is in the air, takes no
+                        // touches: a tap then would start a second transition on top of the first.
+                        val leaving = transition.targetState != EnterExitState.Visible
+                        val coverFlying = screens.isRunning &&
+                            (screens.currentState.startsWith(READ) || screens.targetState.startsWith(READ))
+                        if (book == null && (leaving || coverFlying)) TouchShield()
                         when {
                             target == SETTINGS -> SettingsScreen(
                                 state = state,
@@ -242,21 +290,41 @@ private fun JacketRoot(
                                 onLicenses = { destination = LICENSES },
                             )
                             target == LICENSES -> LicensesScreen(onBack = { destination = SETTINGS })
-                            book != null -> ReaderScreen(
-                                book = book,
-                                settings = state.settings,
-                                outer = outer,
-                                onSettings = library::updateSettings,
-                                onOpen = { open(it) },
-                                onBack = { destination = HOME },
-                            )
+                            book != null -> JacketTheme(seed = if (bookColors) book.seedColor else null, animated = false) {
+                                CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) {
+                                    ReaderScreen(
+                                        book = book,
+                                        settings = state.settings,
+                                        outer = outer,
+                                        onSettings = library::updateSettings,
+                                        onOpen = { open(it, null) },
+                                        onClose = {
+                                            // "Recent" has moved the book just read to the top of the
+                                            // library: bring that into view, so its cover has
+                                            // somewhere to land.
+                                            val newest = state.books.maxByOrNull { maxOf(it.lastOpenedAt, it.addedAt) }
+                                            if (state.settings.sort == LibrarySort.RECENT && newest?.id == book.id &&
+                                                libraryGrid.firstVisibleItemIndex > 0
+                                            ) {
+                                                libraryGrid.requestScrollToItem(0)
+                                            }
+                                            // It lands on the hero card when that shows this book and
+                                            // is in view (it heads the grid), else back on its tile.
+                                            val onHero = !state.onFinishedShelf && state.heroBook(missing)?.id == book.id &&
+                                                libraryGrid.firstVisibleItemIndex == 0
+                                            coverSpot = if (onHero) CoverSpot.HERO else CoverSpot.TILE
+                                        },
+                                        onBack = { destination = HOME },
+                                    )
+                                }
+                            }
                             else -> HomeScreen(
                                 state = state,
                                 outerAvailable = outerAvailable,
                                 importing = busy,
                                 snackbar = snackbar,
                                 onImport = onImport,
-                                onOpen = { open(it.id) },
+                                onOpen = { book, spot -> open(book.id, spot) },
                                 onShowOnCover = { library.setCurrent(it.id) },
                                 onDelete = { library.delete(it.id) },
                                 onSort = { sort -> library.updateSettings { it.copy(sort = sort) } },
@@ -264,6 +332,7 @@ private fun JacketRoot(
                                 missing = missing,
                                 onShelf = { finished -> library.updateSettings { it.copy(showFinished = finished) } },
                                 onFinished = { book, done -> library.setFinished(book.id, done) },
+                                grid = libraryGrid,
                             )
                         }
                     }
@@ -271,4 +340,19 @@ private fun JacketRoot(
             }
         }
     }
+}
+
+/** How far back the library sits while a book is open in front of it. */
+private const val RECEDED = 0.92f
+
+/** Swallows every touch on the screen it is composed in. */
+@Composable
+private fun TouchShield() {
+    Box(
+        Modifier.fillMaxSize().zIndex(1f).pointerInput(Unit) {
+            awaitPointerEventScope {
+                while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() }
+            }
+        },
+    )
 }

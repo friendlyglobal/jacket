@@ -1,0 +1,3 @@
+• Daha akıcı sayfa çevirme: sayfalar parmağınızı izler ve düzgünce yerine oturur.
+• Ayarlar, kapak ekranınızın ve her widget stilinin canlı önizlemesini gösterir.
+• Jacket artık 17 dil konuşuyor: İngilizce, İspanyolca, Portekizce, Fransızca, Almanca, İtalyanca, Felemenkçe, Lehçe, Rusça, Ukraynaca, Türkçe, Arapça, Hintçe, Endonezce, Japonca, Korece ve Çince. Android'in dil ayarlarından uygulama için bir dil seçin.

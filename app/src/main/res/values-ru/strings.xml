@@ -1,0 +1,291 @@
+<resources>
+    <string name="app_name">Jacket</string>
+    <string name="widget_name">Обложка Jacket</string>
+    <string name="widget_description">Книга, которую вы читаете: её обложка и ваш прогресс.</string>
+
+    <string name="common_back">Назад</string>
+    <string name="common_cancel">Отмена</string>
+    <string name="common_ok">ОК</string>
+    <string name="percent">%1$d&#160;%%</string>
+    <string name="cover_of">Обложка: %1$s</string>
+
+    <string name="format_comic">Комикс</string>
+    <string name="format_text">Текст</string>
+
+    <string name="book_status_finished">Прочитано</string>
+    <string name="book_status_not_started">Не начато</string>
+    <string name="book_status_page_of">Страница %1$d из %2$d</string>
+    <string name="book_status_percent_read">Прочитано %1$d&#160;%%</string>
+    <string name="book_untitled">Без названия</string>
+
+    <string name="cover_style_jacket">Jacket</string>
+    <string name="cover_style_shelf">Полка</string>
+    <string name="cover_style_glance">Обзор</string>
+
+    <string name="font_literata_description">Шрифт Google для долгого чтения</string>
+    <string name="font_hyperlegible_description">Чёткие буквы для слабовидящих</string>
+    <string name="font_open_dyslexic_description">Утяжелённые буквы, которые не переворачиваются</string>
+    <string name="font_serif">Системный с засечками</string>
+    <string name="font_serif_description">Шрифт с засечками вашего телефона</string>
+    <string name="font_sans">Системный без засечек</string>
+    <string name="font_sans_description">Шрифт интерфейса вашего телефона</string>
+    <string name="font_original">Из книги</string>
+    <string name="font_original_description">То, что выбрал издатель</string>
+
+    <string name="page_color_book">Книга</string>
+    <string name="page_color_paper">Бумага</string>
+    <string name="page_color_dark">Тёмный</string>
+    <string name="page_color_black">Чёрный</string>
+
+    <string name="layout_pages">Страницы</string>
+    <string name="layout_scroll">Прокрутка</string>
+
+    <string name="sort_recent">Недавние</string>
+    <string name="sort_title">Название</string>
+    <string name="sort_author">Автор</string>
+
+    <string name="import_added_one">Добавлено: «%1$s»</string>
+    <plurals name="import_added_books">
+        <item quantity="one">Добавлена %1$d книга</item>
+        <item quantity="few">Добавлено %1$d книги</item>
+        <item quantity="many">Добавлено %1$d книг</item>
+        <item quantity="other">Добавлено %1$d книги</item>
+    </plurals>
+    <string name="import_failed">Не удалось прочитать: %1$s</string>
+    <string name="import_added_and_failed">%1$s. %2$s</string>
+
+    <string name="library_profile_and_settings">Профиль и настройки</string>
+    <string name="library_add_books">Добавить книги</string>
+    <string name="library_all_finished">Здесь всё прочитано. Добавьте ещё книгу!</string>
+    <string name="library_no_match">Нет книг по запросу «%1$s»</string>
+    <string name="library_start_reading">НАЧАТЬ ЧИТАТЬ</string>
+    <string name="library_continue_reading">ЧИТАТЬ ДАЛЬШЕ</string>
+    <string name="library_on_your_cover">Видно снаружи</string>
+    <string name="library_title">Библиотека</string>
+    <string name="library_title_finished">Прочитанные</string>
+    <plurals name="library_book_count">
+        <item quantity="one">%1$d книга</item>
+        <item quantity="few">%1$d книги</item>
+        <item quantity="many">%1$d книг</item>
+        <item quantity="other">%1$d книги</item>
+    </plurals>
+    <string name="library_shelf_reading">Читаю</string>
+    <string name="library_shelf_finished_count">Прочитано · %1$d</string>
+    <string name="library_search_placeholder">Поиск по названию и автору</string>
+    <string name="library_clear_search">Очистить поиск</string>
+    <string name="library_more_options">Другие параметры</string>
+    <string name="library_add_file_again">Добавить файл заново</string>
+    <string name="library_finished_badge">Прочитано</string>
+    <string name="library_new_badge">Новая</string>
+    <string name="library_on_cover_screen">На внешнем экране</string>
+    <string name="library_menu_open">Открыть</string>
+    <string name="library_menu_show_on_cover">Показать на внешнем экране</string>
+    <string name="library_menu_mark_finished">Отметить как прочитанную</string>
+    <string name="library_menu_mark_unfinished">Отметить как непрочитанную</string>
+    <string name="library_menu_remove">Удалить</string>
+    <string name="library_remove_title">Удалить «%1$s»?</string>
+    <string name="library_remove_message">Jacket удалит свою копию и позицию чтения. Исходный файл останется на месте.</string>
+    <string name="library_remove_confirm">Удалить</string>
+    <string name="library_empty_title">Оденьте свой складной телефон в книгу</string>
+    <string name="library_empty_message">Добавьте файл EPUB, PDF, комикс CBZ или текстовый файл. Jacket хранит личную копию и, пока вы читаете, показывает обложку на внешнем экране или в виджете внешнего экрана.</string>
+
+    <string name="settings_title">Настройки</string>
+    <string name="settings_subtitle">Профиль, внешний экран и чтение</string>
+    <string name="settings_profile_title">Ваша библиотека</string>
+    <plurals name="settings_profile_books">
+        <item quantity="one">%1$d книга</item>
+        <item quantity="few">%1$d книги</item>
+        <item quantity="many">%1$d книг</item>
+        <item quantity="other">%1$d книги</item>
+    </plurals>
+    <plurals name="settings_profile_reading">
+        <item quantity="one">%1$d в процессе</item>
+        <item quantity="few">%1$d в процессе</item>
+        <item quantity="many">%1$d в процессе</item>
+        <item quantity="other">%1$d в процессе</item>
+    </plurals>
+    <plurals name="settings_profile_finished">
+        <item quantity="one">%1$d прочитана</item>
+        <item quantity="few">%1$d прочитаны</item>
+        <item quantity="many">%1$d прочитано</item>
+        <item quantity="other">%1$d прочитано</item>
+    </plurals>
+    <string name="settings_profile_summary">%1$s · %2$s · %3$s</string>
+    <string name="settings_profile_on_cover">Снаружи: %1$s</string>
+    <string name="settings_group_cover_screen">Внешний экран</string>
+    <string name="settings_outer_ready">Внешний экран готов</string>
+    <string name="settings_outer_ready_description">Телефон может показывать обложку на внешнем экране, пока вы читаете на внутреннем.</string>
+    <string name="settings_outer_unavailable">Внешний экран сейчас недоступен</string>
+    <string name="settings_outer_unavailable_description">Разложите складной телефон-книжку, чтобы использовать внешний экран. На раскладушках используйте виджет ниже.</string>
+    <string name="settings_widget_style">Стиль виджета</string>
+    <string name="settings_widget_style_description">Для внешнего экрана Galaxy Z Flip и главных экранов</string>
+    <string name="settings_show_progress">Прогресс чтения</string>
+    <string name="settings_show_progress_description">Тонкая полоса прогресса и процент на обложке</string>
+    <string name="settings_ambient_dim">Затемнение</string>
+    <string name="settings_ambient_dim_description">Внешний экран тускнеет через 30 секунд без касаний</string>
+    <string name="settings_auto_outer">Обложка при чтении</string>
+    <string name="settings_auto_outer_description">Показывать обложку на внешнем экране, когда вы раскладываете телефон для чтения</string>
+    <string name="settings_preview_outer">Внешний экран</string>
+    <string name="settings_preview_widget">Виджет</string>
+    <string name="settings_preview_description">Предпросмотр внешнего экрана с текущими настройками</string>
+    <string name="settings_cover_hint">Galaxy Z Flip: добавьте «Обложка Jacket» в разделе Настройки › Внешний экран › Виджеты. Motorola Razr: откройте Jacket на внешнем экране.</string>
+    <string name="settings_group_reading">Чтение</string>
+    <string name="settings_group_appearance">Оформление</string>
+    <string name="settings_book_colors">Цвета из книги</string>
+    <string name="settings_book_colors_description">Окрашивать Jacket в цвета обложки текущей книги. Выкл.: палитра телефона.</string>
+    <string name="settings_group_backup">Резервная копия</string>
+    <string name="settings_backup_save">Сохранить копию</string>
+    <string name="settings_backup_save_description">Список книг, позиции, закладки, выделения и настройки. Без файлов книг.</string>
+    <string name="settings_backup_restore">Восстановить из копии</string>
+    <string name="settings_backup_restore_description">Затем снова добавьте файлы книг: каждая найдёт своё место и заметки.</string>
+    <string name="settings_backup_saved">Резервная копия сохранена.</string>
+    <string name="settings_backup_save_failed">Не удалось сохранить резервную копию: %1$s</string>
+    <string name="settings_backup_restored">Резервная копия восстановлена.</string>
+    <plurals name="settings_backup_restored_missing">
+        <item quantity="one">Резервная копия восстановлена. Добавьте файл %1$d книги, чтобы снова её подключить.</item>
+        <item quantity="few">Резервная копия восстановлена. Добавьте файлы %1$d книг, чтобы снова их подключить.</item>
+        <item quantity="many">Резервная копия восстановлена. Добавьте файлы %1$d книг, чтобы снова их подключить.</item>
+        <item quantity="other">Резервная копия восстановлена. Добавьте файлы %1$d книги, чтобы снова их подключить.</item>
+    </plurals>
+    <string name="settings_backup_not_a_backup">Это не файл резервной копии Jacket.</string>
+    <string name="settings_backup_unreadable">Не удалось прочитать этот файл.</string>
+    <string name="settings_backup_cant_open">Не удаётся открыть файл резервной копии</string>
+    <string name="settings_backup_cant_write">Не удаётся записать файл резервной копии</string>
+    <string name="settings_group_about">О приложении</string>
+    <string name="settings_about_version">Версия %1$s</string>
+    <string name="settings_about_source">Исходный код</string>
+    <string name="settings_about_source_description">Открытый код на GitHub</string>
+    <string name="settings_about_licenses">Лицензии открытого ПО</string>
+    <string name="settings_about_licenses_description">Jacket распространяется по лицензии Apache 2.0 и использует Readium, Jetpack и открытые шрифты</string>
+
+    <string name="licenses_title">Лицензии открытого ПО</string>
+    <string name="licenses_subtitle">Jacket — свободная программа, созданная на основе чужого труда</string>
+
+    <string name="reading_text_size">Размер текста</string>
+    <string name="reading_text_size_sample">A</string>
+    <string name="reading_typeface">Шрифт</string>
+    <string name="reading_typeface_sample">Aa</string>
+    <string name="reading_selected">Выбрано</string>
+    <string name="reading_page">Страница</string>
+    <string name="reading_layout">Режим</string>
+    <string name="reading_layout_hint">Страницы листаются как в книге: проведите пальцем или коснитесь края. В разложенном виде — разворот из двух страниц.</string>
+    <string name="reading_line_spacing">Межстрочный интервал</string>
+    <string name="reading_line_spacing_book">Книга</string>
+    <string name="reading_line_spacing_tight">Узкий</string>
+    <string name="reading_line_spacing_normal">Обычный</string>
+    <string name="reading_line_spacing_loose">Широкий</string>
+    <string name="reading_margins">Поля</string>
+    <string name="reading_margins_narrow">Узкие</string>
+    <string name="reading_margins_normal">Обычные</string>
+    <string name="reading_margins_wide">Широкие</string>
+    <string name="reading_alignment">Выравнивание</string>
+    <string name="reading_alignment_book">Книга</string>
+    <string name="reading_alignment_left">Влево</string>
+    <string name="reading_alignment_justified">По ширине</string>
+    <string name="reading_alignment_hint">В тексте по ширине включены переносы. «Книга» сохраняет отступы и выравнивание издателя.</string>
+    <string name="reading_buttons">Кнопки</string>
+    <string name="reading_volume_keys">Листать кнопками громкости</string>
+    <string name="reading_volume_keys_description">Тише — следующая страница, громче — предыдущая. Не во время прослушивания.</string>
+
+    <string name="reader_back_to_library">В библиотеку</string>
+    <string name="reader_search">Поиск в книге</string>
+    <string name="reader_bookmark_add">Добавить закладку</string>
+    <string name="reader_bookmark_remove">Удалить закладку</string>
+    <string name="reader_outer_show">Показать обложку на внешнем экране</string>
+    <string name="reader_outer_hide">Скрыть обложку на внешнем экране</string>
+    <string name="reader_text_settings">Настройки текста и страницы</string>
+    <string name="reader_contents_and_notes">Оглавление, закладки и выделения</string>
+    <string name="reader_notes">Закладки и выделения</string>
+    <string name="reader_listen">Слушать: чтение вслух</string>
+    <string name="reader_previous_chapter">Предыдущая глава</string>
+    <string name="reader_next_chapter">Следующая глава</string>
+    <string name="reader_previous_paragraph">Предыдущий абзац</string>
+    <string name="reader_next_paragraph">Следующий абзац</string>
+    <string name="reader_previous_page">Предыдущая страница</string>
+    <string name="reader_next_page">Следующая страница</string>
+    <string name="reader_page_number">Страница %1$d</string>
+    <string name="reader_page_of">Страница %1$d из %2$d</string>
+    <string name="reader_percent_read">Прочитано %1$d&#160;%%</string>
+    <string name="reader_footer_last_page">Последняя страница главы</string>
+    <plurals name="reader_footer_pages_left">
+        <item quantity="one">До конца главы %1$d страница</item>
+        <item quantity="few">До конца главы %1$d страницы</item>
+        <item quantity="many">До конца главы %1$d страниц</item>
+        <item quantity="other">До конца главы %1$d страницы</item>
+    </plurals>
+    <string name="reader_error_open_book">Не удалось открыть книгу.\n%1$s</string>
+    <string name="reader_error_no_pages">В этой книге нет страниц для показа.</string>
+    <string name="reader_error_pdf">Не удалось открыть этот PDF. PDF с паролем пока не поддерживаются.</string>
+    <string name="reader_error_comic">Не удалось открыть этот комикс.</string>
+    <string name="reader_error_text">Этот файл пуст или его не удалось прочитать.</string>
+    <string name="reader_no_app_for_link">Нет приложения, которое может открыть эту ссылку.</string>
+    <string name="reader_share_quote">«%1$s»\n— %2$s</string>
+    <string name="reader_share_quote_author">«%1$s»\n— %2$s, %3$s</string>
+
+    <string name="selection_highlight">Выделить</string>
+    <string name="selection_note">Заметка</string>
+    <string name="selection_share">Поделиться</string>
+
+    <string name="notes_tab_contents">Оглавление</string>
+    <string name="notes_tab_bookmarks">Закладки</string>
+    <string name="notes_tab_bookmarks_count">Закладки · %1$d</string>
+    <string name="notes_tab_highlights">Выделения</string>
+    <string name="notes_tab_highlights_count">Выделения · %1$d</string>
+    <string name="notes_no_bookmarks">Закладок пока нет</string>
+    <string name="notes_no_bookmarks_hint">Нажмите на ленточку вверху страницы, чтобы запомнить место.</string>
+    <string name="notes_no_highlights">Выделений пока нет</string>
+    <string name="notes_no_highlights_hint">Нажмите на текст и удерживайте, затем выберите «Выделить» или «Заметка».</string>
+    <string name="notes_edit">Изменить заметку и цвет</string>
+    <string name="notes_delete">Удалить</string>
+    <string name="notes_bookmark_page_at">Страница на %1$d&#160;%%</string>
+    <string name="notes_highlight_quote">«%1$s»</string>
+    <string name="notes_note">Заметка</string>
+    <string name="notes_done">Готово</string>
+
+    <string name="search_placeholder">Поиск в этой книге</string>
+    <string name="search_clear">Очистить</string>
+    <string name="search_no_results">Ничего не найдено по запросу «%1$s»</string>
+    <plurals name="search_result_count">
+        <item quantity="one">%1$d результат</item>
+        <item quantity="few">%1$d результата</item>
+        <item quantity="many">%1$d результатов</item>
+        <item quantity="other">%1$d результата</item>
+    </plurals>
+
+    <string name="finished_title_finished">Прочитано</string>
+    <string name="finished_title_end">Конец</string>
+    <string name="finished_keep_reading">Читать дальше</string>
+    <string name="finished_mark">Отметить как прочитанную</string>
+    <string name="finished_back_to_library">В библиотеку</string>
+    <string name="finished_next">Далее: %1$s</string>
+
+    <string name="listen_play">Воспроизвести</string>
+    <string name="listen_pause">Пауза</string>
+    <string name="listen_previous_sentence">Предыдущее предложение</string>
+    <string name="listen_next_sentence">Следующее предложение</string>
+    <string name="listen_previous_paragraph">Предыдущий абзац</string>
+    <string name="listen_next_paragraph">Следующий абзац</string>
+    <string name="listen_rate">%1$s×</string>
+    <string name="listen_stop">Остановить чтение</string>
+    <string name="listen_sleep_timer">Таймер сна</string>
+    <string name="listen_sleep_timer_end_of_chapter">Таймер сна: конец главы</string>
+    <plurals name="listen_sleep_minutes_left">
+        <item quantity="one">Таймер сна: осталась %1$d минута</item>
+        <item quantity="few">Таймер сна: осталось %1$d минуты</item>
+        <item quantity="many">Таймер сна: осталось %1$d минут</item>
+        <item quantity="other">Таймер сна: осталось %1$d минуты</item>
+    </plurals>
+    <string name="listen_sleep_off">Выкл.</string>
+    <string name="listen_sleep_15_minutes">15 минут</string>
+    <string name="listen_sleep_30_minutes">30 минут</string>
+    <string name="listen_sleep_1_hour">1 час</string>
+    <string name="listen_sleep_end_of_chapter">Конец главы</string>
+    <string name="listen_no_voice">На этом телефоне не установлен голос для синтеза речи.</string>
+    <string name="listen_no_readable_text">В этой книге нет текста, который можно прочитать вслух.</string>
+    <string name="listen_stopped_error">Чтение вслух остановлено: %1$s</string>
+    <string name="listen_voice_stopped">Голос перестал читать. Проверьте настройки синтеза речи.</string>
+
+    <string name="widget_reading">Читаю</string>
+    <string name="widget_empty">Добавьте книгу, чтобы надеть её обложку</string>
+    <string name="listen_notification_channel">Чтение вслух</string>
+</resources>

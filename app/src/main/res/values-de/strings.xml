@@ -1,0 +1,273 @@
+<resources>
+    <string name="app_name">Jacket</string>
+    <string name="widget_name">Jacket-Cover</string>
+    <string name="widget_description">Das Buch, das du gerade liest: sein Cover und dein Fortschritt.</string>
+
+    <string name="common_back">Zurück</string>
+    <string name="common_cancel">Abbrechen</string>
+    <string name="common_ok">OK</string>
+    <string name="percent">%1$d&#160;%%</string>
+    <string name="cover_of">Cover von %1$s</string>
+
+    <string name="format_comic">Comic</string>
+    <string name="format_text">Text</string>
+
+    <string name="book_status_finished">Ausgelesen</string>
+    <string name="book_status_not_started">Nicht begonnen</string>
+    <string name="book_status_page_of">Seite %1$d von %2$d</string>
+    <string name="book_status_percent_read">%1$d&#160;%% gelesen</string>
+    <string name="book_untitled">Ohne Titel</string>
+
+    <string name="cover_style_jacket">Jacket</string>
+    <string name="cover_style_shelf">Regal</string>
+    <string name="cover_style_glance">Überblick</string>
+
+    <string name="font_literata_description">Googles Schrift für langes Lesen</string>
+    <string name="font_hyperlegible_description">Klare Buchstabenformen bei Sehschwäche</string>
+    <string name="font_open_dyslexic_description">Beschwerte Buchstaben, die sich nicht verdrehen</string>
+    <string name="font_serif">System-Serif</string>
+    <string name="font_serif_description">Die Serifenschrift deines Smartphones</string>
+    <string name="font_sans">System-Sans</string>
+    <string name="font_sans_description">Die Systemschrift deines Smartphones</string>
+    <string name="font_original">Vom Buch</string>
+    <string name="font_original_description">Was der Verlag gewählt hat</string>
+
+    <string name="page_color_book">Buch</string>
+    <string name="page_color_paper">Papier</string>
+    <string name="page_color_dark">Dunkel</string>
+    <string name="page_color_black">Schwarz</string>
+
+    <string name="layout_pages">Seiten</string>
+    <string name="layout_scroll">Scrollen</string>
+
+    <string name="sort_recent">Zuletzt</string>
+    <string name="sort_title">Titel</string>
+    <string name="sort_author">Autor</string>
+
+    <string name="import_added_one">„%1$s“ hinzugefügt</string>
+    <plurals name="import_added_books">
+        <item quantity="one">%1$d Buch hinzugefügt</item>
+        <item quantity="other">%1$d Bücher hinzugefügt</item>
+    </plurals>
+    <string name="import_failed">Nicht lesbar: %1$s</string>
+    <string name="import_added_and_failed">%1$s. %2$s</string>
+
+    <string name="library_profile_and_settings">Profil und Einstellungen</string>
+    <string name="library_add_books">Bücher hinzufügen</string>
+    <string name="library_all_finished">Hier ist alles ausgelesen. Füge ein neues Buch hinzu!</string>
+    <string name="library_no_match">Keine Bücher zu „%1$s“</string>
+    <string name="library_start_reading">LOSLESEN</string>
+    <string name="library_continue_reading">WEITERLESEN</string>
+    <string name="library_on_your_cover">Außen sichtbar</string>
+    <string name="library_title">Bibliothek</string>
+    <string name="library_title_finished">Ausgelesen</string>
+    <plurals name="library_book_count">
+        <item quantity="one">%1$d Buch</item>
+        <item quantity="other">%1$d Bücher</item>
+    </plurals>
+    <string name="library_shelf_reading">Aktuell</string>
+    <string name="library_shelf_finished_count">Ausgelesen · %1$d</string>
+    <string name="library_search_placeholder">Titel und Autoren suchen</string>
+    <string name="library_clear_search">Suche löschen</string>
+    <string name="library_more_options">Weitere Optionen</string>
+    <string name="library_add_file_again">Datei erneut hinzufügen</string>
+    <string name="library_finished_badge">Ausgelesen</string>
+    <string name="library_new_badge">Neu</string>
+    <string name="library_on_cover_screen">Auf dem Cover-Display</string>
+    <string name="library_menu_open">Öffnen</string>
+    <string name="library_menu_show_on_cover">Auf Cover-Display zeigen</string>
+    <string name="library_menu_mark_finished">Als ausgelesen markieren</string>
+    <string name="library_menu_mark_unfinished">Als nicht ausgelesen markieren</string>
+    <string name="library_menu_remove">Entfernen</string>
+    <string name="library_remove_title">„%1$s“ entfernen?</string>
+    <string name="library_remove_message">Jacket löscht seine eigene Kopie und deine Leseposition. Die Originaldatei bleibt, wo sie war.</string>
+    <string name="library_remove_confirm">Entfernen</string>
+    <string name="library_empty_title">Lass dein Foldable dein Buch tragen</string>
+    <string name="library_empty_message">Füge eine EPUB-, PDF-, CBZ-Comic- oder Textdatei hinzu. Jacket legt eine private Kopie an und zeigt beim Lesen das Cover auf dem Außendisplay oder in einem Cover-Display-Widget.</string>
+
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_subtitle">Profil, Cover-Display und Lesen</string>
+    <string name="settings_profile_title">Deine Bibliothek</string>
+    <plurals name="settings_profile_books">
+        <item quantity="one">%1$d Buch</item>
+        <item quantity="other">%1$d Bücher</item>
+    </plurals>
+    <plurals name="settings_profile_reading">
+        <item quantity="one">%1$d begonnen</item>
+        <item quantity="other">%1$d begonnen</item>
+    </plurals>
+    <plurals name="settings_profile_finished">
+        <item quantity="one">%1$d ausgelesen</item>
+        <item quantity="other">%1$d ausgelesen</item>
+    </plurals>
+    <string name="settings_profile_summary">%1$s · %2$s · %3$s</string>
+    <string name="settings_profile_on_cover">Außen sichtbar: %1$s</string>
+    <string name="settings_group_cover_screen">Cover-Display</string>
+    <string name="settings_outer_ready">Außendisplay bereit</string>
+    <string name="settings_outer_ready_description">Dein Smartphone kann das Cover auf dem Außendisplay zeigen, während du innen liest.</string>
+    <string name="settings_outer_unavailable">Außendisplay gerade nicht verfügbar</string>
+    <string name="settings_outer_unavailable_description">Klappe ein Foldable im Buchformat auf, um sein Außendisplay zu nutzen. Flip-Smartphones nutzen das Widget unten.</string>
+    <string name="settings_widget_style">Widget-Stil</string>
+    <string name="settings_widget_style_description">Für das Cover-Display des Galaxy Z Flip und Startbildschirme</string>
+    <string name="settings_show_progress">Lesefortschritt</string>
+    <string name="settings_show_progress_description">Ein schmaler Fortschrittsbalken und Prozentwert auf dem Cover</string>
+    <string name="settings_ambient_dim">Ambient-Dimmung</string>
+    <string name="settings_ambient_dim_description">Das Außendisplay wird nach 30 Sekunden ohne Berührung gedimmt</string>
+    <string name="settings_auto_outer">Cover beim Lesen</string>
+    <string name="settings_auto_outer_description">Das Cover aufs Außendisplay legen, sobald du zum Lesen aufklappst</string>
+    <string name="settings_preview_outer">Außendisplay</string>
+    <string name="settings_preview_widget">Widget</string>
+    <string name="settings_preview_description">Vorschau des Cover-Displays mit deinen aktuellen Einstellungen</string>
+    <string name="settings_cover_hint">Galaxy Z Flip: Füge „Jacket-Cover“ unter Einstellungen › Cover-Bildschirm › Widgets hinzu. Motorola Razr: Öffne Jacket auf dem Außendisplay.</string>
+    <string name="settings_group_reading">Lesen</string>
+    <string name="settings_group_appearance">Darstellung</string>
+    <string name="settings_book_colors">Farben aus deinem Buch</string>
+    <string name="settings_book_colors_description">Färbt Jacket passend zum Cover des Buchs, das du liest. Aus: die Farbpalette deines Smartphones.</string>
+    <string name="settings_group_backup">Sicherung</string>
+    <string name="settings_backup_save">Sicherung speichern</string>
+    <string name="settings_backup_save_description">Deine Bücherliste, Lesepositionen, Lesezeichen, Markierungen und Einstellungen. Nicht die Buchdateien.</string>
+    <string name="settings_backup_restore">Sicherung wiederherstellen</string>
+    <string name="settings_backup_restore_description">Füge danach die Buchdateien erneut hinzu: Jedes Buch findet seine Stelle und Notizen wieder.</string>
+    <string name="settings_backup_saved">Sicherung gespeichert.</string>
+    <string name="settings_backup_save_failed">Sicherung konnte nicht gespeichert werden: %1$s</string>
+    <string name="settings_backup_restored">Sicherung wiederhergestellt.</string>
+    <plurals name="settings_backup_restored_missing">
+        <item quantity="one">Sicherung wiederhergestellt. Füge die Datei für %1$d Buch hinzu, um es wieder zu verknüpfen.</item>
+        <item quantity="other">Sicherung wiederhergestellt. Füge die Dateien für %1$d Bücher hinzu, um sie wieder zu verknüpfen.</item>
+    </plurals>
+    <string name="settings_backup_not_a_backup">Das ist keine Jacket-Sicherungsdatei.</string>
+    <string name="settings_backup_unreadable">Diese Datei konnte nicht gelesen werden.</string>
+    <string name="settings_backup_cant_open">Sicherungsdatei lässt sich nicht öffnen</string>
+    <string name="settings_backup_cant_write">Sicherungsdatei lässt sich nicht schreiben</string>
+    <string name="settings_group_about">Über</string>
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_source">Quellcode</string>
+    <string name="settings_about_source_description">Open Source auf GitHub</string>
+    <string name="settings_about_licenses">Open-Source-Lizenzen</string>
+    <string name="settings_about_licenses_description">Jacket steht unter Apache 2.0 und baut auf Readium, Jetpack und freien Schriften auf</string>
+
+    <string name="licenses_title">Open-Source-Lizenzen</string>
+    <string name="licenses_subtitle">Jacket ist freie Software und baut auf der Arbeit anderer auf</string>
+
+    <string name="reading_text_size">Textgröße</string>
+    <string name="reading_text_size_sample">A</string>
+    <string name="reading_typeface">Schrift</string>
+    <string name="reading_typeface_sample">Aa</string>
+    <string name="reading_selected">Ausgewählt</string>
+    <string name="reading_page">Seite</string>
+    <string name="reading_layout">Layout</string>
+    <string name="reading_layout_hint">Seiten blättern wie im Buch: wischen oder an den Rändern tippen. Aufgeklappt siehst du eine Doppelseite.</string>
+    <string name="reading_line_spacing">Zeilenabstand</string>
+    <string name="reading_line_spacing_book">Buch</string>
+    <string name="reading_line_spacing_tight">Eng</string>
+    <string name="reading_line_spacing_normal">Normal</string>
+    <string name="reading_line_spacing_loose">Weit</string>
+    <string name="reading_margins">Ränder</string>
+    <string name="reading_margins_narrow">Schmal</string>
+    <string name="reading_margins_normal">Normal</string>
+    <string name="reading_margins_wide">Breit</string>
+    <string name="reading_alignment">Ausrichtung</string>
+    <string name="reading_alignment_book">Buch</string>
+    <string name="reading_alignment_left">Links</string>
+    <string name="reading_alignment_justified">Blocksatz</string>
+    <string name="reading_alignment_hint">Blocksatz wird mit Silbentrennung gesetzt. „Buch“ behält die Abstände und Ausrichtung des Verlags bei.</string>
+    <string name="reading_buttons">Tasten</string>
+    <string name="reading_volume_keys">Mit Lautstärketasten blättern</string>
+    <string name="reading_volume_keys_description">Leiser für die nächste Seite, lauter für die vorherige. Nicht beim Vorlesen.</string>
+
+    <string name="reader_back_to_library">Zurück zur Bibliothek</string>
+    <string name="reader_search">Im Buch suchen</string>
+    <string name="reader_bookmark_add">Lesezeichen setzen</string>
+    <string name="reader_bookmark_remove">Lesezeichen entfernen</string>
+    <string name="reader_outer_show">Cover auf Außendisplay zeigen</string>
+    <string name="reader_outer_hide">Cover auf Außendisplay ausblenden</string>
+    <string name="reader_text_settings">Text- und Seiteneinstellungen</string>
+    <string name="reader_contents_and_notes">Inhalt, Lesezeichen und Markierungen</string>
+    <string name="reader_notes">Lesezeichen und Markierungen</string>
+    <string name="reader_listen">Anhören: vorlesen lassen</string>
+    <string name="reader_previous_chapter">Vorheriges Kapitel</string>
+    <string name="reader_next_chapter">Nächstes Kapitel</string>
+    <string name="reader_previous_paragraph">Vorheriger Absatz</string>
+    <string name="reader_next_paragraph">Nächster Absatz</string>
+    <string name="reader_previous_page">Vorherige Seite</string>
+    <string name="reader_next_page">Nächste Seite</string>
+    <string name="reader_page_number">Seite %1$d</string>
+    <string name="reader_page_of">Seite %1$d von %2$d</string>
+    <string name="reader_percent_read">%1$d&#160;%% gelesen</string>
+    <string name="reader_footer_last_page">Letzte Seite im Kapitel</string>
+    <plurals name="reader_footer_pages_left">
+        <item quantity="one">Noch %1$d Seite im Kapitel</item>
+        <item quantity="other">Noch %1$d Seiten im Kapitel</item>
+    </plurals>
+    <string name="reader_error_open_book">Dieses Buch konnte nicht geöffnet werden.\n%1$s</string>
+    <string name="reader_error_no_pages">Dieses Buch hat keine Seiten zum Anzeigen.</string>
+    <string name="reader_error_pdf">Dieses PDF konnte nicht geöffnet werden. Passwortgeschützte PDFs werden noch nicht unterstützt.</string>
+    <string name="reader_error_comic">Dieser Comic konnte nicht geöffnet werden.</string>
+    <string name="reader_error_text">Diese Datei ist leer oder konnte nicht gelesen werden.</string>
+    <string name="reader_no_app_for_link">Keine App kann diesen Link öffnen.</string>
+    <string name="reader_share_quote">„%1$s“\n— %2$s</string>
+    <string name="reader_share_quote_author">„%1$s“\n— %2$s, %3$s</string>
+
+    <string name="selection_highlight">Markieren</string>
+    <string name="selection_note">Notiz</string>
+    <string name="selection_share">Teilen</string>
+
+    <string name="notes_tab_contents">Inhalt</string>
+    <string name="notes_tab_bookmarks">Lesezeichen</string>
+    <string name="notes_tab_bookmarks_count">Lesezeichen · %1$d</string>
+    <string name="notes_tab_highlights">Markierungen</string>
+    <string name="notes_tab_highlights_count">Markierungen · %1$d</string>
+    <string name="notes_no_bookmarks">Noch keine Lesezeichen</string>
+    <string name="notes_no_bookmarks_hint">Tippe oben auf einer Seite auf das Lesebändchen, um dir die Stelle zu merken.</string>
+    <string name="notes_no_highlights">Noch keine Markierungen</string>
+    <string name="notes_no_highlights_hint">Halte den Text gedrückt und wähle dann Markieren oder Notiz.</string>
+    <string name="notes_edit">Notiz und Farbe bearbeiten</string>
+    <string name="notes_delete">Löschen</string>
+    <string name="notes_bookmark_page_at">Seite bei %1$d&#160;%%</string>
+    <string name="notes_highlight_quote">„%1$s“</string>
+    <string name="notes_note">Notiz</string>
+    <string name="notes_done">Fertig</string>
+
+    <string name="search_placeholder">Dieses Buch durchsuchen</string>
+    <string name="search_clear">Löschen</string>
+    <string name="search_no_results">Keine Ergebnisse für „%1$s“</string>
+    <plurals name="search_result_count">
+        <item quantity="one">%1$d Ergebnis</item>
+        <item quantity="other">%1$d Ergebnisse</item>
+    </plurals>
+
+    <string name="finished_title_finished">Ausgelesen</string>
+    <string name="finished_title_end">Ende</string>
+    <string name="finished_keep_reading">Weiterlesen</string>
+    <string name="finished_mark">Als ausgelesen markieren</string>
+    <string name="finished_back_to_library">Zurück zur Bibliothek</string>
+    <string name="finished_next">Als Nächstes: %1$s</string>
+
+    <string name="listen_play">Abspielen</string>
+    <string name="listen_pause">Pause</string>
+    <string name="listen_previous_sentence">Vorheriger Satz</string>
+    <string name="listen_next_sentence">Nächster Satz</string>
+    <string name="listen_previous_paragraph">Vorheriger Absatz</string>
+    <string name="listen_next_paragraph">Nächster Absatz</string>
+    <string name="listen_rate">%1$s×</string>
+    <string name="listen_stop">Vorlesen beenden</string>
+    <string name="listen_sleep_timer">Sleep-Timer</string>
+    <string name="listen_sleep_timer_end_of_chapter">Sleep-Timer: Kapitelende</string>
+    <plurals name="listen_sleep_minutes_left">
+        <item quantity="one">Sleep-Timer: noch %1$d Minute</item>
+        <item quantity="other">Sleep-Timer: noch %1$d Minuten</item>
+    </plurals>
+    <string name="listen_sleep_off">Aus</string>
+    <string name="listen_sleep_15_minutes">15 Minuten</string>
+    <string name="listen_sleep_30_minutes">30 Minuten</string>
+    <string name="listen_sleep_1_hour">1 Stunde</string>
+    <string name="listen_sleep_end_of_chapter">Kapitelende</string>
+    <string name="listen_no_voice">Auf diesem Smartphone ist keine Sprachausgabe-Stimme installiert.</string>
+    <string name="listen_no_readable_text">Dieses Buch hat keinen Text, der vorgelesen werden kann.</string>
+    <string name="listen_stopped_error">Vorlesen gestoppt: %1$s</string>
+    <string name="listen_voice_stopped">Die Stimme ist verstummt. Prüfe deine Einstellungen für die Sprachausgabe.</string>
+
+    <string name="widget_reading">Ich lese</string>
+    <string name="widget_empty">Füge ein Buch hinzu, um sein Cover zu tragen</string>
+    <string name="listen_notification_channel">Vorlesen</string>
+</resources>

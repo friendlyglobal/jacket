@@ -6,6 +6,7 @@ import android.content.ContextWrapper
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Icon
@@ -33,7 +35,9 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedback
@@ -55,6 +59,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import io.github.friendlyglobal.jacket.data.PageColor
 import io.github.friendlyglobal.jacket.data.ReadingFont
+import kotlin.coroutines.coroutineContext
 
 // ---------------------------------------------------------------------------------------------
 // Haptics: one vocabulary for the whole app, mapped onto the platform's expressive feedback types.
@@ -94,21 +99,53 @@ class CoverTransition(val shared: SharedTransitionScope, val visibility: Animate
 
 val LocalCoverTransition = compositionLocalOf<CoverTransition?> { null }
 
-private val CoverBounds = BoundsTransform { _, _ -> spring(dampingRatio = 0.82f, stiffness = 320f) }
+/** Corner radius of a cover in flight, and of the book lying closed in the reader. */
+val CoverCorner = 12.dp
 
-/** Marks a book cover so it flies between screens. Only one element per key may be on screen at once. */
+/**
+ * The places a book's cover can sit in the library. The book you're reading has both at once, so
+ * each has its own key, and the reader's cover is told which one it flies from and back to.
+ */
+enum class CoverSpot { HERO, TILE }
+
+/** The library spot the open book's cover came from, or is about to fly home to. */
+val LocalCoverSpot = compositionLocalOf { CoverSpot.HERO }
+
+/**
+ * Marks a book cover so it flies between screens, on the theme's spatial spring: in the library,
+ * the cover at [spot]; in the reader, the cover bound for it.
+ *
+ * In flight the cover is drawn scaled, which would scale any rounding inside it too: keep the
+ * resting clip outside this modifier and let [clipInFlight] round the flying cover instead.
+ */
 @Composable
-fun Modifier.sharedCover(bookId: String, enabled: Boolean = true): Modifier {
-    val transition = LocalCoverTransition.current
-    if (transition == null || !enabled) return this
+fun Modifier.sharedCover(bookId: String, spot: CoverSpot, clipInFlight: Boolean = true): Modifier {
+    val transition = LocalCoverTransition.current ?: return this
+    val spatial = MaterialTheme.motionScheme.defaultSpatialSpec<Rect>()
+    val bounds = remember(spatial) {
+        // The same spring, but done once the cover is within a pixel: left to itself it keeps
+        // "moving" invisibly for another third of a second, and the book waits for it to land.
+        val landing = (spatial as? SpringSpec<Rect>)
+            ?.let { spring(it.dampingRatio, it.stiffness, visibilityThreshold = Rect(1f, 1f, 1f, 1f)) }
+            ?: spatial
+        BoundsTransform { _, _ -> landing }
+    }
     return with(transition.shared) {
-        this@sharedCover.sharedElement(
-            sharedContentState = rememberSharedContentState("cover-$bookId"),
-            animatedVisibilityScope = transition.visibility,
-            boundsTransform = CoverBounds,
-        )
+        val state = rememberSharedContentState("cover-$spot-$bookId")
+        if (clipInFlight) {
+            val clip = remember(this) { OverlayClip(RoundedCornerShape(CoverCorner)) }
+            this@sharedCover.sharedElement(state, transition.visibility, bounds, clipInOverlayDuringTransition = clip)
+        } else {
+            this@sharedCover.sharedElement(state, transition.visibility, bounds)
+        }
     }
 }
+
+/**
+ * Android's "Remove animations" setting (animator duration scale 0). Compose already snaps its
+ * animations then; choreography built on delays should not wait around either.
+ */
+suspend fun motionRemoved(): Boolean = coroutineContext[MotionDurationScale]?.scaleFactor == 0f
 
 /** Squash-and-spring on press, with the theme's expressive spatial spring. */
 @Composable

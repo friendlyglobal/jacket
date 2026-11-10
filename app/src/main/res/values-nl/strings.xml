@@ -1,0 +1,273 @@
+<resources>
+    <string name="app_name">Jacket</string>
+    <string name="widget_name">Jacket-omslag</string>
+    <string name="widget_description">Het boek dat je leest: de omslag en je voortgang.</string>
+
+    <string name="common_back">Terug</string>
+    <string name="common_cancel">Annuleren</string>
+    <string name="common_ok">OK</string>
+    <string name="percent">%1$d%%</string>
+    <string name="cover_of">Omslag van %1$s</string>
+
+    <string name="format_comic">Strip</string>
+    <string name="format_text">Tekst</string>
+
+    <string name="book_status_finished">Uitgelezen</string>
+    <string name="book_status_not_started">Niet begonnen</string>
+    <string name="book_status_page_of">Pagina %1$d van %2$d</string>
+    <string name="book_status_percent_read">%1$d%% gelezen</string>
+    <string name="book_untitled">Zonder titel</string>
+
+    <string name="cover_style_jacket">Jacket</string>
+    <string name="cover_style_shelf">Plank</string>
+    <string name="cover_style_glance">Overzicht</string>
+
+    <string name="font_literata_description">Het lettertype van Google voor lang lezen</string>
+    <string name="font_hyperlegible_description">Duidelijke lettervormen bij slechtziendheid</string>
+    <string name="font_open_dyslexic_description">Verzwaarde letters die niet omklappen</string>
+    <string name="font_serif">Systeem-serif</string>
+    <string name="font_serif_description">Het schreeflettertype van je telefoon</string>
+    <string name="font_sans">Systeem-sans</string>
+    <string name="font_sans_description">Het interfacelettertype van je telefoon</string>
+    <string name="font_original">Van het boek</string>
+    <string name="font_original_description">Wat de uitgever heeft gekozen</string>
+
+    <string name="page_color_book">Boek</string>
+    <string name="page_color_paper">Papier</string>
+    <string name="page_color_dark">Donker</string>
+    <string name="page_color_black">Zwart</string>
+
+    <string name="layout_pages">Pagina\'s</string>
+    <string name="layout_scroll">Scrollen</string>
+
+    <string name="sort_recent">Recent</string>
+    <string name="sort_title">Titel</string>
+    <string name="sort_author">Auteur</string>
+
+    <string name="import_added_one">“%1$s” toegevoegd</string>
+    <plurals name="import_added_books">
+        <item quantity="one">%1$d boek toegevoegd</item>
+        <item quantity="other">%1$d boeken toegevoegd</item>
+    </plurals>
+    <string name="import_failed">Kan %1$s niet lezen</string>
+    <string name="import_added_and_failed">%1$s. %2$s</string>
+
+    <string name="library_profile_and_settings">Profiel en instellingen</string>
+    <string name="library_add_books">Boeken toevoegen</string>
+    <string name="library_all_finished">Alles hier is uitgelezen. Voeg nog een boek toe!</string>
+    <string name="library_no_match">Geen boeken voor “%1$s”</string>
+    <string name="library_start_reading">BEGIN MET LEZEN</string>
+    <string name="library_continue_reading">VERDER LEZEN</string>
+    <string name="library_on_your_cover">Buiten zichtbaar</string>
+    <string name="library_title">Bibliotheek</string>
+    <string name="library_title_finished">Uitgelezen</string>
+    <plurals name="library_book_count">
+        <item quantity="one">%1$d boek</item>
+        <item quantity="other">%1$d boeken</item>
+    </plurals>
+    <string name="library_shelf_reading">Aan het lezen</string>
+    <string name="library_shelf_finished_count">Uitgelezen · %1$d</string>
+    <string name="library_search_placeholder">Zoek op titel of auteur</string>
+    <string name="library_clear_search">Zoekopdracht wissen</string>
+    <string name="library_more_options">Meer opties</string>
+    <string name="library_add_file_again">Bestand opnieuw toevoegen</string>
+    <string name="library_finished_badge">Uitgelezen</string>
+    <string name="library_new_badge">Nieuw</string>
+    <string name="library_on_cover_screen">Op je coverscherm</string>
+    <string name="library_menu_open">Openen</string>
+    <string name="library_menu_show_on_cover">Tonen op coverscherm</string>
+    <string name="library_menu_mark_finished">Markeren als uitgelezen</string>
+    <string name="library_menu_mark_unfinished">Markeren als niet uitgelezen</string>
+    <string name="library_menu_remove">Verwijderen</string>
+    <string name="library_remove_title">“%1$s” verwijderen?</string>
+    <string name="library_remove_message">Jacket verwijdert zijn eigen kopie en je leespositie. Het originele bestand blijft waar het was.</string>
+    <string name="library_remove_confirm">Verwijderen</string>
+    <string name="library_empty_title">Laat je foldable je boek dragen</string>
+    <string name="library_empty_message">Voeg een EPUB-, PDF-, CBZ-strip- of tekstbestand toe. Jacket bewaart een privékopie en zet de omslag op je buitenscherm, of in een coverschermwidget, terwijl je leest.</string>
+
+    <string name="settings_title">Instellingen</string>
+    <string name="settings_subtitle">Profiel, coverscherm en lezen</string>
+    <string name="settings_profile_title">Je bibliotheek</string>
+    <plurals name="settings_profile_books">
+        <item quantity="one">%1$d boek</item>
+        <item quantity="other">%1$d boeken</item>
+    </plurals>
+    <plurals name="settings_profile_reading">
+        <item quantity="one">%1$d bezig</item>
+        <item quantity="other">%1$d bezig</item>
+    </plurals>
+    <plurals name="settings_profile_finished">
+        <item quantity="one">%1$d uitgelezen</item>
+        <item quantity="other">%1$d uitgelezen</item>
+    </plurals>
+    <string name="settings_profile_summary">%1$s · %2$s · %3$s</string>
+    <string name="settings_profile_on_cover">Buiten zichtbaar: %1$s</string>
+    <string name="settings_group_cover_screen">Coverscherm</string>
+    <string name="settings_outer_ready">Buitenscherm klaar</string>
+    <string name="settings_outer_ready_description">Je telefoon kan de omslag op het buitenscherm tonen terwijl je binnen leest.</string>
+    <string name="settings_outer_unavailable">Buitenscherm nu niet beschikbaar</string>
+    <string name="settings_outer_unavailable_description">Vouw een boekvormige foldable open om het buitenscherm te gebruiken. Flip-telefoons gebruiken de widget hieronder.</string>
+    <string name="settings_widget_style">Widgetstijl</string>
+    <string name="settings_widget_style_description">Voor het coverscherm van de Galaxy Z Flip en startschermen</string>
+    <string name="settings_show_progress">Leesvoortgang</string>
+    <string name="settings_show_progress_description">Een smalle voortgangsbalk en percentage op de omslag</string>
+    <string name="settings_ambient_dim">Automatisch dimmen</string>
+    <string name="settings_ambient_dim_description">Het buitenscherm dimt na 30 seconden zonder aanraking</string>
+    <string name="settings_auto_outer">Omslag tijdens lezen</string>
+    <string name="settings_auto_outer_description">Zet de omslag op het buitenscherm zodra je openvouwt om te lezen</string>
+    <string name="settings_preview_outer">Buitenscherm</string>
+    <string name="settings_preview_widget">Widget</string>
+    <string name="settings_preview_description">Voorbeeld van het coverscherm met je huidige instellingen</string>
+    <string name="settings_cover_hint">Galaxy Z Flip: voeg “Jacket-omslag” toe via Instellingen › Coverscherm › Widgets. Motorola Razr: open Jacket vanaf het externe scherm.</string>
+    <string name="settings_group_reading">Lezen</string>
+    <string name="settings_group_appearance">Weergave</string>
+    <string name="settings_book_colors">Kleuren van je boek</string>
+    <string name="settings_book_colors_description">Kleur Jacket naar de omslag van het boek dat je leest. Uit: het kleurenpalet van je telefoon.</string>
+    <string name="settings_group_backup">Back-up</string>
+    <string name="settings_backup_save">Back-up opslaan</string>
+    <string name="settings_backup_save_description">Je boekenlijst, posities, bladwijzers, markeringen en instellingen. Niet de boekbestanden.</string>
+    <string name="settings_backup_restore">Back-up terugzetten</string>
+    <string name="settings_backup_restore_description">Voeg daarna de boekbestanden opnieuw toe: elk boek vindt zijn plek en notities terug.</string>
+    <string name="settings_backup_saved">Back-up opgeslagen.</string>
+    <string name="settings_backup_save_failed">Kan back-up niet opslaan: %1$s</string>
+    <string name="settings_backup_restored">Back-up teruggezet.</string>
+    <plurals name="settings_backup_restored_missing">
+        <item quantity="one">Back-up teruggezet. Voeg het bestand voor %1$d boek toe om het weer te koppelen.</item>
+        <item quantity="other">Back-up teruggezet. Voeg de bestanden voor %1$d boeken toe om ze weer te koppelen.</item>
+    </plurals>
+    <string name="settings_backup_not_a_backup">Dit is geen back-upbestand van Jacket.</string>
+    <string name="settings_backup_unreadable">Kan dat bestand niet lezen.</string>
+    <string name="settings_backup_cant_open">Kan het back-upbestand niet openen</string>
+    <string name="settings_backup_cant_write">Kan het back-upbestand niet schrijven</string>
+    <string name="settings_group_about">Over</string>
+    <string name="settings_about_version">Versie %1$s</string>
+    <string name="settings_about_source">Broncode</string>
+    <string name="settings_about_source_description">Open source op GitHub</string>
+    <string name="settings_about_licenses">Opensourcelicenties</string>
+    <string name="settings_about_licenses_description">Jacket valt onder Apache 2.0 en is gebouwd op Readium, Jetpack en open lettertypen</string>
+
+    <string name="licenses_title">Opensourcelicenties</string>
+    <string name="licenses_subtitle">Jacket is vrije software, gebouwd op het werk van anderen</string>
+
+    <string name="reading_text_size">Tekstgrootte</string>
+    <string name="reading_text_size_sample">A</string>
+    <string name="reading_typeface">Lettertype</string>
+    <string name="reading_typeface_sample">Aa</string>
+    <string name="reading_selected">Geselecteerd</string>
+    <string name="reading_page">Pagina</string>
+    <string name="reading_layout">Indeling</string>
+    <string name="reading_layout_hint">Pagina\'s slaan om als in een boek: veeg of tik op de randen. Opengevouwen zie je twee pagina\'s naast elkaar.</string>
+    <string name="reading_line_spacing">Regelafstand</string>
+    <string name="reading_line_spacing_book">Boek</string>
+    <string name="reading_line_spacing_tight">Krap</string>
+    <string name="reading_line_spacing_normal">Normaal</string>
+    <string name="reading_line_spacing_loose">Ruim</string>
+    <string name="reading_margins">Marges</string>
+    <string name="reading_margins_narrow">Smal</string>
+    <string name="reading_margins_normal">Normaal</string>
+    <string name="reading_margins_wide">Breed</string>
+    <string name="reading_alignment">Uitlijning</string>
+    <string name="reading_alignment_book">Boek</string>
+    <string name="reading_alignment_left">Links</string>
+    <string name="reading_alignment_justified">Uitgevuld</string>
+    <string name="reading_alignment_hint">Uitgevulde tekst krijgt woordafbreking. “Boek” behoudt de eigen witruimte en uitlijning van de uitgever.</string>
+    <string name="reading_buttons">Knoppen</string>
+    <string name="reading_volume_keys">Bladeren met volumeknoppen</string>
+    <string name="reading_volume_keys_description">Volume omlaag voor de volgende pagina, omhoog voor de vorige. Niet tijdens het luisteren.</string>
+
+    <string name="reader_back_to_library">Terug naar bibliotheek</string>
+    <string name="reader_search">Zoeken in boek</string>
+    <string name="reader_bookmark_add">Bladwijzer toevoegen</string>
+    <string name="reader_bookmark_remove">Bladwijzer verwijderen</string>
+    <string name="reader_outer_show">Omslag tonen op buitenscherm</string>
+    <string name="reader_outer_hide">Omslag verbergen op buitenscherm</string>
+    <string name="reader_text_settings">Tekst- en pagina-instellingen</string>
+    <string name="reader_contents_and_notes">Inhoud, bladwijzers en markeringen</string>
+    <string name="reader_notes">Bladwijzers en markeringen</string>
+    <string name="reader_listen">Luisteren: voorlezen</string>
+    <string name="reader_previous_chapter">Vorig hoofdstuk</string>
+    <string name="reader_next_chapter">Volgend hoofdstuk</string>
+    <string name="reader_previous_paragraph">Vorige alinea</string>
+    <string name="reader_next_paragraph">Volgende alinea</string>
+    <string name="reader_previous_page">Vorige pagina</string>
+    <string name="reader_next_page">Volgende pagina</string>
+    <string name="reader_page_number">Pagina %1$d</string>
+    <string name="reader_page_of">Pagina %1$d van %2$d</string>
+    <string name="reader_percent_read">%1$d%% gelezen</string>
+    <string name="reader_footer_last_page">Laatste pagina van hoofdstuk</string>
+    <plurals name="reader_footer_pages_left">
+        <item quantity="one">Nog %1$d pagina in hoofdstuk</item>
+        <item quantity="other">Nog %1$d pagina\'s in hoofdstuk</item>
+    </plurals>
+    <string name="reader_error_open_book">Kan dit boek niet openen.\n%1$s</string>
+    <string name="reader_error_no_pages">Dit boek heeft geen pagina\'s om te tonen.</string>
+    <string name="reader_error_pdf">Deze PDF kan niet worden geopend. PDF\'s met een wachtwoord worden nog niet ondersteund.</string>
+    <string name="reader_error_comic">Deze strip kan niet worden geopend.</string>
+    <string name="reader_error_text">Dit bestand is leeg of kan niet worden gelezen.</string>
+    <string name="reader_no_app_for_link">Geen app kan deze link openen.</string>
+    <string name="reader_share_quote">“%1$s”\n— %2$s</string>
+    <string name="reader_share_quote_author">“%1$s”\n— %2$s, %3$s</string>
+
+    <string name="selection_highlight">Markeren</string>
+    <string name="selection_note">Notitie</string>
+    <string name="selection_share">Delen</string>
+
+    <string name="notes_tab_contents">Inhoud</string>
+    <string name="notes_tab_bookmarks">Bladwijzers</string>
+    <string name="notes_tab_bookmarks_count">Bladwijzers · %1$d</string>
+    <string name="notes_tab_highlights">Markeringen</string>
+    <string name="notes_tab_highlights_count">Markeringen · %1$d</string>
+    <string name="notes_no_bookmarks">Nog geen bladwijzers</string>
+    <string name="notes_no_bookmarks_hint">Tik op het lintje boven aan een pagina om je plek te bewaren.</string>
+    <string name="notes_no_highlights">Nog geen markeringen</string>
+    <string name="notes_no_highlights_hint">Houd de tekst ingedrukt en kies Markeren of Notitie.</string>
+    <string name="notes_edit">Notitie en kleur bewerken</string>
+    <string name="notes_delete">Verwijderen</string>
+    <string name="notes_bookmark_page_at">Pagina bij %1$d%%</string>
+    <string name="notes_highlight_quote">“%1$s”</string>
+    <string name="notes_note">Notitie</string>
+    <string name="notes_done">Klaar</string>
+
+    <string name="search_placeholder">Doorzoek dit boek</string>
+    <string name="search_clear">Wissen</string>
+    <string name="search_no_results">Geen resultaten voor “%1$s”</string>
+    <plurals name="search_result_count">
+        <item quantity="one">%1$d resultaat</item>
+        <item quantity="other">%1$d resultaten</item>
+    </plurals>
+
+    <string name="finished_title_finished">Uitgelezen</string>
+    <string name="finished_title_end">Einde</string>
+    <string name="finished_keep_reading">Verder lezen</string>
+    <string name="finished_mark">Markeren als uitgelezen</string>
+    <string name="finished_back_to_library">Terug naar bibliotheek</string>
+    <string name="finished_next">Volgende: %1$s</string>
+
+    <string name="listen_play">Afspelen</string>
+    <string name="listen_pause">Pauzeren</string>
+    <string name="listen_previous_sentence">Vorige zin</string>
+    <string name="listen_next_sentence">Volgende zin</string>
+    <string name="listen_previous_paragraph">Vorige alinea</string>
+    <string name="listen_next_paragraph">Volgende alinea</string>
+    <string name="listen_rate">%1$s×</string>
+    <string name="listen_stop">Stoppen met luisteren</string>
+    <string name="listen_sleep_timer">Slaaptimer</string>
+    <string name="listen_sleep_timer_end_of_chapter">Slaaptimer: einde hoofdstuk</string>
+    <plurals name="listen_sleep_minutes_left">
+        <item quantity="one">Slaaptimer: nog %1$d minuut</item>
+        <item quantity="other">Slaaptimer: nog %1$d minuten</item>
+    </plurals>
+    <string name="listen_sleep_off">Uit</string>
+    <string name="listen_sleep_15_minutes">15 minuten</string>
+    <string name="listen_sleep_30_minutes">30 minuten</string>
+    <string name="listen_sleep_1_hour">1 uur</string>
+    <string name="listen_sleep_end_of_chapter">Einde hoofdstuk</string>
+    <string name="listen_no_voice">Op deze telefoon is geen stem voor tekst-naar-spraak geïnstalleerd.</string>
+    <string name="listen_no_readable_text">Dit boek heeft geen tekst die kan worden voorgelezen.</string>
+    <string name="listen_stopped_error">Voorlezen gestopt: %1$s</string>
+    <string name="listen_voice_stopped">De stem is gestopt. Controleer je instellingen voor tekst-naar-spraak.</string>
+
+    <string name="widget_reading">Ik lees</string>
+    <string name="widget_empty">Voeg een boek toe om de omslag te dragen</string>
+    <string name="listen_notification_channel">Voorlezen</string>
+</resources>
