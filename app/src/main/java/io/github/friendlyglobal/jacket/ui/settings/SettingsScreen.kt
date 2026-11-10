@@ -1,7 +1,6 @@
 package io.github.friendlyglobal.jacket.ui.settings
 
 import android.content.Intent
-import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
@@ -34,13 +32,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
@@ -55,8 +51,9 @@ import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.reader.ReadingControls
 import io.github.friendlyglobal.jacket.ui.ConnectedChoice
 import io.github.friendlyglobal.jacket.ui.JacketIcons
+import io.github.friendlyglobal.jacket.ui.hasHinge
+import io.github.friendlyglobal.jacket.ui.predictiveBack
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
-import kotlinx.coroutines.CancellationException
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.AlertDialog
@@ -81,10 +78,14 @@ fun SettingsScreen(
     val library = LocalContext.current.library
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
+    val haptics = rememberHaptics()
+    val context = LocalContext.current
     var message by remember { mutableStateOf<String?>(null) }
     val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(Backup.MIME)) { uri ->
         if (uri != null) scope.launch {
             message = runCatching { library.exportBackup(uri) }
+                .onSuccess { haptics.confirm() }
+                .onFailure { haptics.reject() }
                 .fold(
                     { resources.getString(R.string.settings_backup_saved) },
                     { resources.getString(R.string.settings_backup_save_failed, it.message) },
@@ -93,7 +94,7 @@ fun SettingsScreen(
     }
     val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) scope.launch {
-            message = runCatching { library.importBackup(uri) }.fold(
+            message = runCatching { library.importBackup(uri) }.onSuccess { haptics.confirm() }.onFailure { haptics.reject() }.fold(
                 { missing ->
                     if (missing == 0) resources.getString(R.string.settings_backup_restored)
                     else resources.getQuantityString(R.plurals.settings_backup_restored_missing, missing, missing)
@@ -106,20 +107,16 @@ fun SettingsScreen(
             )
         }
     }
-    val haptics = rememberHaptics()
-    val context = LocalContext.current
-    val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-
-    var backProgress by remember { mutableFloatStateOf(0f) }
-    PredictiveBackHandler { events ->
-        try {
-            events.collect { backProgress = it.progress }
-            onBack()
-        } catch (e: CancellationException) {
-            backProgress = 0f
-            throw e
+    // A folder to watch: Jacket keeps the right to read it, and looks in it straight away.
+    val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) {
+            runCatching { context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+            haptics.confirm()
+            onSettings { it.copy(watchFolder = uri.toString(), watchSeen = emptySet()) }
+            scope.launch { library.scanWatchedFolder()?.message(resources)?.takeIf { it.isNotEmpty() }?.let { message = it } }
         }
     }
+    val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     val toggle = { on: Boolean, change: (Settings) -> Settings ->
         haptics.toggle(on)
@@ -127,15 +124,7 @@ fun SettingsScreen(
     }
 
     Scaffold(
-        modifier = Modifier
-            .nestedScroll(scroll.nestedScrollConnection)
-            .graphicsLayer {
-                val s = 1f - 0.08f * backProgress
-                scaleX = s
-                scaleY = s
-                shape = RoundedCornerShape((32 * backProgress).dp)
-                clip = backProgress > 0f
-            },
+        modifier = Modifier.nestedScroll(scroll.nestedScrollConnection).predictiveBack(onBack),
         topBar = {
             LargeFlexibleTopAppBar(
                 title = { Text(stringResource(R.string.settings_title)) },
@@ -160,7 +149,9 @@ fun SettingsScreen(
             item { GroupTitle(stringResource(R.string.settings_group_cover_screen), column) }
             item {
                 Group(column) {
-                    val count = 6
+                    // Only a phone that folds can be closed on a book.
+                    val folds = remember { context.hasHinge() }
+                    val count = if (folds) 9 else 7
                     SegmentedListItem(
                         shapes = ListItemDefaults.segmentedShapes(0, count),
                         leadingContent = { Icon(JacketIcons.OuterScreen, null) },
@@ -203,11 +194,28 @@ fun SettingsScreen(
                     ) {
                         toggle(it) { s -> s.copy(ambientDim = it) }
                     }
+                    SwitchRow(5, count, stringResource(R.string.settings_ambient_quote), null, settings.ambientQuote) {
+                        toggle(it) { s -> s.copy(ambientQuote = it) }
+                    }
                     SwitchRow(
-                        5, count, stringResource(R.string.settings_auto_outer),
+                        6, count, stringResource(R.string.settings_auto_outer),
                         stringResource(R.string.settings_auto_outer_description), settings.autoOuterScreen,
                     ) {
                         toggle(it) { s -> s.copy(autoOuterScreen = it) }
+                    }
+                    if (folds) {
+                        SwitchRow(
+                            7, count, stringResource(R.string.settings_cover_when_closed),
+                            stringResource(R.string.settings_cover_when_closed_description), settings.coverWhenClosed,
+                        ) {
+                            toggle(it) { s -> s.copy(coverWhenClosed = it) }
+                        }
+                        SwitchRow(
+                            8, count, stringResource(R.string.settings_tabletop),
+                            stringResource(R.string.settings_tabletop_description), settings.tabletop,
+                        ) {
+                            toggle(it) { s -> s.copy(tabletop = it) }
+                        }
                     }
                 }
             }
@@ -226,6 +234,45 @@ fun SettingsScreen(
                         stringResource(R.string.settings_book_colors_description),
                         settings.bookColors,
                     ) { toggle(it) { s -> s.copy(bookColors = it) } }
+                }
+            }
+
+            item { GroupTitle(stringResource(R.string.library_title), column) }
+            item {
+                Group(column) {
+                    val folder = settings.watchFolder
+                    SegmentedListItem(
+                        onClick = { haptics.tick(); folderPicker.launch(null) },
+                        shapes = ListItemDefaults.segmentedShapes(0, 2),
+                        leadingContent = { Icon(JacketIcons.Download, null) },
+                        supportingContent = {
+                            // The folder's own name once one is chosen.
+                            Text(
+                                folder?.let { it.toUri().lastPathSegment?.substringAfterLast(':')?.ifBlank { null } }
+                                    ?: stringResource(R.string.settings_watch_folder_description),
+                            )
+                        },
+                        trailingContent = if (folder != null) {
+                            {
+                                IconButton(
+                                    onClick = {
+                                        haptics.tick()
+                                        runCatching {
+                                            context.contentResolver.releasePersistableUriPermission(
+                                                folder.toUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                                            )
+                                        }
+                                        onSettings { it.copy(watchFolder = null, watchSeen = emptySet()) }
+                                    },
+                                ) { Icon(JacketIcons.Close, stringResource(R.string.search_clear)) }
+                            }
+                        } else {
+                            null
+                        },
+                    ) { Text(stringResource(R.string.settings_watch_folder)) }
+                    SwitchRow(1, 2, stringResource(R.string.settings_reading_stats), null, settings.readingStats) {
+                        toggle(it) { s -> s.copy(readingStats = it) }
+                    }
                 }
             }
 
@@ -338,12 +385,12 @@ private fun Group(modifier: Modifier, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun SwitchRow(index: Int, count: Int, title: String, description: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+private fun SwitchRow(index: Int, count: Int, title: String, description: String?, checked: Boolean, onChange: (Boolean) -> Unit) {
     SegmentedListItem(
         checked = checked,
         onCheckedChange = onChange,
         shapes = ListItemDefaults.segmentedShapes(index, count),
-        supportingContent = { Text(description) },
+        supportingContent = if (description != null) { { Text(description) } } else null,
         trailingContent = {
             Switch(
                 checked = checked,

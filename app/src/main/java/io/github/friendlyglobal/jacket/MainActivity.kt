@@ -24,7 +24,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -32,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.appcompat.app.AppCompatActivity
@@ -57,8 +60,10 @@ import io.github.friendlyglobal.jacket.ui.KeepScreenOn
 import io.github.friendlyglobal.jacket.ui.LocalCoverSpot
 import io.github.friendlyglobal.jacket.ui.LocalCoverTransition
 import io.github.friendlyglobal.jacket.ui.home.HomeScreen
+import io.github.friendlyglobal.jacket.ui.home.Onboarding
 import io.github.friendlyglobal.jacket.ui.home.heroBook
 import io.github.friendlyglobal.jacket.ui.home.onFinishedShelf
+import io.github.friendlyglobal.jacket.ui.rememberFoldedShut
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import io.github.friendlyglobal.jacket.ui.settings.LicensesScreen
 import io.github.friendlyglobal.jacket.ui.settings.SettingsScreen
@@ -73,6 +78,8 @@ import java.io.File
 // AppCompat because Readium's reader is a Fragment that needs an AppCompat activity and theme.
 class MainActivity : AppCompatActivity() {
     private val openRequests = MutableStateFlow<String?>(null)
+    /** A book asked for by the "Listen" shortcut: it starts reading aloud as it opens. */
+    private val listenRequests = MutableStateFlow<String?>(null)
     private val importing = MutableStateFlow(false)
     private val reports = MutableSharedFlow<ImportReport>(extraBufferCapacity = 8)
     private lateinit var outer: OuterDisplay
@@ -86,8 +93,14 @@ class MainActivity : AppCompatActivity() {
         outer = OuterDisplay(this) { OuterCoverHost() }
         if (savedInstanceState == null) handle(intent)
         setContent {
-            JacketRoot(outer, openRequests, importing, reports, onImport = { importUris(it) })
+            JacketRoot(outer, openRequests, listenRequests, importing, reports, onImport = { importUris(it) })
         }
+    }
+
+    /** Each time Jacket comes to the front: anything new in the watched folder joins the library. */
+    override fun onStart() {
+        super.onStart()
+        lifecycleScope.launch { library.scanWatchedFolder()?.let(reports::tryEmit) }
     }
 
     /** Volume keys turn pages while reading, when that's switched on (see [ReaderKeys]). */
@@ -115,6 +128,7 @@ class MainActivity : AppCompatActivity() {
     private fun handle(intent: Intent?) {
         intent ?: return
         intent.getStringExtra(EXTRA_OPEN_BOOK)?.let {
+            if (intent.getBooleanExtra(EXTRA_LISTEN, false)) listenRequests.value = it
             openRequests.value = it
             return
         }
@@ -160,7 +174,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val EXTRA_OPEN_BOOK = "io.github.friendlyglobal.jacket.OPEN_BOOK"
+        const val EXTRA_OPEN_BOOK = "app.usefriendly.jacket.OPEN_BOOK"
+        const val EXTRA_LISTEN = "app.usefriendly.jacket.LISTEN"
     }
 }
 
@@ -173,6 +188,7 @@ private const val READ = "read:"
 private fun JacketRoot(
     outer: OuterDisplay,
     openRequests: MutableStateFlow<String?>,
+    listenRequests: MutableStateFlow<String?>,
     importing: StateFlow<Boolean>,
     reports: SharedFlow<ImportReport>,
     onImport: (List<Uri>) -> Unit,
@@ -185,6 +201,7 @@ private fun JacketRoot(
     val busy by importing.collectAsStateWithLifecycle()
     val outerAvailable by outer.available.collectAsStateWithLifecycle()
     val request by openRequests.collectAsStateWithLifecycle()
+    val listenFor by listenRequests.collectAsStateWithLifecycle()
     var destination by rememberSaveable { mutableStateOf(HOME) }
     val snackbar = remember { SnackbarHostState() }
     // Kept here so closing a book can bring the place its cover lands into view.
@@ -207,16 +224,29 @@ private fun JacketRoot(
         if (library.state.value.find(id) != null) open(id, null)
         openRequests.value = null
     }
+    // The collector below outlives many recompositions: it opens books as the library is now.
+    val openNow by rememberUpdatedState(open)
     LaunchedEffect(Unit) {
         reports.collect { report ->
             if (report.failed.isEmpty()) haptics.confirm() else haptics.reject()
             val message = report.message(resources)
-            if (message.isNotEmpty()) snackbar.showSnackbar(message)
+            if (message.isEmpty()) return@collect
+            // One book, added from the library: a tap on the snackbar opens it. (Opened from
+            // another app, it is already on its way to the reader.)
+            val added = report.imported.singleOrNull()?.takeIf { report.failed.isEmpty() && openRequests.value != it.id && destination == HOME }
+            val answer = snackbar.showSnackbar(
+                message,
+                actionLabel = added?.let { resources.getString(R.string.library_menu_open) },
+                duration = SnackbarDuration.Short,
+            )
+            if (answer == SnackbarResult.ActionPerformed && added != null && destination == HOME) openNow(added.id, null)
         }
     }
-    // A removed book can't stay open.
+    // A removed book can't stay open. Asked of the library as it is now, not of what this
+    // composition saw: started cold by a widget or a shortcut, the book is asked for before this
+    // first runs, and going by the stale view would send it straight back to the library.
     LaunchedEffect(destination, openBook) {
-        if (destination.startsWith(READ) && openBook == null) destination = HOME
+        if (destination.startsWith(READ) && library.state.value.find(destination.removePrefix(READ)) == null) destination = HOME
     }
 
     // The outer display follows "is a book open", not a particular reader screen, so switching
@@ -229,6 +259,20 @@ private fun JacketRoot(
     // Here rather than in the reader: switching books composes two readers for a moment, and the
     // outgoing one must not turn the screen timeout back on.
     if (reading) KeepScreenOn()
+
+    // "Cover when closed": folded shut on an open book, the screen wears its cover and reading
+    // waits until the phone is opened. Back on the cover reads here anyway, until the next unfold.
+    val foldedShut by rememberFoldedShut(watch = reading && state.settings.coverWhenClosed)
+    var readShut by remember { mutableStateOf(false) }
+    LaunchedEffect(foldedShut) { if (!foldedShut) readShut = false }
+    val wearingCover = reading && state.settings.coverWhenClosed && foldedShut && !readShut
+
+    // The welcome comes before the first book. A book arriving some other way (opened from a file
+    // manager, shared from another app) is welcome enough.
+    val welcome = !state.settings.onboarded && state.books.isEmpty() && !busy
+    LaunchedEffect(state.books.isEmpty()) {
+        if (state.books.isNotEmpty() && !state.settings.onboarded) library.updateSettings { it.copy(onboarded = true) }
+    }
 
     // Colors: the library wears the last book you read; the system palette if there is none or
     // "Colors from your book" is off. Browsing never re-tints the app. A reader brings its own
@@ -315,25 +359,51 @@ private fun JacketRoot(
                                             coverSpot = if (onHero) CoverSpot.HERO else CoverSpot.TILE
                                         },
                                         onBack = { destination = HOME },
+                                        coverUp = wearingCover,
+                                        onReadShut = { readShut = true },
+                                        autoListen = listenFor == book.id,
+                                        onAutoListened = { listenRequests.value = null },
                                     )
                                 }
                             }
-                            else -> HomeScreen(
-                                state = state,
-                                outerAvailable = outerAvailable,
-                                importing = busy,
-                                snackbar = snackbar,
-                                onImport = onImport,
-                                onOpen = { book, spot -> open(book.id, spot) },
-                                onShowOnCover = { library.setCurrent(it.id) },
-                                onDelete = { library.delete(it.id) },
-                                onSort = { sort -> library.updateSettings { it.copy(sort = sort) } },
-                                onOpenSettings = { destination = SETTINGS },
-                                missing = missing,
-                                onShelf = { finished -> library.updateSettings { it.copy(showFinished = finished) } },
-                                onFinished = { book, done -> library.setFinished(book.id, done) },
-                                grid = libraryGrid,
-                            )
+                            else -> {
+                                // Decided once, as this library comes into being.
+                                val backFromSettings = remember { screens.currentState == SETTINGS }
+                                // The welcome steps aside for the library it was the way into.
+                                AnimatedContent(
+                                    targetState = welcome,
+                                    transitionSpec = {
+                                        (fadeIn(motion.defaultEffectsSpec()) + scaleIn(motion.defaultSpatialSpec(), initialScale = 0.96f))
+                                            .togetherWith(fadeOut(motion.fastEffectsSpec()))
+                                    },
+                                    label = "welcome",
+                                ) { welcoming ->
+                                    if (welcoming) {
+                                        Onboarding(
+                                            onImport = onImport,
+                                            onDone = { library.updateSettings { it.copy(onboarded = true) } },
+                                        )
+                                    } else {
+                                        HomeScreen(
+                                            backFromSettings = backFromSettings,
+                                            state = state,
+                                            outerAvailable = outerAvailable,
+                                            importing = busy,
+                                            snackbar = snackbar,
+                                            onImport = onImport,
+                                            onOpen = { book, spot -> open(book.id, spot) },
+                                            onShowOnCover = { library.setCurrent(it.id) },
+                                            onDelete = { library.delete(it.id) },
+                                            onSort = { sort -> library.updateSettings { it.copy(sort = sort) } },
+                                            onOpenSettings = { destination = SETTINGS },
+                                            missing = missing,
+                                            onShelf = { finished -> library.updateSettings { it.copy(showFinished = finished) } },
+                                            onFinished = { book, done -> library.setFinished(book.id, done) },
+                                            grid = libraryGrid,
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }

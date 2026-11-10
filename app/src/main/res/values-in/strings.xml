@@ -17,6 +17,8 @@
     <string name="book_status_not_started">Belum dimulai</string>
     <string name="book_status_page_of">Halaman %1$d dari %2$d</string>
     <string name="book_status_percent_read">%1$d%% dibaca</string>
+    <string name="cover_almost_done">Hampir selesai</string>
+    <string name="cover_listening">Sedang didengarkan</string>
     <string name="book_untitled">Tanpa judul</string>
 
     <string name="cover_style_jacket">Jacket</string>
@@ -83,6 +85,9 @@
     <string name="library_remove_confirm">Hapus</string>
     <string name="library_empty_title">Biarkan ponsel lipat Anda memakai buku Anda</string>
     <string name="library_empty_message">Tambahkan file EPUB, PDF, komik CBZ, atau teks. Jacket menyimpan salinan pribadi dan menampilkan sampulnya di layar luar, atau di widget layar depan, selagi Anda membaca.</string>
+    <string name="onboarding_next">Berikutnya</string>
+    <string name="onboarding_skip">Lewati</string>
+    <string name="onboarding_private">Buku Anda tetap di ponsel ini. Jacket tidak memerlukan akun dan tidak pernah terhubung ke internet.</string>
 
     <string name="settings_title">Setelan</string>
     <string name="settings_subtitle">Profil, layar depan, dan membaca</string>
@@ -111,6 +116,8 @@
     <string name="settings_ambient_dim_description">Layar luar meredup setelah 30 detik tidak disentuh</string>
     <string name="settings_auto_outer">Sampul saat membaca</string>
     <string name="settings_auto_outer_description">Tampilkan sampul di layar luar setiap kali Anda membuka ponsel untuk membaca</string>
+    <string name="settings_cover_when_closed">Sampul saat tertutup</string>
+    <string name="settings_cover_when_closed_description">Saat ponsel dilipat dengan buku terbuka, layar menampilkan sampulnya. Buka lipatan untuk membaca, atau ketuk sampul untuk membaca di sini, mendengarkan, atau kembali.</string>
     <string name="settings_preview_outer">Layar luar</string>
     <string name="settings_preview_widget">Widget</string>
     <string name="settings_preview_description">Pratinjau layar depan dengan setelan Anda saat ini</string>
@@ -152,6 +159,11 @@
     <string name="reading_page">Halaman</string>
     <string name="reading_layout">Tata letak</string>
     <string name="reading_layout_hint">Halaman dibalik seperti buku: geser, atau ketuk tepinya. Saat ponsel dibuka, dua halaman tampil berdampingan.</string>
+    <string name="reading_page_turn">Balik halaman</string>
+    <string name="page_turn_slide">Geser</string>
+    <string name="page_turn_paper">Kertas</string>
+    <string name="page_turn_curl">Lipat</string>
+    <string name="page_turn_cards">Kartu</string>
     <string name="reading_line_spacing">Spasi baris</string>
     <string name="reading_line_spacing_book">Buku</string>
     <string name="reading_line_spacing_tight">Rapat</string>
@@ -262,4 +274,18 @@
     <string name="widget_reading">Sedang dibaca</string>
     <string name="widget_empty">Tambahkan buku untuk memakai sampulnya</string>
     <string name="listen_notification_channel">Bacakan</string>
+    <string name="reader_footer_time_left">%1$d mnt lagi di bab ini</string>
+    <string name="reading_time_left">Sisa waktu di bab</string>
+    <string name="reading_edge_swipes">Kecerahan dan kehangatan dengan usapan</string>
+    <string name="reading_edge_swipes_description">Usap ke atas atau bawah di tepi kiri untuk kecerahan, di tepi kanan untuk kehangatan.</string>
+    <string name="reading_night_pages">Halaman gelap di malam hari</string>
+    <string name="reading_night_pages_description">Saat ponsel Anda memakai tema gelap, halaman terang ikut menjadi gelap.</string>
+    <string name="settings_tabletop">Mode meja</string>
+    <string name="settings_tabletop_description">Setengah terlipat di atas meja: halaman di atas lipatan, kontrol di bawahnya.</string>
+    <string name="settings_watch_folder">Folder yang dipantau</string>
+    <string name="settings_watch_folder_description">Buku baru di folder ini ditambahkan saat Jacket dibuka.</string>
+    <string name="settings_reading_stats">Waktu baca dan rangkaian hari</string>
+    <string name="stats_today">%1$d mnt hari ini</string>
+    <string name="stats_streak">Hari ke-%1$d</string>
+    <string name="settings_ambient_quote">Sorotan di sampul yang diredupkan</string>
 </resources>

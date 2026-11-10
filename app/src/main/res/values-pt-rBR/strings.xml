@@ -16,6 +16,8 @@
     <string name="book_status_not_started">Não iniciado</string>
     <string name="book_status_page_of">Página %1$d de %2$d</string>
     <string name="book_status_percent_read">%1$d%% lido</string>
+    <string name="cover_almost_done">Quase no fim</string>
+    <string name="cover_listening">Ouvindo</string>
     <string name="book_untitled">Sem título</string>
 
     <string name="cover_style_jacket">Jacket</string>
@@ -86,6 +88,9 @@
     <string name="library_remove_confirm">Remover</string>
     <string name="library_empty_title">Vista seu dobrável com o seu livro</string>
     <string name="library_empty_message">Adicione um EPUB, PDF, quadrinho CBZ ou arquivo de texto. O Jacket guarda uma cópia privada e mostra a capa na sua tela externa, ou em um widget, enquanto você lê.</string>
+    <string name="onboarding_next">Avançar</string>
+    <string name="onboarding_skip">Pular</string>
+    <string name="onboarding_private">Seus livros ficam neste celular. O Jacket não tem conta e nunca se conecta à internet.</string>
 
     <string name="settings_title">Configurações</string>
     <string name="settings_subtitle">Perfil, tela externa e leitura</string>
@@ -120,6 +125,8 @@
     <string name="settings_ambient_dim_description">A tela externa escurece após 30 segundos sem toque</string>
     <string name="settings_auto_outer">Capa durante a leitura</string>
     <string name="settings_auto_outer_description">Mostra a capa na tela externa sempre que você abrir o celular para ler</string>
+    <string name="settings_cover_when_closed">Capa quando fechado</string>
+    <string name="settings_cover_when_closed_description">Com o celular fechado e um livro aberto, a tela mostra a capa dele. Abra para ler, ou toque na capa para ler aqui, ouvir ou voltar.</string>
     <string name="settings_preview_outer">Tela externa</string>
     <string name="settings_preview_widget">Widget</string>
     <string name="settings_preview_description">Prévia da tela externa com as suas configurações atuais</string>
@@ -163,6 +170,11 @@
     <string name="reading_page">Página</string>
     <string name="reading_layout">Layout</string>
     <string name="reading_layout_hint">As páginas viram como em um livro: deslize ou toque nas bordas. Com o celular aberto, você vê duas páginas lado a lado.</string>
+    <string name="reading_page_turn">Virada de página</string>
+    <string name="page_turn_slide">Deslizar</string>
+    <string name="page_turn_paper">Papel</string>
+    <string name="page_turn_curl">Dobra</string>
+    <string name="page_turn_cards">Cartas</string>
     <string name="reading_line_spacing">Espaçamento entre linhas</string>
     <string name="reading_line_spacing_book">Livro</string>
     <string name="reading_line_spacing_tight">Compacto</string>
@@ -279,4 +291,18 @@
     <string name="widget_reading">Lendo</string>
     <string name="widget_empty">Adicione um livro para vestir a capa dele</string>
     <string name="listen_notification_channel">Leitura em voz alta</string>
+    <string name="reader_footer_time_left">Faltam %1$d min no capítulo</string>
+    <string name="reading_time_left">Tempo restante no capítulo</string>
+    <string name="reading_edge_swipes">Brilho e calor ao deslizar</string>
+    <string name="reading_edge_swipes_description">Deslize para cima ou para baixo na borda esquerda para o brilho e na direita para o calor.</string>
+    <string name="reading_night_pages">Páginas escuras à noite</string>
+    <string name="reading_night_pages_description">Quando o celular está no tema escuro, as páginas claras também ficam escuras.</string>
+    <string name="settings_tabletop">Modo mesa</string>
+    <string name="settings_tabletop_description">Meio dobrado sobre a mesa: a página acima da dobra e os controles abaixo.</string>
+    <string name="settings_watch_folder">Pasta monitorada</string>
+    <string name="settings_watch_folder_description">Os livros novos desta pasta são adicionados quando o Jacket abre.</string>
+    <string name="settings_reading_stats">Tempo de leitura e sequência</string>
+    <string name="stats_today">%1$d min hoje</string>
+    <string name="stats_streak">Dia %1$d</string>
+    <string name="settings_ambient_quote">Destaques na capa escurecida</string>
 </resources>

@@ -11,16 +11,16 @@ Your checklist for the first Play and GitHub release. Work top to bottom. Form a
 - [ ] The known limitations in section 8 are still true. If not, remove them from
       `full_description.txt` and `changelogs/4.txt`.
 
-## 1. Decide the final applicationId
+## 1. applicationId (done)
 
-It is currently `io.github.friendlyglobal.jacket`.
+The applicationId is `app.usefriendly.jacket` (from usefriendly.app), set in
+`app/build.gradle.kts` since 1.0.0-rc.3. Once the app is published on Play it can never change.
+The `namespace` and the Kotlin package (`io.github.friendlyglobal.jacket`) stay as they are; only
+the applicationId is the app's identity.
 
-- Once an app is published on Play, its applicationId can never change. Changing it later
-  means publishing a new app with a new listing (no installs, ratings or reviews carry over),
-  and existing testers would need to install the new app and reinstall their books.
-- To change it now, edit only `applicationId` in `app/build.gradle.kts`. The `namespace` and the
-  Kotlin package (`io.github.friendlyglobal.jacket`) can stay as they are.
-- A new applicationId installs as a separate app next to any existing test build.
+Builds before rc.3 used `io.github.friendlyglobal.jacket`, so they install as a separate app:
+testers should save a backup in the old app (Settings › Backup), install the new one, restore it,
+and add their book files again.
 
 ## 2. Create an upload key
 
@@ -150,7 +150,7 @@ On any device:
 - [ ] Export a backup, install fresh (uninstall, or a second device), import it, and check
       positions, bookmarks, highlights, notes and settings.
 - [ ] Optional, to confirm the privacy policy's backup claims:
-      `adb shell bmgr backupnow io.github.friendlyglobal.jacket`, uninstall, reinstall from
+      `adb shell bmgr backupnow app.usefriendly.jacket`, uninstall, reinstall from
       the same source, and check that reading data returns and book files don't.
 - [ ] A fresh install from the Play internal test, as well as the GitHub APK.
 

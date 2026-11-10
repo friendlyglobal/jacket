@@ -16,6 +16,8 @@
     <string name="book_status_not_started">Nierozpoczęta</string>
     <string name="book_status_page_of">Strona %1$d z %2$d</string>
     <string name="book_status_percent_read">Przeczytano %1$d%%</string>
+    <string name="cover_almost_done">Już prawie koniec</string>
+    <string name="cover_listening">Słucham</string>
     <string name="book_untitled">Bez tytułu</string>
 
     <string name="cover_style_jacket">Jacket</string>
@@ -88,6 +90,9 @@
     <string name="library_remove_confirm">Usuń</string>
     <string name="library_empty_title">Ubierz swój składany telefon w książkę</string>
     <string name="library_empty_message">Dodaj plik EPUB, PDF, komiks CBZ lub plik tekstowy. Jacket przechowuje prywatną kopię i podczas czytania pokazuje okładkę na ekranie zewnętrznym albo w widżecie ekranu zewnętrznego.</string>
+    <string name="onboarding_next">Dalej</string>
+    <string name="onboarding_skip">Pomiń</string>
+    <string name="onboarding_private">Twoje książki zostają na tym telefonie. Jacket nie wymaga konta i nigdy nie łączy się z internetem.</string>
 
     <string name="settings_title">Ustawienia</string>
     <string name="settings_subtitle">Profil, ekran zewnętrzny i czytanie</string>
@@ -125,6 +130,8 @@
     <string name="settings_ambient_dim_description">Ekran zewnętrzny przyciemnia się po 30 sekundach bez dotyku</string>
     <string name="settings_auto_outer">Okładka podczas czytania</string>
     <string name="settings_auto_outer_description">Pokazuj okładkę na ekranie zewnętrznym, gdy rozkładasz telefon do czytania</string>
+    <string name="settings_cover_when_closed">Okładka po zamknięciu</string>
+    <string name="settings_cover_when_closed_description">Gdy telefon jest złożony, a książka otwarta, ekran pokazuje jej okładkę. Rozłóż telefon, aby czytać, lub dotknij okładki, aby czytać tutaj, słuchać albo wrócić.</string>
     <string name="settings_preview_outer">Ekran zewnętrzny</string>
     <string name="settings_preview_widget">Widżet</string>
     <string name="settings_preview_description">Podgląd ekranu zewnętrznego z bieżącymi ustawieniami</string>
@@ -169,6 +176,11 @@
     <string name="reading_page">Strona</string>
     <string name="reading_layout">Układ</string>
     <string name="reading_layout_hint">Strony przewracają się jak w książce: przesuń palcem lub stuknij krawędź. Po rozłożeniu widzisz dwie strony obok siebie.</string>
+    <string name="reading_page_turn">Zmiana strony</string>
+    <string name="page_turn_slide">Ślizg</string>
+    <string name="page_turn_paper">Papier</string>
+    <string name="page_turn_curl">Zagięcie</string>
+    <string name="page_turn_cards">Karty</string>
     <string name="reading_line_spacing">Interlinia</string>
     <string name="reading_line_spacing_book">Książka</string>
     <string name="reading_line_spacing_tight">Ciasna</string>
@@ -288,4 +300,18 @@
     <string name="widget_reading">Czytam</string>
     <string name="widget_empty">Dodaj książkę, aby nosić jej okładkę</string>
     <string name="listen_notification_channel">Czytanie na głos</string>
+    <string name="reader_footer_time_left">Jeszcze %1$d min rozdziału</string>
+    <string name="reading_time_left">Czas do końca rozdziału</string>
+    <string name="reading_edge_swipes">Jasność i ciepło przesunięciem</string>
+    <string name="reading_edge_swipes_description">Przesuń w górę lub w dół wzdłuż lewej krawędzi, aby zmienić jasność, a wzdłuż prawej — ciepło.</string>
+    <string name="reading_night_pages">Ciemne strony nocą</string>
+    <string name="reading_night_pages_description">Gdy telefon jest w ciemnym motywie, jasne strony też stają się ciemne.</string>
+    <string name="settings_tabletop">Tryb stołowy</string>
+    <string name="settings_tabletop_description">Na wpół złożony na stole: strona nad zgięciem, sterowanie pod nim.</string>
+    <string name="settings_watch_folder">Obserwowany folder</string>
+    <string name="settings_watch_folder_description">Nowe książki z tego folderu są dodawane po otwarciu Jacket.</string>
+    <string name="settings_reading_stats">Czas czytania i seria</string>
+    <string name="stats_today">%1$d min dzisiaj</string>
+    <string name="stats_streak">Dzień %1$d</string>
+    <string name="settings_ambient_quote">Zaznaczenia na przyciemnionej okładce</string>
 </resources>

@@ -16,6 +16,8 @@
     <string name="book_status_not_started">Не розпочато</string>
     <string name="book_status_page_of">Сторінка %1$d з %2$d</string>
     <string name="book_status_percent_read">Прочитано %1$d%%</string>
+    <string name="cover_almost_done">Майже дочитано</string>
+    <string name="cover_listening">Слухаю</string>
     <string name="book_untitled">Без назви</string>
 
     <string name="cover_style_jacket">Jacket</string>
@@ -88,6 +90,9 @@
     <string name="library_remove_confirm">Вилучити</string>
     <string name="library_empty_title">Одягніть свій складаний телефон у книгу</string>
     <string name="library_empty_message">Додайте файл EPUB, PDF, комікс CBZ або текстовий файл. Jacket зберігає приватну копію і, поки ви читаєте, показує обкладинку на зовнішньому екрані або у віджеті зовнішнього екрана.</string>
+    <string name="onboarding_next">Далі</string>
+    <string name="onboarding_skip">Пропустити</string>
+    <string name="onboarding_private">Ваші книжки залишаються на цьому телефоні. Jacket не потребує облікового запису й ніколи не виходить в інтернет.</string>
 
     <string name="settings_title">Налаштування</string>
     <string name="settings_subtitle">Профіль, зовнішній екран і читання</string>
@@ -125,6 +130,8 @@
     <string name="settings_ambient_dim_description">Зовнішній екран тьмяніє через 30 секунд без дотиків</string>
     <string name="settings_auto_outer">Обкладинка під час читання</string>
     <string name="settings_auto_outer_description">Показувати обкладинку на зовнішньому екрані, коли ви розкладаєте телефон для читання</string>
+    <string name="settings_cover_when_closed">Обкладинка у складеному стані</string>
+    <string name="settings_cover_when_closed_description">Коли телефон складено, а книжку відкрито, екран показує її обкладинку. Розкладіть телефон, щоб читати, або торкніться обкладинки, щоб читати тут, слухати чи повернутися.</string>
     <string name="settings_preview_outer">Зовнішній екран</string>
     <string name="settings_preview_widget">Віджет</string>
     <string name="settings_preview_description">Попередній перегляд зовнішнього екрана з поточними налаштуваннями</string>
@@ -169,6 +176,11 @@
     <string name="reading_page">Сторінка</string>
     <string name="reading_layout">Режим</string>
     <string name="reading_layout_hint">Сторінки гортаються, як у книзі: проведіть пальцем або торкніться краю. У розкладеному вигляді — розворот із двох сторінок.</string>
+    <string name="reading_page_turn">Гортання</string>
+    <string name="page_turn_slide">Зсув</string>
+    <string name="page_turn_paper">Папір</string>
+    <string name="page_turn_curl">Загин</string>
+    <string name="page_turn_cards">Картки</string>
     <string name="reading_line_spacing">Міжрядковий інтервал</string>
     <string name="reading_line_spacing_book">Книга</string>
     <string name="reading_line_spacing_tight">Щільний</string>
@@ -288,4 +300,18 @@
     <string name="widget_reading">Читаю</string>
     <string name="widget_empty">Додайте книгу, щоб одягнути її обкладинку</string>
     <string name="listen_notification_channel">Читання вголос</string>
+    <string name="reader_footer_time_left">Ще %1$d хв до кінця розділу</string>
+    <string name="reading_time_left">Час до кінця розділу</string>
+    <string name="reading_edge_swipes">Яскравість і теплота свайпом</string>
+    <string name="reading_edge_swipes_description">Проведіть угору або вниз уздовж лівого краю для яскравості, уздовж правого — для теплоти.</string>
+    <string name="reading_night_pages">Темні сторінки вночі</string>
+    <string name="reading_night_pages_description">Коли на телефоні темна тема, світлі сторінки теж стають темними.</string>
+    <string name="settings_tabletop">Режим на столі</string>
+    <string name="settings_tabletop_description">Напівскладений на столі: сторінка над згином, керування під ним.</string>
+    <string name="settings_watch_folder">Відстежувана папка</string>
+    <string name="settings_watch_folder_description">Нові книжки з цієї папки додаються під час відкриття Jacket.</string>
+    <string name="settings_reading_stats">Час читання і серія днів</string>
+    <string name="stats_today">%1$d хв сьогодні</string>
+    <string name="stats_streak">День %1$d</string>
+    <string name="settings_ambient_quote">Виділення на затемненій обкладинці</string>
 </resources>

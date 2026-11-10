@@ -16,6 +16,8 @@
     <string name="book_status_not_started">Sin empezar</string>
     <string name="book_status_page_of">Página %1$d de %2$d</string>
     <string name="book_status_percent_read">%1$d %% leído</string>
+    <string name="cover_almost_done">Casi al final</string>
+    <string name="cover_listening">Escuchando</string>
     <string name="book_untitled">Sin título</string>
 
     <string name="cover_style_jacket">Jacket</string>
@@ -86,6 +88,9 @@
     <string name="library_remove_confirm">Quitar</string>
     <string name="library_empty_title">Viste tu plegable con tu libro</string>
     <string name="library_empty_message">Añade un EPUB, PDF, cómic CBZ o archivo de texto. Jacket guarda una copia privada y muestra su portada en tu pantalla externa, o en un widget, mientras lees.</string>
+    <string name="onboarding_next">Siguiente</string>
+    <string name="onboarding_skip">Omitir</string>
+    <string name="onboarding_private">Tus libros se quedan en este teléfono. Jacket no necesita cuenta y nunca se conecta a internet.</string>
 
     <string name="settings_title">Ajustes</string>
     <string name="settings_subtitle">Perfil, pantalla externa y lectura</string>
@@ -120,6 +125,8 @@
     <string name="settings_ambient_dim_description">La pantalla externa se atenúa tras 30 segundos sin tocarla</string>
     <string name="settings_auto_outer">Portada mientras lees</string>
     <string name="settings_auto_outer_description">Muestra la portada en la pantalla externa cada vez que despliegues para leer</string>
+    <string name="settings_cover_when_closed">Portada al cerrar</string>
+    <string name="settings_cover_when_closed_description">Con el teléfono plegado y un libro abierto, la pantalla muestra su portada. Despliega para leer, o toca la portada para leer aquí, escuchar o volver.</string>
     <string name="settings_preview_outer">Pantalla externa</string>
     <string name="settings_preview_widget">Widget</string>
     <string name="settings_preview_description">Vista previa de la pantalla externa con tus ajustes actuales</string>
@@ -163,6 +170,11 @@
     <string name="reading_page">Página</string>
     <string name="reading_layout">Diseño</string>
     <string name="reading_layout_hint">Las páginas pasan como en un libro: desliza o toca los bordes. Con el teléfono desplegado, verás dos páginas a la vez.</string>
+    <string name="reading_page_turn">Paso de página</string>
+    <string name="page_turn_slide">Deslizar</string>
+    <string name="page_turn_paper">Papel</string>
+    <string name="page_turn_curl">Doblar</string>
+    <string name="page_turn_cards">Cartas</string>
     <string name="reading_line_spacing">Interlineado</string>
     <string name="reading_line_spacing_book">Libro</string>
     <string name="reading_line_spacing_tight">Estrecho</string>
@@ -279,4 +291,18 @@
     <string name="widget_reading">Leyendo</string>
     <string name="widget_empty">Añade un libro para lucir su portada</string>
     <string name="listen_notification_channel">Lectura en voz alta</string>
+    <string name="reader_footer_time_left">Quedan %1$d min del capítulo</string>
+    <string name="reading_time_left">Tiempo restante del capítulo</string>
+    <string name="reading_edge_swipes">Brillo y calidez al deslizar</string>
+    <string name="reading_edge_swipes_description">Desliza hacia arriba o abajo por el borde izquierdo para el brillo y por el derecho para la calidez.</string>
+    <string name="reading_night_pages">Páginas oscuras de noche</string>
+    <string name="reading_night_pages_description">Cuando tu teléfono está en tema oscuro, las páginas claras también se oscurecen.</string>
+    <string name="settings_tabletop">Modo sobremesa</string>
+    <string name="settings_tabletop_description">Medio plegado sobre una mesa: la página encima del pliegue y los controles debajo.</string>
+    <string name="settings_watch_folder">Carpeta vigilada</string>
+    <string name="settings_watch_folder_description">Los libros nuevos de esta carpeta se añaden al abrir Jacket.</string>
+    <string name="settings_reading_stats">Tiempo de lectura y racha</string>
+    <string name="stats_today">%1$d min hoy</string>
+    <string name="stats_streak">Día %1$d</string>
+    <string name="settings_ambient_quote">Resaltados en la portada atenuada</string>
 </resources>

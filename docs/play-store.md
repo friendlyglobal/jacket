@@ -1,7 +1,7 @@
 # Play Console working sheet
 
 Answers for the Play Console forms for **Jacket 1.0.0-rc.1 (versionCode 4)**,
-applicationId `io.github.friendlyglobal.jacket`. Play changes its form wording from time to
+applicationId `app.usefriendly.jacket`. Play changes its form wording from time to
 time: where an answer below depends on Play's definitions, check it against the current form
 before you submit.
 
@@ -86,7 +86,7 @@ Check the final list before you submit: Android Studio's *Merged Manifest* tab f
 | `RECEIVE_BOOT_COMPLETED` | AndroidX WorkManager (used by the Glance widget) | WorkManager reschedules pending widget update work after a reboot. Jacket starts nothing of its own at boot. |
 | `WAKE_LOCK` | AndroidX WorkManager (used by the Glance widget) | Held briefly while widget update work runs. |
 | `ACCESS_NETWORK_STATE` | AndroidX WorkManager (used by the Glance widget) | Lets WorkManager evaluate network constraints on scheduled work. Jacket schedules no network work and, without `INTERNET`, cannot connect; this permission only reports whether a connection exists. |
-| `io.github.friendlyglobal.jacket.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` | AndroidX Core (generated) | Signature-level, internal to the app. No declaration needed. |
+| `app.usefriendly.jacket.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` | AndroidX Core (generated) | Signature-level, internal to the app. No declaration needed. |
 
 Play asks for a declaration only for the foreground service type; the other rows are normal
 permissions, listed here for reviewer or user questions.

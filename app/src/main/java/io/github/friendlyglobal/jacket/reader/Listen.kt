@@ -4,12 +4,7 @@ import android.content.res.Resources
 import android.os.SystemClock
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -62,6 +57,8 @@ import androidx.compose.ui.text.font.FontWeight
 import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
+import io.github.friendlyglobal.jacket.ui.rememberTurn
+import androidx.compose.ui.graphics.graphicsLayer
 
 /** When read-aloud stops by itself. */
 enum class SleepTimer(val minutes: Int, @StringRes val label: Int) {
@@ -83,6 +80,9 @@ class ListenState {
     var sleepEndsAt by mutableLongStateOf(0L)
     /** The chapter file the voice is in (EPUB), or -1: lets "end of chapter" stop on time. */
     var spokenFile by mutableIntStateOf(-1)
+    /** The sentence being spoken, and how many of its characters have been: shown over the cover when the phone is shut. */
+    var phrase by mutableStateOf("")
+    var spoken by mutableIntStateOf(0)
 }
 
 /** Implemented by each format that can be read aloud (EPUB and plain text). */
@@ -130,8 +130,10 @@ fun ListenBar(
     val shapeProgress by animateFloatAsState(
         if (playing) 1f else 0f, MaterialTheme.motionScheme.slowSpatialSpec(), label = "play-shape",
     )
-    val spin = rememberInfiniteTransition(label = "play-spin")
-    val turn by spin.animateFloat(0f, 360f, infiniteRepeatable(tween(16_000, easing = LinearEasing)), label = "turn")
+    // Turning only while it reads, and only as a layer: the bar isn't recomposed frame by frame
+    // for as long as you listen. Paused, it runs on to where a square looks square and rests.
+    val turn = rememberTurn(playing)
+    val shape = remember(morph, shapeProgress) { MorphShape(morph, shapeProgress) }
     val wave by animateFloatAsState(if (playing) 1f else 0f, label = "wave")
 
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -149,11 +151,14 @@ fun ListenBar(
                         haptics.toggle(!playing)
                         controller.toggle()
                     },
-                    shape = MorphShape(morph, shapeProgress, if (playing) turn else 0f),
+                    modifier = Modifier.graphicsLayer { rotationZ = turn.value },
+                    shape = shape,
                 ) {
                     AnimatedContent(
                         targetState = playing,
                         transitionSpec = { (scaleIn() + fadeIn()) togetherWith (scaleOut() + fadeOut()) },
+                        // The icon stays upright inside the turning button.
+                        modifier = Modifier.graphicsLayer { rotationZ = -turn.value },
                         label = "play",
                     ) { on ->
                         Icon(
@@ -230,15 +235,11 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
     }
 }
 
-/** A [Morph] between two shapes as a Compose [Shape], at [progress], turned by [rotation] degrees. */
-private class MorphShape(private val morph: Morph, private val progress: Float, private val rotation: Float) : Shape {
+/** A [Morph] between two shapes as a Compose [Shape], at [progress]. */
+private class MorphShape(private val morph: Morph, private val progress: Float) : Shape {
     override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
         val path = morph.toPath(progress, android.graphics.Path())
-        val matrix = android.graphics.Matrix().apply {
-            setScale(size.width, size.height)
-            postRotate(rotation, size.width / 2, size.height / 2)
-        }
-        path.transform(matrix)
+        path.transform(android.graphics.Matrix().apply { setScale(size.width, size.height) })
         return Outline.Generic(path.asComposePath())
     }
 }

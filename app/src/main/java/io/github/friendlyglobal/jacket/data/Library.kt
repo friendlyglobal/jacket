@@ -3,6 +3,7 @@ package io.github.friendlyglobal.jacket.data
 import android.content.Context
 import android.content.res.Resources
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.util.Log
 import androidx.core.util.AtomicFile
 import io.github.friendlyglobal.jacket.R
@@ -59,10 +60,32 @@ class Library(private val context: Context) {
     private val _missing = MutableStateFlow<Set<String>>(emptySet())
     val missing: StateFlow<Set<String>> = _missing.asStateFlow()
 
+    /** What the open reader is doing right now (see [ReadingMoment]); null while no book is open. */
+    private val _moment = MutableStateFlow<ReadingMoment?>(null)
+    val moment: StateFlow<ReadingMoment?> = _moment.asStateFlow()
+
+    /** The reader reports in as the chapter, the place in it or read-aloud changes. */
+    fun report(moment: ReadingMoment) {
+        val before = _moment.value
+        _moment.value = moment
+        // The widget shows the chapter and whether you're listening, not the place in the chapter.
+        if (before?.copy(chapterProgress = moment.chapterProgress) != moment) WidgetSync.request(context)
+    }
+
+    /** The reader of [bookId] has closed. Another book's reader may already have reported in. */
+    fun endMoment(bookId: String) {
+        if (_moment.value?.bookId != bookId) return
+        _moment.value = null
+        WidgetSync.request(context)
+    }
+
     init {
         // Jacket 0.2 unpacked EPUBs to disk; Readium reads the files directly, so free that space.
         scope.launch(disk) { File(context.filesDir, "unpacked").deleteRecursively() }
         scope.launch(disk) { _missing.value = scanMissing(_state.value) }
+        // Widgets placed before this process started (after an update, a restart) redraw now, rather
+        // than sit on their loading layout until the next page is turned.
+        WidgetSync.request(context)
     }
 
     private fun scanMissing(state: LibraryState): Set<String> =
@@ -156,6 +179,63 @@ class Library(private val context: Context) {
             })
         }
         changed()
+    }
+
+    /**
+     * A page of [id] was on screen for [millis] and carried the reader [advanced] of the way
+     * through the book: counts towards today's reading, and (when it was a page read rather than
+     * flipped past) towards the book's pace.
+     */
+    fun addReading(id: String, millis: Long, advanced: Float) {
+        if (millis <= 0L) return
+        val today = java.time.LocalDate.now().toString()
+        _state.update { s ->
+            val days = (s.reading + (today to (s.reading[today] ?: 0L) + millis)).let { all ->
+                if (all.size <= KEPT_DAYS) all else all.toSortedMap().entries.toList().takeLast(KEPT_DAYS).associate { it.key to it.value }
+            }
+            val books = if (advanced <= 0f || advanced > MOST_ONE_PAGE || !advanced.isFinite()) s.books else s.books.map {
+                if (it.id != id) it else {
+                    val sample = millis / advanced
+                    // A running average: it settles after a few pages and keeps following you.
+                    it.copy(pace = if (it.pace <= 0f) sample else it.pace * 0.8f + sample * 0.2f)
+                }
+            }
+            s.copy(books = books, reading = days)
+        }
+        changed()
+    }
+
+    /**
+     * Looks in the watched folder for books that weren't there before, and adds them. Null when
+     * there is no folder, it can't be read any more, or it holds nothing new.
+     */
+    suspend fun scanWatchedFolder(): ImportReport? = withContext(Dispatchers.IO) {
+        val tree = _state.value.settings.watchFolder?.let(Uri::parse) ?: return@withContext null
+        val seen = _state.value.settings.watchSeen
+        val found = runCatching {
+            val children = DocumentsContract.buildChildDocumentsUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
+            val columns = arrayOf(
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                DocumentsContract.Document.COLUMN_SIZE,
+            )
+            buildList {
+                context.contentResolver.query(children, columns, null, null, null)?.use { rows ->
+                    while (rows.moveToNext()) {
+                        val name = rows.getString(1) ?: continue
+                        if (name.substringAfterLast('.', "").lowercase() !in WATCHED_EXTENSIONS) continue
+                        add(Triple(DocumentsContract.buildDocumentUriUsingTree(tree, rows.getString(0)), name, rows.getLong(2)))
+                    }
+                }
+            }
+        }.onFailure { e -> Log.w(TAG, "Couldn't read the watched folder", e) }.getOrNull() ?: return@withContext null
+        val fresh = found.filter { (_, name, size) -> "$name|$size" !in seen }
+        if (fresh.isEmpty()) return@withContext null
+        // Remembered whether or not they import: a file that can't be read isn't tried at every launch.
+        _state.update { s -> s.copy(settings = s.settings.copy(watchSeen = s.settings.watchSeen + fresh.map { (_, name, size) -> "$name|$size" })) }
+        changed()
+        // Books added by hand before the folder was watched are already here.
+        val missing = fresh.filter { (_, name, size) -> _state.value.books.none { it.sourceName == name && it.sizeBytes == size } }
+        if (missing.isEmpty()) null else import(missing.map { it.first })
     }
 
     /** Marks a book finished (or back to reading). */
@@ -261,5 +341,12 @@ class Library(private val context: Context) {
 
     private companion object {
         const val TAG = "JacketLibrary"
+
+        /** Reading time is kept per day for a little over a year. */
+        const val KEPT_DAYS = 400
+
+        /** A step through the book bigger than this wasn't a page read: it was a jump. */
+        const val MOST_ONE_PAGE = 0.03f
+        val WATCHED_EXTENSIONS = setOf("epub", "pdf", "cbz", "txt")
     }
 }

@@ -22,3 +22,9 @@
 # implementation is created by reflection.
 -keep class * extends androidx.room.RoomDatabase { <init>(); }
 -keep class androidx.work.impl.WorkDatabase_Impl { *; }
+
+# WorkManager also creates its input mergers by reflection, by class name. Without their
+# no-argument constructors the widget's session never starts, and the widget stays on its
+# loading layout for good.
+-keep class * extends androidx.work.InputMerger { <init>(); }
+-keep class * extends androidx.work.ListenableWorker { <init>(android.content.Context, androidx.work.WorkerParameters); }

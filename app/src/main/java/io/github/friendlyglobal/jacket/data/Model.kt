@@ -46,6 +46,11 @@ data class Book(
     val locator: String? = null,
     /** When the book was marked finished; 0 while unread or in progress. */
     val finishedAt: Long = 0L,
+    /**
+     * Your pace in this book: the milliseconds the whole of it would take at the rate you've been
+     * turning its pages; 0 until that's been measured. "Time left" is worked out from it.
+     */
+    val pace: Float = 0f,
 ) {
     val isFinished: Boolean get() = finishedAt > 0L
 
@@ -82,6 +87,17 @@ enum class PageColor(@StringRes val label: Int) {
 enum class PageLayout(@StringRes val label: Int) {
     PAGES(R.string.layout_pages),
     SCROLL(R.string.layout_scroll),
+}
+
+/**
+ * How a page turns: SLIDE is Readium's own strip of pages, PAPER lifts the page off and slides it
+ * over the next, CURL folds it over like a leaf of a book, CARDS deals it away on a spring.
+ */
+enum class PageTurn(@StringRes val label: Int) {
+    SLIDE(R.string.page_turn_slide),
+    PAPER(R.string.page_turn_paper),
+    CURL(R.string.page_turn_curl),
+    CARDS(R.string.page_turn_cards),
 }
 
 enum class LibrarySort(@StringRes val label: Int) {
@@ -151,6 +167,31 @@ data class Settings(
     val volumeKeys: Boolean = false,
     /** Library filter: false shows the books you're reading and haven't started, true the finished shelf. */
     val showFinished: Boolean = false,
+    val pageTurn: PageTurn = PageTurn.PAPER,
+    /** Folded shut with a book open, the screen shows its cover instead of the page: reading waits until you unfold. */
+    val coverWhenClosed: Boolean = false,
+    /** The welcome has been seen (or skipped). */
+    val onboarded: Boolean = false,
+    /** The footer tells the minutes left in the chapter (once your pace is known) rather than the pages. */
+    val timeLeft: Boolean = true,
+    /** Swiping up and down the page's left edge sets the brightness, the right edge the warmth. */
+    val edgeSwipes: Boolean = true,
+    /** The reader's own brightness (0..1), or negative to leave it to the phone. */
+    val brightness: Float = -1f,
+    /** How warm the page is tinted (0..1). */
+    val warmth: Float = 0f,
+    /** While the phone is in dark theme, Paper pages are shown dark. */
+    val nightPages: Boolean = false,
+    /** Half-folded on a table, the page sits above the fold and the controls below it. */
+    val tabletop: Boolean = true,
+    /** The library shows today's reading time and the run of days read. */
+    val readingStats: Boolean = true,
+    /** The ambient cover shows one of the book's highlights. */
+    val ambientQuote: Boolean = false,
+    /** A folder (a document tree URI) whose new books are added when Jacket opens. */
+    val watchFolder: String? = null,
+    /** Files already taken from [watchFolder] ("name|size"): removing a book doesn't bring it back. */
+    val watchSeen: Set<String> = emptySet(),
 )
 
 data class LibraryState(
@@ -158,6 +199,8 @@ data class LibraryState(
     val currentId: String? = null,
     val settings: Settings = Settings(),
     val annotations: List<Annotation> = emptyList(),
+    /** Time spent reading, per day (ISO date to milliseconds): today's total and the streak. */
+    val reading: Map<String, Long> = emptyMap(),
 ) {
     /** The book the covers show: the one picked, else the one opened most recently. */
     val current: Book?
@@ -171,6 +214,21 @@ data class LibraryState(
         }
 
     fun find(id: String?): Book? = id?.let { books.firstOrNull { b -> b.id == it } }
+}
+
+/**
+ * How many days in a row there has been reading, up to [today] (an ISO date); a day not yet read
+ * in doesn't break the run that reached yesterday. A day counts from a minute of reading.
+ */
+fun readingStreak(reading: Map<String, Long>, today: java.time.LocalDate): Int {
+    fun read(day: java.time.LocalDate) = (reading[day.toString()] ?: 0L) >= 60_000L
+    var day = if (read(today)) today else today.minusDays(1)
+    var run = 0
+    while (read(day)) {
+        run++
+        day = day.minusDays(1)
+    }
+    return run
 }
 
 internal object LibraryJson {
@@ -194,7 +252,21 @@ internal object LibraryJson {
             put("alignment", state.settings.alignment.name)
             put("volumeKeys", state.settings.volumeKeys)
             put("showFinished", state.settings.showFinished)
+            put("pageTurn", state.settings.pageTurn.name)
+            put("coverWhenClosed", state.settings.coverWhenClosed)
+            put("onboarded", state.settings.onboarded)
+            put("timeLeft", state.settings.timeLeft)
+            put("edgeSwipes", state.settings.edgeSwipes)
+            put("brightness", state.settings.brightness.toDouble())
+            put("warmth", state.settings.warmth.toDouble())
+            put("nightPages", state.settings.nightPages)
+            put("tabletop", state.settings.tabletop)
+            put("readingStats", state.settings.readingStats)
+            put("ambientQuote", state.settings.ambientQuote)
+            put("watchFolder", state.settings.watchFolder ?: JSONObject.NULL)
+            put("watchSeen", JSONArray(state.settings.watchSeen.toList()))
         })
+        put("reading", JSONObject().apply { state.reading.forEach { (day, millis) -> put(day, millis) } })
         put("books", JSONArray().apply { state.books.forEach { put(it.toJson()) } })
         put("annotations", JSONArray().apply { state.annotations.forEach { put(it.toJson()) } })
     }.toString()
@@ -223,7 +295,22 @@ internal object LibraryJson {
                 alignment = enumOr(s.optString("alignment"), TextAlignment.BOOK),
                 volumeKeys = s.optBoolean("volumeKeys", false),
                 showFinished = s.optBoolean("showFinished", false),
+                pageTurn = enumOr(s.optString("pageTurn"), PageTurn.PAPER),
+                coverWhenClosed = s.optBoolean("coverWhenClosed", false),
+                // A library saved before there was a welcome belongs to someone who needs none.
+                onboarded = s.optBoolean("onboarded", true),
+                timeLeft = s.optBoolean("timeLeft", true),
+                edgeSwipes = s.optBoolean("edgeSwipes", true),
+                brightness = s.optDouble("brightness", -1.0).toFloat().takeIf { it.isFinite() } ?: -1f,
+                warmth = s.optDouble("warmth", 0.0).toFloat().takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: 0f,
+                nightPages = s.optBoolean("nightPages", false),
+                tabletop = s.optBoolean("tabletop", true),
+                readingStats = s.optBoolean("readingStats", true),
+                ambientQuote = s.optBoolean("ambientQuote", false),
+                watchFolder = if (s.isNull("watchFolder")) null else s.optString("watchFolder").takeIf { it.isNotEmpty() },
+                watchSeen = s.optJSONArray("watchSeen")?.let { a -> (0 until a.length()).mapTo(HashSet()) { a.optString(it) } }.orEmpty(),
             ),
+            reading = root.optJSONObject("reading")?.let { days -> days.keys().asSequence().associateWith { days.optLong(it) } }.orEmpty(),
             annotations = (root.optJSONArray("annotations") ?: JSONArray()).let { a ->
                 (0 until a.length()).mapNotNull { i -> runCatching { a.getJSONObject(i).toAnnotation() }.getOrNull() }
             },
@@ -243,6 +330,7 @@ internal object LibraryJson {
         put("lastOpenedAt", lastOpenedAt)
         put("locator", locator ?: JSONObject.NULL)
         put("finishedAt", finishedAt)
+        put("pace", pace.toDouble())
     }
 
     private fun Annotation.toJson() = JSONObject().apply {
@@ -286,5 +374,6 @@ internal object LibraryJson {
         // Jacket 0.x had no "finished" flag; a book read to the end counts as finished.
         finishedAt = if (has("finishedAt")) optLong("finishedAt")
         else if (optDouble("progress", 0.0) >= 0.99) optLong("lastOpenedAt").coerceAtLeast(1L) else 0L,
+        pace = optDouble("pace", 0.0).toFloat().takeIf { it.isFinite() && it > 0f } ?: 0f,
     )
 }

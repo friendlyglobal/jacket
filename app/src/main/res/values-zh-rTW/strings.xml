@@ -17,6 +17,8 @@
     <string name="book_status_not_started">尚未開始</string>
     <string name="book_status_page_of">第 %1$d / %2$d 頁</string>
     <string name="book_status_percent_read">已讀 %1$d%%</string>
+    <string name="cover_almost_done">快讀完了</string>
+    <string name="cover_listening">聆聽中</string>
     <string name="book_untitled">無標題</string>
 
     <string name="cover_style_jacket">Jacket</string>
@@ -83,6 +85,9 @@
     <string name="library_remove_confirm">移除</string>
     <string name="library_empty_title">讓摺疊手機穿上你的書</string>
     <string name="library_empty_message">新增 EPUB、PDF、CBZ 漫畫或文字檔。Jacket 會保留一份私人副本，並在你閱讀時將封面顯示在外螢幕或外螢幕小工具上。</string>
+    <string name="onboarding_next">下一步</string>
+    <string name="onboarding_skip">略過</string>
+    <string name="onboarding_private">你的書只儲存在這支手機上。Jacket 不需要帳號，也從不連線上網。</string>
 
     <string name="settings_title">設定</string>
     <string name="settings_subtitle">個人資料、外螢幕和閱讀</string>
@@ -111,6 +116,8 @@
     <string name="settings_ambient_dim_description">外螢幕 30 秒未操作後會自動變暗</string>
     <string name="settings_auto_outer">閱讀時顯示封面</string>
     <string name="settings_auto_outer_description">每次展開閱讀時都在外螢幕顯示封面</string>
+    <string name="settings_cover_when_closed">闔上時顯示封面</string>
+    <string name="settings_cover_when_closed_description">闔上手機且有書開啟時，螢幕會顯示這本書的封面。展開即可閱讀，或輕觸封面以在此螢幕閱讀、聆聽或返回。</string>
     <string name="settings_preview_outer">外螢幕</string>
     <string name="settings_preview_widget">小工具</string>
     <string name="settings_preview_description">依目前設定預覽外螢幕</string>
@@ -152,6 +159,11 @@
     <string name="reading_page">頁面</string>
     <string name="reading_layout">版面</string>
     <string name="reading_layout_hint">像書一樣翻頁：滑動或輕觸螢幕邊緣。展開後會以雙頁顯示。</string>
+    <string name="reading_page_turn">翻頁效果</string>
+    <string name="page_turn_slide">滑動</string>
+    <string name="page_turn_paper">紙張</string>
+    <string name="page_turn_curl">捲曲</string>
+    <string name="page_turn_cards">卡片</string>
     <string name="reading_line_spacing">行距</string>
     <string name="reading_line_spacing_book">書籍</string>
     <string name="reading_line_spacing_tight">緊密</string>
@@ -262,4 +274,18 @@
     <string name="widget_reading">閱讀中</string>
     <string name="widget_empty">新增一本書，穿上它的封面</string>
     <string name="listen_notification_channel">朗讀</string>
+    <string name="reader_footer_time_left">本章還剩 %1$d 分鐘</string>
+    <string name="reading_time_left">本章剩餘時間</string>
+    <string name="reading_edge_swipes">滑動調整亮度和色溫</string>
+    <string name="reading_edge_swipes_description">沿左邊緣上下滑動調整亮度，沿右邊緣調整色溫。</string>
+    <string name="reading_night_pages">夜間使用深色頁面</string>
+    <string name="reading_night_pages_description">手機處於深色主題時，淺色頁面也會變為深色。</string>
+    <string name="settings_tabletop">桌面模式</string>
+    <string name="settings_tabletop_description">半摺放在桌上：頁面在摺痕上方，控制項在下方。</string>
+    <string name="settings_watch_folder">監看的資料夾</string>
+    <string name="settings_watch_folder_description">開啟 Jacket 時會加入此資料夾中的新書。</string>
+    <string name="settings_reading_stats">閱讀時間和連續天數</string>
+    <string name="stats_today">今天 %1$d 分鐘</string>
+    <string name="stats_streak">第 %1$d 天</string>
+    <string name="settings_ambient_quote">在調暗的封面上顯示畫線</string>
 </resources>

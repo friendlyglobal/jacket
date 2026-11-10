@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status-bar icon: the Jacket mark as a white silhouette, filling the 24dp grid. Overrides
+     Media3's default media-notification icon of the same name. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="60"
+    android:viewportHeight="60">
+    <group android:translateX="-24" android:translateY="-24">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M36,27A3,3 0 0 1 39,30V78A3,3 0 0 1 36,81A3,3 0 0 1 33,78V30A3,3 0 0 1 36,27ZM44.7,27H66A9,9 0 0 1 75,36V72A9,9 0 0 1 66,81H44.7A2.5,2.5 0 0 1 42.2,78.5V29.5A2.5,2.5 0 0 1 44.7,27ZM47.6,76.4H69.6A11,11 0 0 0 47.6,76.4Z" />
+    </group>
+</vector>

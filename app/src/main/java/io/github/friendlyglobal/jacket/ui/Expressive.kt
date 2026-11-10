@@ -1,20 +1,33 @@
 package io.github.friendlyglobal.jacket.ui
 
 import android.app.Activity
+import androidx.activity.compose.PredictiveBackHandler
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,14 +44,26 @@ import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -53,13 +78,22 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.graphics.shapes.Morph
+import androidx.window.layout.FoldingFeature
+import androidx.window.layout.WindowInfoTracker
+import androidx.graphics.shapes.RoundedPolygon
+import androidx.graphics.shapes.toPath
 import io.github.friendlyglobal.jacket.data.PageColor
 import io.github.friendlyglobal.jacket.data.ReadingFont
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import kotlin.coroutines.coroutineContext
+import kotlin.math.ceil
 
 // ---------------------------------------------------------------------------------------------
 // Haptics: one vocabulary for the whole app, mapped onto the platform's expressive feedback types.
@@ -147,16 +181,127 @@ fun Modifier.sharedCover(bookId: String, spot: CoverSpot, clipInFlight: Boolean 
  */
 suspend fun motionRemoved(): Boolean = coroutineContext[MotionDurationScale]?.scaleFactor == 0f
 
-/** Squash-and-spring on press, with the theme's expressive spatial spring. */
+/**
+ * Squash-and-spring on press, with the theme's expressive spatial spring. [held] keeps it
+ * squashed after the finger has gone: a cover stays picked up while its menu is open.
+ */
 @Composable
-fun Modifier.pressScale(interaction: InteractionSource, pressed: Float = 0.94f): Modifier {
+fun Modifier.pressScale(interaction: InteractionSource, pressed: Float = 0.94f, held: Boolean = false): Modifier {
     val isPressed by interaction.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) pressed else 1f,
+    val scale = animateFloatAsState(
+        targetValue = if (isPressed || held) pressed else 1f,
         animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
         label = "press",
     )
-    return graphicsLayer { scaleX = scale; scaleY = scale }
+    return graphicsLayer {
+        scaleX = scale.value
+        scaleY = scale.value
+    }
+}
+
+/**
+ * Predictive back for a whole screen: it shrinks and rounds its corners under the swipe. Carried
+ * through, [onBack] takes over; let go, the screen springs back to full size.
+ */
+@Composable
+fun Modifier.predictiveBack(onBack: () -> Unit): Modifier {
+    val swiped = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
+    val spring = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
+    val back by rememberUpdatedState(onBack)
+    PredictiveBackHandler { events ->
+        try {
+            events.collect { swiped.snapTo(it.progress) }
+            back()
+        } catch (e: CancellationException) {
+            // This coroutine is on its way out; the spring back needs one that isn't.
+            scope.launch { swiped.animateTo(0f, spring) }
+            throw e
+        }
+    }
+    return graphicsLayer {
+        val progress = swiped.value
+        val scale = 1f - 0.08f * progress
+        scaleX = scale
+        scaleY = scale
+        clip = progress > 0f
+        shape = if (progress > 0f) RoundedCornerShape((32 * progress).dp) else RectangleShape
+    }
+}
+
+/**
+ * A badge in one of the [androidx.compose.material3.MaterialShapes], which morphs on the theme's
+ * spatial spring whenever it is handed another. [rotation] (degrees) is read while drawing, so a
+ * turning badge redraws without recomposing.
+ */
+@Composable
+fun MorphBadge(
+    shape: RoundedPolygon,
+    color: Color,
+    modifier: Modifier = Modifier,
+    rotation: () -> Float = { 0f },
+    content: @Composable BoxScope.() -> Unit = {},
+) {
+    val spec = MaterialTheme.motionScheme.slowSpatialSpec<Float>()
+    val outline = remember { MorphingOutline(shape) }
+    LaunchedEffect(shape) { outline.morphTo(shape, spec) }
+    Box(modifier.drawBehind { outline.draw(this, color, rotation()) }, contentAlignment = Alignment.Center, content = content)
+}
+
+/** The outline of a [MorphBadge]: a path that is reused, so morphing and turning allocate nothing. */
+private class MorphingOutline(initial: RoundedPolygon) {
+    private var target = initial
+    private var morph: Morph? = null
+    private val progress = Animatable(1f)
+    private val path = Path()
+    private val matrix = android.graphics.Matrix()
+
+    suspend fun morphTo(shape: RoundedPolygon, spec: AnimationSpec<Float>) {
+        if (shape === target) return
+        // A morph cut short starts over from the shape it was heading for.
+        morph = Morph(target, shape)
+        target = shape
+        progress.snapTo(0f)
+        progress.animateTo(1f, spec)
+        morph = null
+    }
+
+    fun draw(scope: DrawScope, color: Color, degrees: Float) = with(scope) {
+        val outline = path.asAndroidPath()
+        outline.rewind()
+        // Read every time, so a morph starting redraws this. The spring may carry past the target
+        // shape and back: that is its bounce.
+        val morphed = progress.value
+        morph?.toPath(morphed, outline) ?: target.toPath(outline)
+        matrix.setScale(size.width, size.height)
+        if (degrees != 0f) matrix.postRotate(degrees, size.width / 2f, size.height / 2f)
+        outline.transform(matrix)
+        drawPath(path, color)
+    }
+}
+
+/**
+ * An angle (degrees) that turns steadily while [turning], once every [periodMillis]. Stopping, it
+ * runs on to the next quarter turn and rests there, which is where a square (or any shape with
+ * its symmetry) looks the way it started. Nothing runs while it rests, and it never starts with
+ * animations removed.
+ */
+@Composable
+fun rememberTurn(turning: Boolean, periodMillis: Int = 16_000): State<Float> {
+    val angle = remember { Animatable(0f) }
+    LaunchedEffect(turning) {
+        if (!turning) {
+            angle.animateTo(ceil(angle.value / 90f) * 90f, spring(stiffness = Spring.StiffnessLow))
+            angle.snapTo(0f)
+            return@LaunchedEffect
+        }
+        if (motionRemoved()) return@LaunchedEffect
+        while (true) {
+            angle.snapTo(angle.value % 360f)
+            angle.animateTo(angle.value + 360f, tween(periodMillis, easing = LinearEasing))
+        }
+    }
+    return angle.asState()
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -171,6 +316,8 @@ fun <T> ConnectedChoice(
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
     leading: (@Composable (T) -> Unit)? = null,
+    /** The check on the chosen option. Four words in a row on a folded phone need its room; the fill and shape still say which. */
+    check: Boolean = true,
 ) {
     val haptics = rememberHaptics()
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
@@ -191,10 +338,10 @@ fun <T> ConnectedChoice(
                     else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                 },
             ) {
-                if (checked) {
+                if (checked && check) {
                     Icon(JacketIcons.Check, null, Modifier.size(ButtonDefaults.IconSize))
                     Spacer(Modifier.width(6.dp))
-                } else if (leading != null) {
+                } else if (leading != null && !checked) {
                     leading(option)
                     Spacer(Modifier.width(6.dp))
                 }
@@ -277,6 +424,67 @@ fun SystemBarsHidden(hidden: Boolean) {
         onDispose { controller?.show(WindowInsetsCompat.Type.systemBars()) }
     }
 }
+
+/** Whether this phone folds: it has a hinge to measure. */
+fun Context.hasHinge(): Boolean =
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_HINGE_ANGLE)
+
+/**
+ * True while a foldable is folded shut, going by its hinge; always false on a phone without one.
+ * The hinge is only listened to while [watch]: it reports when it moves, and costs nothing still.
+ */
+@Composable
+fun rememberFoldedShut(watch: Boolean): State<Boolean> {
+    val context = LocalContext.current
+    val shut = remember { mutableStateOf(false) }
+    DisposableEffect(context, watch) {
+        val sensors = context.getSystemService(SensorManager::class.java)
+        // Phones differ on whether the hinge is a wake-up sensor: take whichever there is.
+        val hinge = if (watch && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && sensors != null) {
+            sensors.getDefaultSensor(Sensor.TYPE_HINGE_ANGLE)
+                ?: sensors.getDefaultSensor(Sensor.TYPE_HINGE_ANGLE, true)
+                ?: sensors.getDefaultSensor(Sensor.TYPE_HINGE_ANGLE, false)
+        } else {
+            null
+        }
+        if (sensors == null || hinge == null) {
+            shut.value = false
+            return@DisposableEffect onDispose {}
+        }
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                shut.value = event.values[0] < SHUT_BELOW_DEGREES
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
+        }
+        sensors.registerListener(listener, hinge, SensorManager.SENSOR_DELAY_NORMAL)
+        onDispose { sensors.unregisterListener(listener) }
+    }
+    return shut
+}
+
+/**
+ * The fold's bounds in the window while the phone sits half-open with its fold lying flat (on a
+ * table, like a laptop); null in any other posture, on other phones, or while not [watch]ed.
+ */
+@Composable
+fun rememberTabletopFold(watch: Boolean): State<IntRect?> {
+    val activity = LocalContext.current.findActivity()
+    return produceState<IntRect?>(null, activity, watch) {
+        value = null
+        if (activity == null || !watch) return@produceState
+        WindowInfoTracker.getOrCreate(activity).windowLayoutInfo(activity).collect { layout ->
+            val fold = layout.displayFeatures.firstNotNullOfOrNull { it as? FoldingFeature }
+            value = fold
+                ?.takeIf { it.state == FoldingFeature.State.HALF_OPENED && it.orientation == FoldingFeature.Orientation.HORIZONTAL }
+                ?.bounds?.let { IntRect(it.left, it.top, it.right, it.bottom) }
+        }
+    }
+}
+
+/** A hinge this far closed is shut (they don't all read exactly zero). */
+private const val SHUT_BELOW_DEGREES = 20f
 
 @Composable
 fun KeepScreenOn() {

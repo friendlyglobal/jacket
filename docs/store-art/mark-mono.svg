@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="33 27 42 54" width="42" height="54">
+  <!-- Jacket mark, single colour. Same path as ic_launcher_monochrome.xml, cropped to the mark. -->
+  <path fill="currentColor" fill-rule="evenodd" d="M36,27A3,3 0 0 1 39,30V78A3,3 0 0 1 36,81A3,3 0 0 1 33,78V30A3,3 0 0 1 36,27ZM44.7,27H66A9,9 0 0 1 75,36V72A9,9 0 0 1 66,81H44.7A2.5,2.5 0 0 1 42.2,78.5V29.5A2.5,2.5 0 0 1 44.7,27ZM47.6,76.4H69.6A11,11 0 0 0 47.6,76.4Z"/>
+</svg>

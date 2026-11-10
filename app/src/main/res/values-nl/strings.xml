@@ -16,6 +16,8 @@
     <string name="book_status_not_started">Niet begonnen</string>
     <string name="book_status_page_of">Pagina %1$d van %2$d</string>
     <string name="book_status_percent_read">%1$d%% gelezen</string>
+    <string name="cover_almost_done">Bijna uit</string>
+    <string name="cover_listening">Ik luister</string>
     <string name="book_untitled">Zonder titel</string>
 
     <string name="cover_style_jacket">Jacket</string>
@@ -84,6 +86,9 @@
     <string name="library_remove_confirm">Verwijderen</string>
     <string name="library_empty_title">Laat je foldable je boek dragen</string>
     <string name="library_empty_message">Voeg een EPUB-, PDF-, CBZ-strip- of tekstbestand toe. Jacket bewaart een privékopie en zet de omslag op je buitenscherm, of in een coverschermwidget, terwijl je leest.</string>
+    <string name="onboarding_next">Volgende</string>
+    <string name="onboarding_skip">Overslaan</string>
+    <string name="onboarding_private">Je boeken blijven op deze telefoon. Jacket heeft geen account en gaat nooit online.</string>
 
     <string name="settings_title">Instellingen</string>
     <string name="settings_subtitle">Profiel, coverscherm en lezen</string>
@@ -115,6 +120,8 @@
     <string name="settings_ambient_dim_description">Het buitenscherm dimt na 30 seconden zonder aanraking</string>
     <string name="settings_auto_outer">Omslag tijdens lezen</string>
     <string name="settings_auto_outer_description">Zet de omslag op het buitenscherm zodra je openvouwt om te lezen</string>
+    <string name="settings_cover_when_closed">Omslag bij dichtgeklapt</string>
+    <string name="settings_cover_when_closed_description">Dichtgeklapt met een boek open toont het scherm de omslag. Vouw open om te lezen, of tik op de omslag om hier te lezen, te luisteren of terug te gaan.</string>
     <string name="settings_preview_outer">Buitenscherm</string>
     <string name="settings_preview_widget">Widget</string>
     <string name="settings_preview_description">Voorbeeld van het coverscherm met je huidige instellingen</string>
@@ -157,6 +164,11 @@
     <string name="reading_page">Pagina</string>
     <string name="reading_layout">Indeling</string>
     <string name="reading_layout_hint">Pagina\'s slaan om als in een boek: veeg of tik op de randen. Opengevouwen zie je twee pagina\'s naast elkaar.</string>
+    <string name="reading_page_turn">Bladeren</string>
+    <string name="page_turn_slide">Schuiven</string>
+    <string name="page_turn_paper">Papier</string>
+    <string name="page_turn_curl">Krul</string>
+    <string name="page_turn_cards">Kaarten</string>
     <string name="reading_line_spacing">Regelafstand</string>
     <string name="reading_line_spacing_book">Boek</string>
     <string name="reading_line_spacing_tight">Krap</string>
@@ -270,4 +282,18 @@
     <string name="widget_reading">Ik lees</string>
     <string name="widget_empty">Voeg een boek toe om de omslag te dragen</string>
     <string name="listen_notification_channel">Voorlezen</string>
+    <string name="reader_footer_time_left">Nog %1$d min in dit hoofdstuk</string>
+    <string name="reading_time_left">Resterende tijd in hoofdstuk</string>
+    <string name="reading_edge_swipes">Helderheid en warmte met vegen</string>
+    <string name="reading_edge_swipes_description">Veeg omhoog of omlaag langs de linkerrand voor helderheid, langs de rechterrand voor warmte.</string>
+    <string name="reading_night_pages">Donkere pagina\'s \'s nachts</string>
+    <string name="reading_night_pages_description">Als je telefoon in het donkere thema staat, worden lichte pagina\'s ook donker.</string>
+    <string name="settings_tabletop">Tafelmodus</string>
+    <string name="settings_tabletop_description">Half dichtgevouwen op tafel: de pagina boven de vouw, de bediening eronder.</string>
+    <string name="settings_watch_folder">Bewaakte map</string>
+    <string name="settings_watch_folder_description">Nieuwe boeken in deze map worden toegevoegd wanneer Jacket opent.</string>
+    <string name="settings_reading_stats">Leestijd en reeks</string>
+    <string name="stats_today">%1$d min vandaag</string>
+    <string name="stats_streak">Dag %1$d</string>
+    <string name="settings_ambient_quote">Markeringen op de gedimde omslag</string>
 </resources>

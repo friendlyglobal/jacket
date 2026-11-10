@@ -16,11 +16,12 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "io.github.friendlyglobal.jacket"
+        // The store identity (usefriendly.app); the code keeps its original package name.
+        applicationId = "app.usefriendly.jacket"
         minSdk = 26
         targetSdk = 37
-        versionCode = 5
-        versionName = "1.0.0-rc.2"
+        versionCode = 6
+        versionName = "1.0.0-rc.3"
     }
 
     signingConfigs {

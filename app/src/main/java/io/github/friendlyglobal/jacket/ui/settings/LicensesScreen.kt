@@ -1,7 +1,6 @@
 package io.github.friendlyglobal.jacket.ui.settings
 
 import android.content.Context
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -42,6 +41,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.ui.JacketIcons
+import io.github.friendlyglobal.jacket.ui.predictiveBack
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -61,7 +61,6 @@ private fun loadComponents(context: Context): List<Component> = runCatching {
 /** Jacket's own license and every open-source component inside it, with full license texts. */
 @Composable
 fun LicensesScreen(onBack: () -> Unit) {
-    BackHandler(onBack = onBack)
     val context = LocalContext.current
     val haptics = rememberHaptics()
     val scroll = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -69,7 +68,7 @@ fun LicensesScreen(onBack: () -> Unit) {
     var open by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scroll.nestedScrollConnection),
+        modifier = Modifier.nestedScroll(scroll.nestedScrollConnection).predictiveBack(onBack),
         topBar = {
             LargeFlexibleTopAppBar(
                 title = { Text(stringResource(R.string.licenses_title)) },

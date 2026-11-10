@@ -17,6 +17,8 @@
     <string name="book_status_not_started">Başlanmadı</string>
     <string name="book_status_page_of">Sayfa %1$d / %2$d</string>
     <string name="book_status_percent_read">%%%1$d okundu</string>
+    <string name="cover_almost_done">Az kaldı</string>
+    <string name="cover_listening">Dinleniyor</string>
     <string name="book_untitled">Adsız</string>
 
     <string name="cover_style_jacket">Jacket</string>
@@ -85,6 +87,9 @@
     <string name="library_remove_confirm">Kaldır</string>
     <string name="library_empty_title">Katlanabilir telefonunuz kitabınızı giysin</string>
     <string name="library_empty_message">Bir EPUB, PDF, CBZ çizgi roman veya metin dosyası ekleyin. Jacket özel bir kopya saklar ve siz okurken kitabın kapağını dış ekranda ya da kapak ekranı widget\'ında gösterir.</string>
+    <string name="onboarding_next">İleri</string>
+    <string name="onboarding_skip">Atla</string>
+    <string name="onboarding_private">Kitaplarınız bu telefonda kalır. Jacket hesap gerektirmez ve asla internete bağlanmaz.</string>
 
     <string name="settings_title">Ayarlar</string>
     <string name="settings_subtitle">Profil, kapak ekranı ve okuma</string>
@@ -116,6 +121,8 @@
     <string name="settings_ambient_dim_description">Dış ekran, 30 saniye dokunulmadığında kararır</string>
     <string name="settings_auto_outer">Okurken kapak</string>
     <string name="settings_auto_outer_description">Okumak için telefonu her açtığınızda kapak dış ekrana gelir</string>
+    <string name="settings_cover_when_closed">Kapalıyken kapak</string>
+    <string name="settings_cover_when_closed_description">Telefon kapalıyken ve bir kitap açıkken ekranda kitabın kapağı görünür. Okumak için telefonu açın veya burada okumak, dinlemek ya da geri dönmek için kapağa dokunun.</string>
     <string name="settings_preview_outer">Dış ekran</string>
     <string name="settings_preview_widget">Widget</string>
     <string name="settings_preview_description">Geçerli ayarlarınızla kapak ekranının önizlemesi</string>
@@ -158,6 +165,11 @@
     <string name="reading_page">Sayfa</string>
     <string name="reading_layout">Düzen</string>
     <string name="reading_layout_hint">Sayfalar kitap gibi çevrilir: kaydırın veya kenarlara dokunun. Telefon açıkken iki sayfa yan yana görünür.</string>
+    <string name="reading_page_turn">Sayfa çevirme</string>
+    <string name="page_turn_slide">Kaydır</string>
+    <string name="page_turn_paper">Kâğıt</string>
+    <string name="page_turn_curl">Kıvrım</string>
+    <string name="page_turn_cards">Kartlar</string>
     <string name="reading_line_spacing">Satır aralığı</string>
     <string name="reading_line_spacing_book">Kitap</string>
     <string name="reading_line_spacing_tight">Sık</string>
@@ -271,4 +283,18 @@
     <string name="widget_reading">Okunuyor</string>
     <string name="widget_empty">Kapağını giymek için bir kitap ekleyin</string>
     <string name="listen_notification_channel">Sesli okuma</string>
+    <string name="reader_footer_time_left">Bölümde %1$d dk kaldı</string>
+    <string name="reading_time_left">Bölümde kalan süre</string>
+    <string name="reading_edge_swipes">Kaydırarak parlaklık ve sıcaklık</string>
+    <string name="reading_edge_swipes_description">Parlaklık için sol kenarda, sıcaklık için sağ kenarda yukarı veya aşağı kaydırın.</string>
+    <string name="reading_night_pages">Gece koyu sayfalar</string>
+    <string name="reading_night_pages_description">Telefonunuz koyu temadayken açık sayfalar da koyulaşır.</string>
+    <string name="settings_tabletop">Masaüstü modu</string>
+    <string name="settings_tabletop_description">Masada yarı katlı: sayfa katlama çizgisinin üstünde, denetimler altında.</string>
+    <string name="settings_watch_folder">İzlenen klasör</string>
+    <string name="settings_watch_folder_description">Bu klasördeki yeni kitaplar Jacket açıldığında eklenir.</string>
+    <string name="settings_reading_stats">Okuma süresi ve seri</string>
+    <string name="stats_today">Bugün %1$d dk</string>
+    <string name="stats_streak">%1$d. gün</string>
+    <string name="settings_ambient_quote">Karartılmış kapakta vurgular</string>
 </resources>

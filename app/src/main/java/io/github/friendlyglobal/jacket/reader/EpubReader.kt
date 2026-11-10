@@ -49,6 +49,7 @@ import io.github.friendlyglobal.jacket.data.AnnotationKind
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.HighlightColor
 import io.github.friendlyglobal.jacket.data.PageLayout
+import io.github.friendlyglobal.jacket.data.PageTurn
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.readium
@@ -206,7 +207,11 @@ private fun EpubPages(
     val barsVisible = WindowInsets.areSystemBarsVisible
     val chromeShowing by rememberUpdatedState(barsVisible)
     turner.navigator = navigator
-    turner.enabled = { !scroll && !chromeShowing }
+    val pageTurn by rememberUpdatedState(settings.pageTurn)
+    // "Slide" leaves turning to Readium's own strip of pages.
+    turner.enabled = { !scroll && !chromeShowing && pageTurn != PageTurn.SLIDE }
+    turner.style = settings.pageTurn
+    turner.paper = page.background
     turner.onTurned = { haptics.tick() }
     val minEdgePx = with(LocalDensity.current) { 80.dp.toPx() }
 
@@ -258,6 +263,16 @@ private fun EpubPages(
     // Sub-chapter anchors of the file on screen, kept while you stay in it (for scrubber previews).
     var anchors by remember { mutableStateOf<Located?>(null) }
     val spans = remember(positions) { if (positions.isEmpty()) null else Spans(positions, contents) }
+    // The first and last pages of the book: the page gives a little and says no.
+    turner.onBlocked = { haptics.reject() }
+    turner.canTurn = canTurn@{ direction ->
+        val here = current ?: return@canTurn true
+        val file = filePage
+        // Between a turn and Readium's report of it, assume there's more.
+        if (file.href != here.href.toString() || file.count <= 0) return@canTurn true
+        val resource = contents.resourceOf(here.href)
+        if (direction > 0) resource != contents.fileCount - 1 || file.index < file.count - 1 else resource != 0 || file.index > 0
+    }
     LaunchedEffect(navigator, spans, scroll) {
         val n = navigator ?: return@LaunchedEffect
         n.currentLocator.collectLatest { locator ->
@@ -274,12 +289,23 @@ private fun EpubPages(
             nav.section = (progress * (SCRUB_STEPS - 1)).roundToInt()
             library.updateLocator(book.id, locator.toJSON().toString(), progress.toFloat(), position, positions.size)
 
+            // For the cover screen: the chapter's name and how far through it this page is.
+            fun placeInChapter() {
+                nav.chapter = contents.titleOf(nav.tocIndex).orEmpty()
+                val span = spans?.let { contents.span(nav.tocIndex, it, located) }
+                nav.chapterProgress = if (span == null) -1f else {
+                    ((progress - span.start) / (span.endInclusive - span.start)).toFloat().coerceIn(0f, 1f)
+                }
+                nav.chapterLeft = if (span == null) -1f else (span.endInclusive - progress).toFloat().coerceAtLeast(0f)
+            }
+
             // Chapter: by file, or, in a file with sub-chapter anchors, by asking the page where
             // they are (keeping the last answer meanwhile, so nothing flickers).
             if (!contents.hasAnchors(resource)) {
                 located = null
                 nav.tocIndex = contents.chapterAt(resource)
                 nav.title = contents.titleOf(nav.tocIndex) ?: locator.title ?: ""
+                placeInChapter()
                 return@collectLatest
             }
             if (located?.resource != resource) {
@@ -294,6 +320,7 @@ private fun EpubPages(
             anchors = here
             nav.tocIndex = here.chapter
             nav.title = contents.titleOf(here.chapter) ?: locator.title ?: ""
+            placeInChapter()
         }
     }
     // Readium reports the page count after the location, so the footer follows both.
@@ -312,6 +339,7 @@ private fun EpubPages(
         }
         // The last page is all of the book, though it starts a little before the end.
         if (nav.atEnd) {
+            if (nav.chapterProgress >= 0f) nav.chapterProgress = 1f
             val position = ((locator.locations.position ?: 1) - 1).coerceAtLeast(0)
             library.updateLocator(book.id, locator.toJSON().toString(), 1f, position, positions.size)
         }
@@ -426,9 +454,22 @@ private fun EpubPages(
             kotlin.math.abs(p - (here.locations.progression ?: 0.0)) < 0.03
         }
     }
+    // A jump remembers the page it left from, so the reader can offer the way back.
+    val markOrigin = {
+        val here = current
+        val n = navigator
+        if (here != null && n != null) {
+            val pages = filePage.count.takeIf { filePage.href == here.href.toString() && it > 0 }
+            val place = here.byProgression().onPage(pages, n.overflow.value)
+            nav.cameFrom = Origin(nav.section * 100 / (nav.sectionCount - 1).coerceAtLeast(1)) { navigator?.go(place, animated = false) }
+        }
+    }
     nav.goTo = { mark ->
         mark.locator?.let { runCatching { Locator.fromJSON(JSONObject(it)) }.getOrNull() }
-            ?.let { navigator?.go(it, animated = false) }
+            ?.let {
+                markOrigin()
+                navigator?.go(it, animated = false)
+            }
     }
     nav.turnPage = { delta -> turner.turn(delta) }
 
@@ -437,6 +478,7 @@ private fun EpubPages(
         if (publication.isSearchable) EpubSearch(publication, contents, { navigator }, scope) else null
     }
     search?.tint = page.link.toArgb()
+    search?.beforeShow = markOrigin
     nav.search = search
 
     // Chapter starts as marks on the scrubber.
@@ -482,15 +524,26 @@ private fun EpubPages(
             return contents.chapterAt(resource, within, anchors)
         }
         nav.toc = contents.entries.mapIndexed { i, e -> TocItem(e.title, e.level, i) }
-        nav.openToc = { item -> contents.entries.getOrNull(item.index)?.let { navigator?.go(it.link, animated = false) } }
+        nav.openToc = { item ->
+            contents.entries.getOrNull(item.index)?.let {
+                markOrigin()
+                navigator?.go(it.link, animated = false)
+            }
+        }
         nav.sectionName = { step -> contents.titleOf(chapterAt(step)).orEmpty() }
         nav.sectionGroup = { step -> chapterAt(step) }
         nav.jumpTo = { step ->
+            markOrigin()
             scope.launch {
                 publication.locateProgression(step / (SCRUB_STEPS - 1.0))?.let { navigator?.go(it, animated = false) }
             }
         }
-        nav.step = { delta -> contents.step(nav.tocIndex, delta)?.let { navigator?.go(it, animated = false) } }
+        nav.step = { delta ->
+            contents.step(nav.tocIndex, delta)?.let {
+                markOrigin()
+                navigator?.go(it, animated = false)
+            }
+        }
         nav.canStep = { delta -> contents.step(nav.tocIndex, delta) != null }
         onDispose {}
     }
@@ -740,6 +793,24 @@ private class Contents(private val publication: Publication) {
 
     fun titleOf(chapter: Int): String? = entries.getOrNull(chapter)?.title
 
+    /**
+     * Where [chapter] starts and ends, as fractions of the whole book: from its own start to the
+     * next entry that starts further on (a chapter and its first section can share a start).
+     * Anchored entries are placed by [known] when it covers their file, else where the file starts.
+     */
+    fun span(chapter: Int, spans: Spans, known: Located?): ClosedFloatingPointRange<Double>? {
+        fun startOf(index: Int): Double? {
+            val entry = entries.getOrNull(index) ?: return null
+            val within = if (entry.fragment == null) 0.0 else {
+                known?.takeIf { it.resource == entry.resource }?.starts?.firstOrNull { it.first == index }?.second ?: 0.0
+            }
+            return spans.total(entry.resource, within)
+        }
+        val start = startOf(chapter) ?: return null
+        val end = (chapter + 1 until entries.size).firstNotNullOfOrNull { next -> startOf(next)?.takeIf { it > start + 1e-6 } } ?: 1.0
+        return start..end
+    }
+
     /** The chapter [delta] entries away in the contents (from before the first: the first). */
     fun step(current: Int, delta: Int): Link? {
         if (entries.isEmpty()) return null
@@ -837,6 +908,8 @@ private class EpubSearch(
     private val scope: CoroutineScope,
 ) : BookSearch {
     var tint: Int = 0
+    /** Called just before the page jumps to a result. */
+    var beforeShow: () -> Unit = {}
     private val found = mutableListOf<Locator>()
 
     override suspend fun search(query: String, onHits: (List<SearchHit>) -> Unit) {
@@ -866,6 +939,7 @@ private class EpubSearch(
     override fun show(hit: SearchHit) {
         val locator = found.getOrNull(hit.index) ?: return
         val n = navigator() ?: return
+        beforeShow()
         n.go(locator, animated = false)
         scope.launch { n.applyDecorations(listOf(Decoration("hit", locator, Marker(tint))), SEARCH) }
     }
@@ -947,6 +1021,14 @@ private class ReadAloud(
                 var utterance: Locator? = null
                 tts.location.collect { location ->
                     listen.spokenFile = fileOf(location.href)
+                    // Paused, the voice reports no word: the sentence keeps the ink it has.
+                    val spokenTo = location.range?.last?.plus(1)
+                    if (location.utterance != listen.phrase) {
+                        listen.phrase = location.utterance
+                        listen.spoken = spokenTo ?: 0
+                    } else if (spokenTo != null) {
+                        listen.spoken = spokenTo
+                    }
                     lastSpoken = location.utteranceLocator
                     val n = navigator() ?: return@collect
                     // Turn the page to follow the voice.
@@ -1003,6 +1085,7 @@ private class ReadAloud(
         mediaSession?.let(ListenService::detach)
         mediaSession = null
         listen.spokenFile = -1
+        listen.phrase = ""
         tts?.close()
         tts = null
         listen.active = false

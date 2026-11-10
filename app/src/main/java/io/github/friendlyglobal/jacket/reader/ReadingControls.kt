@@ -1,5 +1,6 @@
 package io.github.friendlyglobal.jacket.reader
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.PageColor
 import io.github.friendlyglobal.jacket.data.PageLayout
+import io.github.friendlyglobal.jacket.data.PageTurn
 import io.github.friendlyglobal.jacket.data.ReadingFont
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.ui.ColorSwatch
@@ -146,6 +148,20 @@ fun ReadingControls(
             modifier = Modifier.padding(top = 8.dp, start = 4.dp, end = 4.dp),
         )
 
+        // How a page turns, for EPUB pages (scrolling has none to turn).
+        AnimatedVisibility(visible = forEpub && settings.layout == PageLayout.PAGES) {
+            Column {
+                Label(stringResource(R.string.reading_page_turn))
+                ConnectedChoice(
+                    options = PageTurn.entries,
+                    selected = settings.pageTurn,
+                    label = { stringResource(it.label) },
+                    onSelect = { choice -> onSettings { it.copy(pageTurn = choice) } },
+                    check = false,
+                )
+            }
+        }
+
         if (forEpub) {
             Label(stringResource(R.string.reading_line_spacing))
             ConnectedChoice(
@@ -196,12 +212,30 @@ fun ReadingControls(
             )
         }
 
+        Label(stringResource(R.string.settings_group_reading))
+        ToggleRow(stringResource(R.string.reading_time_left), null, settings.timeLeft) { on ->
+            haptics.toggle(on)
+            onSettings { it.copy(timeLeft = on) }
+        }
+        ToggleRow(stringResource(R.string.reading_edge_swipes), stringResource(R.string.reading_edge_swipes_description), settings.edgeSwipes) { on ->
+            haptics.toggle(on)
+            // Off hands the screen back to the phone, as it was.
+            onSettings { it.copy(edgeSwipes = on, brightness = if (on) it.brightness else -1f, warmth = if (on) it.warmth else 0f) }
+        }
+        ToggleRow(stringResource(R.string.reading_night_pages), stringResource(R.string.reading_night_pages_description), settings.nightPages) { on ->
+            haptics.toggle(on)
+            onSettings { it.copy(nightPages = on) }
+        }
+
         Label(stringResource(R.string.reading_buttons))
         Row(
             Modifier
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.large)
-                .toggleable(settings.volumeKeys, role = Role.Switch) { on -> onSettings { it.copy(volumeKeys = on) } }
+                .toggleable(settings.volumeKeys, role = Role.Switch) { on ->
+                    haptics.toggle(on)
+                    onSettings { it.copy(volumeKeys = on) }
+                }
                 .padding(horizontal = 4.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -216,6 +250,27 @@ fun ReadingControls(
             Switch(checked = settings.volumeKeys, onCheckedChange = null)
         }
         Spacer(Modifier.height(8.dp))
+    }
+}
+
+/** A reading comfort to switch on or off: its name, a line on what it does, and the switch. */
+@Composable
+private fun ToggleRow(title: String, description: String?, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.large)
+            .toggleable(checked, role = Role.Switch, onValueChange = onChange)
+            .padding(horizontal = 4.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f).padding(end = 16.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            if (description != null) {
+                Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        Switch(checked = checked, onCheckedChange = null)
     }
 }
 

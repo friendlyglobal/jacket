@@ -16,6 +16,8 @@
     <string name="book_status_not_started">Pas commencé</string>
     <string name="book_status_page_of">Page %1$d sur %2$d</string>
     <string name="book_status_percent_read">%1$d %% lu</string>
+    <string name="cover_almost_done">Presque terminé</string>
+    <string name="cover_listening">Écoute en cours</string>
     <string name="book_untitled">Sans titre</string>
 
     <string name="cover_style_jacket">Jacket</string>
@@ -86,6 +88,9 @@
     <string name="library_remove_confirm">Retirer</string>
     <string name="library_empty_title">Habillez votre pliable de votre livre</string>
     <string name="library_empty_message">Ajoutez un EPUB, un PDF, une BD CBZ ou un fichier texte. Jacket en garde une copie privée et affiche sa couverture sur votre écran externe, ou dans un widget, pendant que vous lisez.</string>
+    <string name="onboarding_next">Suivant</string>
+    <string name="onboarding_skip">Passer</string>
+    <string name="onboarding_private">Vos livres restent sur ce téléphone. Jacket n\'a pas de compte et ne se connecte jamais à Internet.</string>
 
     <string name="settings_title">Paramètres</string>
     <string name="settings_subtitle">Profil, écran externe et lecture</string>
@@ -120,6 +125,8 @@
     <string name="settings_ambient_dim_description">L\'écran externe s\'assombrit après 30 secondes sans contact</string>
     <string name="settings_auto_outer">Couverture pendant la lecture</string>
     <string name="settings_auto_outer_description">Afficher la couverture sur l\'écran externe dès que vous dépliez le téléphone pour lire</string>
+    <string name="settings_cover_when_closed">Couverture téléphone fermé</string>
+    <string name="settings_cover_when_closed_description">Téléphone plié avec un livre ouvert, l\'écran affiche sa couverture. Dépliez pour lire, ou touchez la couverture pour lire ici, écouter ou revenir en arrière.</string>
     <string name="settings_preview_outer">Écran externe</string>
     <string name="settings_preview_widget">Widget</string>
     <string name="settings_preview_description">Aperçu de l\'écran externe avec vos paramètres actuels</string>
@@ -163,6 +170,11 @@
     <string name="reading_page">Page</string>
     <string name="reading_layout">Mise en page</string>
     <string name="reading_layout_hint">Les pages se tournent comme dans un livre : balayez ou touchez les bords. Téléphone déplié, vous voyez deux pages côte à côte.</string>
+    <string name="reading_page_turn">Changement de page</string>
+    <string name="page_turn_slide">Glisser</string>
+    <string name="page_turn_paper">Papier</string>
+    <string name="page_turn_curl">Courbe</string>
+    <string name="page_turn_cards">Cartes</string>
     <string name="reading_line_spacing">Interligne</string>
     <string name="reading_line_spacing_book">Livre</string>
     <string name="reading_line_spacing_tight">Serré</string>
@@ -279,4 +291,18 @@
     <string name="widget_reading">En cours</string>
     <string name="widget_empty">Ajoutez un livre pour arborer sa couverture</string>
     <string name="listen_notification_channel">Lecture à voix haute</string>
+    <string name="reader_footer_time_left">%1$d min restantes dans le chapitre</string>
+    <string name="reading_time_left">Temps restant dans le chapitre</string>
+    <string name="reading_edge_swipes">Luminosité et chaleur par balayage</string>
+    <string name="reading_edge_swipes_description">Balayez vers le haut ou le bas le long du bord gauche pour la luminosité, du bord droit pour la chaleur.</string>
+    <string name="reading_night_pages">Pages sombres la nuit</string>
+    <string name="reading_night_pages_description">Quand votre téléphone est en thème sombre, les pages claires deviennent sombres aussi.</string>
+    <string name="settings_tabletop">Mode table</string>
+    <string name="settings_tabletop_description">À moitié plié sur une table : la page au-dessus de la pliure, les commandes en dessous.</string>
+    <string name="settings_watch_folder">Dossier surveillé</string>
+    <string name="settings_watch_folder_description">Les nouveaux livres de ce dossier sont ajoutés à l\'ouverture de Jacket.</string>
+    <string name="settings_reading_stats">Temps de lecture et série</string>
+    <string name="stats_today">%1$d min aujourd\'hui</string>
+    <string name="stats_streak">Jour %1$d</string>
+    <string name="settings_ambient_quote">Surlignages sur la couverture atténuée</string>
 </resources>

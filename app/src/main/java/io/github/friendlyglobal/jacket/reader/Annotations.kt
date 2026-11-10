@@ -134,6 +134,8 @@ fun NotesSheet(
     onPick: (Annotation) -> Unit,
     onEdit: (Annotation) -> Unit,
     onDelete: (Annotation) -> Unit,
+    /** Sends every highlight and note to another app, as text. */
+    onShare: (() -> Unit)? = null,
 ) {
     val bookmarks = annotations.filter { it.kind == AnnotationKind.BOOKMARK }.sortedBy { it.progress }
     val highlights = annotations.filter { it.kind == AnnotationKind.HIGHLIGHT }.sortedBy { it.progress }
@@ -184,7 +186,7 @@ fun NotesSheet(
                 NotesTab.HIGHLIGHTS -> if (highlights.isEmpty()) {
                     EmptyNotes(JacketIcons.Highlight, stringResource(R.string.notes_no_highlights), stringResource(R.string.notes_no_highlights_hint))
                 } else {
-                    AnnotationList(highlights, haptics, onPick, onEdit, onDelete)
+                    AnnotationList(highlights, haptics, onPick, onEdit, onDelete, onShare)
                 }
             }
         }
@@ -223,8 +225,21 @@ private fun AnnotationList(
     onPick: (Annotation) -> Unit,
     onEdit: ((Annotation) -> Unit)?,
     onDelete: (Annotation) -> Unit,
+    onShare: (() -> Unit)? = null,
 ) {
     LazyColumn(Modifier.fillMaxWidth().navigationBarsPadding()) {
+        if (onShare != null) {
+            // All of them at once, to keep somewhere else.
+            item(key = "share") {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.End) {
+                    FilledTonalButton(onClick = { haptics.tick(); onShare() }) {
+                        Icon(JacketIcons.Share, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.selection_share))
+                    }
+                }
+            }
+        }
         items(items, key = { it.id }) { item ->
             ListItem(
                 onClick = { haptics.tick(); onPick(item) },

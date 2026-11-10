@@ -3,8 +3,8 @@
 <style>
 html,body{margin:0;width:1024px;height:500px;overflow:hidden}
 body{background:radial-gradient(120% 140% at 85% 30%,#1f5c66 0%,#16424A 45%,#0e2c31 100%);font-family:'Roboto Flex',sans-serif;color:#FBF6EA;position:relative}
-.mark{position:absolute;left:64px;top:62px;width:72px;height:72px}
-.word{position:absolute;left:150px;top:64px;font-family:Literata,serif;font-weight:800;font-size:58px;letter-spacing:-1px;color:#FBF6EA}
+.mark{position:absolute;left:66px;top:71px;width:47px;height:62px}
+.word{position:absolute;left:129px;top:64px;font-family:Literata,serif;font-weight:800;font-size:58px;letter-spacing:-1px;color:#FBF6EA}
 .tag{position:absolute;left:66px;top:170px;width:470px;font-family:Literata,serif;font-weight:600;font-size:40px;line-height:1.18;color:#F4C76B}
 .sub{position:absolute;left:68px;top:330px;width:460px;font-size:20px;line-height:1.45;color:#cfe3e2}
 .chips{position:absolute;left:68px;top:418px;display:flex;gap:10px}
@@ -27,8 +27,46 @@ body{background:radial-gradient(120% 140% at 85% 30%,#1f5c66 0%,#16424A 45%,#0e2
 .ln.ink{background:#3a2f23}
 .hl{background:rgba(244,199,107,.75)}
 .cap{font-family:Literata,serif;font-weight:800;font-size:15px;color:#3a2f23;margin:0 0 12px}
+</style>
+<style>
+/* ---- Localized variants. Everything below only applies with ?lang=… (strings in feature-strings.js,
+   render with render-feature.sh); without it the page is the English graphic exactly as above. ---- */
+html.l10n .chip,html.l10n .cover p,html.l10n .cap{white-space:nowrap}
+html.l10n .tag,html.l10n .sub{text-wrap:pretty}
+html.l10n .cap{display:flex;justify-content:flex-end}
+html.l10n .chip{padding:7px calc(14em / 15)}
+html.webfont .chip{line-height:1.17}
+html[data-script=jpan] .chip{font-feature-settings:"palt"}
+html.webfont .tag,html.webfont .cover h3,html.webfont .cap{font-family:var(--serif)}
+html.webfont body{font-family:var(--sans)}
+html.cjk .tag,html.cjk .sub,html.cjk .cover h3{word-break:keep-all;line-break:strict}
+html.cjk .tag{line-height:1.3}
+html.cjk .sub{line-height:1.6}
+html.cjk .cover h3{line-height:1.25}
+html.cjk .chip{font-family:'Roboto Flex',var(--sans)}
+html.cjk .cover p{letter-spacing:1px}
+html[data-script=arab] .tag{line-height:1.42}
+html[data-script=arab] .sub{line-height:1.65}
+html[data-script=arab] .cover h3{line-height:1.4}
+html[data-script=arab] .cover p{letter-spacing:0}
+html[data-script=arab] .cover h3,html[data-script=arab] .cap{font-weight:700}
+html[data-script=deva] .tag{line-height:1.4}
+html[data-script=deva] .sub{line-height:1.6}
+html[data-script=deva] .cover h3{line-height:1.35}
+html[data-script=deva] .cover p{letter-spacing:.5px}
+/* right-to-left: the same composition mirrored (the logo mark itself is not flipped) */
+html[dir=rtl] body{background:radial-gradient(120% 140% at 15% 30%,#1f5c66 0%,#16424A 45%,#0e2c31 100%)}
+html[dir=rtl] .mark{left:auto;right:66px}
+html[dir=rtl] .word{left:auto;right:129px}
+html[dir=rtl] .tag{left:auto;right:66px}
+html[dir=rtl] .sub,html[dir=rtl] .chips{left:auto;right:68px}
+html[dir=rtl] .phone{right:auto;left:250px;transform:rotate(6deg)}
+html[dir=rtl] .open{right:auto;left:36px;transform:rotate(-5deg)}
+html[dir=rtl] .open .l{left:auto;right:10px;border-radius:16px 4px 4px 16px}
+html[dir=rtl] .open .r{right:auto;left:10px;border-radius:4px 16px 16px 4px}
+html[dir=rtl] .cover p{left:auto;right:18px}
 </style></head><body>
-<svg class="mark" viewBox="22 22 64 64"><path fill="#F4C76B" d="M54.00,23.00 L55.34,23.27 L56.62,24.02 L57.80,25.16 L58.84,26.52 L59.78,27.92 L60.65,29.17 L61.53,30.12 L62.48,30.70 L63.58,30.87 L64.86,30.70 L66.34,30.30 L67.95,29.84 L69.63,29.47 L71.26,29.35 L72.73,29.59 L73.93,30.25 L74.78,31.32 L75.28,32.72 L75.44,34.35 L75.37,36.07 L75.19,37.74 L75.06,39.25 L75.12,40.55 L75.48,41.60 L76.21,42.44 L77.30,43.14 L78.68,43.78 L80.22,44.46 L81.74,45.25 L83.07,46.21 L84.03,47.34 L84.53,48.62 L84.50,49.98 L83.98,51.38 L83.06,52.73 L81.90,54.00 L80.69,55.17 L79.61,56.24 L78.82,57.27 L78.42,58.31 L78.44,59.42 L78.83,60.65 L79.48,62.03 L80.22,63.54 L80.87,65.13 L81.27,66.72 L81.29,68.21 L80.85,69.50 L79.95,70.53 L78.65,71.26 L77.08,71.71 L75.37,71.93 L73.70,72.05 L72.18,72.18 L70.91,72.46 L69.94,73.00 L69.24,73.86 L68.75,75.06 L68.35,76.53 L67.95,78.16 L67.43,79.80 L66.72,81.27 L65.77,82.42 L64.60,83.13 L63.25,83.34 L61.79,83.07 L60.30,82.40 L58.84,81.48 L57.49,80.49 L56.24,79.61 L55.09,79.01 L54.00,78.80 L52.91,79.01 L51.76,79.61 L50.51,80.49 L49.16,81.48 L47.70,82.40 L46.21,83.07 L44.75,83.34 L43.40,83.13 L42.23,82.42 L41.28,81.27 L40.57,79.80 L40.05,78.16 L39.65,76.53 L39.25,75.06 L38.76,73.86 L38.06,73.00 L37.09,72.46 L35.82,72.18 L34.30,72.05 L32.63,71.93 L30.92,71.71 L29.35,71.26 L28.05,70.53 L27.15,69.50 L26.71,68.21 L26.73,66.72 L27.13,65.13 L27.78,63.54 L28.52,62.03 L29.17,60.65 L29.56,59.42 L29.58,58.31 L29.18,57.27 L28.39,56.24 L27.31,55.17 L26.10,54.00 L24.94,52.73 L24.02,51.38 L23.50,49.98 L23.47,48.62 L23.97,47.34 L24.93,46.21 L26.26,45.25 L27.78,44.46 L29.32,43.78 L30.70,43.14 L31.79,42.44 L32.52,41.60 L32.88,40.55 L32.94,39.25 L32.81,37.74 L32.63,36.07 L32.56,34.35 L32.72,32.72 L33.22,31.32 L34.07,30.25 L35.27,29.59 L36.74,29.35 L38.37,29.47 L40.05,29.84 L41.66,30.30 L43.14,30.70 L44.42,30.87 L45.52,30.70 L46.47,30.12 L47.35,29.17 L48.22,27.92 L49.16,26.52 L50.20,25.16 L51.38,24.02 L52.66,23.27 Z"/><path fill="#16424A" d="M44,38 h20 a3,3 0 0 1 3,3 v24 a3,3 0 0 1 -3,3 h-20 a3,3 0 0 1 -3,-3 v-24 a3,3 0 0 1 3,-3 Z"/><path fill="#FBF6EA" d="M64,41.5 v23 h-1.6 v-23 Z"/><path fill="#F4C76B" d="M48,46 h12 v2.2 h-12 Z M48,51 h8 v2.2 h-8 Z"/></svg>
+<svg class="mark" viewBox="35 28.5 38 50"><path fill="#FBF6EA" d="M38,28.5H64.5A8.5,8.5 0 0 1 73,37V70A8.5,8.5 0 0 1 64.5,78.5H38Z"/><path fill="#D4972B" d="M38,28.5A3,3 0 0 1 41,31.5V75.5A3,3 0 0 1 38,78.5A3,3 0 0 1 35,75.5V31.5A3,3 0 0 1 38,28.5Z"/><path fill="#F4C76B" d="M49.5,30.9H64.5A6.1,6.1 0 0 1 70.6,37V70A6.1,6.1 0 0 1 64.5,76.1H49.5A6.1,6.1 0 0 1 43.4,70V37A6.1,6.1 0 0 1 49.5,30.9Z"/><path fill="#E0633F" d="M45.14,74.27A12,12 0 0 1 68.86,74.27A6.1,6.1 0 0 1 64.5,76.1H49.5A6.1,6.1 0 0 1 45.14,74.27Z"/></svg>
 <div class="word">Jacket</div>
 <div class="tag">Let your foldable wear the book you’re reading.</div>
 <div class="sub">The cover of your book, full-bleed on the outer screen. A calm reader inside, with read-aloud, highlights and search.</div>
@@ -38,4 +76,166 @@ body{background:radial-gradient(120% 140% at 85% 30%,#1f5c66 0%,#16424A 45%,#0e2
   <div class="pg r"><div class="ln" style="width:92%"></div><div class="ln" style="width:86%"></div><div class="ln" style="width:95%"></div><div class="ln" style="width:72%"></div><div class="ln" style="width:90%"></div><div class="ln" style="width:83%"></div><div class="ln" style="width:94%"></div><div class="ln" style="width:65%"></div><div class="ln" style="width:89%"></div><div class="ln" style="width:78%"></div><div class="ln" style="width:50%"></div></div>
 </div>
 <div class="phone"><div class="screen"><div class="cover"><h3>The Long Way Home</h3><div class="sun"></div><p>A novel</p><div class="bar"><i></i></div></div></div></div>
+<script src="feature-strings.js"></script>
+<script>
+// ?lang=<fastlane locale> renders that locale; ?check adds a JSON layout/font report (for --dump-dom).
+(async function () {
+  var q = new URLSearchParams(location.search), code = q.get('lang') || 'en-US';
+  var $ = function (s) { return document.querySelector(s); }, $$ = function (s) { return [].slice.call(document.querySelectorAll(s)); };
+  var SCRIPTS = {   // Google Fonts per writing system; Latin and Cyrillic use the Literata/Roboto Flex above
+    latn: null,
+    arab: { css: 'family=Noto+Naskh+Arabic:wght@600;700&family=Noto+Sans+Arabic:wght@400', serif: "'Noto Naskh Arabic'", sans: "'Noto Sans Arabic'" },
+    deva: { css: 'family=Noto+Serif+Devanagari:wght@600;800&family=Noto+Sans+Devanagari:wght@400', serif: "'Noto Serif Devanagari'", sans: "'Noto Sans Devanagari'" },
+    jpan: { css: 'family=Noto+Serif+JP:wght@600;800&family=Noto+Sans+JP:wght@400', serif: "'Noto Serif JP'", sans: "'Noto Sans JP'", cjk: true },
+    kore: { css: 'family=Noto+Serif+KR:wght@600;800&family=Noto+Sans+KR:wght@400', serif: "'Noto Serif KR'", sans: "'Noto Sans KR'", cjk: true },
+    hans: { css: 'family=Noto+Serif+SC:wght@600;800&family=Noto+Sans+SC:wght@400', serif: "'Noto Serif SC'", sans: "'Noto Sans SC'", cjk: true },
+    hant: { css: 'family=Noto+Serif+TC:wght@600;800&family=Noto+Sans+TC:wght@400', serif: "'Noto Serif TC'", sans: "'Noto Sans TC'", cjk: true }
+  };
+  // The English layout these limits come from: tagline top 170, 3 lines of 40px x 1.18; subline top 330,
+  // 3 lines of 20px x 1.45; chips top 418. The text column must stay clear of the phone.
+  var TAG_TOP = 170, TAG_H = 3 * 40 * 1.18, SUB_TOP = 330, SUB_H = 3 * 20 * 1.45, CHIPS_TOP = 418, CHIPS_MAX_RIGHT = 565;
+  var textEls = function () { return [$('.word'), $('.tag'), $('.sub')].concat($$('.chip'), [$('.cover h3'), $('.cover p'), $('.cap')]); };
+  async function fontsSettled() {
+    await Promise.all(textEls().map(function (el) { return document.fonts.load(getComputedStyle(el).font, el.textContent).catch(function () {}); }));
+    await document.fonts.ready;
+  }
+  function html(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\|/g, '<wbr>'); }
+  function px(el, p) { return parseFloat(getComputedStyle(el)[p]); }
+  function shrink(el, ok, min) {   // step the font size down by 1px until ok() holds
+    var s = px(el, 'fontSize');
+    while (!ok() && s > min) { s -= 1; el.style.fontSize = s + 'px'; }
+    return s;
+  }
+  var fits = function (el) { return el.scrollWidth <= el.clientWidth + 0.5; };
+  var report = { lang: code, sizes: {}, notes: [] };
+
+  if (code !== 'en-US') {
+    var L = (window.FEATURE_LOCALES || {})[code];
+    if (!L) { document.body.textContent = 'Unknown lang ' + code; return; }
+    var S = SCRIPTS[L.script || 'latn'], root = document.documentElement;
+    // the English chapter heading's width, so the translated one ends where "IV" ends
+    await document.fonts.load('800 15px Literata', 'Chapter IV');
+    var r = document.createRange(); r.selectNodeContents($('.cap')); var capW = r.getBoundingClientRect().width;
+    root.lang = L.lang; root.dir = L.dir || 'ltr'; root.dataset.script = L.script || 'latn';
+    root.classList.add('l10n');
+    if (S) {
+      root.classList.add('webfont'); if (S.cjk) root.classList.add('cjk');
+      root.style.setProperty('--serif', S.serif + ', Literata, serif');
+      root.style.setProperty('--sans', S.sans + ", 'Roboto Flex', sans-serif");
+      var link = document.createElement('link'); link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?' + S.css + '&display=block';
+      await new Promise(function (ok) { link.onload = link.onerror = ok; document.head.appendChild(link); });
+    }
+    $('.word').lang = 'en';
+    $('.tag').innerHTML = html(L.tag);
+    $('.sub').innerHTML = html(L.sub);
+    $('.chips').innerHTML = L.chips.map(function (c) { return '<span class="chip">' + html(c) + '</span>'; }).join('');
+    $('.cover h3').innerHTML = html(L.title);
+    $('.cover p').textContent = L.novel;
+    $('.cap').textContent = L.cap; $('.cap').style.width = capW + 'px';
+    var size = L.size || {};
+    if (size.tag) $('.tag').style.fontSize = size.tag + 'px';
+    if (size.sub) $('.sub').style.fontSize = size.sub + 'px';
+    if (size.chip) $$('.chip').forEach(function (c) { c.style.fontSize = size.chip + 'px'; });
+    if (size.title) $('.cover h3').style.fontSize = size.title + 'px';
+    await fontsSettled();
+
+    // Fit: only ever shrink, and only what runs long.
+    var tag = $('.tag'), sub = $('.sub'), h3 = $('.cover h3'), sun = $('.cover .sun'), nov = $('.cover p');
+    report.sizes.tag = shrink(tag, function () { return tag.offsetHeight <= TAG_H + 0.5 && fits(tag); }, 28);
+    report.sizes.sub = shrink(sub, function () {
+      return Math.round(sub.offsetHeight / px(sub, 'lineHeight')) <= 3 && tag.offsetHeight + sub.offsetHeight <= TAG_H + SUB_H + 0.5 && fits(sub);
+    }, 15);
+    var chips = $('.chips'), rtl = root.dir === 'rtl';
+    var chipsFit = function () { var b = chips.getBoundingClientRect(); return rtl ? b.left >= 1024 - CHIPS_MAX_RIGHT : b.right <= CHIPS_MAX_RIGHT; };
+    var cs = px($('.chip'), 'fontSize');
+    while (!chipsFit() && cs > 12) { cs -= 0.5; $$('.chip').forEach(function (c) { c.style.fontSize = cs + 'px'; }); }
+    report.sizes.chip = cs;
+    report.sizes.title = shrink(h3, function () { return h3.offsetTop + h3.offsetHeight <= sun.offsetTop - 20 && fits(h3); }, 20);
+    report.sizes.novel = shrink(nov, function () { return nov.offsetLeft + nov.offsetWidth <= nov.parentNode.clientWidth - 18; }, 10);
+    await fontsSettled();
+
+    // Same rhythm as English: wordmark and chips stay put; space a shorter text block leaves is
+    // shared equally by the three gaps (wordmark-tagline, tagline-subline, subline-chips).
+    var spare = Math.max(0, TAG_H + SUB_H - tag.offsetHeight - sub.offsetHeight) / 3;
+    tag.style.top = (TAG_TOP + spare) + 'px';
+    sub.style.top = (TAG_TOP + spare + tag.offsetHeight + (SUB_TOP - TAG_TOP - TAG_H) + spare) + 'px';
+  } else {
+    await document.fonts.ready;
+  }
+
+  if (!q.has('check')) return;
+  // ---- ?check: report which font draws every character, and the text geometry ----
+  await fontsSettled();
+  var faces = []; document.fonts.forEach(function (f) { faces.push(f); });
+  function ranges(f) {
+    return f.unicodeRange.split(',').map(function (u) {
+      var m = u.trim().replace(/^U\+/i, '').split('-');
+      if (m[0].indexOf('?') >= 0) return [parseInt(m[0].replace(/\?/g, '0'), 16), parseInt(m[0].replace(/\?/g, 'F'), 16)];
+      return [parseInt(m[0], 16), parseInt(m[1] || m[0], 16)];
+    });
+  }
+  function weightOk(f, w) { var a = f.weight.split(' ').map(Number); return a.length > 1 ? w >= a[0] && w <= a[1] : a[0] === w; }
+  function covering(fam, cp, w) {   // CSS falls back to the nearest weight; flag that as a problem
+    var fs = faces.filter(function (f) { return f.family.replace(/["']/g, '') === fam && ranges(f).some(function (r) { return cp >= r[0] && cp <= r[1]; }); });
+    var exact = fs.filter(function (f) { return weightOk(f, w); });
+    return exact.length ? exact : fs.map(function (f) { return { status: f.status, weight: f.weight, synth: true }; });
+  }
+  report.fonts = textEls().map(function (el) {
+    var cs = getComputedStyle(el), w = Number(cs.fontWeight);
+    var fams = cs.fontFamily.split(',').map(function (s) { return s.trim().replace(/["']/g, ''); });
+    var used = {}, problems = [];
+    Array.from(el.textContent).forEach(function (ch) {
+      if (/\s/.test(ch)) return;
+      var cp = ch.codePointAt(0), hit = null;
+      for (var i = 0; i < fams.length && !hit; i++) {
+        var fs = covering(fams[i], cp, w);
+        if (fs.length) hit = (fs.some(function (f) { return f.status === 'loaded'; }) ? fams[i] : 'NOT LOADED ' + fams[i]) + (fs[0].synth ? ' (no ' + w + ' weight)' : '');
+      }
+      hit = hit || 'SYSTEM FALLBACK';
+      used[hit] = (used[hit] || 0) + 1;
+      if (!/^(Literata|Roboto Flex|Noto)/.test(hit) || / \(no /.test(hit)) problems.push(ch + ' U+' + cp.toString(16) + ' -> ' + hit);
+    });
+    return { el: el.className || el.tagName, weight: w, size: cs.fontSize, used: used, problems: problems };
+  });
+  // geometry: canvas margins for the text column, clearance from the (rotated) phone, cover fit
+  function quad(el) {
+    var m = new DOMMatrix(getComputedStyle(el).transform), x = el.offsetLeft, y = el.offsetTop, w = el.offsetWidth, h = el.offsetHeight;
+    var cx = x + w / 2, cy = y + h / 2;
+    return [[x, y], [x + w, y], [x + w, y + h], [x, y + h]].map(function (p) { var t = m.transformPoint(new DOMPoint(p[0] - cx, p[1] - cy)); return [t.x + cx, t.y + cy]; });
+  }
+  function edgeX(q, y, side) {   // x of the phone's near edge at height y
+    var a = side === 'left' ? q[0] : q[1], b = side === 'left' ? q[3] : q[2];
+    return a[0] + (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]);
+  }
+  var pq = quad($('.phone')), rtl2 = document.documentElement.dir === 'rtl', geo = [];
+  [$('.word'), $('.tag'), $('.sub')].concat($$('.chip')).forEach(function (el) {
+    var rects = [];
+    if (el.classList.contains('chip')) rects = [el.getBoundingClientRect()];
+    else { var rg = document.createRange(); rg.selectNodeContents(el); rects = [].slice.call(rg.getClientRects()); }
+    var b = { l: 1e9, t: 1e9, r: -1e9, b: -1e9 }, clear = 1e9;
+    rects.forEach(function (rc) {
+      if (!rc.width) return;
+      b.l = Math.min(b.l, rc.left); b.t = Math.min(b.t, rc.top); b.r = Math.max(b.r, rc.right); b.b = Math.max(b.b, rc.bottom);
+      [rc.top, rc.bottom].forEach(function (y) {
+        clear = Math.min(clear, rtl2 ? rc.left - edgeX(pq, y, 'right') : edgeX(pq, y, 'left') - rc.right);
+      });
+    });
+    var g = { el: el.className, left: Math.round(b.l), top: Math.round(b.t), right: Math.round(b.r), bottom: Math.round(b.b), phoneClearance: Math.round(clear), lines: el.classList.contains('chip') ? 1 : Math.round(el.offsetHeight / px(el, 'lineHeight')) };
+    if (b.l < 48 || b.t < 48 || b.r > 976 || b.b > 452) report.notes.push('MARGIN ' + g.el);
+    if (clear < 20) report.notes.push('PHONE ' + g.el + ' clearance ' + Math.round(clear));
+    if (!fits(el)) report.notes.push('OVERFLOW ' + g.el);
+    geo.push(g);
+  });
+  var h3b = $('.cover h3'), sunb = $('.cover .sun'), novb = $('.cover p');
+  geo.push({ el: 'cover h3', lines: Math.round(h3b.offsetHeight / px(h3b, 'lineHeight')), bottom: h3b.offsetTop + h3b.offsetHeight, sunTop: sunb.offsetTop - 14, fits: fits(h3b) });
+  geo.push({ el: 'cover p', right: novb.offsetLeft + novb.offsetWidth, max: novb.parentNode.clientWidth - 18 });
+  if (h3b.offsetTop + h3b.offsetHeight > sunb.offsetTop - 14 || !fits(h3b)) report.notes.push('COVER TITLE');
+  if (novb.offsetLeft + novb.offsetWidth > novb.parentNode.clientWidth - 18) report.notes.push('COVER NOVEL');
+  report.geometry = geo;
+  report.fonts.forEach(function (f) { if (f.problems.length) report.notes.push('FONT ' + f.el + ': ' + f.problems.slice(0, 5).join(', ')); });
+  var out = document.createElement('script'); out.type = 'application/json'; out.id = 'report';
+  out.textContent = JSON.stringify(report); document.body.appendChild(out);
+})();
+</script>
 </body></html>

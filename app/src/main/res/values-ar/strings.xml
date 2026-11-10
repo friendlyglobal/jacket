@@ -17,6 +17,8 @@
     <string name="book_status_not_started">لم يبدأ</string>
     <string name="book_status_page_of">صفحة %1$d من %2$d</string>
     <string name="book_status_percent_read">تمت قراءة %1$d%%</string>
+    <string name="cover_almost_done">اقتربت النهاية</string>
+    <string name="cover_listening">قيد الاستماع</string>
     <string name="book_untitled">بلا عنوان</string>
 
     <string name="cover_style_jacket">Jacket</string>
@@ -93,6 +95,9 @@
     <string name="library_remove_confirm">إزالة</string>
     <string name="library_empty_title">دَع هاتفك القابل للطي يرتدي كتابك</string>
     <string name="library_empty_message">أضف ملف EPUB أو PDF أو قصة مصوّرة CBZ أو ملفًا نصيًا. يحتفظ تطبيق Jacket بنسخة خاصة، ويعرض غلافها على الشاشة الخارجية أو في أداة شاشة الغطاء أثناء قراءتك.</string>
+    <string name="onboarding_next">التالي</string>
+    <string name="onboarding_skip">تخطٍّ</string>
+    <string name="onboarding_private">كتبك تبقى على هذا الهاتف. لا يحتاج Jacket إلى حساب ولا يتصل بالإنترنت أبدًا.</string>
 
     <string name="settings_title">الإعدادات</string>
     <string name="settings_subtitle">الملف الشخصي وشاشة الغطاء والقراءة</string>
@@ -136,6 +141,8 @@
     <string name="settings_ambient_dim_description">تخفت الشاشة الخارجية بعد 30 ثانية دون لمس</string>
     <string name="settings_auto_outer">الغلاف أثناء القراءة</string>
     <string name="settings_auto_outer_description">عرض الغلاف على الشاشة الخارجية كلما فتحت الهاتف للقراءة</string>
+    <string name="settings_cover_when_closed">الغلاف عند الطيّ</string>
+    <string name="settings_cover_when_closed_description">عند طيّ الهاتف وكتابٌ مفتوح، تعرض الشاشة غلافه. افتح الهاتف للقراءة، أو انقر على الغلاف للقراءة هنا أو الاستماع أو الرجوع.</string>
     <string name="settings_preview_outer">الشاشة الخارجية</string>
     <string name="settings_preview_widget">الأداة</string>
     <string name="settings_preview_description">معاينة لشاشة الغطاء بإعداداتك الحالية</string>
@@ -182,6 +189,11 @@
     <string name="reading_page">الصفحة</string>
     <string name="reading_layout">التخطيط</string>
     <string name="reading_layout_hint">تُقلَب الصفحات كما في الكتاب: اسحب أو انقر على الحواف. وعند فتح الهاتف، تظهر صفحتان متجاورتان.</string>
+    <string name="reading_page_turn">تقليب الصفحة</string>
+    <string name="page_turn_slide">انزلاق</string>
+    <string name="page_turn_paper">ورق</string>
+    <string name="page_turn_curl">طيّ</string>
+    <string name="page_turn_cards">بطاقات</string>
     <string name="reading_line_spacing">تباعد الأسطر</string>
     <string name="reading_line_spacing_book">كتاب</string>
     <string name="reading_line_spacing_tight">ضيّق</string>
@@ -307,4 +319,18 @@
     <string name="widget_reading">قيد القراءة</string>
     <string name="widget_empty">أضف كتابًا ليظهر غلافه هنا</string>
     <string name="listen_notification_channel">القراءة بصوت عالٍ</string>
+    <string name="reader_footer_time_left">بقي %1$d د من الفصل</string>
+    <string name="reading_time_left">الوقت المتبقي في الفصل</string>
+    <string name="reading_edge_swipes">السطوع والدفء بالسحب</string>
+    <string name="reading_edge_swipes_description">اسحب لأعلى أو لأسفل على الحافة اليسرى للسطوع، وعلى اليمنى للدفء.</string>
+    <string name="reading_night_pages">صفحات داكنة ليلًا</string>
+    <string name="reading_night_pages_description">عندما يكون هاتفك في المظهر الداكن، تصبح الصفحات الفاتحة داكنة أيضًا.</string>
+    <string name="settings_tabletop">وضع الطاولة</string>
+    <string name="settings_tabletop_description">نصف مطويّ على طاولة: الصفحة فوق الطيّة وعناصر التحكم تحتها.</string>
+    <string name="settings_watch_folder">مجلد مُراقَب</string>
+    <string name="settings_watch_folder_description">تُضاف الكتب الجديدة في هذا المجلد عند فتح Jacket.</string>
+    <string name="settings_reading_stats">وقت القراءة وتتابع الأيام</string>
+    <string name="stats_today">%1$d د اليوم</string>
+    <string name="stats_streak">اليوم %1$d</string>
+    <string name="settings_ambient_quote">التمييزات على الغلاف المعتّم</string>
 </resources>

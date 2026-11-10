@@ -40,7 +40,7 @@ class ListenService : MediaSessionService() {
                     .build(),
             )
             val notification = NotificationCompat.Builder(this, channel)
-                .setSmallIcon(R.drawable.ic_launcher_monochrome)
+                .setSmallIcon(R.drawable.media3_notification_small_icon)
                 .setContentTitle(getString(R.string.app_name))
                 .setSilent(true)
                 .build()

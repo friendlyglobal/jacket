@@ -23,6 +23,10 @@
     <string name="book_status_not_started">Not started</string>
     <string name="book_status_page_of">Page %1$d of %2$d</string>
     <string name="book_status_percent_read">%1$d%% read</string>
+    <!-- The last stretch of a book (from 90%), on the cover screen and the widget. -->
+    <string name="cover_almost_done">Almost there</string>
+    <!-- The book is being read aloud, on the cover screen and the widget (next to "Reading"). -->
+    <string name="cover_listening">Listening</string>
     <!-- Title for a book whose file name has no usable text. -->
     <string name="book_untitled">Untitled</string>
 
@@ -105,6 +109,11 @@
     <string name="library_empty_title">Let your foldable wear your book</string>
     <string name="library_empty_message">Add an EPUB, PDF, CBZ comic or text file. Jacket keeps a private copy and puts its cover on your outer screen, or in a cover-screen widget, while you read.</string>
 
+    <!-- Welcome, shown once before the first book (its other words are the library's and the settings' own) -->
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_private">Your books stay on this phone. Jacket has no account and never goes online.</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_subtitle">Profile, cover screen and reading</string>
@@ -137,6 +146,8 @@
     <string name="settings_ambient_dim_description">The outer screen dims after 30 seconds untouched</string>
     <string name="settings_auto_outer">Cover while reading</string>
     <string name="settings_auto_outer_description">Put the cover on the outer screen whenever you unfold to read</string>
+    <string name="settings_cover_when_closed">Cover when closed</string>
+    <string name="settings_cover_when_closed_description">Folded shut with a book open, the screen shows its cover. Unfold to read, or tap the cover to read here, listen or go back.</string>
     <string name="settings_preview_outer">Outer screen</string>
     <string name="settings_preview_widget">Widget</string>
     <string name="settings_preview_description">Preview of the cover screen with your current settings</string>
@@ -184,6 +195,12 @@
     <string name="reading_page">Page</string>
     <string name="reading_layout">Layout</string>
     <string name="reading_layout_hint">Pages turn like a book: swipe, or tap the edges. Unfolded, you get a two-page spread.</string>
+    <!-- How a page moves when you turn it, and the four ways: sliding along, lifting off like paper, folding over like a leaf of a book, dealt away like a card. -->
+    <string name="reading_page_turn">Page turn</string>
+    <string name="page_turn_slide">Slide</string>
+    <string name="page_turn_paper">Paper</string>
+    <string name="page_turn_curl">Curl</string>
+    <string name="page_turn_cards">Cards</string>
     <string name="reading_line_spacing">Line spacing</string>
     <string name="reading_line_spacing_book">Book</string>
     <string name="reading_line_spacing_tight">Tight</string>
@@ -310,4 +327,20 @@
     <string name="widget_reading">Reading</string>
     <string name="widget_empty">Add a book to wear its cover</string>
     <string name="listen_notification_channel">Read aloud</string>
+
+    <!-- Day-to-day comforts: time left, edge swipes, night pages, tabletop, a watched folder, reading time, highlights on the dimmed cover. "min" is the abbreviation for minutes. "Day 5" is the fifth day in a row with some reading. -->
+    <string name="reader_footer_time_left">%1$d min left in chapter</string>
+    <string name="reading_time_left">Time left in chapter</string>
+    <string name="reading_edge_swipes">Brightness and warmth by swipe</string>
+    <string name="reading_edge_swipes_description">Swipe up or down along the left edge for brightness, the right edge for warmth.</string>
+    <string name="reading_night_pages">Dark pages at night</string>
+    <string name="reading_night_pages_description">When your phone is in dark theme, light pages turn dark too.</string>
+    <string name="settings_tabletop">Tabletop mode</string>
+    <string name="settings_tabletop_description">Half-folded on a table: the page above the fold, the controls below.</string>
+    <string name="settings_watch_folder">Watched folder</string>
+    <string name="settings_watch_folder_description">New books in this folder are added when Jacket opens.</string>
+    <string name="settings_reading_stats">Reading time and streak</string>
+    <string name="stats_today">%1$d min today</string>
+    <string name="stats_streak">Day %1$d</string>
+    <string name="settings_ambient_quote">Highlights on the dimmed cover</string>
 </resources>

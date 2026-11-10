@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.spring
@@ -19,8 +20,24 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsIgnoringVisibility
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import io.github.friendlyglobal.jacket.data.PageColor
+import io.github.friendlyglobal.jacket.ui.rememberTabletopFold
+import kotlin.math.ceil
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -48,7 +65,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderState
 import androidx.compose.material3.Surface
@@ -63,6 +81,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,6 +109,7 @@ import io.github.friendlyglobal.jacket.data.Annotation
 import io.github.friendlyglobal.jacket.data.AnnotationKind
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.BookFormat
+import io.github.friendlyglobal.jacket.data.ReadingMoment
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.outer.OuterDisplay
@@ -125,6 +145,14 @@ class ReaderNav {
     var footer by mutableStateOf("")
     var toc by mutableStateOf<List<TocItem>>(emptyList())
     var tocIndex by mutableIntStateOf(-1)
+    /** The chapter you're in, by name, for formats that have chapters: the cover screen shows it. */
+    var chapter by mutableStateOf("")
+    /** How far through [chapter] you are (0..1); negative while unknown. */
+    var chapterProgress by mutableFloatStateOf(-1f)
+    /** What's left of the chapter, as a fraction of the whole book (negative while unknown): at your pace, the time left. */
+    var chapterLeft by mutableFloatStateOf(-1f)
+    /** Where the last jump started from, offered back for a little while. */
+    var cameFrom by mutableStateOf<Origin?>(null)
     var sectionName: (Int) -> String = { "" }
     /** Sections in the same group (e.g. chapter) share a value: the scrubber ticks between groups. */
     var sectionGroup: (Int) -> Int = { it }
@@ -161,6 +189,9 @@ class ReaderNav {
     var contentReady by mutableStateOf(false)
 }
 
+/** The place a jump (contents, search, the scrubber) left from: how far through the book, and the way back. */
+class Origin(val percent: Int, val back: () -> Unit)
+
 /** The open book's [ReaderNav], for views that only need to report in (see [ReaderError]). */
 internal val LocalReaderNav = compositionLocalOf<ReaderNav?> { null }
 
@@ -182,6 +213,13 @@ fun ReaderScreen(
     onOpen: (String) -> Unit,
     onClose: () -> Unit,
     onBack: () -> Unit,
+    /** The phone is folded shut on this book with "Cover when closed" on: the cover takes the screen. */
+    coverUp: Boolean = false,
+    /** Back on that cover: read here after all. */
+    onReadShut: () -> Unit = {},
+    /** Opened to be listened to (the "Listen" shortcut): read-aloud starts with the first page. */
+    autoListen: Boolean = false,
+    onAutoListened: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val library = context.library
@@ -195,7 +233,10 @@ fun ReaderScreen(
     val outerAvailable by outer.available.collectAsStateWithLifecycle()
     val outerActive by outer.active.collectAsStateWithLifecycle()
     val nav = remember(book.id) { ReaderNav() }
-    val page = rememberPageColors(settings.pageColor)
+    // "Dark pages at night": with the phone in dark theme, Paper gives way to Dark.
+    val page = rememberPageColors(
+        if (settings.nightPages && settings.pageColor == PageColor.PAPER && isSystemInDarkTheme()) PageColor.DARK else settings.pageColor,
+    )
     var chrome by rememberSaveable(book.id) { mutableStateOf(true) }
     var sheet by rememberSaveable { mutableStateOf(Sheet.NONE) }
     // Once you touch the controls, they stay until you dismiss them.
@@ -286,7 +327,13 @@ fun ReaderScreen(
     }
     // Closing shows the system bars straight away, so the library has its final layout (and the
     // cover its landing spot) by the time it appears.
-    SystemBarsHidden(hidden = !chrome && sheet == Sheet.NONE && !closing)
+    SystemBarsHidden(hidden = coverUp || (!chrome && sheet == Sheet.NONE && !closing))
+    // A sheet is a window of its own: it would sit on top of the cover.
+    LaunchedEffect(coverUp) { if (coverUp) sheet = Sheet.NONE }
+    val setRate: (Float) -> Unit = { rate ->
+        onSettings { it.copy(listenRate = rate) }
+        nav.listenController?.setRate(rate)
+    }
 
     val close: () -> Unit = {
         if (!closing) {
@@ -299,7 +346,8 @@ fun ReaderScreen(
 
     // Back: the page starts to fold under your thumb. Let go and the book closes; change your mind
     // and it springs flat again. Once it is closing, further presses are swallowed.
-    PredictiveBackHandler { events ->
+    // (Not while the cover of a folded phone is up: that has its own way back.)
+    PredictiveBackHandler(enabled = !coverUp) { events ->
         if (closing) return@PredictiveBackHandler events.collect { }
         try {
             events.collect { if (opening.settled) opening.peek(it.progress) }
@@ -311,8 +359,9 @@ fun ReaderScreen(
     }
 
     // Volume keys turn pages while reading (not while listening, when they're for volume).
-    DisposableEffect(settings.volumeKeys, nav.listen.active) {
-        val handler: ((Int) -> Unit)? = if (settings.volumeKeys && !nav.listen.active) { delta -> nav.turnPage(delta) } else null
+    // Nor under the cover of a folded phone, where pages would turn unseen.
+    DisposableEffect(settings.volumeKeys, nav.listen.active, coverUp) {
+        val handler: ((Int) -> Unit)? = if (settings.volumeKeys && !nav.listen.active && !coverUp) { delta -> nav.turnPage(delta) } else null
         ReaderKeys.handler = handler
         // Only clear our own: opening the next book briefly overlaps the outgoing reader.
         onDispose { if (ReaderKeys.handler === handler) ReaderKeys.handler = null }
@@ -339,6 +388,61 @@ fun ReaderScreen(
     // Stopping read-aloud clears the timer.
     LaunchedEffect(listen.active) { if (!listen.active) listen.sleep = SleepTimer.OFF }
 
+    // The cover screen and the widget follow along: the chapter, the place in it (to the nearest
+    // half percent: about a page), and read-aloud.
+    DisposableEffect(book.id) { onDispose { library.endMoment(book.id) } }
+    LaunchedEffect(book.id, nav) {
+        snapshotFlow {
+            val place = nav.chapterProgress
+            ReadingMoment(
+                bookId = book.id,
+                chapter = nav.chapter,
+                chapterProgress = if (place < 0f) -1f else (place * 200).roundToInt() / 200f,
+                listening = nav.listen.active,
+                playing = nav.listen.playing,
+                marks = nav.marks,
+            )
+        }.collect(library::report)
+    }
+
+    // Reading time: how long each page was up before the next (a page left open, or flipped
+    // past, doesn't count), for the book's pace and today's total. Listening isn't reading pace.
+    LaunchedEffect(book.id, nav) {
+        var since = SystemClock.elapsedRealtime()
+        var from = -1f
+        snapshotFlow { nav.pageKey }.collect {
+            val now = SystemClock.elapsedRealtime()
+            val progress = library.state.value.find(book.id)?.progress ?: return@collect
+            val spent = now - since
+            if (from >= 0f && spent in SHORTEST_PAGE_MS..LONGEST_PAGE_MS && !nav.listen.active) {
+                library.addReading(book.id, spent, progress - from)
+            }
+            since = now
+            from = progress
+        }
+    }
+
+    // The "Listen" shortcut: start reading aloud once the book is open on its page.
+    LaunchedEffect(autoListen) {
+        if (!autoListen) return@LaunchedEffect
+        snapshotFlow { nav.contentReady && nav.listenController != null && opening.settled }.first { it }
+        chrome = false
+        nav.listenController?.start()
+        onAutoListened()
+    }
+
+    // Brightness and warmth, by swiping the page's edges.
+    val levels = remember { EdgeLevels(settings.brightness, settings.warmth) }
+    val swipes by rememberUpdatedState(settings.edgeSwipes)
+    ReaderBrightness(levels, enabled = settings.edgeSwipes)
+
+    // Tabletop: half-open with the fold lying flat, the page sits above it and a desk of controls below.
+    val fold by rememberTabletopFold(watch = settings.tabletop)
+    var windowHeight by remember { mutableIntStateOf(0) }
+    val density = LocalDensity.current
+    val belowFold = fold?.let { with(density) { (windowHeight - it.top).coerceAtLeast(0).toDp() } } ?: 0.dp
+    val desk = fold?.let { with(density) { (windowHeight - it.bottom).coerceAtLeast(0).toDp() } } ?: 0.dp
+
     // A highlight tapped on the page opens its editor.
     val editing = annotations.firstOrNull { it.id == nav.editing }
     var finishedDismissed by rememberSaveable(book.id) { mutableStateOf(false) }
@@ -356,10 +460,26 @@ fun ReaderScreen(
     }
 
     val motion = MaterialTheme.motionScheme
-    Box(Modifier.fillMaxSize().background(page.background)) {
+    Box(Modifier.fillMaxSize().background(page.background).onSizeChanged { windowHeight = it.height }) {
         // The page and its controls. They grow with the window the backdrop opens on them: a page
         // the size of the book under the cover, the whole screen once it is open.
-        Box(Modifier.fillMaxSize().openingPage(opening)) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(bottom = belowFold)
+                .openingPage(opening)
+                .pointerInput(levels) {
+                    edgeSwipes(
+                        levels,
+                        enabled = { swipes && opening.settled },
+                        phoneBrightness = {
+                            android.provider.Settings.System.getInt(context.contentResolver, android.provider.Settings.System.SCREEN_BRIGHTNESS, 128) / 255f
+                        },
+                        haptics = haptics,
+                        onSettled = { onSettings { it.copy(brightness = levels.brightness, warmth = levels.warmth) } },
+                    )
+                },
+        ) {
             if (staged) {
                 CompositionLocalProvider(LocalReaderNav provides nav) {
                     when (book.format) {
@@ -370,6 +490,7 @@ fun ReaderScreen(
                     }
                 }
             }
+            Warmth(levels, enabled = settings.edgeSwipes)
             // The page fades in under the indicator when it does arrive, rather than popping up.
             AnimatedVisibility(visible = waiting, enter = EnterTransition.None, exit = fadeOut(motion.slowEffectsSpec())) {
                 Box(Modifier.fillMaxSize().background(page.background)) { ReaderLoading() }
@@ -380,7 +501,11 @@ fun ReaderScreen(
                 enter = fadeIn(motion.slowEffectsSpec()),
                 exit = fadeOut(motion.fastEffectsSpec()),
                 modifier = Modifier.align(Alignment.BottomCenter),
-            ) { ReaderFooter(nav, book, page) }
+            ) { ReaderFooter(nav, book, page, settings) }
+
+            // After a jump: the way back to where you were, for a little while.
+            JumpBack(nav, haptics, visible = opening.settled, modifier = Modifier.align(Alignment.TopCenter))
+            EdgeLevel(levels)
 
             AnimatedVisibility(
                 visible = chrome && entrance >= 1,
@@ -432,10 +557,7 @@ fun ReaderScreen(
                     nav = nav, book = book, haptics = haptics,
                     showScrubber = chrome,
                     rate = settings.listenRate,
-                    onRate = { rate ->
-                        onSettings { it.copy(listenRate = rate) }
-                        nav.listenController?.setRate(rate)
-                    },
+                    onRate = setRate,
                     onListen = {
                         haptics.confirm()
                         chrome = false
@@ -467,44 +589,44 @@ fun ReaderScreen(
 
         // Over everything, so nothing of the reader shows until the book opens: the backdrop the
         // closed book lies on, and the cover itself (not needed while reading).
+        if (fold != null && opening.settled) {
+            TabletopDesk(nav, book, settings, setRate, haptics, Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(desk))
+        }
         OpeningBackdrop(opening, MaterialTheme.colorScheme.primaryContainer)
         if (!opening.settled) OpeningCover(book, opening)
+        ClosedCover(coverUp, book, nav, settings, setRate, haptics, onReadHere = onReadShut, onLeave = close)
     }
 
     when (sheet) {
-        Sheet.CONTENTS -> ModalBottomSheet(onDismissRequest = { sheet = Sheet.NONE }) {
+        Sheet.CONTENTS -> ReaderSheet(onGone = { sheet = Sheet.NONE }) { leave ->
             NotesSheet(
                 nav = nav,
                 annotations = annotations,
                 haptics = haptics,
+                // You picked where to go: get out of the way and let them read. The jump waits for
+                // the sheet to leave: loading a chapter would stall it halfway down.
                 onPickToc = { item ->
-                    nav.openToc(item)
-                    sheet = Sheet.NONE
-                    // You picked where to go: get out of the way and let them read.
                     chrome = false
+                    leave { nav.openToc(item) }
                 },
                 onPick = { item ->
-                    nav.goTo(item)
-                    sheet = Sheet.NONE
                     chrome = false
+                    leave { nav.goTo(item) }
                 },
-                onEdit = { item -> sheet = Sheet.NONE; nav.editing = item.id },
+                onEdit = { item -> leave { nav.editing = item.id } },
                 onDelete = { item -> library.deleteAnnotation(item.id) },
+                onShare = { shareHighlights(context, book, annotations) },
             )
         }
-        Sheet.SEARCH -> ModalBottomSheet(
-            onDismissRequest = { sheet = Sheet.NONE },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        ) {
+        Sheet.SEARCH -> ReaderSheet(onGone = { sheet = Sheet.NONE }, fullHeight = true) { leave ->
             nav.search?.let { search ->
                 SearchPanel(search, haptics) { hit ->
-                    search.show(hit)
-                    sheet = Sheet.NONE
                     chrome = false
+                    leave { search.show(hit) }
                 }
             }
         }
-        Sheet.TEXT -> ModalBottomSheet(onDismissRequest = { sheet = Sheet.NONE }) {
+        Sheet.TEXT -> ReaderSheet(onGone = { sheet = Sheet.NONE }) {
             ReadingControls(
                 settings, onSettings,
                 Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
@@ -515,15 +637,178 @@ fun ReaderScreen(
     }
 
     if (editing != null) {
-        ModalBottomSheet(onDismissRequest = { nav.editing = null }) {
+        ReaderSheet(onGone = { nav.editing = null }) { leave ->
             HighlightEditor(
                 annotation = editing,
                 haptics = haptics,
                 onChange = { changed -> library.updateAnnotation(changed.id) { changed } },
-                onDelete = { library.deleteAnnotation(editing.id); nav.editing = null },
-                onDone = { nav.editing = null },
+                // Gone first, then deleted: the sheet shows the highlight until it has left.
+                onDelete = { leave { library.deleteAnnotation(editing.id) } },
+                onDone = { leave {} },
             )
         }
+    }
+}
+
+/**
+ * One of the reader's bottom sheets. Choosing something in it calls `leave`: the sheet slides
+ * away on its own spring, and only then is it dropped from the composition and the given
+ * follow-up run. (Dropped at once, a sheet just vanishes from the middle of the screen.)
+ */
+@Composable
+private fun ReaderSheet(
+    onGone: () -> Unit,
+    fullHeight: Boolean = false,
+    content: @Composable ColumnScope.(leave: (then: () -> Unit) -> Unit) -> Unit,
+) {
+    val state = rememberBottomSheetState(SheetValue.Hidden, if (fullHeight) FullHeightOnly else AnyHeight)
+    val scope = rememberCoroutineScope()
+    val gone by rememberUpdatedState(onGone)
+    val leave: (() -> Unit) -> Unit = { then ->
+        scope.launch {
+            try {
+                state.hide()
+            } finally {
+                gone()
+                then()
+            }
+        }
+    }
+    ModalBottomSheet(onDismissRequest = onGone, sheetState = state) { content(leave) }
+}
+
+private val AnyHeight = setOf(SheetValue.Hidden, SheetValue.PartiallyExpanded, SheetValue.Expanded)
+private val FullHeightOnly = setOf(SheetValue.Hidden, SheetValue.Expanded)
+
+/** A page up for less than this was flipped past; for more than the other, left open. Neither is reading. */
+private const val SHORTEST_PAGE_MS = 3_000L
+private const val LONGEST_PAGE_MS = 180_000L
+
+/** How long the way back from a jump stays on offer. */
+private const val JUMP_BACK_MS = 12_000L
+
+/**
+ * "Back · 42%": after a jump through the contents, a search or the scrubber, a pill that takes
+ * you back to the page you left. It goes away by itself.
+ */
+@Composable
+private fun JumpBack(nav: ReaderNav, haptics: Haptics, visible: Boolean, modifier: Modifier = Modifier) {
+    val origin = nav.cameFrom
+    // Kept while the pill fades, after the offer itself has gone.
+    var shown by remember { mutableStateOf(origin) }
+    if (origin != null) shown = origin
+    LaunchedEffect(origin) {
+        if (origin == null) return@LaunchedEffect
+        delay(JUMP_BACK_MS)
+        if (nav.cameFrom === origin) nav.cameFrom = null
+    }
+    val motion = MaterialTheme.motionScheme
+    AnimatedVisibility(
+        visible = origin != null && visible,
+        enter = scaleIn(motion.fastSpatialSpec(), initialScale = 0.8f) + fadeIn(motion.fastEffectsSpec()),
+        exit = scaleOut(motion.fastSpatialSpec(), targetScale = 0.8f) + fadeOut(motion.fastEffectsSpec()),
+        modifier = modifier.windowInsetsPadding(WindowInsets.statusBarsIgnoringVisibility).padding(top = 76.dp),
+    ) {
+        Surface(
+            onClick = {
+                haptics.tick()
+                shown?.back?.invoke()
+                nav.cameFrom = null
+            },
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.inverseSurface,
+            contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+            shadowElevation = 4.dp,
+        ) {
+            Row(Modifier.padding(start = 14.dp, end = 18.dp, top = 12.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(JacketIcons.Back, null, Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    stringResource(R.string.common_back) + " · " + stringResource(R.string.percent, shown?.percent ?: 0),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The lower half of a phone standing half-open on a table: where you are, and two broad buttons
+ * to turn the page without picking the phone up; or, while the book is read aloud, the sentence
+ * being spoken and the player.
+ */
+@Composable
+private fun TabletopDesk(nav: ReaderNav, book: Book, settings: Settings, onRate: (Float) -> Unit, haptics: Haptics, modifier: Modifier = Modifier) {
+    val controller = nav.listenController
+    Surface(color = MaterialTheme.colorScheme.surfaceContainer, modifier = modifier) {
+        Column(
+            Modifier.fillMaxSize().navigationBarsPadding().padding(horizontal = 24.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            if (nav.listen.active && controller != null) {
+                SpokenPhrase(nav.listen, settings)
+                Spacer(Modifier.height(20.dp))
+                ListenBar(
+                    nav.listen, controller, settings.listenRate, onRate, haptics,
+                    progress = nav.section.toFloat() / (nav.sectionCount - 1).coerceAtLeast(1),
+                    hasChapters = nav.toc.isNotEmpty(),
+                )
+            } else {
+                Text(nav.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    listOf(footerText(nav, book, settings), stringResource(R.string.percent, book.percent)).filter { it.isNotBlank() }.joinToString(" · "),
+                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1,
+                )
+                Spacer(Modifier.height(16.dp))
+                Row(Modifier.widthIn(max = 560.dp).fillMaxWidth().weight(1f, fill = false), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FilledTonalButton(
+                        onClick = { nav.turnPage(-1) }, shapes = ButtonDefaults.shapes(),
+                        modifier = Modifier.weight(1f).heightIn(min = 72.dp, max = 132.dp).fillMaxHeight(),
+                    ) { Icon(JacketIcons.Previous, stringResource(R.string.reader_previous_page), Modifier.size(32.dp)) }
+                    FilledTonalButton(
+                        onClick = { nav.turnPage(1) }, shapes = ButtonDefaults.shapes(),
+                        modifier = Modifier.weight(1f).heightIn(min = 72.dp, max = 132.dp).fillMaxHeight(),
+                    ) { Icon(JacketIcons.Next, stringResource(R.string.reader_next_page), Modifier.size(32.dp)) }
+                }
+            }
+        }
+    }
+}
+
+/** Everything highlighted in [book], with its notes, as text for another app: a quote per paragraph. */
+private fun shareHighlights(context: android.content.Context, book: Book, annotations: List<Annotation>) {
+    val highlights = annotations.filter { it.kind == AnnotationKind.HIGHLIGHT && it.text.isNotBlank() }.sortedBy { it.progress }
+    if (highlights.isEmpty()) return
+    val text = buildString {
+        append("# ").append(book.title)
+        if (book.author.isNotBlank()) append(" — ").append(book.author)
+        for (highlight in highlights) {
+            append("\n\n> ").append(highlight.text.trim())
+            val place = listOf(highlight.chapter, context.getString(R.string.percent, (highlight.progress * 100).toInt())).filter { it.isNotBlank() }
+            append("\n(").append(place.joinToString(" · ")).append(')')
+            if (highlight.note.isNotBlank()) append("\n").append(highlight.note.trim())
+        }
+    }
+    runCatching {
+        val send = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain")
+            .putExtra(android.content.Intent.EXTRA_SUBJECT, book.title)
+            .putExtra(android.content.Intent.EXTRA_TEXT, text)
+        context.startActivity(android.content.Intent.createChooser(send, null))
+    }
+}
+
+/**
+ * The quiet line under the page: the minutes left in the chapter once your pace in this book is
+ * known (and "Time left" is on), otherwise whatever the format reports (pages left, the page number).
+ */
+@Composable
+private fun footerText(nav: ReaderNav, book: Book, settings: Settings): String {
+    val left = nav.chapterLeft
+    return if (settings.timeLeft && book.pace > 0f && left >= 0f && !nav.atEnd) {
+        stringResource(R.string.reader_footer_time_left, ceil(book.pace * left / 60_000f).toInt().coerceAtLeast(1))
+    } else {
+        nav.footer
     }
 }
 
@@ -562,9 +847,15 @@ private fun ReaderTopBar(
         title = {
             Column {
                 Text(book.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                // A new chapter rolls up into place.
+                val motion = MaterialTheme.motionScheme
                 AnimatedContent(
                     targetState = nav.title,
-                    transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(120)) },
+                    transitionSpec = {
+                        (slideInVertically(motion.fastSpatialSpec()) { it / 2 } + fadeIn(motion.fastEffectsSpec()))
+                            .togetherWith(slideOutVertically(motion.fastSpatialSpec()) { -it / 2 } + fadeOut(motion.fastEffectsSpec()))
+                            .using(SizeTransform(clip = false))
+                    },
                     label = "chapter",
                 ) { title ->
                     Text(
@@ -579,13 +870,15 @@ private fun ReaderTopBar(
             if (nav.search != null) {
                 IconButton(onClick = onSearch) { Icon(JacketIcons.Search, stringResource(R.string.reader_search)) }
             }
-            // The ribbon drops in and bounces when you mark the page.
+            // The ribbon drops in and bounces when you mark the page, and gives a small shrug when
+            // you take it off. Not when the bar merely appears over a page that was marked already.
             val drop = remember { Animatable(1f) }
+            var shown by remember { mutableStateOf(bookmarked) }
             LaunchedEffect(bookmarked) {
-                if (bookmarked) {
-                    drop.snapTo(0f)
-                    drop.animateTo(1f, spring(dampingRatio = 0.35f, stiffness = 500f))
-                }
+                if (bookmarked == shown) return@LaunchedEffect
+                shown = bookmarked
+                drop.snapTo(if (bookmarked) 0f else 0.55f)
+                drop.animateTo(1f, spring(dampingRatio = if (bookmarked) 0.35f else 0.6f, stiffness = 500f))
             }
             IconButton(onClick = onBookmark) {
                 Icon(
@@ -723,7 +1016,7 @@ private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics) {
                 Slider(
                     state = slider,
                     onValueChange = { value ->
-                        if (nav.sectionGroup(value.roundToInt()) != nav.sectionGroup(target)) haptics.frequentTick()
+                        if (nav.sectionGroup(value.roundToInt()) != nav.sectionGroup(target)) haptics.tick()
                         preview = value
                         slider.value = value
                     },
@@ -755,7 +1048,7 @@ private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics) {
 }
 
 @Composable
-private fun ReaderFooter(nav: ReaderNav, book: Book, page: PageColors) {
+private fun ReaderFooter(nav: ReaderNav, book: Book, page: PageColors, settings: Settings) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -763,10 +1056,16 @@ private fun ReaderFooter(nav: ReaderNav, book: Book, page: PageColors) {
             .padding(horizontal = 24.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            nav.footer, style = MaterialTheme.typography.labelMedium, color = page.secondary,
-            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f),
-        )
+        // "5 pages left" gives way to "4" quietly: the page is the thing that moves.
+        val effects = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+        AnimatedContent(
+            targetState = footerText(nav, book, settings),
+            transitionSpec = { fadeIn(effects) togetherWith fadeOut(effects) },
+            modifier = Modifier.weight(1f),
+            label = "footer",
+        ) { text ->
+            Text(text, style = MaterialTheme.typography.labelMedium, color = page.secondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
         Text(stringResource(R.string.percent, book.percent), style = MaterialTheme.typography.labelMedium, color = page.secondary, textAlign = TextAlign.End)
     }
 }

@@ -17,6 +17,8 @@
     <string name="book_status_not_started">शुरू नहीं की</string>
     <string name="book_status_page_of">पेज %1$d / %2$d</string>
     <string name="book_status_percent_read">%1$d%% पढ़ी गई</string>
+    <string name="cover_almost_done">बस थोड़ी बाकी</string>
+    <string name="cover_listening">सुनी जा रही</string>
     <string name="book_untitled">बिना शीर्षक</string>
 
     <string name="cover_style_jacket">Jacket</string>
@@ -85,6 +87,9 @@
     <string name="library_remove_confirm">हटाएँ</string>
     <string name="library_empty_title">अपने फ़ोल्डेबल को अपनी किताब पहनाएँ</string>
     <string name="library_empty_message">कोई EPUB, PDF, CBZ कॉमिक या टेक्स्ट फ़ाइल जोड़ें। Jacket उसकी एक निजी कॉपी रखता है और आपके पढ़ते समय उसका कवर बाहरी स्क्रीन पर या कवर-स्क्रीन विजेट में दिखाता है।</string>
+    <string name="onboarding_next">आगे</string>
+    <string name="onboarding_skip">छोड़ें</string>
+    <string name="onboarding_private">आपकी किताबें इसी फ़ोन में रहती हैं। Jacket में कोई खाता नहीं है और यह कभी ऑनलाइन नहीं जाता।</string>
 
     <string name="settings_title">सेटिंग</string>
     <string name="settings_subtitle">प्रोफ़ाइल, कवर स्क्रीन और पढ़ना</string>
@@ -116,6 +121,8 @@
     <string name="settings_ambient_dim_description">30 सेकंड तक न छूने पर बाहरी स्क्रीन डिम हो जाती है</string>
     <string name="settings_auto_outer">पढ़ते समय कवर</string>
     <string name="settings_auto_outer_description">पढ़ने के लिए फ़ोन खोलते ही बाहरी स्क्रीन पर कवर दिखाएँ</string>
+    <string name="settings_cover_when_closed">बंद होने पर कवर</string>
+    <string name="settings_cover_when_closed_description">फ़ोन बंद हो और कोई किताब खुली हो, तो स्क्रीन पर उसका कवर दिखता है। पढ़ने के लिए फ़ोन खोलें, या यहीं पढ़ने, सुनने या वापस जाने के लिए कवर पर टैप करें।</string>
     <string name="settings_preview_outer">बाहरी स्क्रीन</string>
     <string name="settings_preview_widget">विजेट</string>
     <string name="settings_preview_description">आपकी मौजूदा सेटिंग के साथ कवर स्क्रीन की झलक</string>
@@ -158,6 +165,11 @@
     <string name="reading_page">पेज</string>
     <string name="reading_layout">लेआउट</string>
     <string name="reading_layout_hint">पेज किताब की तरह पलटते हैं: स्वाइप करें या किनारों पर टैप करें। फ़ोन खोलने पर दो पेज एक साथ दिखते हैं।</string>
+    <string name="reading_page_turn">पन्ना पलटना</string>
+    <string name="page_turn_slide">स्लाइड</string>
+    <string name="page_turn_paper">काग़ज़</string>
+    <string name="page_turn_curl">मोड़</string>
+    <string name="page_turn_cards">कार्ड</string>
     <string name="reading_line_spacing">लाइन स्पेसिंग</string>
     <string name="reading_line_spacing_book">किताब</string>
     <string name="reading_line_spacing_tight">कम</string>
@@ -271,4 +283,18 @@
     <string name="widget_reading">पढ़ी जा रही</string>
     <string name="widget_empty">कवर पहनाने के लिए कोई किताब जोड़ें</string>
     <string name="listen_notification_channel">पढ़कर सुनाना</string>
+    <string name="reader_footer_time_left">अध्याय में %1$d मिनट बाकी</string>
+    <string name="reading_time_left">अध्याय में बचा समय</string>
+    <string name="reading_edge_swipes">स्वाइप से चमक और गर्माहट</string>
+    <string name="reading_edge_swipes_description">चमक के लिए बाएँ किनारे पर और गर्माहट के लिए दाएँ किनारे पर ऊपर या नीचे स्वाइप करें।</string>
+    <string name="reading_night_pages">रात में गहरे पन्ने</string>
+    <string name="reading_night_pages_description">जब आपका फ़ोन डार्क थीम में हो, तो हल्के पन्ने भी गहरे हो जाते हैं।</string>
+    <string name="settings_tabletop">टेबलटॉप मोड</string>
+    <string name="settings_tabletop_description">मेज़ पर आधा मुड़ा हुआ: पन्ना मोड़ के ऊपर, कंट्रोल नीचे।</string>
+    <string name="settings_watch_folder">निगरानी वाला फ़ोल्डर</string>
+    <string name="settings_watch_folder_description">इस फ़ोल्डर की नई किताबें Jacket खुलते ही जुड़ जाती हैं।</string>
+    <string name="settings_reading_stats">पढ़ने का समय और लगातार दिन</string>
+    <string name="stats_today">आज %1$d मिनट</string>
+    <string name="stats_streak">दिन %1$d</string>
+    <string name="settings_ambient_quote">डिम कवर पर हाइलाइट</string>
 </resources>
