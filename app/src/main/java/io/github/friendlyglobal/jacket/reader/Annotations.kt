@@ -48,7 +48,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +65,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -72,6 +77,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Annotation
 import io.github.friendlyglobal.jacket.data.AnnotationKind
 import io.github.friendlyglobal.jacket.data.Book
@@ -136,6 +142,7 @@ fun NotesSheet(
         add(NotesTab.HIGHLIGHTS)
     }
     var tab by rememberSaveable { mutableStateOf(tabs.first()) }
+    val roomy = LocalConfiguration.current.screenWidthDp >= 600
     if (tab !in tabs) tab = tabs.first()
 
     Column(Modifier.fillMaxWidth()) {
@@ -144,9 +151,18 @@ fun NotesSheet(
             selected = tab,
             label = {
                 when (it) {
-                    NotesTab.CONTENTS -> "Contents"
-                    NotesTab.BOOKMARKS -> if (bookmarks.isEmpty()) "Bookmarks" else "Bookmarks · ${bookmarks.size}"
-                    NotesTab.HIGHLIGHTS -> if (highlights.isEmpty()) "Highlights" else "Highlights · ${highlights.size}"
+                    NotesTab.CONTENTS -> stringResource(R.string.notes_tab_contents)
+                    // Counts only fit when there's room (unfolded); the lists show them anyway.
+                    NotesTab.BOOKMARKS -> if (bookmarks.isEmpty() || !roomy) {
+                        stringResource(R.string.notes_tab_bookmarks)
+                    } else {
+                        stringResource(R.string.notes_tab_bookmarks_count, bookmarks.size)
+                    }
+                    NotesTab.HIGHLIGHTS -> if (highlights.isEmpty() || !roomy) {
+                        stringResource(R.string.notes_tab_highlights)
+                    } else {
+                        stringResource(R.string.notes_tab_highlights_count, highlights.size)
+                    }
                 }
             },
             onSelect = { tab = it },
@@ -160,12 +176,12 @@ fun NotesSheet(
             when (current) {
                 NotesTab.CONTENTS -> ContentsList(nav, haptics, onPickToc)
                 NotesTab.BOOKMARKS -> if (bookmarks.isEmpty()) {
-                    EmptyNotes(JacketIcons.Bookmark, "No bookmarks yet", "Tap the ribbon at the top of a page to keep your place there.")
+                    EmptyNotes(JacketIcons.Bookmark, stringResource(R.string.notes_no_bookmarks), stringResource(R.string.notes_no_bookmarks_hint))
                 } else {
                     AnnotationList(bookmarks, haptics, onPick, onEdit = null, onDelete)
                 }
                 NotesTab.HIGHLIGHTS -> if (highlights.isEmpty()) {
-                    EmptyNotes(JacketIcons.Highlight, "No highlights yet", "Press and hold on the text, then choose Highlight or Note.")
+                    EmptyNotes(JacketIcons.Highlight, stringResource(R.string.notes_no_highlights), stringResource(R.string.notes_no_highlights_hint))
                 } else {
                     AnnotationList(highlights, haptics, onPick, onEdit, onDelete)
                 }
@@ -222,7 +238,8 @@ private fun AnnotationList(
                 },
                 overlineContent = {
                     Text(
-                        listOf(item.chapter, "${(item.progress * 100).toInt()}%").filter { it.isNotBlank() }.joinToString(" · "),
+                        listOf(item.chapter, stringResource(R.string.percent, (item.progress * 100).toInt()))
+                            .filter { it.isNotBlank() }.joinToString(" · "),
                         maxLines = 1, overflow = TextOverflow.Ellipsis,
                     )
                 },
@@ -234,14 +251,14 @@ private fun AnnotationList(
                 trailingContent = {
                     Row {
                         if (onEdit != null) {
-                            IconButton(onClick = { haptics.tick(); onEdit(item) }) { Icon(JacketIcons.Note, "Edit note and colour") }
+                            IconButton(onClick = { haptics.tick(); onEdit(item) }) { Icon(JacketIcons.Note, stringResource(R.string.notes_edit)) }
                         }
-                        IconButton(onClick = { haptics.confirm(); onDelete(item) }) { Icon(JacketIcons.Delete, "Delete") }
+                        IconButton(onClick = { haptics.confirm(); onDelete(item) }) { Icon(JacketIcons.Delete, stringResource(R.string.notes_delete)) }
                     }
                 },
             ) {
                 Text(
-                    item.text.ifBlank { "Page at ${(item.progress * 100).toInt()}%" },
+                    item.text.ifBlank { stringResource(R.string.notes_bookmark_page_at, (item.progress * 100).toInt()) },
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = if (item.kind == AnnotationKind.HIGHLIGHT) 4 else 2,
                     overflow = TextOverflow.Ellipsis,
@@ -280,12 +297,22 @@ fun HighlightEditor(
     onDone: () -> Unit,
 ) {
     var note by remember(annotation.id) { mutableStateOf(annotation.note) }
+    // A note typed and then dismissed with a swipe or back is kept, not lost.
+    val latestNote by rememberUpdatedState(note)
+    val latest by rememberUpdatedState(annotation)
+    val save by rememberUpdatedState(onChange)
+    DisposableEffect(annotation.id) {
+        onDispose {
+            val text = latestNote.trim()
+            if (text != latest.note) save(latest.copy(note = text))
+        }
+    }
     Column(
         Modifier.fillMaxWidth().padding(horizontal = 24.dp).navigationBarsPadding().imePadding(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
-            "“${annotation.text}”", style = MaterialTheme.typography.bodyLarge, fontStyle = FontStyle.Italic,
+            stringResource(R.string.notes_highlight_quote, annotation.text), style = MaterialTheme.typography.bodyLarge, fontStyle = FontStyle.Italic,
             maxLines = 4, overflow = TextOverflow.Ellipsis,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -308,21 +335,21 @@ fun HighlightEditor(
         OutlinedTextField(
             value = note,
             onValueChange = { note = it },
-            label = { Text("Note") },
+            label = { Text(stringResource(R.string.notes_note)) },
             modifier = Modifier.fillMaxWidth().heightIn(min = 96.dp),
         )
         Row(Modifier.fillMaxWidth().padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = { haptics.confirm(); onDelete() }) {
                 Icon(JacketIcons.Delete, null)
                 Spacer(Modifier.width(8.dp))
-                Text("Delete")
+                Text(stringResource(R.string.notes_delete))
             }
             Spacer(Modifier.weight(1f))
             Button(onClick = {
                 haptics.confirm()
                 if (note != annotation.note) onChange(annotation.copy(note = note.trim()))
                 onDone()
-            }) { Text("Done") }
+            }) { Text(stringResource(R.string.notes_done)) }
         }
     }
 }
@@ -359,10 +386,10 @@ fun SearchPanel(search: BookSearch, haptics: Haptics, onPick: (SearchHit) -> Uni
         OutlinedTextField(
             value = query,
             onValueChange = { query = it },
-            placeholder = { Text("Search this book") },
+            placeholder = { Text(stringResource(R.string.search_placeholder)) },
             leadingIcon = { Icon(JacketIcons.Search, null) },
             trailingIcon = if (query.isNotEmpty()) {
-                { IconButton(onClick = { query = ""; job?.cancel(); hits.clear(); searched = ""; search.clear() }) { Icon(JacketIcons.Close, "Clear") } }
+                { IconButton(onClick = { query = ""; job?.cancel(); hits.clear(); searched = ""; search.clear() }) { Icon(JacketIcons.Close, stringResource(R.string.search_clear)) } }
             } else {
                 null
             },
@@ -376,10 +403,10 @@ fun SearchPanel(search: BookSearch, haptics: Haptics, onPick: (SearchHit) -> Uni
             when {
                 searching -> LinearWavyProgressIndicator(Modifier.fillMaxWidth())
                 searched.isNotEmpty() -> Text(
-                    when (hits.size) {
-                        0 -> "No results for “$searched”"
-                        1 -> "1 result"
-                        else -> "${hits.size} results"
+                    if (hits.isEmpty()) {
+                        stringResource(R.string.search_no_results, searched)
+                    } else {
+                        pluralStringResource(R.plurals.search_result_count, hits.size, hits.size)
                     },
                     style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -456,26 +483,26 @@ fun FinishedCard(
                 Spacer(Modifier.width(16.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        if (book.isFinished) "Finished" else "The end",
+                        if (book.isFinished) stringResource(R.string.finished_title_finished) else stringResource(R.string.finished_title_end),
                         style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold,
                     )
                     Text(book.title, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-                IconButton(onClick = onDismiss) { Icon(JacketIcons.Close, "Keep reading") }
+                IconButton(onClick = onDismiss) { Icon(JacketIcons.Close, stringResource(R.string.finished_keep_reading)) }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (!book.isFinished) {
                     Button(onClick = onFinish) {
                         Icon(JacketIcons.Check, null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Mark as finished")
+                        Text(stringResource(R.string.finished_mark))
                     }
                 } else {
-                    Button(onClick = onLibrary) { Text("Back to library") }
+                    Button(onClick = onLibrary) { Text(stringResource(R.string.finished_back_to_library)) }
                 }
                 if (next != null) {
                     FilledTonalButton(onClick = { onNext(next) }, modifier = Modifier.weight(1f, fill = false)) {
-                        Text("Next: ${next.title}", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(stringResource(R.string.finished_next, next.title), maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }

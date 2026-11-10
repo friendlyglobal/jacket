@@ -27,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -159,6 +160,7 @@ private fun JacketRoot(
     onImport: (List<Uri>) -> Unit,
 ) {
     val library = LocalContext.current.library
+    val resources = LocalResources.current
     val haptics = rememberHaptics()
     val state by library.state.collectAsStateWithLifecycle()
     val missing by library.missing.collectAsStateWithLifecycle()
@@ -184,7 +186,8 @@ private fun JacketRoot(
     LaunchedEffect(Unit) {
         reports.collect { report ->
             if (report.failed.isEmpty()) haptics.confirm() else haptics.reject()
-            if (report.message.isNotEmpty()) snackbar.showSnackbar(report.message)
+            val message = report.message(resources)
+            if (message.isNotEmpty()) snackbar.showSnackbar(message)
         }
     }
     // A removed book can't stay open.

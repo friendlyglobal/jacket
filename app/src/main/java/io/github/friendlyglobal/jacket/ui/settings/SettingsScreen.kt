@@ -43,8 +43,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.CoverStyle
 import io.github.friendlyglobal.jacket.data.LibraryState
 import io.github.friendlyglobal.jacket.data.Settings
@@ -75,21 +79,30 @@ fun SettingsScreen(
 ) {
     val settings = state.settings
     val library = LocalContext.current.library
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     var message by remember { mutableStateOf<String?>(null) }
     val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(Backup.MIME)) { uri ->
         if (uri != null) scope.launch {
             message = runCatching { library.exportBackup(uri) }
-                .fold({ "Backup saved." }, { "Couldn't save the backup: ${it.message}" })
+                .fold(
+                    { resources.getString(R.string.settings_backup_saved) },
+                    { resources.getString(R.string.settings_backup_save_failed, it.message) },
+                )
         }
     }
     val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) scope.launch {
             message = runCatching { library.importBackup(uri) }.fold(
                 { missing ->
-                    if (missing == 0) "Backup restored." else "Backup restored. Add the files for $missing book${if (missing == 1) "" else "s"} to reconnect them."
+                    if (missing == 0) resources.getString(R.string.settings_backup_restored)
+                    else resources.getQuantityString(R.plurals.settings_backup_restored_missing, missing, missing)
                 },
-                { it.message ?: "Couldn't read that file." },
+                // Backup.read throws IllegalArgumentException for a file that isn't a backup.
+                {
+                    if (it is IllegalArgumentException) resources.getString(R.string.settings_backup_not_a_backup)
+                    else it.message ?: resources.getString(R.string.settings_backup_unreadable)
+                },
             )
         }
     }
@@ -125,9 +138,9 @@ fun SettingsScreen(
             },
         topBar = {
             LargeFlexibleTopAppBar(
-                title = { Text("Settings") },
-                subtitle = { Text("Profile, cover screen and reading") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(JacketIcons.Back, "Back") } },
+                title = { Text(stringResource(R.string.settings_title)) },
+                subtitle = { Text(stringResource(R.string.settings_subtitle)) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(JacketIcons.Back, stringResource(R.string.common_back)) } },
                 scrollBehavior = scroll,
             )
         },
@@ -144,7 +157,7 @@ fun SettingsScreen(
 
             item { ProfileCard(state, column) }
 
-            item { GroupTitle("Cover screen", column) }
+            item { GroupTitle(stringResource(R.string.settings_group_cover_screen), column) }
             item {
                 Group(column) {
                     val count = 5
@@ -153,59 +166,69 @@ fun SettingsScreen(
                         leadingContent = { Icon(JacketIcons.OuterScreen, null) },
                         supportingContent = {
                             Text(
-                                if (outerAvailable) "Your phone can show the cover on its outer screen while you read inside."
-                                else "Unfold a book-style foldable to use its outer screen. Flip phones use the widget below.",
+                                if (outerAvailable) stringResource(R.string.settings_outer_ready_description)
+                                else stringResource(R.string.settings_outer_unavailable_description),
                             )
                         },
-                    ) { Text(if (outerAvailable) "Outer screen ready" else "Outer screen not available right now") }
+                    ) {
+                        Text(
+                            if (outerAvailable) stringResource(R.string.settings_outer_ready)
+                            else stringResource(R.string.settings_outer_unavailable),
+                        )
+                    }
                     SegmentedListItem(shapes = ListItemDefaults.segmentedShapes(1, count)) {
                         Column(Modifier.padding(vertical = 4.dp)) {
-                            Text("Widget style")
+                            Text(stringResource(R.string.settings_widget_style))
                             Text(
-                                "For the Galaxy Z Flip cover screen and home screens",
+                                stringResource(R.string.settings_widget_style_description),
                                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Spacer(Modifier.height(10.dp))
                             ConnectedChoice(
-                                options = CoverStyle.entries, selected = settings.coverStyle, label = { it.label },
+                                options = CoverStyle.entries, selected = settings.coverStyle, label = { stringResource(it.label) },
                                 onSelect = { style -> onSettings { it.copy(coverStyle = style) } },
                             )
                         }
                     }
-                    SwitchRow(2, count, "Reading progress", "A slim progress bar and percentage on the cover", settings.showProgress) {
+                    SwitchRow(
+                        2, count, stringResource(R.string.settings_show_progress),
+                        stringResource(R.string.settings_show_progress_description), settings.showProgress,
+                    ) {
                         toggle(it) { s -> s.copy(showProgress = it) }
                     }
-                    SwitchRow(3, count, "Ambient dim", "The outer screen dims after 30 seconds untouched", settings.ambientDim) {
+                    SwitchRow(
+                        3, count, stringResource(R.string.settings_ambient_dim),
+                        stringResource(R.string.settings_ambient_dim_description), settings.ambientDim,
+                    ) {
                         toggle(it) { s -> s.copy(ambientDim = it) }
                     }
-                    SwitchRow(4, count, "Cover while reading", "Put the cover on the outer screen whenever you unfold to read", settings.autoOuterScreen) {
+                    SwitchRow(
+                        4, count, stringResource(R.string.settings_auto_outer),
+                        stringResource(R.string.settings_auto_outer_description), settings.autoOuterScreen,
+                    ) {
                         toggle(it) { s -> s.copy(autoOuterScreen = it) }
                     }
                 }
             }
             item {
-                Hint(
-                    "Galaxy Z Flip: add “Jacket cover” under Settings › Cover screen › Widgets. " +
-                        "Motorola Razr: open Jacket from the external display.",
-                    column,
-                )
+                Hint(stringResource(R.string.settings_cover_hint), column)
             }
 
-            item { GroupTitle("Reading", column) }
+            item { GroupTitle(stringResource(R.string.settings_group_reading), column) }
             item { ReadingControls(settings, onSettings, column) }
 
-            item { GroupTitle("Appearance", column) }
+            item { GroupTitle(stringResource(R.string.settings_group_appearance), column) }
             item {
                 Group(column) {
                     SwitchRow(
-                        0, 1, "Colors from your book",
-                        "Tint Jacket with the cover of the book you're reading. Off: use your phone's palette.",
+                        0, 1, stringResource(R.string.settings_book_colors),
+                        stringResource(R.string.settings_book_colors_description),
                         settings.bookColors,
                     ) { toggle(it) { s -> s.copy(bookColors = it) } }
                 }
             }
 
-            item { GroupTitle("Backup", column) }
+            item { GroupTitle(stringResource(R.string.settings_group_backup), column) }
             item {
                 Group(column) {
                     SegmentedListItem(
@@ -215,18 +238,18 @@ fun SettingsScreen(
                         },
                         shapes = ListItemDefaults.segmentedShapes(0, 2),
                         leadingContent = { Icon(JacketIcons.Download, null) },
-                        supportingContent = { Text("Your books list, places, bookmarks, highlights and settings. Not the book files.") },
-                    ) { Text("Save a backup") }
+                        supportingContent = { Text(stringResource(R.string.settings_backup_save_description)) },
+                    ) { Text(stringResource(R.string.settings_backup_save)) }
                     SegmentedListItem(
                         onClick = { haptics.tick(); importer.launch(arrayOf(Backup.MIME, "application/octet-stream", "text/plain")) },
                         shapes = ListItemDefaults.segmentedShapes(1, 2),
                         leadingContent = { Icon(JacketIcons.Upload, null) },
-                        supportingContent = { Text("Then add the book files again: each finds its place and notes.") },
-                    ) { Text("Restore from a backup") }
+                        supportingContent = { Text(stringResource(R.string.settings_backup_restore_description)) },
+                    ) { Text(stringResource(R.string.settings_backup_restore)) }
                 }
             }
 
-            item { GroupTitle("About", column) }
+            item { GroupTitle(stringResource(R.string.settings_group_about), column) }
             item {
                 Group(column) {
                     val version = remember {
@@ -235,8 +258,8 @@ fun SettingsScreen(
                     SegmentedListItem(
                         shapes = ListItemDefaults.segmentedShapes(0, 3),
                         leadingContent = { Icon(JacketIcons.Info, null) },
-                        supportingContent = { Text("Version $version") },
-                    ) { Text("Jacket") }
+                        supportingContent = { Text(stringResource(R.string.settings_about_version, version)) },
+                    ) { Text(stringResource(R.string.app_name)) }
                     SegmentedListItem(
                         onClick = {
                             haptics.tick()
@@ -244,14 +267,14 @@ fun SettingsScreen(
                         },
                         shapes = ListItemDefaults.segmentedShapes(1, 3),
                         leadingContent = { Icon(JacketIcons.Code, null) },
-                        supportingContent = { Text("Open source on GitHub") },
-                    ) { Text("Source code") }
+                        supportingContent = { Text(stringResource(R.string.settings_about_source_description)) },
+                    ) { Text(stringResource(R.string.settings_about_source)) }
                     SegmentedListItem(
                         onClick = { haptics.tick(); onLicenses() },
                         shapes = ListItemDefaults.segmentedShapes(2, 3),
                         leadingContent = { Icon(JacketIcons.Gavel, null) },
-                        supportingContent = { Text("Jacket is Apache 2.0, built on Readium, Jetpack and open fonts") },
-                    ) { Text("Open-source licenses") }
+                        supportingContent = { Text(stringResource(R.string.settings_about_licenses_description)) },
+                    ) { Text(stringResource(R.string.settings_about_licenses)) }
                 }
             }
         }
@@ -260,7 +283,7 @@ fun SettingsScreen(
         AlertDialog(
             onDismissRequest = { message = null },
             text = { Text(text) },
-            confirmButton = { TextButton(onClick = { message = null }) { Text("OK") } },
+            confirmButton = { TextButton(onClick = { message = null }) { Text(stringResource(R.string.common_ok)) } },
         )
     }
 }
@@ -282,17 +305,18 @@ private fun ProfileCard(state: LibraryState, modifier: Modifier) {
             ) { Icon(JacketIcons.Person, null, tint = MaterialTheme.colorScheme.onPrimary) }
             Spacer(Modifier.width(16.dp))
             Column {
-                Text("Your library", style = MaterialTheme.typography.titleLargeEmphasized)
+                Text(stringResource(R.string.settings_profile_title), style = MaterialTheme.typography.titleLargeEmphasized)
                 Text(
-                    listOf(
-                        if (books.size == 1) "1 book" else "${books.size} books",
-                        "$reading reading",
-                        "$finished finished",
-                    ).joinToString(" · "),
+                    stringResource(
+                        R.string.settings_profile_summary,
+                        pluralStringResource(R.plurals.settings_profile_books, books.size, books.size),
+                        pluralStringResource(R.plurals.settings_profile_reading, reading, reading),
+                        pluralStringResource(R.plurals.settings_profile_finished, finished, finished),
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 state.current?.let {
-                    Text("On your cover: ${it.title}", style = MaterialTheme.typography.bodySmall, maxLines = 1)
+                    Text(stringResource(R.string.settings_profile_on_cover, it.title), style = MaterialTheme.typography.bodySmall, maxLines = 1)
                 }
             }
         }

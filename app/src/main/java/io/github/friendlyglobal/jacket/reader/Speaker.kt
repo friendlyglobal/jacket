@@ -13,6 +13,7 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import io.github.friendlyglobal.jacket.R
 import java.util.Locale
 
 /** One spoken piece of a paragraph. Ids look like "token:paragraph:offset:flags". */
@@ -155,7 +156,7 @@ class Speaker(context: Context) {
         if (listener == null) return // the reader is gone; nothing to tell
         if (state == 1) tts.stop()
         release()
-        Toast.makeText(app, "The voice stopped. Check your text-to-speech settings.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(app, R.string.listen_voice_stopped, Toast.LENGTH_SHORT).show()
         listener?.onFailed()
     }
 

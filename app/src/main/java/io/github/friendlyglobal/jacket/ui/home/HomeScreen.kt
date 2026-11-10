@@ -76,11 +76,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.LibrarySort
 import io.github.friendlyglobal.jacket.data.LibraryState
@@ -117,7 +121,9 @@ fun HomeScreen(
     val grid = rememberLazyGridState()
     val fabExpanded by remember { derivedStateOf { grid.firstVisibleItemIndex == 0 } }
     var query by rememberSaveable { mutableStateOf("") }
-    val hero = state.current?.takeIf { !it.isFinished } ?: state.books.filter { !it.isFinished }.maxByOrNull { it.lastOpenedAt }
+    // The hero is the book you're reading, if its file is here (after a restore it may not be yet).
+    val hero = state.current?.takeIf { !it.isFinished && it.id !in missing }
+        ?: state.books.filter { !it.isFinished && it.id !in missing }.maxByOrNull { maxOf(it.lastOpenedAt, it.addedAt) }
     val finished = state.settings.showFinished
     val finishedCount = state.books.count { it.isFinished }
     // The finished shelf only exists once something is on it.
@@ -131,7 +137,7 @@ fun HomeScreen(
                 title = { Brand() },
                 actions = {
                     FilledTonalIconButton(onClick = { haptics.tick(); onOpenSettings() }, modifier = Modifier.padding(end = 8.dp)) {
-                        Icon(JacketIcons.Person, "Profile and settings")
+                        Icon(JacketIcons.Person, stringResource(R.string.library_profile_and_settings))
                     }
                 },
             )
@@ -139,7 +145,7 @@ fun HomeScreen(
         floatingActionButton = {
             if (state.books.isNotEmpty()) {
                 ExtendedFloatingActionButton(
-                    text = { Text("Add books") },
+                    text = { Text(stringResource(R.string.library_add_books)) },
                     icon = { Icon(JacketIcons.Add, null) },
                     onClick = addBooks,
                     expanded = fabExpanded,
@@ -185,7 +191,7 @@ fun HomeScreen(
                     if (shown.isEmpty()) {
                         item(key = "nothing", span = { GridItemSpan(maxLineSpan) }) {
                             Text(
-                                if (query.isBlank()) "Everything here is finished. Add another book!" else "No books match “$query”",
+                                if (query.isBlank()) stringResource(R.string.library_all_finished) else stringResource(R.string.library_no_match, query),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center,
                                 modifier = Modifier.padding(vertical = 32.dp),
@@ -233,7 +239,7 @@ private fun Brand() {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(26.dp).clip(MaterialShapes.Cookie9Sided.toShape()).background(MaterialTheme.colorScheme.primary))
         Spacer(Modifier.width(10.dp))
-        Text("Jacket", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+        Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
     }
 }
 
@@ -260,7 +266,7 @@ private fun ContinueCard(book: Book, outerAvailable: Boolean, onOpen: (Book) -> 
             Spacer(Modifier.width(18.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    if (book.isNew) "START READING" else "CONTINUE READING",
+                    if (book.isNew) stringResource(R.string.library_start_reading) else stringResource(R.string.library_continue_reading),
                     style = MaterialTheme.typography.labelMedium, letterSpacing = 1.4.sp, fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(Modifier.height(4.dp))
@@ -277,13 +283,13 @@ private fun ContinueCard(book: Book, outerAvailable: Boolean, onOpen: (Book) -> 
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(book.statusLabel, style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+                    Text(book.statusLabel(LocalResources.current), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
                     AnimatedVisibility(outerAvailable) {
                         Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary) {
                             Row(Modifier.padding(horizontal = 10.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Icon(JacketIcons.OuterScreen, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onPrimary)
                                 Spacer(Modifier.width(6.dp))
-                                Text("On your cover", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary)
+                                Text(stringResource(R.string.library_on_your_cover), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary)
                             }
                         }
                     }
@@ -313,10 +319,13 @@ private fun LibraryHeader(
                 label = "shelf-title",
                 modifier = Modifier.weight(1f),
             ) { done ->
-                Text(if (done) "Finished" else "Library", style = MaterialTheme.typography.headlineSmallEmphasized)
+                Text(
+                    if (done) stringResource(R.string.library_title_finished) else stringResource(R.string.library_title),
+                    style = MaterialTheme.typography.headlineSmallEmphasized,
+                )
             }
             Text(
-                if (count == 1) "1 book" else "$count books",
+                pluralStringResource(R.plurals.library_book_count, count, count),
                 style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -325,14 +334,17 @@ private fun LibraryHeader(
             ConnectedChoice(
                 options = listOf(false, true),
                 selected = onFinishedShelf,
-                label = { if (it) "Finished · $finishedCount" else "Reading" },
+                label = {
+                    if (it) stringResource(R.string.library_shelf_finished_count, finishedCount)
+                    else stringResource(R.string.library_shelf_reading)
+                },
                 onSelect = onShelf,
                 modifier = Modifier.widthIn(max = 420.dp),
             )
         }
         Spacer(Modifier.height(12.dp))
         ConnectedChoice(
-            options = LibrarySort.entries, selected = sort, label = { it.label }, onSelect = onSort,
+            options = LibrarySort.entries, selected = sort, label = { stringResource(it.label) }, onSelect = onSort,
             modifier = Modifier.widthIn(max = 420.dp),
         )
         if (searchable || query.isNotEmpty()) {
@@ -341,10 +353,10 @@ private fun LibraryHeader(
                 value = query,
                 onValueChange = onQuery,
                 singleLine = true,
-                placeholder = { Text("Search titles and authors") },
+                placeholder = { Text(stringResource(R.string.library_search_placeholder)) },
                 leadingIcon = { Icon(JacketIcons.Search, null) },
                 trailingIcon = if (query.isNotEmpty()) {
-                    { IconButton(onClick = { onQuery("") }) { Icon(JacketIcons.Close, "Clear search") } }
+                    { IconButton(onClick = { onQuery("") }) { Icon(JacketIcons.Close, stringResource(R.string.library_clear_search)) } }
                 } else null,
                 shape = CircleShape,
                 colors = TextFieldDefaults.colors(
@@ -386,7 +398,7 @@ private fun BookTile(
                     indication = ripple(),
                     onClick = { onOpen(book) },
                     onLongClick = { haptics.longPress(); menu = true },
-                    onLongClickLabel = "More options",
+                    onLongClickLabel = stringResource(R.string.library_more_options),
                 ),
         ) {
             // The hero card already carries this book's shared cover; keys must be unique on screen.
@@ -400,7 +412,7 @@ private fun BookTile(
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(8.dp)) {
                         Icon(JacketIcons.Upload, null, tint = Color.White)
                         Text(
-                            "Add the file again", style = MaterialTheme.typography.labelMedium, color = Color.White,
+                            stringResource(R.string.library_add_file_again), style = MaterialTheme.typography.labelMedium, color = Color.White,
                             textAlign = TextAlign.Center,
                         )
                     }
@@ -412,7 +424,7 @@ private fun BookTile(
                         .background(MaterialTheme.colorScheme.tertiary),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(JacketIcons.Check, "Finished", Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onTertiary)
+                    Icon(JacketIcons.Check, stringResource(R.string.library_finished_badge), Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onTertiary)
                 }
             }
             if (book.isNew && !missing) {
@@ -421,7 +433,7 @@ private fun BookTile(
                     modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
                 ) {
                     Text(
-                        "New", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onTertiary,
+                        stringResource(R.string.library_new_badge), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onTertiary,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                     )
                 }
@@ -433,7 +445,7 @@ private fun BookTile(
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(JacketIcons.OuterScreen, "On your cover screen", Modifier.size(15.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                    Icon(JacketIcons.OuterScreen, stringResource(R.string.library_on_cover_screen), Modifier.size(15.dp), tint = MaterialTheme.colorScheme.onPrimary)
                 }
             }
             if (!book.isNew && !book.isFinished && book.progress > 0f) {
@@ -443,20 +455,25 @@ private fun BookTile(
                 )
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(text = { Text("Open") }, leadingIcon = { Icon(JacketIcons.Book, null) }, onClick = { menu = false; onOpen(book) })
+                DropdownMenuItem(text = { Text(stringResource(R.string.library_menu_open)) }, leadingIcon = { Icon(JacketIcons.Book, null) }, onClick = { menu = false; onOpen(book) })
                 if (!onCover) {
                     DropdownMenuItem(
-                        text = { Text("Show on cover screen") }, leadingIcon = { Icon(JacketIcons.OuterScreen, null) },
+                        text = { Text(stringResource(R.string.library_menu_show_on_cover)) }, leadingIcon = { Icon(JacketIcons.OuterScreen, null) },
                         onClick = { menu = false; haptics.confirm(); onShowOnCover(book) },
                     )
                 }
                 DropdownMenuItem(
-                    text = { Text(if (book.isFinished) "Mark as not finished" else "Mark as finished") },
+                    text = {
+                        Text(
+                            if (book.isFinished) stringResource(R.string.library_menu_mark_unfinished)
+                            else stringResource(R.string.library_menu_mark_finished),
+                        )
+                    },
                     leadingIcon = { Icon(JacketIcons.Check, null) },
                     onClick = { menu = false; haptics.confirm(); onFinished(book, !book.isFinished) },
                 )
                 DropdownMenuItem(
-                    text = { Text("Remove") }, leadingIcon = { Icon(JacketIcons.Delete, null) },
+                    text = { Text(stringResource(R.string.library_menu_remove)) }, leadingIcon = { Icon(JacketIcons.Delete, null) },
                     onClick = { menu = false; confirm = true },
                 )
             }
@@ -473,10 +490,12 @@ private fun BookTile(
     if (confirm) {
         AlertDialog(
             onDismissRequest = { confirm = false },
-            title = { Text("Remove “${book.title}”?") },
-            text = { Text("Jacket deletes its own copy and your reading position. The original file stays where it was.") },
-            confirmButton = { TextButton(onClick = { confirm = false; haptics.confirm(); onDelete(book) }) { Text("Remove") } },
-            dismissButton = { TextButton(onClick = { confirm = false }) { Text("Cancel") } },
+            title = { Text(stringResource(R.string.library_remove_title, book.title)) },
+            text = { Text(stringResource(R.string.library_remove_message)) },
+            confirmButton = {
+                TextButton(onClick = { confirm = false; haptics.confirm(); onDelete(book) }) { Text(stringResource(R.string.library_remove_confirm)) }
+            },
+            dismissButton = { TextButton(onClick = { confirm = false }) { Text(stringResource(R.string.common_cancel)) } },
         )
     }
 }
@@ -505,11 +524,10 @@ private fun EmptyLibrary(modifier: Modifier, onAdd: () -> Unit) {
             )
         }
         Spacer(Modifier.height(28.dp))
-        Text("Let your foldable wear your book", style = MaterialTheme.typography.headlineSmallEmphasized, textAlign = TextAlign.Center)
+        Text(stringResource(R.string.library_empty_title), style = MaterialTheme.typography.headlineSmallEmphasized, textAlign = TextAlign.Center)
         Spacer(Modifier.height(12.dp))
         Text(
-            "Add an EPUB, PDF, CBZ comic or text file. Jacket keeps a private copy and puts its cover " +
-                "on your outer screen, or in a cover-screen widget, while you read.",
+            stringResource(R.string.library_empty_message),
             style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center, modifier = Modifier.widthIn(max = 420.dp),
         )
@@ -517,7 +535,7 @@ private fun EmptyLibrary(modifier: Modifier, onAdd: () -> Unit) {
         Button(onClick = onAdd, shapes = ButtonDefaults.shapes()) {
             Icon(JacketIcons.Add, null, Modifier.size(ButtonDefaults.IconSize))
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-            Text("Add books")
+            Text(stringResource(R.string.library_add_books))
         }
     }
 }

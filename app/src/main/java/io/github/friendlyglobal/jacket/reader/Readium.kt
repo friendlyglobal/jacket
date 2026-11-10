@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import androidx.fragment.app.FragmentManager
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.LineSpacing
 import io.github.friendlyglobal.jacket.data.PageLayout
 import io.github.friendlyglobal.jacket.data.TextAlignment
@@ -194,10 +195,10 @@ class SelectionMenu(private val context: Context) : ActionMode.Callback {
     private var processors: List<ResolveInfo> = emptyList()
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        menu.add(Menu.NONE, ID_HIGHLIGHT, 0, "Highlight")
-        menu.add(Menu.NONE, ID_NOTE, 1, "Note")
+        menu.add(Menu.NONE, ID_HIGHLIGHT, 0, R.string.selection_highlight)
+        menu.add(Menu.NONE, ID_NOTE, 1, R.string.selection_note)
         menu.add(Menu.NONE, ID_COPY, 2, android.R.string.copy)
-        menu.add(Menu.NONE, ID_SHARE, 3, "Share")
+        menu.add(Menu.NONE, ID_SHARE, 3, R.string.selection_share)
         val pm = context.packageManager
         processors = runCatching {
             pm.queryIntentActivities(Intent(Intent.ACTION_PROCESS_TEXT).setType("text/plain"), 0)

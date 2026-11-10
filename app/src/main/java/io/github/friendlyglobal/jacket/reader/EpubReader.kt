@@ -6,6 +6,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -33,10 +34,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.fragment.compose.AndroidFragment
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Annotation
 import io.github.friendlyglobal.jacket.data.AnnotationKind
 import io.github.friendlyglobal.jacket.data.Book
@@ -125,9 +129,9 @@ fun EpubReader(
     }
     val result = opened ?: return ReaderLoading()
     val (publication, start) = result.getOrElse {
-        return ReaderError("Couldn't open this book.\n${it.message.orEmpty()}")
+        return ReaderError(stringResource(R.string.reader_error_open_book, it.message.orEmpty()))
     }
-    if (publication.readingOrder.isEmpty()) return ReaderError("This book has no pages to show.")
+    if (publication.readingOrder.isEmpty()) return ReaderError(stringResource(R.string.reader_error_no_pages))
     EpubPages(book, publication, start, settings, page, nav, haptics, annotations, onCenterTap)
 }
 
@@ -151,6 +155,7 @@ private fun EpubPages(
     onCenterTap: () -> Unit,
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val library = context.library
     val selectionMenu = remember(publication) { SelectionMenu(context) }
     val scope = rememberCoroutineScope()
@@ -255,12 +260,14 @@ private fun EpubPages(
     // Readium reports the page count after the location, so the footer follows both.
     LaunchedEffect(current, located, filePage, scroll, nav.title) {
         val locator = current ?: return@LaunchedEffect
-        nav.footer = footerFor(scroll, nav.title, filePage, locator, located)
+        nav.footer = footerFor(resources, scroll, nav.title, filePage, locator, located)
         nav.pageKey++
         // The last page of the last file (or the bottom of it, scrolling): the end of the book.
         val lastFile = contents.resourceOf(locator.href) == contents.fileCount - 1
         nav.atEnd = lastFile && if (scroll) {
-            (locator.locations.progression ?: 0.0) >= 0.97
+            // Scrolling, Readium's progression stops a screen short of 1: ask the page.
+            val n = navigator
+            n != null && runCatching { n.evaluateJavascript(AT_BOTTOM_SCRIPT) }.getOrNull() == "true"
         } else {
             filePage.href == locator.href.toString() && filePage.count > 0 && filePage.index >= filePage.count - 1
         }
@@ -325,8 +332,13 @@ private fun EpubPages(
                         .setPrimaryClip(ClipData.newPlainText(book.title, text))
                 }
                 SelectionMenu.Action.SHARE -> runCatching {
+                    val quote = if (book.author.isNotBlank()) {
+                        resources.getString(R.string.reader_share_quote_author, text, book.title, book.author)
+                    } else {
+                        resources.getString(R.string.reader_share_quote, text, book.title)
+                    }
                     val send = Intent(Intent.ACTION_SEND).setType("text/plain")
-                        .putExtra(Intent.EXTRA_TEXT, "“$text”\n— ${book.title}${if (book.author.isNotBlank()) ", ${book.author}" else ""}")
+                        .putExtra(Intent.EXTRA_TEXT, quote)
                     context.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 }
                 SelectionMenu.Action.PROCESS -> runCatching {
@@ -402,7 +414,7 @@ private fun EpubPages(
     }
 
     val listen = remember(publication) {
-        ReadAloud(context, publication, book.id, { navigator }, nav.listen, scope)
+        ReadAloud(context, publication, book.id, { navigator }, nav.listen, scope) { href -> contents.resourceOf(href) }
     }
     listen.colors = page.link.toArgb() to page.background.toArgb()
     LaunchedEffect(listen, settings.listenRate) { listen.setRate(settings.listenRate) }
@@ -534,17 +546,17 @@ private fun navigatorScrolls(navigator: EpubNavigatorFragment?): Boolean =
 
 private data class FilePage(val href: String = "", val index: Int = 0, val count: Int = 0)
 
-private fun footerFor(scroll: Boolean, chapter: String, file: FilePage, locator: Locator, here: Located?): String {
+private fun footerFor(resources: Resources, scroll: Boolean, chapter: String, file: FilePage, locator: Locator, here: Located?): String {
     if (scroll) return chapter
     val left = when {
         here?.pagesToNext != null -> here.pagesToNext
         file.href == locator.href.toString() && file.count > 0 -> file.count - 1 - file.index
         else -> return chapter
     }.coerceAtLeast(0)
-    return when (left) {
-        0 -> "Last page in chapter"
-        1 -> "1 page left in chapter"
-        else -> "$left pages left in chapter"
+    return if (left == 0) {
+        resources.getString(R.string.reader_footer_last_page)
+    } else {
+        resources.getQuantityString(R.plurals.reader_footer_pages_left, left, left)
     }
 }
 
@@ -567,7 +579,7 @@ private fun openLink(context: Context, url: AbsoluteUrl) {
     try {
         context.startActivity(Intent(Intent.ACTION_VIEW, url.toString().toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     } catch (_: ActivityNotFoundException) {
-        Toast.makeText(context, "No app can open this link.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, R.string.reader_no_app_for_link, Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -725,6 +737,9 @@ private fun anchorScript(ids: JSONArray, scroll: Boolean) = """
 // ---------------------------------------------------------------------------------------------
 
 private const val HIGHLIGHTS = "highlights"
+
+private const val AT_BOTTOM_SCRIPT =
+    "(function(){var s=document.scrollingElement;return s.scrollTop+window.innerHeight>=s.scrollHeight-8;})()"
 private const val SEARCH = "search"
 
 /**
@@ -811,12 +826,16 @@ private class ReadAloud(
     private val navigator: () -> EpubNavigatorFragment?,
     private val listen: ListenState,
     private val scope: CoroutineScope,
+    /** Which chapter file a locator is in, so the sleep timer knows when one ends. */
+    private val fileOf: (org.readium.r2.shared.util.Url) -> Int,
 ) : ListenController {
+    private var mediaSession: androidx.media3.session.MediaSession? = null
     /** Highlight tint and page color, for the read-along decorations. */
     var colors: Pair<Int, Int> = 0 to 0
     private var speed = 1f
 
-    override val unit = "sentence"
+    override val previousLabel = R.string.listen_previous_sentence
+    override val nextLabel = R.string.listen_next_sentence
     private val factory by lazy { AndroidTtsNavigatorFactory(context.applicationContext as Application, publication) }
     private var tts: AndroidTtsNavigator? = null
     private var session: Job? = null
@@ -831,7 +850,7 @@ private class ReadAloud(
         listen.active = true
         listen.playing = true
         session = scope.launch {
-            val factory = factory ?: return@launch fail("This book has no text that can be read aloud.")
+            val factory = factory ?: return@launch fail(context.getString(R.string.listen_no_readable_text))
             // The first block of text on screen; before the page has loaded, wherever you are.
             val from = navigator()?.let { it.firstVisibleElementLocator() ?: it.currentLocator.value }
             val tts = factory.createNavigator(
@@ -840,7 +859,7 @@ private class ReadAloud(
                 },
                 initialLocator = from,
                 initialPreferences = AndroidTtsPreferences(speed = speed.toDouble()),
-            ).getOrElse { return@launch fail("This phone has no text-to-speech voice installed.") }
+            ).getOrElse { return@launch fail(context.getString(R.string.listen_no_voice)) }
             if (!isActive) {
                 // Stopped while the engine was starting.
                 tts.close()
@@ -848,13 +867,13 @@ private class ReadAloud(
             }
             this@ReadAloud.tts = tts
             // Lock screen, notification and headphone controls; keeps playing with the screen off.
-            ListenService.attach(context.applicationContext, tts.asMedia3Player(), bookId)
+            mediaSession = ListenService.attach(context.applicationContext, tts.asMedia3Player(), bookId)
             launch {
                 tts.playback.collect { playback ->
                     listen.playing = playback.playWhenReady && playback.state is TtsNavigator.State.Ready
                     when (val state = playback.state) {
                         is TtsNavigator.State.Ended -> stop()
-                        is TtsNavigator.State.Failure -> fail("Read aloud stopped: ${state.error.message}")
+                        is TtsNavigator.State.Failure -> fail(context.getString(R.string.listen_stopped_error, state.error.message))
                         else -> {}
                     }
                 }
@@ -862,6 +881,7 @@ private class ReadAloud(
             launch {
                 var utterance: Locator? = null
                 tts.location.collect { location ->
+                    listen.spokenFile = fileOf(location.href)
                     val n = navigator() ?: return@collect
                     // Turn the page to follow the voice.
                     if (location.utteranceLocator != utterance) {
@@ -911,7 +931,9 @@ private class ReadAloud(
     override fun stop() {
         session?.cancel()
         session = null
-        ListenService.detach()
+        mediaSession?.let(ListenService::detach)
+        mediaSession = null
+        listen.spokenFile = -1
         tts?.close()
         tts = null
         listen.active = false

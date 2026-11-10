@@ -13,6 +13,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.importer.Bitmaps
 import io.github.friendlyglobal.jacket.library
@@ -46,7 +48,7 @@ fun CoverImage(book: Book?, modifier: Modifier = Modifier, contentScale: Content
     val cover = rememberCover(book, maxHeight)
     Box(modifier.background(MaterialTheme.colorScheme.surfaceContainerHighest)) {
         if (cover != null) {
-            Image(cover, contentDescription = book?.let { "Cover of ${it.title}" }, contentScale = contentScale, modifier = Modifier.matchParentSize())
+            Image(cover, contentDescription = book?.let { stringResource(R.string.cover_of, it.title) }, contentScale = contentScale, modifier = Modifier.matchParentSize())
         }
     }
 }

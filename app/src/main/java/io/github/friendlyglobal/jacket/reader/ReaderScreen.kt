@@ -78,11 +78,13 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Annotation
 import io.github.friendlyglobal.jacket.data.AnnotationKind
 import io.github.friendlyglobal.jacket.data.Book
@@ -236,8 +238,10 @@ fun ReaderScreen(
 
     // Volume keys turn pages while reading (not while listening, when they're for volume).
     DisposableEffect(settings.volumeKeys, nav.listen.active) {
-        ReaderKeys.handler = if (settings.volumeKeys && !nav.listen.active) { delta -> nav.turnPage(delta) } else null
-        onDispose { ReaderKeys.handler = null }
+        val handler: ((Int) -> Unit)? = if (settings.volumeKeys && !nav.listen.active) { delta -> nav.turnPage(delta) } else null
+        ReaderKeys.handler = handler
+        // Only clear our own: opening the next book briefly overlaps the outgoing reader.
+        onDispose { if (ReaderKeys.handler === handler) ReaderKeys.handler = null }
     }
 
     // Sleep timer: pause after the chosen time, or when the chapter changes.
@@ -246,8 +250,12 @@ fun ReaderScreen(
         val timer = listen.sleep
         if (timer == SleepTimer.OFF) return@LaunchedEffect
         if (timer == SleepTimer.CHAPTER) {
-            val chapter = nav.tocIndex
-            snapshotFlow { nav.tocIndex }.first { it != chapter }
+            // Whichever comes first: the voice moving into the next chapter file, or the page
+            // (following the voice) reaching the next chapter in the contents.
+            val start = listen.spokenFile to nav.tocIndex
+            snapshotFlow { listen.spokenFile to nav.tocIndex }.first { (file, chapter) ->
+                (file != start.first && file >= 0 && start.first >= 0) || chapter != start.second
+            }
         } else {
             delay((listen.sleepEndsAt - SystemClock.uptimeMillis()).coerceAtLeast(0))
         }
@@ -469,10 +477,10 @@ private fun ReaderTopBar(
                 }
             }
         },
-        navigationIcon = { IconButton(onClick = onBack) { Icon(JacketIcons.Back, "Back to library") } },
+        navigationIcon = { IconButton(onClick = onBack) { Icon(JacketIcons.Back, stringResource(R.string.reader_back_to_library)) } },
         actions = {
             if (nav.search != null) {
-                IconButton(onClick = onSearch) { Icon(JacketIcons.Search, "Search in book") }
+                IconButton(onClick = onSearch) { Icon(JacketIcons.Search, stringResource(R.string.reader_search)) }
             }
             // The ribbon drops in and bounces when you mark the page.
             val drop = remember { Animatable(1f) }
@@ -485,7 +493,7 @@ private fun ReaderTopBar(
             IconButton(onClick = onBookmark) {
                 Icon(
                     if (bookmarked) JacketIcons.BookmarkFilled else JacketIcons.Bookmark,
-                    if (bookmarked) "Remove bookmark" else "Bookmark this page",
+                    if (bookmarked) stringResource(R.string.reader_bookmark_remove) else stringResource(R.string.reader_bookmark_add),
                     tint = if (bookmarked) MaterialTheme.colorScheme.primary else LocalContentColor.current,
                     modifier = Modifier.graphicsLayer {
                         translationY = (1f - drop.value) * -10.dp.toPx()
@@ -497,7 +505,10 @@ private fun ReaderTopBar(
             }
             if (outerAvailable || outerActive) {
                 FilledTonalIconToggleButton(checked = outerActive, onCheckedChange = onOuter) {
-                    Icon(JacketIcons.OuterScreen, if (outerActive) "Hide cover on outer screen" else "Show cover on outer screen")
+                    Icon(
+                        JacketIcons.OuterScreen,
+                        if (outerActive) stringResource(R.string.reader_outer_hide) else stringResource(R.string.reader_outer_show),
+                    )
                 }
             }
         },
@@ -548,30 +559,33 @@ private fun ReaderBottomBar(
                     expanded = true,
                     floatingActionButton = {
                         FloatingToolbarDefaults.VibrantFloatingActionButton(onClick = { haptics.tick(); onText() }) {
-                            Icon(JacketIcons.TextFormat, "Text and page settings")
+                            Icon(JacketIcons.TextFormat, stringResource(R.string.reader_text_settings))
                         }
                     },
                     colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
                 ) {
                     IconButton(onClick = { haptics.tick(); onContents() }) {
-                        Icon(JacketIcons.Contents, if (nav.toc.isNotEmpty()) "Contents, bookmarks and highlights" else "Bookmarks and highlights")
+                        Icon(
+                            JacketIcons.Contents,
+                            if (nav.toc.isNotEmpty()) stringResource(R.string.reader_contents_and_notes) else stringResource(R.string.reader_notes),
+                        )
                     }
                     if (controller != null) {
-                        IconButton(onClick = onListen) { Icon(JacketIcons.Headphones, "Listen: read aloud") }
+                        IconButton(onClick = onListen) { Icon(JacketIcons.Headphones, stringResource(R.string.reader_listen)) }
                     }
-                    val unit = when {
-                        nav.toc.isNotEmpty() -> "chapter"
-                        book.format == BookFormat.TXT -> "paragraph"
-                        else -> "page"
+                    val (previousLabel, nextLabel) = when {
+                        nav.toc.isNotEmpty() -> R.string.reader_previous_chapter to R.string.reader_next_chapter
+                        book.format == BookFormat.TXT -> R.string.reader_previous_paragraph to R.string.reader_next_paragraph
+                        else -> R.string.reader_previous_page to R.string.reader_next_page
                     }
                     IconButton(
                         onClick = { haptics.tick(); nav.step(-1) },
                         enabled = nav.canStep(-1),
-                    ) { Icon(JacketIcons.Previous, "Previous $unit") }
+                    ) { Icon(JacketIcons.Previous, stringResource(previousLabel)) }
                     IconButton(
                         onClick = { haptics.tick(); nav.step(1) },
                         enabled = nav.canStep(1),
-                    ) { Icon(JacketIcons.Next, "Next $unit") }
+                    ) { Icon(JacketIcons.Next, stringResource(nextLabel)) }
                 }
             }
         }
@@ -603,7 +617,7 @@ private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics) {
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    if (preview != null) "${target * 100 / last}%" else "${book.percent}%",
+                    stringResource(R.string.percent, if (preview != null) target * 100 / last else book.percent),
                     style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -656,7 +670,7 @@ private fun ReaderFooter(nav: ReaderNav, book: Book, page: PageColors) {
             nav.footer, style = MaterialTheme.typography.labelMedium, color = page.secondary,
             maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f),
         )
-        Text("${book.percent}%", style = MaterialTheme.typography.labelMedium, color = page.secondary, textAlign = TextAlign.End)
+        Text(stringResource(R.string.percent, book.percent), style = MaterialTheme.typography.labelMedium, color = page.secondary, textAlign = TextAlign.End)
     }
 }
 

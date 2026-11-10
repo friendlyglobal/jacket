@@ -1,9 +1,11 @@
 package io.github.friendlyglobal.jacket.data
 
 import android.content.Context
+import android.content.res.Resources
 import android.net.Uri
 import android.util.Log
 import androidx.core.util.AtomicFile
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.importer.BookImporter
 import io.github.friendlyglobal.jacket.widget.WidgetSync
 import kotlinx.coroutines.CoroutineScope
@@ -23,18 +25,17 @@ import java.io.File
 import java.io.FileOutputStream
 
 data class ImportReport(val imported: List<Book>, val failed: List<String>) {
-    val message: String
-        get() = buildString {
-            when (imported.size) {
-                0 -> {}
-                1 -> append("Added “${imported[0].title}”")
-                else -> append("Added ${imported.size} books")
-            }
-            if (failed.isNotEmpty()) {
-                if (isNotEmpty()) append(". ")
-                append("Couldn't read ${failed.joinToString()}")
-            }
+    /** What happened, for a snackbar; empty when nothing was imported or failed. */
+    fun message(resources: Resources): String {
+        val added = when (imported.size) {
+            0 -> ""
+            1 -> resources.getString(R.string.import_added_one, imported[0].title)
+            else -> resources.getQuantityString(R.plurals.import_added_books, imported.size, imported.size)
         }
+        if (failed.isEmpty()) return added
+        val couldNotRead = resources.getString(R.string.import_failed, failed.joinToString())
+        return if (added.isEmpty()) couldNotRead else resources.getString(R.string.import_added_and_failed, added, couldNotRead)
+    }
 }
 
 /**
@@ -90,7 +91,12 @@ class Library(private val context: Context) {
                     runCatching { BookImporter.copyInto(context, uri, fileOf(existing)) }
                         .onFailure { e -> Log.w(TAG, "Re-linking $name failed", e) }
                         .isSuccess
-                if (relinked) imported += existing else failed += name
+                if (relinked) {
+                    if (coverOf(existing) == null) runCatching { BookImporter.restoreCover(existing, this@Library) }
+                    imported += existing
+                } else {
+                    failed += name
+                }
                 continue
             }
             runCatching { BookImporter.import(context, uri, name, this@Library) }
@@ -179,7 +185,7 @@ class Library(private val context: Context) {
     /** Writes a backup of the library (not the book files) to [uri]. */
     suspend fun exportBackup(uri: Uri) = withContext(Dispatchers.IO) {
         val text = Backup.write(_state.value)
-        val out = context.contentResolver.openOutputStream(uri, "wt") ?: error("Can't write the backup file")
+        val out = context.contentResolver.openOutputStream(uri, "wt") ?: error(context.getString(R.string.settings_backup_cant_write))
         out.use { it.write(text.toByteArray(Charsets.UTF_8)) }
     }
 
@@ -188,7 +194,7 @@ class Library(private val context: Context) {
      * need their file added again.
      */
     suspend fun importBackup(uri: Uri): Int = withContext(Dispatchers.IO) {
-        val input = context.contentResolver.openInputStream(uri) ?: error("Can't open the backup file")
+        val input = context.contentResolver.openInputStream(uri) ?: error(context.getString(R.string.settings_backup_cant_open))
         val backup = Backup.read(input.use { String(it.readBytes(), Charsets.UTF_8) })
         _state.update { Backup.merge(it, backup) }
         val missing = scanMissing(_state.value)

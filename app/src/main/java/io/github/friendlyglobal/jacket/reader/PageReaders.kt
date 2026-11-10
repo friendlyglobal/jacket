@@ -46,12 +46,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.importer.Comic
@@ -119,7 +122,7 @@ fun PdfReader(book: Book, page: PageColors, nav: ReaderNav, haptics: Haptics, on
     val result = rememberDocument(book.id) { PdfDocument(library.fileOf(book)) }
     when {
         result == null -> ReaderLoading()
-        result.isFailure -> ReaderError("This PDF couldn't be opened. Password-protected PDFs aren't supported yet.")
+        result.isFailure -> ReaderError(stringResource(R.string.reader_error_pdf))
         else -> {
             val pdf = result.getOrThrow()
             PagedList(pdf.pageCount, book.position, pdf.firstPageAspect, page, nav, haptics, onProgress, onCenterTap) { index, width ->
@@ -163,7 +166,7 @@ fun ComicReader(book: Book, page: PageColors, nav: ReaderNav, haptics: Haptics, 
     val result = rememberDocument(book.id) { ComicDocument(library.fileOf(book)) }
     when {
         result == null -> ReaderLoading()
-        result.isFailure || result.getOrThrow().pages.isEmpty() -> ReaderError("This comic couldn't be opened.")
+        result.isFailure || result.getOrThrow().pages.isEmpty() -> ReaderError(stringResource(R.string.reader_error_comic))
         else -> {
             val comic = result.getOrThrow()
             PagedList(comic.pages.size, book.position, 0.66f, page, nav, haptics, onProgress, onCenterTap) { index, width ->
@@ -188,16 +191,22 @@ private fun PagedList(
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = initial.coerceIn(0, (count - 1).coerceAtLeast(0)))
     val scope = rememberCoroutineScope()
     val first by remember { derivedStateOf { listState.firstVisibleItemIndex } }
+    // The last page is on screen when the list can't scroll any further (pages are often shorter
+    // than the screen, so the last one never becomes the first visible).
+    val atEnd by remember { derivedStateOf { count > 0 && !listState.canScrollForward } }
+    val resources = LocalResources.current
     SideEffect {
         nav.sectionCount = count
         nav.section = first
-        nav.title = "Page ${first + 1} of $count"
+        nav.title = resources.getString(R.string.reader_page_of, first + 1, count)
         nav.footer = nav.title
-        nav.sectionName = { "Page ${it + 1}" }
+        nav.sectionName = { resources.getString(R.string.reader_page_number, it + 1) }
         nav.jumpTo = { target -> if (target in 0 until count) scope.launch { listState.animateScrollToItem(target) } }
-        nav.atEnd = count > 0 && first >= count - 1
+        nav.atEnd = atEnd
         nav.pageKey = first
-        nav.place = { Place(null, first, if (count > 1) first / (count - 1f) else 0f, "", "Page ${first + 1}") }
+        nav.place = {
+            Place(null, first, if (count > 1) first / (count - 1f) else 0f, "", resources.getString(R.string.reader_page_number, first + 1))
+        }
         nav.onScreen = { mark -> mark.section == first }
         nav.goTo = { mark -> nav.jumpTo(mark.section) }
         nav.turnPage = { delta -> nav.jumpTo(first + delta) }
@@ -241,7 +250,7 @@ private fun PageImage(index: Int, widthPx: Int, placeholderAspect: Float, page: 
             .shadow(2.dp)
             .background(if (bitmap == null) page.secondary.copy(alpha = 0.12f) else Color.White),
     ) {
-        bitmap?.let { Image(it, "Page ${index + 1}", Modifier.fillMaxSize(), contentScale = ContentScale.Fit) }
+        bitmap?.let { Image(it, stringResource(R.string.reader_page_number, index + 1), Modifier.fillMaxSize(), contentScale = ContentScale.Fit) }
     }
 }
 
@@ -261,20 +270,22 @@ fun TextReader(
         value = withContext(Dispatchers.IO) { runCatching { readParagraphs(library.fileOf(book)) }.getOrDefault(emptyList()) }
     }
     val text = paragraphs ?: return ReaderLoading()
-    if (text.isEmpty()) return ReaderError("This file is empty or couldn't be read.")
+    if (text.isEmpty()) return ReaderError(stringResource(R.string.reader_error_text))
 
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = book.position.coerceIn(0, text.lastIndex))
     val scope = rememberCoroutineScope()
     val first by remember { derivedStateOf { listState.firstVisibleItemIndex } }
+    val textAtEnd by remember { derivedStateOf { !listState.canScrollForward } }
     val percent = book.percent
+    val resources = LocalResources.current
     SideEffect {
         nav.sectionCount = text.size
         nav.section = first
-        nav.title = "$percent% read"
+        nav.title = resources.getString(R.string.reader_percent_read, percent)
         nav.footer = ""
-        nav.sectionName = { "${it * 100 / text.size}%" }
+        nav.sectionName = { resources.getString(R.string.percent, it * 100 / text.size) }
         nav.jumpTo = { target -> if (target in text.indices) scope.launch { listState.scrollToItem(target) } }
-        nav.atEnd = !listState.canScrollForward
+        nav.atEnd = textAtEnd
         nav.pageKey = first
         nav.place = { Place(null, first, first / text.size.toFloat(), "", text[first].take(160)) }
         nav.onScreen = { mark -> mark.section == first }
@@ -294,7 +305,8 @@ fun TextReader(
     val context = LocalContext.current
     val controller = remember(book.id, speaker, text) {
         object : ListenController {
-            override val unit = "paragraph"
+            override val previousLabel = R.string.listen_previous_paragraph
+            override val nextLabel = R.string.listen_next_paragraph
 
             fun say(index: Int, from: Int, queue: Boolean) {
                 if (index !in text.indices) {
@@ -326,7 +338,7 @@ fun TextReader(
             override fun start() {
                 if (speaker.unavailable) {
                     haptics.reject()
-                    Toast.makeText(context, "This phone has no text-to-speech voice installed.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, R.string.listen_no_voice, Toast.LENGTH_LONG).show()
                     return
                 }
                 speaker.setLanguage(null)

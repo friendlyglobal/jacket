@@ -49,6 +49,20 @@ class BackupTest {
     }
 
     @Test
+    fun backupFileNamesCannotLeaveTheBooksFolder() {
+        val evil = book("x", "evil.epub").copy(fileName = "../library.json", coverFile = "../../shared_prefs/a.xml")
+        val merged = Backup.merge(LibraryState(), LibraryState(books = listOf(evil)))
+        assertEquals("library.json", merged.books.single().fileName)
+        assertEquals("a.xml", merged.books.single().coverFile)
+    }
+
+    @Test
+    fun oldLibrariesKeepBooksReadToTheEndAsFinished() {
+        val old = """{"books":[{"id":"b","title":"T","format":"EPUB","fileName":"b.epub","progress":1.0,"lastOpenedAt":42}]}"""
+        assertEquals(42L, LibraryJson.decode(old).books.single().finishedAt)
+    }
+
+    @Test
     fun mergeDoesNotDuplicateAnnotations() {
         val state = LibraryState(books = listOf(book("b1", "one.epub")), annotations = listOf(highlight))
         val merged = Backup.merge(state, state)

@@ -20,9 +20,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.PageColor
 import io.github.friendlyglobal.jacket.data.PageLayout
 import io.github.friendlyglobal.jacket.data.ReadingFont
@@ -56,12 +58,12 @@ fun ReadingControls(
 ) {
     val haptics = rememberHaptics()
     Column(modifier) {
-        Label("Text size")
+        Label(stringResource(R.string.reading_text_size))
         Row(verticalAlignment = Alignment.CenterVertically) {
             FilledTonalIconButton(
                 onClick = { haptics.tick(); onSettings { it.copy(textScale = step(it.textScale, -1)) } },
                 enabled = settings.textScale > MIN_SCALE,
-            ) { Text("A", fontSize = 13.sp, fontWeight = FontWeight.Bold) }
+            ) { Text(stringResource(R.string.reading_text_size_sample), fontSize = 13.sp, fontWeight = FontWeight.Bold) }
             val size = remember {
                 SliderState(settings.textScale, ((MAX_SCALE - MIN_SCALE) * 10).roundToInt() - 1, MIN_SCALE..MAX_SCALE)
             }
@@ -82,15 +84,15 @@ fun ReadingControls(
             FilledTonalIconButton(
                 onClick = { haptics.tick(); onSettings { it.copy(textScale = step(it.textScale, 1)) } },
                 enabled = settings.textScale < MAX_SCALE,
-            ) { Text("A", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
+            ) { Text(stringResource(R.string.reading_text_size_sample), fontSize = 20.sp, fontWeight = FontWeight.Bold) }
         }
         Text(
-            "${(settings.textScale * 100).roundToInt()}%",
+            stringResource(R.string.percent, (settings.textScale * 100).roundToInt()),
             style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.align(Alignment.CenterHorizontally),
         )
 
-        Label("Typeface")
+        Label(stringResource(R.string.reading_typeface))
         Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
             val fonts = ReadingFont.entries
             fonts.forEachIndexed { index, font ->
@@ -107,94 +109,94 @@ fun ReadingControls(
                     leadingContent = {
                         // Each option previews itself in its own typeface.
                         Text(
-                            "Aa", fontFamily = rememberReadingFontFamily(font), fontSize = 24.sp,
+                            stringResource(R.string.reading_typeface_sample), fontFamily = rememberReadingFontFamily(font), fontSize = 24.sp,
                             modifier = Modifier.widthIn(min = 40.dp),
                         )
                     },
-                    supportingContent = { Text(font.description) },
+                    supportingContent = { Text(stringResource(font.description)) },
                     trailingContent = if (selected) {
-                        { Icon(JacketIcons.Check, "Selected") }
+                        { Icon(JacketIcons.Check, stringResource(R.string.reading_selected)) }
                     } else null,
                 ) {
-                    Text(font.label)
+                    Text(stringResource(font.label))
                 }
             }
         }
 
-        Label("Page")
+        Label(stringResource(R.string.reading_page))
         val bookSurface = MaterialTheme.colorScheme.surface
         ConnectedChoice(
             options = PageColor.entries,
             selected = settings.pageColor,
-            label = { it.label },
+            label = { stringResource(it.label) },
             onSelect = { choice -> onSettings { it.copy(pageColor = choice) } },
             leading = { ColorSwatch(it.swatch(bookSurface)) },
         )
 
-        Label("Layout")
+        Label(stringResource(R.string.reading_layout))
         ConnectedChoice(
             options = PageLayout.entries,
             selected = settings.layout,
-            label = { it.label },
+            label = { stringResource(it.label) },
             onSelect = { choice -> onSettings { it.copy(layout = choice) } },
         )
         Text(
-            "Pages turn like a book: swipe, or tap the edges. Unfolded, you get a two-page spread.",
+            stringResource(R.string.reading_layout_hint),
             style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 8.dp, start = 4.dp, end = 4.dp),
         )
 
         if (forEpub) {
-            Label("Line spacing")
+            Label(stringResource(R.string.reading_line_spacing))
             ConnectedChoice(
                 options = LineSpacing.entries,
                 selected = settings.lineSpacing,
                 label = {
                     when (it) {
-                        LineSpacing.BOOK -> "Book"
-                        LineSpacing.TIGHT -> "Tight"
-                        LineSpacing.NORMAL -> "Normal"
-                        LineSpacing.LOOSE -> "Loose"
+                        LineSpacing.BOOK -> stringResource(R.string.reading_line_spacing_book)
+                        LineSpacing.TIGHT -> stringResource(R.string.reading_line_spacing_tight)
+                        LineSpacing.NORMAL -> stringResource(R.string.reading_line_spacing_normal)
+                        LineSpacing.LOOSE -> stringResource(R.string.reading_line_spacing_loose)
                     }
                 },
                 onSelect = { choice -> onSettings { it.copy(lineSpacing = choice) } },
             )
 
-            Label("Margins")
+            Label(stringResource(R.string.reading_margins))
             ConnectedChoice(
                 options = PageMargins.entries,
                 selected = settings.margins,
                 label = {
                     when (it) {
-                        PageMargins.NARROW -> "Narrow"
-                        PageMargins.NORMAL -> "Normal"
-                        PageMargins.WIDE -> "Wide"
+                        PageMargins.NARROW -> stringResource(R.string.reading_margins_narrow)
+                        PageMargins.NORMAL -> stringResource(R.string.reading_margins_normal)
+                        PageMargins.WIDE -> stringResource(R.string.reading_margins_wide)
                     }
                 },
                 onSelect = { choice -> onSettings { it.copy(margins = choice) } },
             )
 
-            Label("Alignment")
+            Label(stringResource(R.string.reading_alignment))
             ConnectedChoice(
                 options = TextAlignment.entries,
                 selected = settings.alignment,
                 label = {
                     when (it) {
-                        TextAlignment.BOOK -> "Book"
-                        TextAlignment.START -> "Left"
-                        TextAlignment.JUSTIFY -> "Justified"
+                        TextAlignment.BOOK -> stringResource(R.string.reading_alignment_book)
+                        TextAlignment.START -> stringResource(R.string.reading_alignment_left)
+                        TextAlignment.JUSTIFY -> stringResource(R.string.reading_alignment_justified)
                     }
                 },
                 onSelect = { choice -> onSettings { it.copy(alignment = choice) } },
             )
             Text(
-                "Justified text is hyphenated. “Book” keeps the publisher's own spacing and alignment.",
+                stringResource(R.string.reading_alignment_hint),
                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp, start = 4.dp, end = 4.dp),
             )
         }
 
-        Label("Buttons")
+        Label(stringResource(R.string.reading_buttons))
         Row(
             Modifier
                 .fillMaxWidth()
@@ -205,9 +207,9 @@ fun ReadingControls(
         ) {
             Icon(JacketIcons.Volume, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
             Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
-                Text("Turn pages with volume keys", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.reading_volume_keys), style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    "Volume down for the next page, up for the previous. Not while listening.",
+                    stringResource(R.string.reading_volume_keys_description),
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }

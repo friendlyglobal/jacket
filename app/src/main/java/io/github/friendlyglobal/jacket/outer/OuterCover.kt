@@ -31,8 +31,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.library
@@ -78,7 +81,7 @@ fun OuterCover(book: Book?, settings: Settings) {
     ) {
         if (book == null) {
             Text(
-                "Jacket", style = MaterialTheme.typography.displaySmallEmphasized,
+                stringResource(R.string.app_name), style = MaterialTheme.typography.displaySmallEmphasized,
                 color = MaterialTheme.colorScheme.primary, modifier = Modifier.align(Alignment.Center),
             )
             return@Box
@@ -87,7 +90,7 @@ fun OuterCover(book: Book?, settings: Settings) {
         Crossfade(targetState = cover, animationSpec = tween(500), label = "cover") { image ->
             if (image != null) {
                 Image(
-                    image, "Cover of ${book.title}",
+                    image, stringResource(R.string.cover_of, book.title),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
                 )
@@ -109,7 +112,7 @@ fun OuterCover(book: Book?, settings: Settings) {
                 LinearWavyProgressIndicator(progress = { book.progress }, modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    book.statusLabel,
+                    book.statusLabel(LocalResources.current),
                     style = MaterialTheme.typography.labelMedium,
                     color = Color.White.copy(alpha = 0.85f),
                 )

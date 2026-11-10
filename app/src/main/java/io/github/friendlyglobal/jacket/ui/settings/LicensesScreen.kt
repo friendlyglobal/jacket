@@ -37,8 +37,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import kotlinx.coroutines.Dispatchers
@@ -70,9 +72,9 @@ fun LicensesScreen(onBack: () -> Unit) {
         modifier = Modifier.nestedScroll(scroll.nestedScrollConnection),
         topBar = {
             LargeFlexibleTopAppBar(
-                title = { Text("Open-source licenses") },
-                subtitle = { Text("Jacket is free software, built on the work of others") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(JacketIcons.Back, "Back") } },
+                title = { Text(stringResource(R.string.licenses_title)) },
+                subtitle = { Text(stringResource(R.string.licenses_subtitle)) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(JacketIcons.Back, stringResource(R.string.common_back)) } },
                 scrollBehavior = scroll,
             )
         },
@@ -85,7 +87,7 @@ fun LicensesScreen(onBack: () -> Unit) {
             val column = Modifier.widthIn(max = 640.dp).fillMaxWidth()
             item {
                 Entry(
-                    "Jacket", "Apache-2.0", "Copyright 2026 the Jacket authors", "jacket-LICENSE.txt",
+                    stringResource(R.string.app_name), "Apache-2.0", "Copyright 2026 the Jacket authors", "jacket-LICENSE.txt",
                     expanded = open == "Jacket", modifier = column,
                 ) { haptics.tick(); open = if (open == "Jacket") null else "Jacket" }
             }

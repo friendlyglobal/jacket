@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.palette.graphics.Palette
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.BookFormat
 import io.github.friendlyglobal.jacket.data.Library
@@ -56,6 +57,22 @@ object BookImporter {
         }
     }
 
+    /** Makes the cover again for a book whose file came back after a restore (covers aren't backed up). */
+    fun restoreCover(book: Book, library: Library) {
+        val coverName = book.coverFile ?: return
+        val file = library.fileOf(book)
+        val meta = runCatching {
+            when (book.format) {
+                BookFormat.EPUB -> Epub.readMeta(file)
+                BookFormat.PDF -> Pdf.readMeta(file)
+                BookFormat.CBZ -> Comic.readMeta(file)
+                BookFormat.TXT -> BookMeta(null, null, null, 0)
+            }
+        }.getOrNull()
+        val cover = meta?.cover ?: TitleCard.render(book.title, book.author)
+        Bitmaps.saveJpeg(cover, File(library.coversDir, coverName), maxHeight = 1400)
+    }
+
     /** Copies the file into app storage, reads its metadata and cover, and returns the new [Book]. */
     fun import(context: Context, uri: Uri, name: String, library: Library): Book {
         val id = UUID.randomUUID().toString()
@@ -76,7 +93,7 @@ object BookImporter {
                 BookFormat.CBZ -> Comic.readMeta(stored)
                 BookFormat.TXT -> BookMeta(null, null, null, 0)
             }
-            val title = meta.title?.trim()?.takeIf { it.isNotEmpty() } ?: prettifyFileName(name)
+            val title = meta.title?.trim()?.takeIf { it.isNotEmpty() } ?: prettifyFileName(context, name)
             val author = meta.author?.trim().orEmpty()
             val cover = meta.cover ?: TitleCard.render(title, author)
             val coverName = "$id.jpg"
@@ -132,8 +149,9 @@ object BookImporter {
         return null
     }
 
-    private fun prettifyFileName(name: String) =
-        name.substringBeforeLast('.').replace('_', ' ').replace(Regex("\\s+"), " ").trim().ifEmpty { "Untitled" }
+    private fun prettifyFileName(context: Context, name: String) =
+        name.substringBeforeLast('.').replace('_', ' ').replace(Regex("\\s+"), " ").trim()
+            .ifEmpty { context.getString(R.string.book_untitled) }
 
     private fun seedFrom(cover: Bitmap): Int? {
         val palette = Palette.from(cover).maximumColorCount(16).generate()

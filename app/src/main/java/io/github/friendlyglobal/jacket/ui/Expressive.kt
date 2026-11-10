@@ -130,7 +130,7 @@ fun Modifier.pressScale(interaction: InteractionSource, pressed: Float = 0.94f):
 fun <T> ConnectedChoice(
     options: List<T>,
     selected: T,
-    label: (T) -> String,
+    label: @Composable (T) -> String,
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
     leading: (@Composable (T) -> Unit)? = null,

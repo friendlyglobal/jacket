@@ -9,8 +9,8 @@ around you see what you're reading. On flip phones, the cover fills the cover-sc
 It's built with Material 3 Expressive: springy motion, shape morphing, haptics, and colors taken
 from the cover of the book you're reading.
 
-> **Status: early alpha.** The outer-screen cover has been confirmed on a book-style foldable;
-> the rest is young. Test builds are on the [releases page](https://github.com/friendlyglobal/jacket/releases),
+> **Status: 1.0 release candidate.** The outer-screen cover has been confirmed on a book-style
+> foldable. Test builds are on the [releases page](https://github.com/friendlyglobal/jacket/releases),
 > and reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome.
 
 ## What it does
@@ -28,8 +28,15 @@ from the cover of the book you're reading.
   chapter you're in tracked as you read (even when a whole book is one file), "pages left in
   chapter", and a smooth scrubber that previews the chapter under your thumb.
 - **Typography:** Literata (Google's typeface for long reading), Atkinson Hyperlegible and
-  OpenDyslexic, alongside the system serif and sans and the book's own fonts. Text size, and
-  Book, Paper, Dark or Black pages. Settings apply live and keep your place.
+  OpenDyslexic, alongside the system serif and sans and the book's own fonts. Text size, line
+  spacing, margins, justified text with hyphenation, and Book, Paper, Dark or Black pages.
+  Settings apply live and keep your place. Volume keys can turn pages.
+- **Bookmarks, highlights and notes:** tap the ribbon to bookmark a page. Press and hold text to
+  highlight it in one of five colours, add a note, copy, share, or send it to Translate and other
+  text apps. Everything is listed next to the contents.
+- **Search inside EPUBs**, with results streaming in and the match marked on the page.
+- **Finishing a book:** the last page offers to mark it finished and suggests what to read next;
+  finished books move to their own shelf.
 - PDFs render with Android's `PdfRenderer`, comics page by page, text as flowing paragraphs.
   Your place is saved as you read.
 
@@ -38,8 +45,16 @@ from the cover of the book you're reading.
   language when a voice is installed. The sentence being read is highlighted, and each word turns
   from soft gray to full ink (full white in dark mode) as it's spoken. The page turns itself to
   follow, and reading carries on into the next chapter.
+- EPUB read-aloud keeps going with the screen off, with controls on the lock screen, in the
+  notification shade and on headphones. A sleep timer stops it after 15, 30 or 60 minutes or at
+  the end of the chapter.
 - Play/pause, skip by sentence (EPUB) or paragraph (text), 0.8× to 2× speed. It pauses when
   another app plays audio or your headphones come out.
+
+### Your data
+- **Backup:** Settings › Backup saves your books list, places, bookmarks, highlights and settings
+  to a file you choose (not the book files). Restore it on a new phone, then add the books again:
+  each one finds its place and notes. Android's own device backup keeps the same data.
 
 ### The cover, where people can see it
 
@@ -52,7 +67,11 @@ from the cover of the book you're reading.
 
 ### Material 3 Expressive
 - The cover flies from the library into the book (a shared-element transition) and "opens" into
-  the first page. Predictive back shrinks the page as you swipe.
+  the first page; closing the book flies it back to its place. Predictive back shrinks the page
+  as you swipe.
+- The play button morphs into a slowly turning cookie while it reads, over a wavy progress line
+  that goes flat when paused. The bookmark ribbon drops in with a bounce, and finishing a book
+  gets a small celebration.
 - Covers squash on press, re-sorting springs the grid into place, and the add button tucks away
   as you scroll.
 - Connected button groups, segmented lists, wavy progress, a floating toolbar with its own
@@ -63,6 +82,8 @@ from the cover of the book you're reading.
   roles are built in OKLCH). Turn that off in Settings to use your phone's palette.
 
 ## Privacy
+
+See [PRIVACY.md](PRIVACY.md).
 
 Everything stays on the device. Jacket has no internet permission, so neither the app nor the
 books you open in it can reach the network.
@@ -101,8 +122,9 @@ docs/concept.html            The interactive design concept the app started from
 
 ## Roadmap
 
-- Background listening with lock-screen controls (a media session and foreground service)
-- Read-aloud for PDFs (Android 15's PdfRenderer text API)
+- Read-aloud for PDFs (Android 15's PdfRenderer text API), and in the background for plain text
+- Translations (the UI text lives in `res/values/strings.xml`)
+- Collections and reading stats
 - "Currently reading" sync from Hardcover and Open Library, for books you read in other apps
 - ISBN barcode scanning to set a cover for a paper book
 - More formats (FB2, CBR), password-protected PDFs

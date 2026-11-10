@@ -2,4 +2,309 @@
     <string name="app_name">Jacket</string>
     <string name="widget_name">Jacket cover</string>
     <string name="widget_description">The book you\'re reading: its cover and your progress.</string>
+
+    <!-- Shared -->
+    <string name="common_back">Back</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_ok">OK</string>
+    <!-- A whole-number percentage, e.g. "42%". -->
+    <string name="percent">%1$d%%</string>
+    <!-- Content description for a book cover image. -->
+    <string name="cover_of">Cover of %1$s</string>
+
+    <!-- Book formats -->
+    <string name="format_epub" translatable="false">EPUB</string>
+    <string name="format_pdf" translatable="false">PDF</string>
+    <string name="format_comic">Comic</string>
+    <string name="format_text">Text</string>
+
+    <!-- Reading status on covers, the outer screen and the widget -->
+    <string name="book_status_finished">Finished</string>
+    <string name="book_status_not_started">Not started</string>
+    <string name="book_status_page_of">Page %1$d of %2$d</string>
+    <string name="book_status_percent_read">%1$d%% read</string>
+    <!-- Title for a book whose file name has no usable text. -->
+    <string name="book_untitled">Untitled</string>
+
+    <!-- Cover-screen widget styles -->
+    <string name="cover_style_jacket">Jacket</string>
+    <string name="cover_style_shelf">Shelf</string>
+    <string name="cover_style_glance">Glance</string>
+
+    <!-- Reading fonts -->
+    <string name="font_literata" translatable="false">Literata</string>
+    <string name="font_literata_description">Google\'s typeface for long reading</string>
+    <string name="font_hyperlegible" translatable="false">Atkinson Hyperlegible</string>
+    <string name="font_hyperlegible_description">Distinct letterforms for low vision</string>
+    <string name="font_open_dyslexic" translatable="false">OpenDyslexic</string>
+    <string name="font_open_dyslexic_description">Weighted letters that resist flipping</string>
+    <string name="font_serif">System serif</string>
+    <string name="font_serif_description">Your phone\'s serif font</string>
+    <string name="font_sans">System sans</string>
+    <string name="font_sans_description">Your phone\'s interface font</string>
+    <string name="font_original">Book\'s own</string>
+    <string name="font_original_description">Whatever the publisher chose</string>
+
+    <!-- Page colors -->
+    <string name="page_color_book">Book</string>
+    <string name="page_color_paper">Paper</string>
+    <string name="page_color_dark">Dark</string>
+    <string name="page_color_black">Black</string>
+
+    <!-- Page layouts -->
+    <string name="layout_pages">Pages</string>
+    <string name="layout_scroll">Scroll</string>
+
+    <!-- Library sort orders -->
+    <string name="sort_recent">Recent</string>
+    <string name="sort_title">Title</string>
+    <string name="sort_author">Author</string>
+
+    <!-- Import results (snackbar) -->
+    <string name="import_added_one">Added “%1$s”</string>
+    <plurals name="import_added_books">
+        <item quantity="one">Added %1$d book</item>
+        <item quantity="other">Added %1$d books</item>
+    </plurals>
+    <!-- %1$s: comma-separated file names. -->
+    <string name="import_failed">Couldn\'t read %1$s</string>
+    <!-- %1$s: what was added; %2$s: what couldn't be read. -->
+    <string name="import_added_and_failed">%1$s. %2$s</string>
+
+    <!-- Library (home screen) -->
+    <string name="library_profile_and_settings">Profile and settings</string>
+    <string name="library_add_books">Add books</string>
+    <string name="library_all_finished">Everything here is finished. Add another book!</string>
+    <string name="library_no_match">No books match “%1$s”</string>
+    <string name="library_start_reading">START READING</string>
+    <string name="library_continue_reading">CONTINUE READING</string>
+    <string name="library_on_your_cover">On your cover</string>
+    <string name="library_title">Library</string>
+    <string name="library_title_finished">Finished</string>
+    <plurals name="library_book_count">
+        <item quantity="one">%1$d book</item>
+        <item quantity="other">%1$d books</item>
+    </plurals>
+    <string name="library_shelf_reading">Reading</string>
+    <string name="library_shelf_finished_count">Finished · %1$d</string>
+    <string name="library_search_placeholder">Search titles and authors</string>
+    <string name="library_clear_search">Clear search</string>
+    <string name="library_more_options">More options</string>
+    <string name="library_add_file_again">Add the file again</string>
+    <string name="library_finished_badge">Finished</string>
+    <string name="library_new_badge">New</string>
+    <string name="library_on_cover_screen">On your cover screen</string>
+    <string name="library_menu_open">Open</string>
+    <string name="library_menu_show_on_cover">Show on cover screen</string>
+    <string name="library_menu_mark_finished">Mark as finished</string>
+    <string name="library_menu_mark_unfinished">Mark as not finished</string>
+    <string name="library_menu_remove">Remove</string>
+    <string name="library_remove_title">Remove “%1$s”?</string>
+    <string name="library_remove_message">Jacket deletes its own copy and your reading position. The original file stays where it was.</string>
+    <string name="library_remove_confirm">Remove</string>
+    <string name="library_empty_title">Let your foldable wear your book</string>
+    <string name="library_empty_message">Add an EPUB, PDF, CBZ comic or text file. Jacket keeps a private copy and puts its cover on your outer screen, or in a cover-screen widget, while you read.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_subtitle">Profile, cover screen and reading</string>
+    <string name="settings_profile_title">Your library</string>
+    <plurals name="settings_profile_books">
+        <item quantity="one">%1$d book</item>
+        <item quantity="other">%1$d books</item>
+    </plurals>
+    <plurals name="settings_profile_reading">
+        <item quantity="one">%1$d reading</item>
+        <item quantity="other">%1$d reading</item>
+    </plurals>
+    <plurals name="settings_profile_finished">
+        <item quantity="one">%1$d finished</item>
+        <item quantity="other">%1$d finished</item>
+    </plurals>
+    <!-- Books · reading · finished counts, e.g. "12 books · 3 reading · 4 finished". -->
+    <string name="settings_profile_summary">%1$s · %2$s · %3$s</string>
+    <string name="settings_profile_on_cover">On your cover: %1$s</string>
+    <string name="settings_group_cover_screen">Cover screen</string>
+    <string name="settings_outer_ready">Outer screen ready</string>
+    <string name="settings_outer_ready_description">Your phone can show the cover on its outer screen while you read inside.</string>
+    <string name="settings_outer_unavailable">Outer screen not available right now</string>
+    <string name="settings_outer_unavailable_description">Unfold a book-style foldable to use its outer screen. Flip phones use the widget below.</string>
+    <string name="settings_widget_style">Widget style</string>
+    <string name="settings_widget_style_description">For the Galaxy Z Flip cover screen and home screens</string>
+    <string name="settings_show_progress">Reading progress</string>
+    <string name="settings_show_progress_description">A slim progress bar and percentage on the cover</string>
+    <string name="settings_ambient_dim">Ambient dim</string>
+    <string name="settings_ambient_dim_description">The outer screen dims after 30 seconds untouched</string>
+    <string name="settings_auto_outer">Cover while reading</string>
+    <string name="settings_auto_outer_description">Put the cover on the outer screen whenever you unfold to read</string>
+    <string name="settings_cover_hint">Galaxy Z Flip: add “Jacket cover” under Settings › Cover screen › Widgets. Motorola Razr: open Jacket from the external display.</string>
+    <string name="settings_group_reading">Reading</string>
+    <string name="settings_group_appearance">Appearance</string>
+    <string name="settings_book_colors">Colors from your book</string>
+    <string name="settings_book_colors_description">Tint Jacket with the cover of the book you\'re reading. Off: use your phone\'s palette.</string>
+    <string name="settings_group_backup">Backup</string>
+    <string name="settings_backup_save">Save a backup</string>
+    <string name="settings_backup_save_description">Your books list, places, bookmarks, highlights and settings. Not the book files.</string>
+    <string name="settings_backup_restore">Restore from a backup</string>
+    <string name="settings_backup_restore_description">Then add the book files again: each finds its place and notes.</string>
+    <string name="settings_backup_saved">Backup saved.</string>
+    <!-- %1$s: the reason, from the system. -->
+    <string name="settings_backup_save_failed">Couldn\'t save the backup: %1$s</string>
+    <string name="settings_backup_restored">Backup restored.</string>
+    <plurals name="settings_backup_restored_missing">
+        <item quantity="one">Backup restored. Add the files for %1$d book to reconnect them.</item>
+        <item quantity="other">Backup restored. Add the files for %1$d books to reconnect them.</item>
+    </plurals>
+    <string name="settings_backup_not_a_backup">This isn\'t a Jacket backup file.</string>
+    <string name="settings_backup_unreadable">Couldn\'t read that file.</string>
+    <string name="settings_backup_cant_open">Can\'t open the backup file</string>
+    <string name="settings_backup_cant_write">Can\'t write the backup file</string>
+    <string name="settings_group_about">About</string>
+    <string name="settings_about_version">Version %1$s</string>
+    <string name="settings_about_source">Source code</string>
+    <string name="settings_about_source_description">Open source on GitHub</string>
+    <string name="settings_about_licenses">Open-source licenses</string>
+    <string name="settings_about_licenses_description">Jacket is Apache 2.0, built on Readium, Jetpack and open fonts</string>
+
+    <!-- Open-source licenses screen -->
+    <string name="licenses_title">Open-source licenses</string>
+    <string name="licenses_subtitle">Jacket is free software, built on the work of others</string>
+
+    <!-- Reading controls (reader sheet and Settings) -->
+    <string name="reading_text_size">Text size</string>
+    <!-- Letter shown on the smaller/larger text size buttons. -->
+    <string name="reading_text_size_sample">A</string>
+    <string name="reading_typeface">Typeface</string>
+    <!-- Sample letters each typeface option previews itself with. -->
+    <string name="reading_typeface_sample">Aa</string>
+    <string name="reading_selected">Selected</string>
+    <string name="reading_page">Page</string>
+    <string name="reading_layout">Layout</string>
+    <string name="reading_layout_hint">Pages turn like a book: swipe, or tap the edges. Unfolded, you get a two-page spread.</string>
+    <string name="reading_line_spacing">Line spacing</string>
+    <string name="reading_line_spacing_book">Book</string>
+    <string name="reading_line_spacing_tight">Tight</string>
+    <string name="reading_line_spacing_normal">Normal</string>
+    <string name="reading_line_spacing_loose">Loose</string>
+    <string name="reading_margins">Margins</string>
+    <string name="reading_margins_narrow">Narrow</string>
+    <string name="reading_margins_normal">Normal</string>
+    <string name="reading_margins_wide">Wide</string>
+    <string name="reading_alignment">Alignment</string>
+    <string name="reading_alignment_book">Book</string>
+    <string name="reading_alignment_left">Left</string>
+    <string name="reading_alignment_justified">Justified</string>
+    <string name="reading_alignment_hint">Justified text is hyphenated. “Book” keeps the publisher\'s own spacing and alignment.</string>
+    <string name="reading_buttons">Buttons</string>
+    <string name="reading_volume_keys">Turn pages with volume keys</string>
+    <string name="reading_volume_keys_description">Volume down for the next page, up for the previous. Not while listening.</string>
+
+    <!-- Reader -->
+    <string name="reader_back_to_library">Back to library</string>
+    <string name="reader_search">Search in book</string>
+    <string name="reader_bookmark_add">Bookmark this page</string>
+    <string name="reader_bookmark_remove">Remove bookmark</string>
+    <string name="reader_outer_show">Show cover on outer screen</string>
+    <string name="reader_outer_hide">Hide cover on outer screen</string>
+    <string name="reader_text_settings">Text and page settings</string>
+    <string name="reader_contents_and_notes">Contents, bookmarks and highlights</string>
+    <string name="reader_notes">Bookmarks and highlights</string>
+    <string name="reader_listen">Listen: read aloud</string>
+    <string name="reader_previous_chapter">Previous chapter</string>
+    <string name="reader_next_chapter">Next chapter</string>
+    <string name="reader_previous_paragraph">Previous paragraph</string>
+    <string name="reader_next_paragraph">Next paragraph</string>
+    <string name="reader_previous_page">Previous page</string>
+    <string name="reader_next_page">Next page</string>
+    <string name="reader_page_number">Page %1$d</string>
+    <string name="reader_page_of">Page %1$d of %2$d</string>
+    <string name="reader_percent_read">%1$d%% read</string>
+    <string name="reader_footer_last_page">Last page in chapter</string>
+    <plurals name="reader_footer_pages_left">
+        <item quantity="one">%1$d page left in chapter</item>
+        <item quantity="other">%1$d pages left in chapter</item>
+    </plurals>
+    <!-- %1$s: the reason, from the system. -->
+    <string name="reader_error_open_book">Couldn\'t open this book.\n%1$s</string>
+    <string name="reader_error_no_pages">This book has no pages to show.</string>
+    <string name="reader_error_pdf">This PDF couldn\'t be opened. Password-protected PDFs aren\'t supported yet.</string>
+    <string name="reader_error_comic">This comic couldn\'t be opened.</string>
+    <string name="reader_error_text">This file is empty or couldn\'t be read.</string>
+    <string name="reader_no_app_for_link">No app can open this link.</string>
+    <!-- Shared quote: %1$s the selected text, %2$s the book title. -->
+    <string name="reader_share_quote">“%1$s”\n— %2$s</string>
+    <!-- Shared quote: %1$s the selected text, %2$s the book title, %3$s the author. -->
+    <string name="reader_share_quote_author">“%1$s”\n— %2$s, %3$s</string>
+
+    <!-- Menu over selected text -->
+    <string name="selection_highlight">Highlight</string>
+    <string name="selection_note">Note</string>
+    <string name="selection_share">Share</string>
+
+    <!-- Contents, bookmarks and highlights sheet -->
+    <string name="notes_tab_contents">Contents</string>
+    <string name="notes_tab_bookmarks">Bookmarks</string>
+    <string name="notes_tab_bookmarks_count">Bookmarks · %1$d</string>
+    <string name="notes_tab_highlights">Highlights</string>
+    <string name="notes_tab_highlights_count">Highlights · %1$d</string>
+    <string name="notes_no_bookmarks">No bookmarks yet</string>
+    <string name="notes_no_bookmarks_hint">Tap the ribbon at the top of a page to keep your place there.</string>
+    <string name="notes_no_highlights">No highlights yet</string>
+    <string name="notes_no_highlights_hint">Press and hold on the text, then choose Highlight or Note.</string>
+    <string name="notes_edit">Edit note and colour</string>
+    <string name="notes_delete">Delete</string>
+    <string name="notes_bookmark_page_at">Page at %1$d%%</string>
+    <!-- The highlighted text, in quotation marks. -->
+    <string name="notes_highlight_quote">“%1$s”</string>
+    <string name="notes_note">Note</string>
+    <string name="notes_done">Done</string>
+
+    <!-- Search in book -->
+    <string name="search_placeholder">Search this book</string>
+    <string name="search_clear">Clear</string>
+    <string name="search_no_results">No results for “%1$s”</string>
+    <plurals name="search_result_count">
+        <item quantity="one">%1$d result</item>
+        <item quantity="other">%1$d results</item>
+    </plurals>
+
+    <!-- End of the book -->
+    <string name="finished_title_finished">Finished</string>
+    <string name="finished_title_end">The end</string>
+    <string name="finished_keep_reading">Keep reading</string>
+    <string name="finished_mark">Mark as finished</string>
+    <string name="finished_back_to_library">Back to library</string>
+    <string name="finished_next">Next: %1$s</string>
+
+    <!-- Read aloud -->
+    <string name="listen_play">Play</string>
+    <string name="listen_pause">Pause</string>
+    <string name="listen_previous_sentence">Previous sentence</string>
+    <string name="listen_next_sentence">Next sentence</string>
+    <string name="listen_previous_paragraph">Previous paragraph</string>
+    <string name="listen_next_paragraph">Next paragraph</string>
+    <!-- Read-aloud speed, e.g. "1.25×". -->
+    <string name="listen_rate">%1$s×</string>
+    <string name="listen_stop">Stop listening</string>
+    <string name="listen_sleep_timer">Sleep timer</string>
+    <string name="listen_sleep_timer_end_of_chapter">Sleep timer: end of chapter</string>
+    <plurals name="listen_sleep_minutes_left">
+        <item quantity="one">Sleep timer: %1$d minute left</item>
+        <item quantity="other">Sleep timer: %1$d minutes left</item>
+    </plurals>
+    <string name="listen_sleep_off">Off</string>
+    <string name="listen_sleep_15_minutes">15 minutes</string>
+    <string name="listen_sleep_30_minutes">30 minutes</string>
+    <string name="listen_sleep_1_hour">1 hour</string>
+    <string name="listen_sleep_end_of_chapter">End of chapter</string>
+    <string name="listen_no_voice">This phone has no text-to-speech voice installed.</string>
+    <string name="listen_no_readable_text">This book has no text that can be read aloud.</string>
+    <!-- %1$s: the reason, from the speech engine. -->
+    <string name="listen_stopped_error">Read aloud stopped: %1$s</string>
+    <string name="listen_voice_stopped">The voice stopped. Check your text-to-speech settings.</string>
+
+    <!-- Widget -->
+    <string name="widget_reading">Reading</string>
+    <string name="widget_empty">Add a book to wear its cover</string>
+    <string name="listen_notification_channel">Read aloud</string>
 </resources>

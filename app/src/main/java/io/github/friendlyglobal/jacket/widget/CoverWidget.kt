@@ -2,6 +2,7 @@ package io.github.friendlyglobal.jacket.widget
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -46,6 +47,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import io.github.friendlyglobal.jacket.MainActivity
+import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.CoverStyle
 import io.github.friendlyglobal.jacket.data.Library
@@ -78,12 +80,12 @@ class CoverWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val library = context.library
-        val initial = WidgetModel(library.state.value)
+        val initial = WidgetModel(library.state.value, context.resources)
         val initialCover = initial.book?.let { loadCover(library, it) }
         provideContent {
             // Subscribed for as long as the widget session lives, so picking another book or
             // reading on shows up without waiting for the session to restart.
-            val model by remember { library.state.map(::WidgetModel).distinctUntilChanged() }.collectAsState(initial)
+            val model by remember { library.state.map { WidgetModel(it, context.resources) }.distinctUntilChanged() }.collectAsState(initial)
             val book = model.book
             val cover by produceState(initialCover, book?.coverFile) {
                 value = book?.let { loadCover(library, it) }
@@ -108,12 +110,12 @@ class CoverWidget : GlanceAppWidget() {
  * What the widget shows. Equality covers only visible fields, so scrolling within a page
  * doesn't push a new widget layout; a new whole percent or chapter does.
  */
-private class WidgetModel(state: LibraryState) {
+private class WidgetModel(state: LibraryState, resources: Resources) {
     val book: Book? = state.current
     val settings: Settings = state.settings
     private val key = listOf(
         book?.id, book?.title, book?.author, book?.coverFile, book?.seedColor,
-        book?.percent, book?.statusLabel, settings.coverStyle, settings.showProgress,
+        book?.percent, book?.statusLabel(resources), settings.coverStyle, settings.showProgress,
     )
 
     override fun equals(other: Any?) = other is WidgetModel && other.key == key
@@ -142,10 +144,10 @@ private fun Label(text: String) = Text(
 )
 
 @Composable
-private fun Cover(cover: Bitmap?, title: String, width: Dp, height: Dp) {
+private fun Cover(context: Context, cover: Bitmap?, title: String, width: Dp, height: Dp) {
     if (cover != null) {
         Image(
-            provider = ImageProvider(cover), contentDescription = "Cover of $title",
+            provider = ImageProvider(cover), contentDescription = context.getString(R.string.cover_of, title),
             modifier = GlanceModifier.size(width, height).cornerRadius(6.dp),
             contentScale = androidx.glance.layout.ContentScale.Fit,
         )
@@ -164,13 +166,13 @@ private fun Jacket(context: Context, book: Book, cover: Bitmap?, settings: Setti
     Box(base(context, book)) {
         if (cover != null) {
             Image(
-                provider = ImageProvider(cover), contentDescription = "Cover of ${book.title}",
+                provider = ImageProvider(cover), contentDescription = context.getString(R.string.cover_of, book.title),
                 modifier = GlanceModifier.fillMaxSize(),
                 contentScale = androidx.glance.layout.ContentScale.Crop,
             )
         } else {
             Column(GlanceModifier.fillMaxSize().padding(14.dp)) {
-                Label("Reading")
+                Label(context.getString(R.string.widget_reading))
                 Spacer(GlanceModifier.height(6.dp))
                 Text(book.title, maxLines = 3, style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 17.sp, fontWeight = FontWeight.Bold))
             }
@@ -181,7 +183,7 @@ private fun Jacket(context: Context, book: Book, cover: Bitmap?, settings: Setti
                     Progress(book)
                     Spacer(GlanceModifier.height(4.dp))
                     Text(
-                        book.statusLabel,
+                        book.statusLabel(context.resources),
                         style = TextStyle(color = ColorProvider(Color.White), fontSize = 11.sp),
                     )
                 }
@@ -194,15 +196,18 @@ private fun Jacket(context: Context, book: Book, cover: Bitmap?, settings: Setti
 private fun Shelf(context: Context, book: Book, cover: Bitmap?, settings: Settings) {
     Column(base(context, book).padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Cover(cover, book.title, 56.dp, 84.dp)
+            Cover(context, cover, book.title, 56.dp, 84.dp)
             Spacer(GlanceModifier.width(14.dp))
             Column {
                 if (settings.showProgress) {
-                    Text("${book.percent}%", style = TextStyle(color = GlanceTheme.colors.primary, fontSize = 40.sp, fontWeight = FontWeight.Bold))
+                    Text(
+                        context.getString(R.string.percent, book.percent),
+                        style = TextStyle(color = GlanceTheme.colors.primary, fontSize = 40.sp, fontWeight = FontWeight.Bold),
+                    )
                 } else {
-                    Label("Reading")
+                    Label(context.getString(R.string.widget_reading))
                 }
-                Text(book.statusLabel, style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp))
+                Text(book.statusLabel(context.resources), style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp))
             }
         }
         Spacer(GlanceModifier.height(10.dp))
@@ -222,10 +227,13 @@ private fun Glance(context: Context, book: Book, cover: Bitmap?, settings: Setti
     val size = LocalSize.current
     val coverHeight = (size.height * 0.62f).coerceAtLeast(60.dp)
     Column(base(context, book).padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalAlignment = Alignment.CenterVertically) {
-        Cover(cover, book.title, coverHeight * 0.66f, coverHeight)
+        Cover(context, cover, book.title, coverHeight * 0.66f, coverHeight)
         Spacer(GlanceModifier.height(8.dp))
         if (settings.showProgress) {
-            Text("${book.percent}%", style = TextStyle(color = GlanceTheme.colors.primary, fontSize = 26.sp, fontWeight = FontWeight.Bold))
+            Text(
+                context.getString(R.string.percent, book.percent),
+                style = TextStyle(color = GlanceTheme.colors.primary, fontSize = 26.sp, fontWeight = FontWeight.Bold),
+            )
             Progress(book, GlanceModifier.width(coverHeight * 0.9f))
         } else {
             Text(book.title, maxLines = 1, style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 13.sp, fontWeight = FontWeight.Bold))
@@ -237,8 +245,8 @@ private fun Glance(context: Context, book: Book, cover: Bitmap?, settings: Setti
 private fun Empty(context: Context) {
     Box(base(context, null).padding(16.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Jacket", style = TextStyle(color = GlanceTheme.colors.primary, fontSize = 22.sp, fontWeight = FontWeight.Bold))
-            Text("Add a book to wear its cover", style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp))
+            Text(context.getString(R.string.app_name), style = TextStyle(color = GlanceTheme.colors.primary, fontSize = 22.sp, fontWeight = FontWeight.Bold))
+            Text(context.getString(R.string.widget_empty), style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp))
         }
     }
 }

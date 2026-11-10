@@ -44,7 +44,7 @@ object Backup {
             } else {
                 here
             }
-        } + backup.books.filter { saved -> current.books.none { sameBook(it, saved) } }
+        } + backup.books.filter { saved -> current.books.none { sameBook(it, saved) } }.map { it.safe() }
         val known = current.annotations.mapTo(HashSet()) { it.id }
         val annotations = current.annotations + backup.annotations
             .filter { it.id !in known }
@@ -52,4 +52,10 @@ object Backup {
             .filter { a -> books.any { it.id == a.bookId } }
         return current.copy(books = books, settings = backup.settings, annotations = annotations)
     }
+
+    /** A backup's file names are only names: no folders, so nothing outside the books folder is touched. */
+    private fun Book.safe(): Book = copy(
+        fileName = java.io.File(fileName).name.takeIf { it.isNotBlank() && it != ".." } ?: "$id.${format.extension}",
+        coverFile = coverFile?.let { java.io.File(it).name }?.takeIf { it.isNotBlank() && it != ".." },
+    )
 }

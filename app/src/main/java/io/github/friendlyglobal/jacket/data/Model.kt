@@ -1,20 +1,23 @@
 package io.github.friendlyglobal.jacket.data
 
+import android.content.res.Resources
+import androidx.annotation.StringRes
+import io.github.friendlyglobal.jacket.R
 import org.json.JSONArray
 import org.json.JSONObject
 
-enum class BookFormat(val extension: String, val label: String) {
-    EPUB("epub", "EPUB"),
-    PDF("pdf", "PDF"),
-    CBZ("cbz", "Comic"),
-    TXT("txt", "Text"),
+enum class BookFormat(val extension: String, @StringRes val label: Int) {
+    EPUB("epub", R.string.format_epub),
+    PDF("pdf", R.string.format_pdf),
+    CBZ("cbz", R.string.format_comic),
+    TXT("txt", R.string.format_text),
 }
 
 /** How the cover-screen widget lays the book out. */
-enum class CoverStyle(val label: String) {
-    JACKET("Jacket"),
-    SHELF("Shelf"),
-    GLANCE("Glance"),
+enum class CoverStyle(@StringRes val label: Int) {
+    JACKET(R.string.cover_style_jacket),
+    SHELF(R.string.cover_style_shelf),
+    GLANCE(R.string.cover_style_glance),
 }
 
 data class Book(
@@ -51,41 +54,40 @@ data class Book(
     val isNew: Boolean get() = lastOpenedAt == 0L
 
     /** Short reading status for covers and widgets, e.g. "42% read" or "Page 3 of 40". */
-    val statusLabel: String
-        get() = when {
-            isFinished -> "Finished"
-            isNew -> "Not started"
-            (format == BookFormat.PDF || format == BookFormat.CBZ) && sectionCount > 0 ->
-                "Page ${position + 1} of $sectionCount"
-            else -> "$percent% read"
-        }
+    fun statusLabel(resources: Resources): String = when {
+        isFinished -> resources.getString(R.string.book_status_finished)
+        isNew -> resources.getString(R.string.book_status_not_started)
+        (format == BookFormat.PDF || format == BookFormat.CBZ) && sectionCount > 0 ->
+            resources.getString(R.string.book_status_page_of, position + 1, sectionCount)
+        else -> resources.getString(R.string.book_status_percent_read, percent)
+    }
 }
 
-enum class ReadingFont(val label: String, val description: String) {
-    LITERATA("Literata", "Google's typeface for long reading"),
-    HYPERLEGIBLE("Atkinson Hyperlegible", "Distinct letterforms for low vision"),
-    OPEN_DYSLEXIC("OpenDyslexic", "Weighted letters that resist flipping"),
-    SERIF("System serif", "Your phone's serif font"),
-    SANS("System sans", "Your phone's interface font"),
-    ORIGINAL("Book's own", "Whatever the publisher chose"),
+enum class ReadingFont(@StringRes val label: Int, @StringRes val description: Int) {
+    LITERATA(R.string.font_literata, R.string.font_literata_description),
+    HYPERLEGIBLE(R.string.font_hyperlegible, R.string.font_hyperlegible_description),
+    OPEN_DYSLEXIC(R.string.font_open_dyslexic, R.string.font_open_dyslexic_description),
+    SERIF(R.string.font_serif, R.string.font_serif_description),
+    SANS(R.string.font_sans, R.string.font_sans_description),
+    ORIGINAL(R.string.font_original, R.string.font_original_description),
 }
 
-enum class PageColor(val label: String) {
-    BOOK("Book"),
-    PAPER("Paper"),
-    DARK("Dark"),
-    BLACK("Black"),
+enum class PageColor(@StringRes val label: Int) {
+    BOOK(R.string.page_color_book),
+    PAPER(R.string.page_color_paper),
+    DARK(R.string.page_color_dark),
+    BLACK(R.string.page_color_black),
 }
 
-enum class PageLayout(val label: String) {
-    PAGES("Pages"),
-    SCROLL("Scroll"),
+enum class PageLayout(@StringRes val label: Int) {
+    PAGES(R.string.layout_pages),
+    SCROLL(R.string.layout_scroll),
 }
 
-enum class LibrarySort(val label: String) {
-    RECENT("Recent"),
-    TITLE("Title"),
-    AUTHOR("Author"),
+enum class LibrarySort(@StringRes val label: Int) {
+    RECENT(R.string.sort_recent),
+    TITLE(R.string.sort_title),
+    AUTHOR(R.string.sort_author),
 }
 
 /** Line spacing; BOOK keeps the publisher's. */
@@ -159,7 +161,14 @@ data class LibraryState(
 ) {
     /** The book the covers show: the one picked, else the one opened most recently. */
     val current: Book?
-        get() = books.firstOrNull { it.id == currentId } ?: books.maxByOrNull { it.lastOpenedAt }
+        get() {
+            // Finished books step aside for what you're reading now, unless everything's finished.
+            val reading = books.filterNot { it.isFinished }
+            return reading.firstOrNull { it.id == currentId }
+                ?: reading.maxByOrNull { maxOf(it.lastOpenedAt, it.addedAt) }
+                ?: books.firstOrNull { it.id == currentId }
+                ?: books.maxByOrNull { it.lastOpenedAt }
+        }
 
     fun find(id: String?): Book? = id?.let { books.firstOrNull { b -> b.id == it } }
 }
@@ -274,6 +283,8 @@ internal object LibraryJson {
         progress = optDouble("progress", 0.0).toFloat(),
         lastOpenedAt = optLong("lastOpenedAt"),
         locator = if (isNull("locator")) null else optString("locator").takeIf { it.isNotEmpty() },
-        finishedAt = optLong("finishedAt"),
+        // Jacket 0.x had no "finished" flag; a book read to the end counts as finished.
+        finishedAt = if (has("finishedAt")) optLong("finishedAt")
+        else if (optDouble("progress", 0.0) >= 0.99) optLong("lastOpenedAt").coerceAtLeast(1L) else 0L,
     )
 }
