@@ -50,7 +50,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -71,7 +70,6 @@ import androidx.compose.material3.ripple
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -105,6 +103,31 @@ import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.pressScale
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import io.github.friendlyglobal.jacket.ui.sharedCover
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.Dp
+import io.github.friendlyglobal.jacket.data.BookFormat
+import androidx.compose.runtime.rememberCoroutineScope
+import io.github.friendlyglobal.jacket.data.BookCollection
+import io.github.friendlyglobal.jacket.data.LibraryOrganizer
+import io.github.friendlyglobal.jacket.data.arrangeShelf
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import androidx.activity.compose.BackHandler
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
+import androidx.compose.material3.ToggleFloatingActionButton
+import androidx.compose.material3.ToggleFloatingActionButtonDefaults
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 
 @Composable
 fun HomeScreen(
@@ -124,13 +147,23 @@ fun HomeScreen(
     grid: LazyGridState = rememberLazyGridState(),
     /** This library is coming back into view from Settings (its gear has a turn to undo). */
     backFromSettings: Boolean = false,
+    /** Opens the book that comes with the app, offered while the library is empty. */
+    onSample: () -> Unit = {},
+    /** The phone folds: the empty library speaks of its outer screen (see Foldables). */
+    foldable: Boolean = false,
+    /** Opens the book and starts reading it aloud; offered on the wide layout's "Continue reading" pane. */
+    onListen: ((Book) -> Unit)? = null,
+    /** Pins, collections, a book's details and cover, the grid or the list; without it, none are offered. */
+    organizer: LibraryOrganizer? = null,
+    /** Jacket's shelf of free classics; the + menu and the empty library offer it. */
+    onFreeBooks: () -> Unit = {},
 ) {
     val haptics = rememberHaptics()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         if (uris.isNotEmpty()) onImport(uris)
     }
     val addBooks = { haptics.tick(); picker.launch(BookImporter.MIME_TYPES) }
-    val fabExpanded by remember { derivedStateOf { grid.firstVisibleItemIndex == 0 } }
+    var fabMenu by rememberSaveable { mutableStateOf(false) }
     var query by rememberSaveable { mutableStateOf("") }
     val hero = state.heroBook(missing)
     val finishedCount = state.books.count { it.isFinished }
@@ -141,7 +174,29 @@ fun HomeScreen(
     val today = remember(state.reading) { java.time.LocalDate.now() }
     val readToday = if (stats) ((state.reading[today.toString()] ?: 0L) / 60_000L).toInt() else 0
     val streak = if (stats) remember(state.reading, today) { readingStreak(state.reading, today) } else 0
-    val shown = remember(shelf, state.settings.sort, query) { sortAndFilter(shelf, state.settings.sort, query) }
+    // A collection shows all its books, finished or not; the shelves split the rest.
+    val collection = state.settings.collection?.let { id -> state.collections.firstOrNull { it.id == id } }
+    val source = if (collection != null) state.books else shelf
+    val shown = remember(source, state.settings.sort, query, collection) { arrangeShelf(source, state.settings.sort, query, collection?.id) }
+    val scope = rememberCoroutineScope()
+
+    // What's being asked about: a book to remove, to sort into collections or to edit; a collection to name or delete.
+    var removing by remember { mutableStateOf<Book?>(null) }
+    var collectionsFor by remember { mutableStateOf<String?>(null) }
+    var editing by remember { mutableStateOf<String?>(null) }
+    var naming by remember { mutableStateOf<BookCollection?>(null) }
+    var newCollection by remember { mutableStateOf(false) }
+    var deleting by remember { mutableStateOf<BookCollection?>(null) }
+    val actions = BookActions(
+        onOpen = { if (it.id in missing) addBooks() else onOpen(it, CoverSpot.TILE) },
+        onShowOnCover = onShowOnCover,
+        onFinished = onFinished,
+        onRemove = { removing = it },
+        onPin = { book, pinned -> organizer?.setPinned(book.id, pinned) },
+        onCollections = { collectionsFor = it.id },
+        onEdit = { editing = it.id },
+        organize = organizer != null,
+    )
 
     Scaffold(
         topBar = {
@@ -152,78 +207,145 @@ fun HomeScreen(
         },
         floatingActionButton = {
             if (state.books.isNotEmpty()) {
-                ExtendedFloatingActionButton(
-                    text = { Text(stringResource(R.string.library_add_books)) },
-                    icon = { Icon(JacketIcons.Add, null) },
-                    onClick = addBooks,
-                    expanded = fabExpanded,
-                )
+                // The + opens into Material's FAB menu, turning into a ✕: books from your files, or free ones.
+                BackHandler(enabled = fabMenu) { fabMenu = false }
+                val label = stringResource(R.string.library_add_books)
+                FloatingActionButtonMenu(
+                    expanded = fabMenu,
+                    button = {
+                        ToggleFloatingActionButton(
+                            checked = fabMenu,
+                            onCheckedChange = { haptics.tick(); fabMenu = it },
+                            modifier = Modifier.semantics { contentDescription = label },
+                        ) {
+                            val icon by remember { derivedStateOf { if (checkedProgress > 0.5f) JacketIcons.Close else JacketIcons.Add } }
+                            Icon(icon, null, with(ToggleFloatingActionButtonDefaults) { Modifier.animateIcon({ checkedProgress }) })
+                        }
+                    },
+                ) {
+                    FloatingActionButtonMenuItem(
+                        onClick = { fabMenu = false; addBooks() },
+                        icon = { Icon(LibraryIcons.Folder, null) },
+                        text = { Text(stringResource(R.string.library_add_from_files)) },
+                    )
+                    FloatingActionButtonMenuItem(
+                        onClick = { fabMenu = false; haptics.tick(); onFreeBooks() },
+                        icon = { Icon(FreeBooks.Icon, null) },
+                        text = { Text(stringResource(R.string.free_books_find)) },
+                    )
+                }
             }
         },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        Box(Modifier.fillMaxSize()) {
-            if (state.books.isEmpty()) {
-                EmptyLibrary(Modifier.padding(padding), onAdd = addBooks)
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 112.dp),
-                    state = grid,
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(
-                        start = 16.dp, end = 16.dp,
-                        top = padding.calculateTopPadding() + 4.dp,
-                        bottom = padding.calculateBottomPadding() + 104.dp,
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(18.dp),
-                ) {
-                    if (hero != null && !onFinishedShelf) {
-                        item(key = "hero", span = { GridItemSpan(maxLineSpan) }) {
-                            // The shelves change under it: it moves over rather than jumping.
-                            ContinueCard(hero, outerAvailable, onOpen = { onOpen(it, CoverSpot.HERO) }, modifier = Modifier.animateItem())
-                        }
+        // The shelves, with the "Continue reading" card at their head when it doesn't have a pane of its own.
+        val shelves: @Composable (Modifier, Boolean) -> Unit = { gridModifier, inlineHero ->
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 112.dp),
+                state = grid,
+                modifier = gridModifier,
+                contentPadding = PaddingValues(
+                    start = 16.dp, end = 16.dp,
+                    top = padding.calculateTopPadding() + 4.dp,
+                    bottom = padding.calculateBottomPadding() + 104.dp,
+                ),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+            ) {
+                if (inlineHero && hero != null && !onFinishedShelf) {
+                    item(key = "hero", span = { GridItemSpan(maxLineSpan) }) {
+                        // The shelves change under it: it moves over rather than jumping.
+                        ContinueCard(hero, outerAvailable, onOpen = { onOpen(it, CoverSpot.HERO) }, modifier = Modifier.animateItem())
                     }
-                    item(key = "header", span = { GridItemSpan(maxLineSpan) }) {
-                        LibraryHeader(
-                            count = shelf.size,
-                            sort = state.settings.sort,
-                            onSort = onSort,
-                            query = query,
-                            onQuery = { query = it },
-                            searchable = state.books.size > 6,
-                            finishedCount = finishedCount,
-                            onFinishedShelf = onFinishedShelf,
-                            onShelf = { haptics.tick(); onShelf(it) },
-                            modifier = Modifier.animateItem(),
-                            readToday = readToday,
-                            streak = streak,
-                        )
-                    }
-                    if (shown.isEmpty()) {
-                        item(key = "nothing", span = { GridItemSpan(maxLineSpan) }) {
-                            Text(
-                                if (query.isBlank()) stringResource(R.string.library_all_finished) else stringResource(R.string.library_no_match, query),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center,
-                                modifier = Modifier.animateItem().padding(vertical = 32.dp),
-                            )
-                        }
-                    }
-                    items(shown, key = { it.id }) { book ->
-                        BookTile(
-                            book = book,
-                            onCover = book.id == hero?.id && !onFinishedShelf,
-                            missing = book.id in missing,
-                            haptics = haptics,
-                            onOpen = { if (it.id in missing) addBooks() else onOpen(it, CoverSpot.TILE) },
-                            onShowOnCover = onShowOnCover,
-                            onDelete = onDelete,
-                            onFinished = onFinished,
-                            modifier = Modifier.animateItem(),
+                }
+                item(key = "header", span = { GridItemSpan(maxLineSpan) }) {
+                    LibraryHeader(
+                        count = if (collection != null) source.count { collection.id in it.collections } else shelf.size,
+                        sort = state.settings.sort,
+                        onSort = onSort,
+                        query = query,
+                        onQuery = { query = it },
+                        searchable = state.books.size > 6,
+                        // Inside a collection there's no shelf to switch: it shows all its books.
+                        finishedCount = if (collection != null) 0 else finishedCount,
+                        onFinishedShelf = onFinishedShelf && collection == null,
+                        onShelf = { haptics.tick(); onShelf(it) },
+                        modifier = Modifier.animateItem(),
+                        // Beside the pane, today's reading is told there instead.
+                        readToday = if (inlineHero) readToday else 0,
+                        streak = if (inlineHero) streak else 0,
+                        organize = if (organizer == null) null else {
+                            {
+                                // Once there's something to sort: a few books, or a collection already.
+                                if (state.collections.isNotEmpty() || state.books.size >= 3) {
+                                    CollectionChips(
+                                        collections = state.collections,
+                                        selected = collection?.id,
+                                        haptics = haptics,
+                                        onSelect = { organizer.showCollection(it) },
+                                        onNew = { newCollection = true },
+                                        onRename = { naming = it },
+                                        onDelete = { deleting = it },
+                                    )
+                                }
+                            }
+                        },
+                    )
+                }
+                if (shown.isEmpty()) {
+                    item(key = "nothing", span = { GridItemSpan(maxLineSpan) }) {
+                        Text(
+                            when {
+                                query.isNotBlank() -> stringResource(R.string.library_no_match, query)
+                                collection != null -> stringResource(R.string.library_collection_empty, collection.name)
+                                else -> stringResource(R.string.library_all_finished)
+                            },
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center,
+                            modifier = Modifier.animateItem().padding(vertical = 32.dp),
                         )
                     }
                 }
+                items(shown, key = { it.id }) { book ->
+                    BookTile(
+                        book = book,
+                        onCover = book.id == hero?.id && !onFinishedShelf,
+                        missing = book.id in missing,
+                        haptics = haptics,
+                        actions = actions,
+                        modifier = Modifier.animateItem(),
+                    )
+                }
+            }
+        }
+        // Wide (unfolded, a tablet, landscape): the book you're reading gets a pane of its own beside
+        // the shelves, its cover large, instead of a card stretched across the whole width.
+        val paneWidth = libraryPaneWidth()
+        Box(Modifier.fillMaxSize()) {
+            if (state.books.isEmpty()) {
+                EmptyLibrary(
+                    Modifier.padding(padding), foldable, onAdd = addBooks, onSample = { haptics.confirm(); onSample() },
+                    onFreeBooks = { haptics.tick(); onFreeBooks() },
+                )
+            } else if (paneWidth != null && hero != null) {
+                Row(Modifier.fillMaxSize()) {
+                    NowReadingPane(
+                        book = hero,
+                        outerAvailable = outerAvailable,
+                        readToday = readToday,
+                        streak = streak,
+                        haptics = haptics,
+                        onOpen = { onOpen(it, CoverSpot.HERO) },
+                        onListen = onListen,
+                        modifier = Modifier
+                            .width(paneWidth)
+                            .fillMaxHeight()
+                            .padding(start = 16.dp, top = padding.calculateTopPadding() + 4.dp, bottom = padding.calculateBottomPadding() + 16.dp),
+                    )
+                    shelves(Modifier.weight(1f).fillMaxHeight(), false)
+                }
+            } else {
+                shelves(Modifier.fillMaxSize(), true)
             }
             // The library dims while books come in, and clears as they land.
             AnimatedVisibility(visible = importing, enter = fadeIn(), exit = fadeOut()) {
@@ -232,6 +354,81 @@ fun HomeScreen(
                     contentAlignment = Alignment.Center,
                 ) { ContainedLoadingIndicator() }
             }
+        }
+    }
+
+    removing?.let { book ->
+        AlertDialog(
+            onDismissRequest = { removing = null },
+            title = { Text(stringResource(R.string.library_remove_title, book.title)) },
+            text = { Text(stringResource(R.string.library_remove_message)) },
+            confirmButton = {
+                TextButton(onClick = { removing = null; haptics.confirm(); onDelete(book) }) { Text(stringResource(R.string.library_remove_confirm)) }
+            },
+            dismissButton = { TextButton(onClick = { removing = null }) { Text(stringResource(R.string.common_cancel)) } },
+        )
+    }
+    if (organizer != null) {
+        // Looked up afresh, so the ticks follow each change.
+        state.find(collectionsFor)?.let { book ->
+            CollectionsSheet(
+                book = book,
+                collections = state.collections,
+                haptics = haptics,
+                onChange = { organizer.setCollections(book.id, it) },
+                onCreate = { organizer.createCollection(it) },
+                onDismiss = { collectionsFor = null },
+            )
+        }
+        state.find(editing)?.let { book ->
+            EditBookSheet(
+                book = book,
+                haptics = haptics,
+                onDismiss = { editing = null },
+                onSave = { title, author, cover ->
+                    editing = null
+                    if (title != book.title || author != book.author) organizer.editDetails(book.id, title, author)
+                    when (cover) {
+                        CoverChange.Original -> organizer.setCover(book.id, null)
+                        is CoverChange.Photo -> organizer.setCover(book.id, cover.image)
+                        // Drawn at full size with the title and author as saved.
+                        is CoverChange.Design -> scope.launch {
+                            val image = withContext(Dispatchers.Default) { CoverDesigns.render(cover.design, title, author) }
+                            organizer.setCover(book.id, image, cover.design.color)
+                        }
+                        null -> Unit
+                    }
+                },
+            )
+        }
+        if (newCollection) {
+            NameDialog(
+                title = stringResource(R.string.library_collection_new),
+                initial = "",
+                confirm = stringResource(R.string.common_create),
+                onDismiss = { newCollection = false },
+                onConfirm = { name ->
+                    newCollection = false
+                    haptics.confirm()
+                    organizer.showCollection(organizer.createCollection(name))
+                },
+            )
+        }
+        naming?.let { collection ->
+            NameDialog(
+                title = stringResource(R.string.library_collection_rename),
+                initial = collection.name,
+                confirm = stringResource(R.string.common_save),
+                onDismiss = { naming = null },
+                onConfirm = { name -> naming = null; organizer.renameCollection(collection.id, name) },
+            )
+        }
+        deleting?.let { collection ->
+            DeleteCollectionDialog(
+                collection = collection,
+                onDismiss = { deleting = null },
+                onConfirm = { deleting = null; haptics.confirm(); organizer.deleteCollection(collection.id) },
+            )
         }
     }
 }
@@ -246,17 +443,6 @@ internal fun LibraryState.heroBook(missing: Set<String>): Book? =
 
 /** Showing the finished shelf, which only exists once something is on it (and has no hero card). */
 internal val LibraryState.onFinishedShelf: Boolean get() = settings.showFinished && books.any { it.isFinished }
-
-private fun sortAndFilter(books: List<Book>, sort: LibrarySort, query: String): List<Book> {
-    val q = query.trim()
-    val matching = if (q.isEmpty()) books else books.filter { it.title.contains(q, true) || it.author.contains(q, true) }
-    fun titleKey(b: Book) = b.title.lowercase().removePrefix("the ").removePrefix("a ").removePrefix("an ")
-    return when (sort) {
-        LibrarySort.RECENT -> matching.sortedByDescending { maxOf(it.lastOpenedAt, it.addedAt) }
-        LibrarySort.TITLE -> matching.sortedBy(::titleKey)
-        LibrarySort.AUTHOR -> matching.sortedWith(compareBy({ it.author.ifEmpty { "￿" }.lowercase() }, ::titleKey))
-    }
-}
 
 @Composable
 private fun Brand() {
@@ -364,6 +550,142 @@ private fun ContinueCard(book: Book, outerAvailable: Boolean, onOpen: (Book) -> 
     }
 }
 
+/** Windows at least this wide put the book you're reading in a pane beside the shelves. */
+private val TWO_PANE_FROM = 700.dp
+
+/**
+ * The width of the "Continue reading" pane beside the shelves when the window is wide enough for
+ * one (an unfolded foldable, a tablet, a phone on its side); null when it isn't.
+ */
+@Composable
+internal fun libraryPaneWidth(): Dp? {
+    val width = with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() }
+    return if (width >= TWO_PANE_FROM) (width * 0.38f).coerceIn(300.dp, 440.dp) else null
+}
+
+/**
+ * The book you're reading, given a pane of its own on a wide screen: its cover as large as the
+ * pane allows, where you are in it, and a button each to read on or to listen.
+ */
+@Composable
+private fun NowReadingPane(
+    book: Book,
+    outerAvailable: Boolean,
+    readToday: Int,
+    streak: Int,
+    haptics: Haptics,
+    onOpen: (Book) -> Unit,
+    onListen: ((Book) -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    val interaction = remember { MutableInteractionSource() }
+    // Back from reading, the line runs on to where you got to.
+    val progress = animateFloatAsState(book.progress, WavyProgressIndicatorDefaults.ProgressAnimationSpec, label = "progress")
+    BoxWithConstraints(modifier) {
+        // As big as the pane is wide, unless that would push the words and buttons out of a short window.
+        val coverWidth = minOf(maxWidth * 0.62f, ((maxHeight - 330.dp) * (2f / 3f)).coerceAtLeast(110.dp))
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+            // Not a button itself, so Read and Listen stay buttons of their own; the cover opens the book too.
+            Card(
+                shape = MaterialTheme.shapes.extraLarge,
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        if (book.isNew) stringResource(R.string.library_start_reading) else stringResource(R.string.library_continue_reading),
+                        style = MaterialTheme.typography.labelMedium, letterSpacing = 1.4.sp, fontWeight = FontWeight.SemiBold,
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    CoverImage(
+                        book,
+                        // The clip stays outside the shared cover: in flight it is drawn scaled, corners and all.
+                        Modifier.width(coverWidth).aspectRatio(2f / 3f)
+                            .pressScale(interaction, pressed = 0.96f)
+                            .clip(RoundedCornerShape(14.dp))
+                            .clickable(interactionSource = interaction, indication = ripple(), onClickLabel = stringResource(R.string.library_read)) { onOpen(book) }
+                            .sharedCover(book.id, CoverSpot.HERO),
+                        maxHeight = 900,
+                    )
+                    Spacer(Modifier.height(20.dp))
+                    Text(
+                        book.title, style = MaterialTheme.typography.headlineSmallEmphasized, textAlign = TextAlign.Center,
+                        maxLines = 3, overflow = TextOverflow.Ellipsis,
+                    )
+                    if (book.author.isNotEmpty()) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            book.author, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center,
+                            maxLines = 2, overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    Spacer(Modifier.height(18.dp))
+                    LinearWavyProgressIndicator(
+                        progress = { progress.value },
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.18f),
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(book.statusLabel(LocalResources.current), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+                        AnimatedVisibility(outerAvailable) {
+                            Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary) {
+                                Row(Modifier.padding(horizontal = 10.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(JacketIcons.OuterScreen, null, Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(stringResource(R.string.library_on_your_cover), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onPrimary)
+                                }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(18.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(
+                            onClick = { onOpen(book) },
+                            shapes = ButtonDefaults.shapes(),
+                            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                        ) {
+                            Icon(JacketIcons.Book, null, Modifier.size(ButtonDefaults.IconSize))
+                            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                            Text(stringResource(R.string.library_read), maxLines = 1)
+                        }
+                        // Formats that can be read aloud.
+                        if (onListen != null && (book.format == BookFormat.EPUB || book.format == BookFormat.TXT)) {
+                            FilledTonalButton(
+                                onClick = { haptics.tick(); onListen(book) },
+                                shapes = ButtonDefaults.shapes(),
+                                modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                            ) {
+                                Icon(JacketIcons.Headphones, null, Modifier.size(ButtonDefaults.IconSize))
+                                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                                Text(stringResource(R.string.library_listen), maxLines = 1)
+                            }
+                        }
+                    }
+                }
+            }
+            // "24 min today · Day 5", under the book rather than over the shelves.
+            if (readToday > 0 || streak > 1) {
+                Row(Modifier.padding(start = 8.dp, top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(JacketIcons.Clock, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.tertiary)
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        listOfNotNull(
+                            stringResource(R.string.stats_today, readToday).takeIf { readToday > 0 },
+                            stringResource(R.string.stats_streak, streak).takeIf { streak > 1 },
+                        ).joinToString(stringResource(R.string.separator)),
+                        style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun LibraryHeader(
     count: Int,
@@ -379,6 +701,8 @@ private fun LibraryHeader(
     /** Minutes read today, and the run of days read; both 0 when the reader has those switched off. */
     readToday: Int = 0,
     streak: Int = 0,
+    /** The collections' chips, when the library can be organized. */
+    organize: (@Composable () -> Unit)? = null,
 ) {
     Column(modifier.padding(top = 10.dp)) {
         Row(verticalAlignment = Alignment.Bottom) {
@@ -401,16 +725,20 @@ private fun LibraryHeader(
         // "24 min today · Day 5": only once there is something to say.
         AnimatedVisibility(visible = readToday > 0 || streak > 0) {
             Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(JacketIcons.Sparkle, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.tertiary)
+                Icon(JacketIcons.Clock, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.tertiary)
                 Spacer(Modifier.width(6.dp))
                 Text(
                     listOfNotNull(
                         stringResource(R.string.stats_today, readToday).takeIf { readToday > 0 },
                         stringResource(R.string.stats_streak, streak).takeIf { streak > 1 },
-                    ).joinToString(" · "),
+                    ).joinToString(stringResource(R.string.separator)),
                     style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+        }
+        if (organize != null) {
+            Spacer(Modifier.height(12.dp))
+            organize()
         }
         if (finishedCount > 0) {
             Spacer(Modifier.height(12.dp))
@@ -460,14 +788,10 @@ private fun BookTile(
     onCover: Boolean,
     missing: Boolean,
     haptics: Haptics,
-    onOpen: (Book) -> Unit,
-    onShowOnCover: (Book) -> Unit,
-    onDelete: (Book) -> Unit,
-    onFinished: (Book, Boolean) -> Unit,
+    actions: BookActions,
     modifier: Modifier,
 ) {
     var menu by remember { mutableStateOf(false) }
-    var confirm by remember { mutableStateOf(false) }
     val interaction = remember { MutableInteractionSource() }
     Column(modifier) {
         Box(
@@ -479,7 +803,7 @@ private fun BookTile(
                 .combinedClickable(
                     interactionSource = interaction,
                     indication = ripple(),
-                    onClick = { onOpen(book) },
+                    onClick = { actions.onOpen(book) },
                     onLongClick = { haptics.longPress(); menu = true },
                     onLongClickLabel = stringResource(R.string.library_more_options),
                 ),
@@ -521,14 +845,17 @@ private fun BookTile(
                     )
                 }
             }
-            if (onCover) {
-                Box(
-                    Modifier.align(Alignment.TopEnd).padding(8.dp).size(28.dp)
-                        .clip(MaterialShapes.Cookie9Sided.toShape())
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(JacketIcons.OuterScreen, stringResource(R.string.library_on_cover_screen), Modifier.size(15.dp), tint = MaterialTheme.colorScheme.onPrimary)
+            Row(Modifier.align(Alignment.TopEnd).padding(8.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (book.isPinned) PinBadge()
+                if (onCover) {
+                    Box(
+                        Modifier.size(28.dp)
+                            .clip(MaterialShapes.Cookie9Sided.toShape())
+                            .background(MaterialTheme.colorScheme.primary),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(JacketIcons.OuterScreen, stringResource(R.string.library_on_cover_screen), Modifier.size(15.dp), tint = MaterialTheme.colorScheme.onPrimary)
+                    }
                 }
             }
             if (!book.isNew && !book.isFinished && book.progress > 0f) {
@@ -538,27 +865,7 @@ private fun BookTile(
                 )
             }
             DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                DropdownMenuItem(text = { Text(stringResource(R.string.library_menu_open)) }, leadingIcon = { Icon(JacketIcons.Book, null) }, onClick = { menu = false; onOpen(book) })
-                if (!onCover) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.library_menu_show_on_cover)) }, leadingIcon = { Icon(JacketIcons.OuterScreen, null) },
-                        onClick = { menu = false; haptics.confirm(); onShowOnCover(book) },
-                    )
-                }
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            if (book.isFinished) stringResource(R.string.library_menu_mark_unfinished)
-                            else stringResource(R.string.library_menu_mark_finished),
-                        )
-                    },
-                    leadingIcon = { Icon(JacketIcons.Check, null) },
-                    onClick = { menu = false; haptics.confirm(); onFinished(book, !book.isFinished) },
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.library_menu_remove)) }, leadingIcon = { Icon(JacketIcons.Delete, null) },
-                    onClick = { menu = false; confirm = true },
-                )
+                BookMenuItems(book, onCover, haptics, actions, close = { menu = false })
             }
         }
         Spacer(Modifier.height(8.dp))
@@ -570,21 +877,10 @@ private fun BookTile(
             )
         }
     }
-    if (confirm) {
-        AlertDialog(
-            onDismissRequest = { confirm = false },
-            title = { Text(stringResource(R.string.library_remove_title, book.title)) },
-            text = { Text(stringResource(R.string.library_remove_message)) },
-            confirmButton = {
-                TextButton(onClick = { confirm = false; haptics.confirm(); onDelete(book) }) { Text(stringResource(R.string.library_remove_confirm)) }
-            },
-            dismissButton = { TextButton(onClick = { confirm = false }) { Text(stringResource(R.string.common_cancel)) } },
-        )
-    }
 }
 
 @Composable
-private fun EmptyLibrary(modifier: Modifier, onAdd: () -> Unit) {
+private fun EmptyLibrary(modifier: Modifier, foldable: Boolean, onAdd: () -> Unit, onSample: () -> Unit, onFreeBooks: () -> Unit) {
     val spin by rememberInfiniteTransition(label = "spin").animateFloat(
         initialValue = 0f, targetValue = 360f,
         animationSpec = infiniteRepeatable(tween(24_000, easing = LinearEasing)), label = "rotation",
@@ -607,10 +903,14 @@ private fun EmptyLibrary(modifier: Modifier, onAdd: () -> Unit) {
             )
         }
         Spacer(Modifier.height(28.dp))
-        Text(stringResource(R.string.library_empty_title), style = MaterialTheme.typography.headlineSmallEmphasized, textAlign = TextAlign.Center)
+        // A phone that folds is told about the cover on its outer screen; any other, about reading and listening.
+        Text(
+            stringResource(if (foldable) R.string.library_empty_title else R.string.library_empty_title_phone),
+            style = MaterialTheme.typography.headlineSmallEmphasized, textAlign = TextAlign.Center,
+        )
         Spacer(Modifier.height(12.dp))
         Text(
-            stringResource(R.string.library_empty_message),
+            stringResource(if (foldable) R.string.library_empty_message else R.string.library_empty_message_phone),
             style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center, modifier = Modifier.widthIn(max = 420.dp),
         )
@@ -619,6 +919,14 @@ private fun EmptyLibrary(modifier: Modifier, onAdd: () -> Unit) {
             Icon(JacketIcons.Add, null, Modifier.size(ButtonDefaults.IconSize))
             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text(stringResource(R.string.library_add_books))
+        }
+        Spacer(Modifier.height(4.dp))
+        // Nothing to add yet? A classic comes with the app, and more are free to download.
+        TextButton(onClick = onSample) { Text(stringResource(R.string.library_try_sample)) }
+        TextButton(onClick = onFreeBooks) {
+            Icon(FreeBooks.Icon, null, Modifier.size(ButtonDefaults.IconSize))
+            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+            Text(stringResource(R.string.free_books_find))
         }
     }
 }

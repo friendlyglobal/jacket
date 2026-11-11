@@ -43,6 +43,7 @@ import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.findActivity
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * The reader's own brightness and warmth, set by swiping up and down the page's edges: the left
@@ -123,6 +124,12 @@ internal suspend fun PointerInputScope.edgeSwipes(
     }
 }
 
+/**
+ * The brightness the reader holds the inner screen at (0..1), or negative while it leaves it to
+ * the phone. The cover screen keeps to the same (see OuterDisplay).
+ */
+internal val ReaderHeldBrightness = MutableStateFlow(-1f)
+
 /** Holds the window at the reader's brightness while a book is open, and hands it back after. */
 @Composable
 internal fun ReaderBrightness(levels: EdgeLevels, enabled: Boolean) {
@@ -133,6 +140,7 @@ internal fun ReaderBrightness(levels: EdgeLevels, enabled: Boolean) {
         window.attributes = window.attributes.apply {
             screenBrightness = if (level < 0f) WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE else level
         }
+        ReaderHeldBrightness.value = if (level < 0f) -1f else level
     }
     LaunchedEffect(window, enabled) {
         snapshotFlow { if (enabled) levels.brightness else -1f }.collect(::set)

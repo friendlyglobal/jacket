@@ -8,6 +8,13 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOutCubic
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.graphics.Path
+import io.github.friendlyglobal.jacket.ui.motionRemoved
+import kotlin.math.PI
+import kotlin.math.sin
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -65,6 +72,8 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
@@ -73,6 +82,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -105,13 +115,24 @@ import kotlin.math.roundToInt
  * Root of the outer-display window, and of the cover a folded phone wears: always dark
  * (OLED-friendly), tinted by the book. [onTap] hears taps on the cover (each one wakes it first);
  * [keepLit] holds the ambient state off while something is showing over it.
+ *
+ * [controls] are the player's buttons, for a cover that can be touched: while the book is read
+ * aloud they join the strip along the bottom, which is then the player (see [CoverFace]).
+ *
+ * The cover is the book being read, or the one named by [bookId]: the reader names the book it has
+ * open, which is another when a finished book is opened again.
  */
 @Composable
-fun OuterCoverHost(onTap: (() -> Unit)? = null, keepLit: Boolean = false, onDimmed: ((Boolean) -> Unit)? = null) {
+fun OuterCoverHost(
+    onTap: (() -> Unit)? = null,
+    keepLit: Boolean = false,
+    controls: (@Composable () -> Unit)? = null,
+    bookId: String? = null,
+) {
     val library = LocalContext.current.library
     val state by library.state.collectAsStateWithLifecycle()
     val moment by library.moment.collectAsStateWithLifecycle()
-    val book = state.current
+    val book = state.find(bookId) ?: state.current
     // "Highlights on the dimmed cover": what you marked in this book, short enough to read at a glance.
     val quotes = remember(state.annotations, book?.id, state.settings.ambientQuote) {
         if (!state.settings.ambientQuote || book == null) emptyList() else {
@@ -122,7 +143,7 @@ fun OuterCoverHost(onTap: (() -> Unit)? = null, keepLit: Boolean = false, onDimm
         }
     }
     JacketTheme(seed = book?.seedColor, darkTheme = true) {
-        OuterCover(book, state.settings, moment, onTap, keepLit, quotes, onDimmed)
+        OuterCover(book, state.settings, moment, onTap, keepLit, quotes, controls)
     }
 }
 
@@ -138,12 +159,11 @@ fun OuterCover(
     onTap: (() -> Unit)? = null,
     keepLit: Boolean = false,
     quotes: List<String> = emptyList(),
-    /** Told as the cover goes ambient and wakes, for whatever is drawn over it. */
-    onDimmed: ((Boolean) -> Unit)? = null,
+    /** The player's buttons, where the cover can be touched (see [CoverFace]). */
+    controls: (@Composable () -> Unit)? = null,
 ) {
     var wakeCount by remember { mutableIntStateOf(0) }
     var dimmed by remember { mutableStateOf(false) }
-    LaunchedEffect(dimmed) { onDimmed?.invoke(dimmed) }
     val status = book?.let { CoverStatus.of(it, moment) }
     val tapped by rememberUpdatedState(onTap)
     // A tap wakes it. So does a new stage (starting to listen, finishing), which is worth showing;
@@ -156,12 +176,19 @@ fun OuterCover(
         }
     }
     Box(
-        Modifier.fillMaxSize().background(Color.Black).pointerInput(Unit) {
-            detectTapGestures {
-                wakeCount++
-                tapped?.invoke()
+        Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            // Any touch keeps the cover lit, one on the player's buttons included: it must not go
+            // dark under a thumb skipping back sentence by sentence.
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        if (awaitPointerEvent(PointerEventPass.Initial).type == PointerEventType.Press) wakeCount++
+                    }
+                }
             }
-        },
+            .pointerInput(Unit) { detectTapGestures { tapped?.invoke() } },
     ) {
         if (book == null || status == null) {
             val brightness by animateFloatAsState(if (dimmed) AMBIENT_BRIGHTNESS else 1f, tween(AMBIENT_FADE_MS), label = "ambient")
@@ -171,7 +198,7 @@ fun OuterCover(
                 modifier = Modifier.align(Alignment.Center).graphicsLayer { alpha = brightness },
             )
         } else {
-            CoverFace(book, status, showProgress = settings.showProgress, ambient = dimmed, quotes = quotes)
+            CoverFace(book, status, showProgress = settings.showProgress, ambient = dimmed, quotes = quotes, controls = controls)
         }
     }
 }
@@ -180,7 +207,8 @@ fun OuterCover(
  * One book on the cover screen, in one of two faces.
  *
  * Lit: the cover fills the screen, and a strip along the bottom tells the stage the book is at,
- * each with its own shape and motion ([CoverPhase]).
+ * each with its own shape and motion ([CoverPhase]). Given [controls] (a cover that can be touched),
+ * the strip is the player while the book is read aloud: the only one on the cover.
  *
  * Ambient: the cover steps back into a small, dim card on black (far fewer lit pixels on an OLED
  * than the whole screen at low brightness), with a ring and a number under it. Nothing moves
@@ -199,6 +227,8 @@ internal fun CoverFace(
     label: String = book.statusLabel(LocalResources.current),
     /** Highlights from the book, one of which the ambient face shows under the ring. */
     quotes: List<String> = emptyList(),
+    /** The player's buttons (play, pause, skip), for the listening strip of a cover that can be touched. */
+    controls: (@Composable () -> Unit)? = null,
 ) {
     val motion = MaterialTheme.motionScheme
     // The lights go down slowly and evenly; waking, the cover comes forward again on a spring.
@@ -216,7 +246,7 @@ internal fun CoverFace(
             Box(Modifier.fillMaxSize()) {
                 if (lit) {
                     LitStatus(
-                        status, label,
+                        status, label, controls,
                         Modifier.align(Alignment.BottomCenter).graphicsLayer { alpha = (1f - dim.value * 2f).coerceIn(0f, 1f) },
                     )
                 } else {
@@ -332,13 +362,28 @@ private fun CoverArt(book: Book, dim: State<Float>, drift: State<Offset>) {
  * accent, so the wave carries on through.
  */
 @Composable
-private fun LitStatus(status: CoverStatus, label: String, modifier: Modifier = Modifier) {
+private fun LitStatus(status: CoverStatus, label: String, controls: (@Composable () -> Unit)?, modifier: Modifier = Modifier) {
     val motion = MaterialTheme.motionScheme
     Box(
         modifier
             .fillMaxWidth()
             // Dark enough behind the words to read them over any cover, its own lettering included.
-            .background(Brush.verticalGradient(0f to Color.Transparent, 0.38f to Color.Black.copy(alpha = 0.74f), 1f to Color.Black.copy(alpha = 0.94f)))
+            // The fade is measured from the top, not as a share of the strip: above a tall strip
+            // (the player) as above a short one, the first line sits on the dark, and what comes
+            // under it (the wave, the buttons) on darker still, where a cover's title won't show
+            // through them.
+            .drawBehind {
+                val fade = (StripFade.toPx() / size.height).coerceIn(0.01f, 0.6f)
+                val deep = (StripDeep.toPx() / size.height).coerceIn(fade + 0.01f, 0.99f)
+                drawRect(
+                    Brush.verticalGradient(
+                        0f to Color.Transparent,
+                        fade to Color.Black.copy(alpha = 0.74f),
+                        deep to Color.Black.copy(alpha = 0.9f),
+                        1f to Color.Black.copy(alpha = 0.95f),
+                    ),
+                )
+            }
             .padding(start = 28.dp, end = 28.dp, top = 104.dp, bottom = 36.dp),
     ) {
         AnimatedContent(
@@ -347,7 +392,7 @@ private fun LitStatus(status: CoverStatus, label: String, modifier: Modifier = M
             transitionSpec = {
                 (slideInVertically(motion.defaultSpatialSpec()) { it / 3 } + fadeIn(motion.defaultEffectsSpec()))
                     .togetherWith(fadeOut(motion.fastEffectsSpec()))
-                    .using(SizeTransform(clip = false))
+                    .using(SizeTransform(clip = false) { _, _ -> motion.defaultSpatialSpec() })
             },
             contentAlignment = Alignment.BottomStart,
             label = "stage",
@@ -355,12 +400,16 @@ private fun LitStatus(status: CoverStatus, label: String, modifier: Modifier = M
             when (phase) {
                 CoverPhase.NEW -> NewStatus(status)
                 CoverPhase.READING, CoverPhase.ALMOST_DONE -> ReadingStatus(status, label)
-                CoverPhase.LISTENING -> ListeningStatus(status, label)
+                CoverPhase.LISTENING -> if (controls != null) ListeningPlayer(status, controls) else ListeningStatus(status, label)
                 CoverPhase.FINISHED -> FinishedStatus(status)
             }
         }
     }
 }
+
+/** How far down the strip its fade runs before the dark behind the words is reached, and where it is at its deepest. */
+private val StripFade = 96.dp
+private val StripDeep = 152.dp
 
 /** Just opened: a "New" tag, and the chapter you're starting on if the book names it. */
 @Composable
@@ -368,7 +417,7 @@ private fun NewStatus(status: CoverStatus) {
     Column {
         Surface(shape = CircleShape, color = MaterialTheme.colorScheme.tertiary, contentColor = MaterialTheme.colorScheme.onTertiary) {
             Row(Modifier.padding(start = 14.dp, end = 18.dp, top = 8.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(JacketIcons.Sparkle, null, Modifier.size(22.dp))
+                Icon(JacketIcons.Book, null, Modifier.size(22.dp))
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.library_new_badge), style = MaterialTheme.typography.titleMediumEmphasized)
             }
@@ -396,7 +445,7 @@ private fun ReadingStatus(status: CoverStatus, label: String) {
         ) {
             Row(Modifier.padding(bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
                 MorphBadge(almostShape(status.percent), MaterialTheme.colorScheme.tertiary, Modifier.size(56.dp)) {
-                    Icon(JacketIcons.Sparkle, null, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.onTertiary)
+                    Icon(JacketIcons.Flag, null, Modifier.size(28.dp), tint = MaterialTheme.colorScheme.onTertiary)
                 }
                 Spacer(Modifier.width(14.dp))
                 Text(stringResource(R.string.cover_almost_done), style = MaterialTheme.typography.headlineSmallEmphasized, color = Color.White)
@@ -458,6 +507,27 @@ private fun ListeningStatus(status: CoverStatus, label: String) {
     }
 }
 
+/**
+ * Being read aloud on a cover that can be touched (a phone folded shut): the strip is the player,
+ * and the only one there. What is playing and where you are, said once each: the chapter by name,
+ * the place in the book as a quiet figure, and the chapter as one wave that runs with the voice
+ * and lies still when it pauses. Under them the [controls], which carry the play state.
+ */
+@Composable
+private fun ListeningPlayer(status: CoverStatus, controls: @Composable () -> Unit) {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)) { ChapterTitle(status.chapter.ifEmpty { stringResource(R.string.cover_listening) }) }
+            Spacer(Modifier.width(12.dp))
+            Numeral(status.percent, Soft, MaterialTheme.typography.titleLarge)
+        }
+        Spacer(Modifier.height(8.dp))
+        Scales(status, MaterialTheme.colorScheme.primary, moving = status.playing, level = if (status.playing) 1f else 0f, bookLine = false, fullWave = true)
+        Spacer(Modifier.height(14.dp))
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { controls() }
+    }
+}
+
 /** Finished: a check in a burst that opens out of a circle, and the day you got there. */
 @Composable
 private fun FinishedStatus(status: CoverStatus) {
@@ -479,9 +549,9 @@ private fun FinishedStatus(status: CoverStatus) {
     }
 }
 
-/** How far through the book, as one big figure; each new percent rolls up into place. */
+/** How far through the book, as one big figure (or a quieter one in [style]); each new percent rolls up into place. */
 @Composable
-private fun Numeral(percent: Int, color: Color) {
+private fun Numeral(percent: Int, color: Color, style: TextStyle = MaterialTheme.typography.displaySmallEmphasized) {
     val motion = MaterialTheme.motionScheme
     AnimatedContent(
         targetState = percent,
@@ -492,7 +562,7 @@ private fun Numeral(percent: Int, color: Color) {
         },
         label = "percent",
     ) { value ->
-        Text(stringResource(R.string.percent, value), style = MaterialTheme.typography.displaySmallEmphasized, color = color, maxLines = 1)
+        Text(stringResource(R.string.percent, value), style = style, color = color, maxLines = 1)
     }
 }
 
@@ -516,10 +586,19 @@ private fun ChapterTitle(chapter: String) {
 /**
  * Two scales: the chapter as a wave over a thinner line for the whole book, or the book alone as
  * the wave when that is all that's known. The wave is drawn still; it moves when its progress
- * does (a page turned), and runs only while [moving].
+ * does (a page turned), and runs only while [moving]. Without the [bookLine] it is the wave alone.
+ *
+ * The player's line ([fullWave]) is a [SwirlLine], which swirls the whole width while the voice reads.
  */
 @Composable
-private fun Scales(status: CoverStatus, color: Color, moving: Boolean = false, level: Float = 1f) {
+private fun Scales(
+    status: CoverStatus,
+    color: Color,
+    moving: Boolean = false,
+    level: Float = 1f,
+    bookLine: Boolean = true,
+    fullWave: Boolean = false,
+) {
     val spec = WavyProgressIndicatorDefaults.ProgressAnimationSpec
     val twoScales = status.hasChapterScale
     val book = animateFloatAsState(status.progress, spec, label = "book")
@@ -527,18 +606,22 @@ private fun Scales(status: CoverStatus, color: Color, moving: Boolean = false, l
     val thickness = with(LocalDensity.current) { 7.dp.toPx() }
     val stroke = remember(thickness) { Stroke(width = thickness, cap = StrokeCap.Round) }
     Column {
-        LinearWavyProgressIndicator(
-            progress = { wave.value },
-            modifier = Modifier.fillMaxWidth().height(20.dp),
-            color = color,
-            trackColor = Track,
-            stroke = stroke,
-            trackStroke = stroke,
-            amplitude = { progress -> WavyProgressIndicatorDefaults.indicatorAmplitude(progress) * level },
-            wavelength = 44.dp,
-            waveSpeed = if (moving) 44.dp else 0.dp,
-        )
-        AnimatedVisibility(twoScales) {
+        if (fullWave) {
+            SwirlLine({ wave.value }, color, playing = moving, Modifier.fillMaxWidth().height(20.dp))
+        } else {
+            LinearWavyProgressIndicator(
+                progress = { wave.value },
+                modifier = Modifier.fillMaxWidth().height(20.dp),
+                color = color,
+                trackColor = Track,
+                stroke = stroke,
+                trackStroke = stroke,
+                amplitude = { progress -> WavyProgressIndicatorDefaults.indicatorAmplitude(progress) * level },
+                wavelength = 44.dp,
+                waveSpeed = if (moving) 44.dp else 0.dp,
+            )
+        }
+        AnimatedVisibility(twoScales && bookLine) {
             if (status.marks.size in 2..MOST_BEADS) {
                 ChapterBeads(status.marks, { book.value }, color, Modifier.padding(top = 10.dp).fillMaxWidth().height(12.dp))
             } else {
@@ -555,6 +638,62 @@ private fun Scales(status: CoverStatus, color: Color, moving: Boolean = false, l
         }
     }
 }
+
+/**
+ * The player's line on the cover: Material's wave, but the whole width of it, the part heard in
+ * [color] and the rest in the track's. A wavy progress line only swells where it has filled, which
+ * at a chapter's start is nothing at all; this one swirls from the first sentence while the voice
+ * reads, and eases flat, on the theme's spring, when it stops. The wave travels by the frame
+ * clock and is read only while drawing, so it redraws the line and nothing else.
+ */
+@Composable
+private fun SwirlLine(progress: () -> Float, color: Color, playing: Boolean, modifier: Modifier = Modifier) {
+    val swell by animateFloatAsState(if (playing) 1f else 0f, MaterialTheme.motionScheme.slowSpatialSpec(), label = "swell")
+    val phase = remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(playing) {
+        if (!playing || motionRemoved()) return@LaunchedEffect
+        var last = withFrameNanos { it }
+        while (true) {
+            withFrameNanos { now ->
+                phase.floatValue = (phase.floatValue + (now - last) / 1_000_000_000f * SWIRL_WAVES_PER_SECOND) % 1f
+                last = now
+            }
+        }
+    }
+    val heard = remember { Path() }
+    val rest = remember { Path() }
+    Canvas(modifier) {
+        val thickness = 7.dp.toPx()
+        val stroke = Stroke(width = thickness, cap = StrokeCap.Round)
+        val wavelength = 44.dp.toPx()
+        val amplitude = (size.height - thickness) / 2f * swell
+        val mid = size.height / 2f
+        val shift = phase.floatValue * wavelength
+        val step = 2.dp.toPx()
+        fun y(x: Float) = mid + amplitude * sin((x - shift) / wavelength * 2f * PI.toFloat())
+        fun Path.wave(from: Float, to: Float) {
+            reset()
+            if (to <= from) return
+            var x = from
+            moveTo(x, y(x))
+            while (x < to) {
+                x = min(x + step, to)
+                lineTo(x, y(x))
+            }
+        }
+        val start = thickness / 2f
+        val end = size.width - thickness / 2f
+        val at = start + (end - start) * progress().coerceIn(0f, 1f)
+        // A little room between the two, as Material leaves between a line and its track.
+        heard.wave(start, at)
+        rest.wave(if (at > start) at + thickness + 4.dp.toPx() else start, end)
+        drawPath(rest, Track, style = stroke)
+        drawPath(heard, color, style = stroke)
+    }
+}
+
+/** How many wavelengths the player's line travels in a second while the voice reads. */
+private const val SWIRL_WAVES_PER_SECOND = 1f
 
 /** Past this many chapters the beads would be too small to tell apart: a plain line serves better. */
 private const val MOST_BEADS = 48

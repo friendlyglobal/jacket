@@ -143,6 +143,15 @@
     "copyright": "Copyright (c) 2016, Mapbox"
   },
   {
+    "name": "Eigen (inside the voice engine)",
+    "artifacts": [
+      "com.k2fsa.sherpa.onnx:sherpa-onnx-static-link-onnxruntime (libsherpa-onnx-jni.so)"
+    ],
+    "license": "MPL-2.0",
+    "url": "https://eigen.tuxfamily.org",
+    "copyright": "Copyright (c) the Eigen authors"
+  },
+  {
     "name": "Glance",
     "artifacts": [
       "androidx.glance:glance",
@@ -164,6 +173,15 @@
     "license": "Apache-2.0",
     "url": "https://github.com/google/guava",
     "copyright": "Copyright (C) The Guava Authors"
+  },
+  {
+    "name": "hclust-cpp (inside the voice engine)",
+    "artifacts": [
+      "com.k2fsa.sherpa.onnx:sherpa-onnx-static-link-onnxruntime (libsherpa-onnx-jni.so)"
+    ],
+    "license": "BSD-2-Clause",
+    "url": "https://github.com/cdalitz/hclust-cpp",
+    "copyright": "Copyright (c) 2011 Daniel Müllner\nCopyright (c) 2019 Christoph Dalitz"
   },
   {
     "name": "Hypothesis Client",
@@ -260,6 +278,15 @@
     "copyright": "Copyright The JSpecify Authors"
   },
   {
+    "name": "Kaldi components inside the voice engine (kaldi-native-fbank, kaldi-decoder, OpenFst, simple-sentencepiece)",
+    "artifacts": [
+      "com.k2fsa.sherpa.onnx:sherpa-onnx-static-link-onnxruntime (libsherpa-onnx-jni.so)"
+    ],
+    "license": "Apache-2.0",
+    "url": "https://github.com/k2-fsa",
+    "copyright": "Copyright (c) Xiaomi Corporation and the Kaldi and OpenFst authors"
+  },
+  {
     "name": "Koi",
     "artifacts": [
       "com.mcxiaoke.koi:core"
@@ -338,6 +365,42 @@
     "license": "Apache-2.0",
     "url": "https://github.com/androidx/media",
     "copyright": "Copyright The Android Open Source Project"
+  },
+  {
+    "name": "Natural voices: Supertonic 3",
+    "artifacts": [
+      "assets/voices/supertonic3 (8-bit models from the sherpa-onnx project)"
+    ],
+    "license": "OpenRAIL-M",
+    "url": "https://huggingface.co/Supertone/supertonic-3",
+    "copyright": "Supertonic 3 (c) Supertone Inc. The models were made smaller (8-bit) by the sherpa-onnx project.\nThe licence's use restrictions (its Attachment A, at the end) apply to everyone who uses these voices."
+  },
+  {
+    "name": "Natural voices: the Brazilian voice (Piper “cadu”)",
+    "artifacts": [
+      "assets/voices/cadu (the model as the sherpa-onnx project publishes it, its weights stored at half size by Jacket's build)"
+    ],
+    "license": "MIT",
+    "url": "https://huggingface.co/rhasspy/piper-voices/tree/main/pt/pt_BR/cadu/medium",
+    "copyright": "Piper voice “cadu” (Brazilian Portuguese), from the Piper voices collection, Copyright (c) the Piper voices contributors (MIT).\nIt was taught from recordings a volunteer gave to the public domain (CC0 1.0, https://github.com/OHF-Voice/voice-datasets), starting from a voice that is itself CC0. The model was prepared for this engine by the sherpa-onnx project; Jacket's build stores its weights as 16-bit numbers, which halves its size and changes nothing that can be heard.\nThe sounds it is given to say are written by Jacket's own rules for Brazilian Portuguese."
+  },
+  {
+    "name": "nlohmann/json and utf8proc (inside the voice engine)",
+    "artifacts": [
+      "com.k2fsa.sherpa.onnx:sherpa-onnx-static-link-onnxruntime (libsherpa-onnx-jni.so)"
+    ],
+    "license": "MIT",
+    "url": "https://github.com/nlohmann/json",
+    "copyright": "Copyright (c) 2013-2025 Niels Lohmann\nCopyright (c) 2014-2021 Steven G. Johnson, Jiahao Chen, Tony Kelman, Jonas Fonseca and other contributors (utf8proc)"
+  },
+  {
+    "name": "ONNX Runtime (inside the voice engine)",
+    "artifacts": [
+      "com.k2fsa.sherpa.onnx:sherpa-onnx-static-link-onnxruntime (libsherpa-onnx-jni.so)"
+    ],
+    "license": "MIT",
+    "url": "https://github.com/microsoft/onnxruntime",
+    "copyright": "Copyright (c) Microsoft Corporation"
   },
   {
     "name": "OpenDyslexic",
@@ -519,6 +582,24 @@
     "license": "BSD-3-Clause",
     "url": "https://github.com/readium/kotlin-toolkit",
     "copyright": "Copyright (c) 2017, Readium\nCopyright (c) 2020, Readium (Divina Player)"
+  },
+  {
+    "name": "sherpa-onnx (the voice engine)",
+    "artifacts": [
+      "com.k2fsa.sherpa.onnx:sherpa-onnx-static-link-onnxruntime"
+    ],
+    "license": "Apache-2.0",
+    "url": "https://github.com/k2-fsa/sherpa-onnx",
+    "copyright": "Copyright (c) 2023-2026 Xiaomi Corporation"
+  },
+  {
+    "name": "The Time Machine (the sample book)",
+    "artifacts": [
+      "assets/sample/the-time-machine.epub"
+    ],
+    "license": "CC0-1.0",
+    "url": "https://standardebooks.org/ebooks/h-g-wells/the-time-machine",
+    "copyright": "By H. G. Wells, 1895: in the public domain in the United States and wherever copyright lasts 70 years or less after the author's death.\nThis edition was produced by Standard Ebooks, whose contributors dedicate their work to the public domain (CC0 1.0)."
   },
   {
     "name": "Timber",

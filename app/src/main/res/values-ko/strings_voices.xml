@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Natural voices, the welcome pages and the sample book (see values/strings_voices.xml for what each is). -->
+<resources>
+    <string name="settings_group_listening">듣기</string>
+    <string name="voice_title">음성</string>
+    <string name="voice_phone">휴대전화 음성</string>
+    <string name="voice_phone_description">휴대전화에 내장되어 있습니다. 지원하는 모든 언어를 읽어 줍니다.</string>
+    <string name="voice_natural">자연스러운 음성</string>
+    <string name="voice_female">여성 음성 %1$d</string>
+    <string name="voice_male">남성 음성 %1$d</string>
+    <string name="voice_hear">%1$s 들어 보기</string>
+    <string name="voice_stop_sample">중지</string>
+    <string name="voice_change">변경</string>
+    <string name="voice_book_language">책의 언어: %1$s</string>
+    <string name="voice_book_language_hint">맞지 않나요? 변경하면 알맞은 음성으로 읽어 줍니다.</string>
+    <string name="voice_language_title">이 책은 어떤 언어인가요?</string>
+    <string name="voice_language_from_book">책에 표시된 언어</string>
+    <string name="voice_only_language">이 언어의 책에만 사용: %1$s</string>
+    <string name="voice_only_language_description">다른 언어의 책은 각자의 음성을 그대로 씁니다.</string>
+    <string name="voice_not_in_language">%1$s: 자연스러운 음성이 아직 이 언어를 지원하지 않아 휴대전화 음성으로 읽습니다.</string>
+    <string name="voice_private">자연스러운 음성은 휴대전화 안에서만 작동합니다. 읽는 내용은 어디로도 전송되지 않습니다.</string>
+    <string name="voice_about">이 음성 정보</string>
+    <string name="voice_about_text">자연스러운 음성은 Jacket에 포함되어 있으며 인터넷 없이 작동합니다. 자유롭게 사용할 수 있지만, 음성을 실제 사람인 것처럼 속이는 등 누군가를 속이거나 해치는 데 사용해서는 안 됩니다. 전체 약관은 설정의 라이선스에 있습니다.</string>
+    <string name="voice_slow">이 음성은 이 휴대전화에 너무 무겁습니다. 탭하여 변경하세요.</string>
+    <string name="listen_preparing">음성을 준비하는 중…</string>
+    <string name="voice_stopped">자연스러운 음성이 멈췄습니다. 다시 시도하거나 휴대전화 음성으로 바꾸세요.</string>
+    <string name="voice_fell_back">자연스러운 음성을 시작할 수 없어 휴대전화 음성으로 읽고 있습니다.</string>
+    <string name="voice_phone_settings">휴대전화 음성 설정</string>
+    <string name="voice_phone_settings_description">휴대전화 자체 음성이 어떻게 들릴지 선택합니다.</string>
+    <string name="voice_settings_hint">책은 각자의 언어로 읽어 줍니다. 자연스러운 음성은 여러 언어를 지원하며, 나머지는 휴대전화 음성이 읽습니다.</string>
+    <string name="onboarding_cover_body">안쪽에서 읽는 동안 외부 화면에는 책 표지가 표시됩니다. 휴대전화를 닫아도 표지는 그대로이고, 반쯤 펼쳐 세우면 페이지가 접히는 부분 위에 놓입니다.</string>
+    <string name="onboarding_cover_outside">바깥쪽에 표지</string>
+    <string name="onboarding_read_title">종이처럼 넘기는 진짜 페이지</string>
+    <string name="onboarding_read_body">페이지가 손가락 아래에서 들려 올라가 밀리거나, 말리거나, 넘겨집니다. 단어를 길게 눌러 하이라이트하고 메모를 추가하세요.</string>
+    <string name="onboarding_read_listen_body">페이지가 종이처럼 넘어가고, 휴대전화를 펼치면 두 페이지가 나란히 보입니다. 편하게 앉아 들어도 됩니다. 자연스러운 음성이 어떤 책이든 소리 내어 읽어 줍니다.</string>
+    <string name="onboarding_listen_title">아니면 그냥 들으세요</string>
+    <string name="onboarding_listen_body">자연스러운 음성이 어떤 책이든 소리 내어 읽어 주고, 읽는 단어마다 불이 들어옵니다. 화면을 꺼도 계속됩니다.</string>
+    <string name="onboarding_yours_title">내 취향대로</string>
+    <string name="onboarding_yours_body">시작하면서 몇 가지만 골라 보세요. 언제든지 바꿀 수 있습니다.</string>
+    <string name="onboarding_yours_sample">옛날 옛적에, 한 권의 책이 독자를 만났습니다.</string>
+    <string name="onboarding_start_title">내 책은 언제나 내 것</string>
+    <string name="onboarding_widget">Jacket 위젯으로 책 표지를 홈 화면에 두세요.</string>
+    <string name="library_empty_title_phone">다음 책이 여기서 시작됩니다</string>
+    <string name="library_empty_message_phone">EPUB, PDF, CBZ 만화 또는 텍스트 파일을 추가하세요. Jacket이 개인 사본을 보관하고, 넘길 수 있는 진짜 페이지로 만들어 주며, 자연스러운 음성으로 읽어 줄 수도 있습니다.</string>
+    <string name="library_try_sample">샘플 책 읽어 보기</string>
+    <string name="sample_failed">샘플 책을 열 수 없습니다.</string>
+</resources>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Natural voices, the welcome pages and the sample book (see values/strings_voices.xml for what each is). -->
+<resources>
+    <string name="settings_group_listening">聴く</string>
+    <string name="voice_title">音声</string>
+    <string name="voice_phone">スマートフォンの音声</string>
+    <string name="voice_phone_description">スマートフォンに内蔵されています。対応しているすべての言語を読み上げます。</string>
+    <string name="voice_natural">ナチュラル</string>
+    <string name="voice_female">女性の声 %1$d</string>
+    <string name="voice_male">男性の声 %1$d</string>
+    <string name="voice_hear">%1$sを試聴</string>
+    <string name="voice_stop_sample">停止</string>
+    <string name="voice_change">変更</string>
+    <string name="voice_book_language">本の言語：%1$s</string>
+    <string name="voice_book_language_hint">違う場合は変更すると、合った音声で読み上げます。</string>
+    <string name="voice_language_title">この本は何語ですか？</string>
+    <string name="voice_language_from_book">本に記載の言語</string>
+    <string name="voice_only_language">この言語の本だけに使う：%1$s</string>
+    <string name="voice_only_language_description">ほかの言語の本は、それぞれの音声のままです。</string>
+    <string name="voice_not_in_language">%1$s：ナチュラル音声はまだこの言語に対応していないため、スマートフォンの音声で読み上げます。</string>
+    <string name="voice_private">ナチュラル音声はスマートフォンの中だけで動きます。読んでいる内容がどこかに送信されることはありません。</string>
+    <string name="voice_about">この音声について</string>
+    <string name="voice_about_text">ナチュラル音声は Jacket に含まれており、インターネットなしで使えます。自由に使えますが、実在の人物の声と偽るなど、人をだましたり傷つけたりする目的には使えません。条件の全文は、設定のライセンスにあります。</string>
+    <string name="voice_slow">この音声はこのスマートフォンには重すぎます。タップして変更できます。</string>
+    <string name="listen_preparing">音声を準備しています…</string>
+    <string name="voice_stopped">ナチュラル音声が停止しました。もう一度試すか、スマートフォンの音声に切り替えてください。</string>
+    <string name="voice_fell_back">ナチュラル音声を開始できなかったため、スマートフォンの音声で読み上げています。</string>
+    <string name="voice_phone_settings">スマートフォンの音声の設定</string>
+    <string name="voice_phone_settings_description">スマートフォン本体の音声の聞こえ方を選びます。</string>
+    <string name="voice_settings_hint">本はそれぞれの言語で読み上げられます。ナチュラル音声は多くの言語に対応し、それ以外はスマートフォンの音声が読み上げます。</string>
+    <string name="onboarding_cover_body">内側で読んでいる間、外側の画面には本の表紙が表示されます。閉じても表紙はそのまま。半分開いて立てると、ページが折り目の上に収まります。</string>
+    <string name="onboarding_cover_outside">外側に表紙</string>
+    <string name="onboarding_read_title">紙のようにめくれる、本物のページ</string>
+    <string name="onboarding_read_body">ページは指の下で持ち上がり、スライドしたり、丸まったり、配られたりします。言葉を長押しすると、ハイライトやメモを付けられます。</string>
+    <string name="onboarding_read_listen_body">ページは紙のようにめくれ、開いているときは見開きで表示されます。ゆったり聴くこともできます。ナチュラル音声がどんな本でも読み上げます。</string>
+    <string name="onboarding_listen_title">聴くだけでも</string>
+    <string name="onboarding_listen_body">ナチュラル音声がどんな本でも読み上げ、読まれている言葉が順に光ります。画面を消しても続きます。</string>
+    <string name="onboarding_yours_title">自分好みに</string>
+    <string name="onboarding_yours_body">はじめにいくつか選びましょう。あとでいつでも変更できます。</string>
+    <string name="onboarding_yours_sample">むかしむかし、一冊の本が読み手に出会いました。</string>
+    <string name="onboarding_start_title">本はずっとあなたのもの</string>
+    <string name="onboarding_widget">Jacket のウィジェットで、本の表紙をホーム画面に置けます。</string>
+    <string name="library_empty_title_phone">次の一冊はここから</string>
+    <string name="library_empty_message_phone">EPUB、PDF、CBZ コミック、テキストファイルを追加できます。Jacket は自分だけのコピーを保管し、めくれる本物のページにして、ナチュラル音声で読み上げることもできます。</string>
+    <string name="library_try_sample">サンプルの本を試す</string>
+    <string name="sample_failed">サンプルの本を開けませんでした。</string>
+</resources>

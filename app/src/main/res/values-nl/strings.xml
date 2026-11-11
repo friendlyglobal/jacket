@@ -150,6 +150,8 @@
     <string name="settings_about_version">Versie %1$s</string>
     <string name="settings_about_source">Broncode</string>
     <string name="settings_about_source_description">Open source op GitHub</string>
+    <string name="settings_about_privacy">Privacybeleid</string>
+    <string name="settings_about_privacy_description">Jacket verzamelt geen gegevens van je</string>
     <string name="settings_about_licenses">Opensourcelicenties</string>
     <string name="settings_about_licenses_description">Jacket valt onder Apache 2.0 en is gebouwd op Readium, Jetpack en open lettertypen</string>
 

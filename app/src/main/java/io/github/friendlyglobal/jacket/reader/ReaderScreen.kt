@@ -20,6 +20,14 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -57,11 +65,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilledTonalIconToggleButton
-import androidx.compose.material3.FloatingToolbarDefaults
-import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -84,6 +92,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -112,6 +121,10 @@ import io.github.friendlyglobal.jacket.data.BookFormat
 import io.github.friendlyglobal.jacket.data.ReadingMoment
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.library
+import io.github.friendlyglobal.jacket.voices
+import androidx.compose.ui.platform.LocalConfiguration
+import io.github.friendlyglobal.jacket.ui.voices.VoicePicker
+import io.github.friendlyglobal.jacket.ui.voices.voiceLabel
 import io.github.friendlyglobal.jacket.outer.OuterDisplay
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
@@ -187,10 +200,30 @@ class ReaderNav {
 
     /** The first page is on screen (or nothing more is coming): the opening cover may lift. */
     var contentReady by mutableStateOf(false)
+
+    /**
+     * When the reader last moved through the book themselves (uptime millis): a swipe or scroll on
+     * the page, a page turned, a jump. Pages also move by themselves (re-flowing for the player, a
+     * fold); only these count as the listener going elsewhere.
+     */
+    var movedAt = 0L
+
+    /** The language the book itself says it is in (an EPUB does), for the voice picker; null when it doesn't say. */
+    var bookLanguage by mutableStateOf<String?>(null)
 }
 
-/** The place a jump (contents, search, the scrubber) left from: how far through the book, and the way back. */
-class Origin(val percent: Int, val back: () -> Unit)
+/**
+ * The place a jump (contents, search, the scrubber) left from, and the way back. The pill names it
+ * as precisely as the format allows: the chapter's name, else the page, else how far through.
+ */
+class Origin(
+    val percent: Int,
+    /** The chapter left from; empty where there's none. */
+    val chapter: String = "",
+    /** The page left from, counting from 1, for page-based formats; 0 otherwise. */
+    val page: Int = 0,
+    val back: () -> Unit,
+)
 
 /** The open book's [ReaderNav], for views that only need to report in (see [ReaderError]). */
 internal val LocalReaderNav = compositionLocalOf<ReaderNav?> { null }
@@ -202,7 +235,7 @@ object ReaderKeys {
 
 typealias ProgressSink = (position: Int, offset: Float, progress: Float, sections: Int) -> Unit
 
-private enum class Sheet { NONE, CONTENTS, TEXT, SEARCH }
+private enum class Sheet { NONE, CONTENTS, TEXT, SEARCH, VOICE }
 
 @Composable
 fun ReaderScreen(
@@ -226,9 +259,24 @@ fun ReaderScreen(
     val libraryState by library.state.collectAsStateWithLifecycle()
     val annotations = remember(libraryState.annotations, book.id) { libraryState.annotations.filter { it.bookId == book.id } }
     val haptics = rememberHaptics()
-    // Plain text is read aloud with Jacket's own speech engine; EPUB uses Readium's.
-    val speaker = remember(book.id) { if (book.format == BookFormat.TXT) Speaker(context) else null }
+    // The voice follows the book's language; a text file's was told from its words when it was
+    // added (older ones go by the phone's language).
+    val voices = context.voices
+    val phoneLanguage = LocalConfiguration.current.locales[0]?.toLanguageTag()
+    val readIn = book.language ?: if (book.format == BookFormat.TXT) phoneLanguage else null
+    val voice = remember(settings.voice, settings.voices, readIn) { voices.choose(readIn, settings) }
+    // Plain text is read aloud with Jacket's own speakers; EPUB goes through Readium.
+    val speaker = remember(book.id, voice) {
+        when {
+            book.format != BookFormat.TXT -> null
+            voice != null -> NaturalSpeaker(context, voices, voice)
+            else -> SystemSpeaker(context)
+        }
+    }
     DisposableEffect(speaker) { onDispose { speaker?.shutdown() } }
+    // On the player: who is reading, and whether the phone is keeping up with them.
+    val health by voices.health.collectAsStateWithLifecycle()
+    val voiceLabel = voiceLabel(readIn, settings)
     LaunchedEffect(speaker, settings.listenRate) { speaker?.setRate(settings.listenRate) }
     val outerAvailable by outer.available.collectAsStateWithLifecycle()
     val outerActive by outer.active.collectAsStateWithLifecycle()
@@ -238,14 +286,23 @@ fun ReaderScreen(
         if (settings.nightPages && settings.pageColor == PageColor.PAPER && isSystemInDarkTheme()) PageColor.DARK else settings.pageColor,
     )
     var chrome by rememberSaveable(book.id) { mutableStateOf(true) }
+    // The toolbar by itself, without the bars around it: the player, shown for a moment when
+    // listening starts so its controls are found, and while it turns back into the reading
+    // toolbar when listening ends.
+    var peek by remember(book.id) { mutableStateOf(false) }
+    val barUp = chrome || peek
     var sheet by rememberSaveable { mutableStateOf(Sheet.NONE) }
     // Once you touch the controls, they stay until you dismiss them.
     var touchedChrome by remember(book.id) { mutableStateOf(false) }
+    // While listening they tuck away by themselves instead: when they were last touched, and where they sit.
+    val controls = remember(book.id) { ControlsWatch() }
     val noticeTouches = Modifier.pointerInput(Unit) {
         awaitPointerEventScope {
             while (true) {
-                awaitPointerEvent(PointerEventPass.Initial)
+                val event = awaitPointerEvent(PointerEventPass.Initial)
                 touchedChrome = true
+                controls.touchedAt = SystemClock.uptimeMillis()
+                controls.pressed = event.changes.any { it.pressed }
             }
         }
     }
@@ -327,7 +384,7 @@ fun ReaderScreen(
     }
     // Closing shows the system bars straight away, so the library has its final layout (and the
     // cover its landing spot) by the time it appears.
-    SystemBarsHidden(hidden = coverUp || (!chrome && sheet == Sheet.NONE && !closing))
+    SystemBarsHidden(hidden = coverUp || (!barUp && sheet == Sheet.NONE && !closing))
     // A sheet is a window of its own: it would sit on top of the cover.
     LaunchedEffect(coverUp) { if (coverUp) sheet = Sheet.NONE }
     val setRate: (Float) -> Unit = { rate ->
@@ -388,6 +445,88 @@ fun ReaderScreen(
     // Stopping read-aloud clears the timer.
     LaunchedEffect(listen.active) { if (!listen.active) listen.sleep = SleepTimer.OFF }
 
+    // While the book is read aloud, the controls don't stay over the text. They tuck away into the
+    // footer's mini player a few seconds after the last touch, and sooner than that when they sit
+    // over the line being read: the words the voice is on are never kept out of sight.
+    val listening = listen.active && nav.listenController != null
+    val accessibility = LocalAccessibilityManager.current
+    LaunchedEffect(listening, barUp, sheet == Sheet.NONE) {
+        if (!barUp) {
+            // Gone: whatever was known of them is out of date (a finger can't still be on them).
+            controls.covering = false
+            controls.pressed = false
+        }
+        if (!listening || !barUp || sheet != Sheet.NONE) return@LaunchedEffect
+        val stays = accessibility?.calculateRecommendedTimeoutMillis(
+            LISTEN_CONTROLS_MS, containsIcons = true, containsText = true, containsControls = true,
+        ) ?: LISTEN_CONTROLS_MS
+        // Arriving counts as a touch.
+        controls.touchedAt = SystemClock.uptimeMillis()
+        while (true) {
+            delay(CONTROLS_POLL_MS)
+            val now = SystemClock.uptimeMillis()
+            // They stay under a finger, under a menu of their own, while the voice gets ready (the
+            // player is what says so), and for someone finding their way by touch with TalkBack.
+            if (controls.pressed || listen.held || listen.preparing || context.exploresByTouch()) {
+                controls.touchedAt = now
+                continue
+            }
+            val line = if (listen.playing) nav.listenController?.spokenLine() else null
+            controls.covering = line != null && ((chrome && controls.top.overlaps(line)) || controls.bottom.overlaps(line))
+            if (now - controls.touchedAt >= if (controls.covering) COVERED_CONTROLS_MS else stays) break
+        }
+        chrome = false
+        peek = false
+    }
+    // Listening over (closed, or the book ran out): the player turns back into the reading toolbar
+    // in front of you, then leaves the page to its footer, where the sentence the voice stopped on
+    // is marked for a moment. If the bar sits over that sentence it goes at once.
+    var listened by remember(book.id) { mutableStateOf(false) }
+    LaunchedEffect(listening) {
+        if (listening) {
+            listened = true
+            return@LaunchedEffect
+        }
+        if (!listened) return@LaunchedEffect
+        listened = false
+        val covering = controls.covering
+        controls.covering = false
+        if (!barUp) return@LaunchedEffect
+        val stoppedAt = SystemClock.uptimeMillis()
+        if (!covering) delay(STOPPED_CONTROLS_MS)
+        // Sent away by a tap on the page meanwhile: nothing left to do.
+        if (!chrome && !peek) return@LaunchedEffect
+        // Taken hold of meanwhile: they are the reading controls now, whole, to dismiss as ever.
+        chrome = controls.pressed || controls.touchedAt > stoppedAt || context.exploresByTouch()
+        peek = false
+    }
+    // A voice the phone can't keep up with says so on the player: bring it up to be seen.
+    val struggling = voice != null && health.slow
+    LaunchedEffect(struggling, listening) {
+        if (!struggling) listen.warned = false else if (listening && !listen.warned && !chrome) peek = true
+    }
+
+    // How fast the voice gets through this book, learnt from the pages it turns (see ListeningPace):
+    // the mini player tells the time left in the chapter by it, as the footer does by your own
+    // reading pace. Until a page or so has been heard, it says what the footer would.
+    val heard = remember(book.id) { ListeningPace() }
+    var listenPace by remember(book.id) { mutableFloatStateOf(0f) }
+    var paceRate by remember(book.id) { mutableFloatStateOf(settings.listenRate) }
+    LaunchedEffect(book.id, nav, settings.listenRate) {
+        if (paceRate != settings.listenRate) {
+            heard.retimed(paceRate, settings.listenRate)
+            paceRate = settings.listenRate
+            listenPace = heard.wholeBook
+        }
+        snapshotFlow { Triple(nav.pageKey, listen.playing && !listen.preparing, listen.offPage) }.collect { (_, speaking, elsewhere) ->
+            val progress = library.state.value.find(book.id)?.progress ?: return@collect
+            // Only pages the voice turned itself count, not the listener's own.
+            val theirs = SystemClock.uptimeMillis() - nav.movedAt < LISTENER_TURN_MS
+            heard.page(SystemClock.elapsedRealtime(), progress, following = speaking && !elsewhere && !theirs)
+            listenPace = heard.wholeBook
+        }
+    }
+
     // The cover screen and the widget follow along: the chapter, the place in it (to the nearest
     // half percent: about a page), and read-aloud.
     DisposableEffect(book.id) { onDispose { library.endMoment(book.id) } }
@@ -428,6 +567,7 @@ fun ReaderScreen(
         snapshotFlow { nav.contentReady && nav.listenController != null && opening.settled }.first { it }
         chrome = false
         nav.listenController?.start()
+        peek = nav.listen.active
         onAutoListened()
     }
 
@@ -454,9 +594,16 @@ fun ReaderScreen(
     val onProgress: ProgressSink = { position, offset, progress, sections ->
         library.updatePosition(book.id, position, offset, progress, sections)
     }
+    // A tap on the page: the full controls, or the page to itself again (the lone toolbar goes too).
     val toggleChrome = {
         touchedChrome = true
-        chrome = !chrome
+        controls.touchedAt = SystemClock.uptimeMillis()
+        if (chrome || peek) {
+            chrome = false
+            peek = false
+        } else {
+            chrome = true
+        }
     }
 
     val motion = MaterialTheme.motionScheme
@@ -496,12 +643,29 @@ fun ReaderScreen(
                 Box(Modifier.fillMaxSize().background(page.background)) { ReaderLoading() }
             }
 
+            // The footer line, in the room every page keeps under it: its quiet words while you
+            // read, the mini player while you listen. The toolbar sits over it when it is up.
+            val playerVoice = ListenVoice(voiceLabel, natural = voice != null, struggling = struggling) { sheet = Sheet.VOICE }
+            // It gives way at once to the toolbar, and hops back up once the toolbar has dropped
+            // away, rather than through it.
+            val footerUp by produceState(!barUp, barUp) {
+                if (!barUp && !motionRemoved()) delay(FOOTER_GAP_MS)
+                value = !barUp
+            }
             AnimatedVisibility(
-                visible = !chrome && !nav.listen.active,
-                enter = fadeIn(motion.slowEffectsSpec()),
+                visible = footerUp,
+                enter = slideInVertically(motion.fastSpatialSpec()) { it / 2 } + fadeIn(motion.defaultEffectsSpec()),
                 exit = fadeOut(motion.fastEffectsSpec()),
                 modifier = Modifier.align(Alignment.BottomCenter),
-            ) { ReaderFooter(nav, book, page, settings) }
+            ) {
+                ReaderFooter(
+                    nav, book, page, settings, playerVoice, listenPace, haptics,
+                    onControls = {
+                        touchedChrome = true
+                        chrome = true
+                    },
+                )
+            }
 
             // After a jump: the way back to where you were, for a little while.
             JumpBack(nav, haptics, visible = opening.settled, modifier = Modifier.align(Alignment.TopCenter))
@@ -511,7 +675,8 @@ fun ReaderScreen(
                 visible = chrome && entrance >= 1,
                 enter = slideInVertically(motion.defaultSpatialSpec()) { -it } + fadeIn(motion.defaultEffectsSpec()),
                 exit = slideOutVertically(motion.fastSpatialSpec()) { -it } + fadeOut(),
-                modifier = Modifier.align(Alignment.TopCenter).then(noticeTouches),
+                modifier = Modifier.align(Alignment.TopCenter).then(noticeTouches)
+                    .onGloballyPositioned { controls.top = it.boundsInWindow() },
             ) {
                 val marked = remember(nav.pageKey, annotations) {
                     annotations.firstOrNull { it.kind == AnnotationKind.BOOKMARK && nav.onScreen(it) }
@@ -544,33 +709,44 @@ fun ReaderScreen(
                 )
             }
 
-            // While listening, the player stays even when the rest of the controls are hidden. The
-            // toolbar floats, so it can afford more spring than the bar pinned to the top edge.
+            // The toolbar floats over the page in the same place whether you read or listen: the
+            // reading bar and the player hop out and in there (see ReaderToolbar). It floats, so it
+            // can afford more spring than the bar pinned to the top edge. Leaving, it drops away in
+            // sight (not faded out before it has moved), and the footer hops up after it.
             AnimatedVisibility(
-                visible = (chrome || nav.listen.active) && entrance >= 2,
+                visible = barUp && entrance >= 2,
                 enter = slideInVertically(motion.fastSpatialSpec()) { it } +
-                    scaleIn(motion.fastSpatialSpec(), initialScale = 0.88f) + fadeIn(motion.defaultEffectsSpec()),
-                exit = slideOutVertically(motion.fastSpatialSpec()) { it } + fadeOut(),
+                    scaleIn(motion.fastSpatialSpec(), initialScale = 0.88f, transformOrigin = BottomMiddle) + fadeIn(motion.fastEffectsSpec()),
+                exit = slideOutVertically(motion.fastSpatialSpec()) { it } +
+                    scaleOut(motion.fastSpatialSpec(), targetScale = 0.88f, transformOrigin = BottomMiddle) + fadeOut(motion.defaultEffectsSpec()),
                 modifier = Modifier.align(Alignment.BottomCenter).then(noticeTouches),
             ) {
                 ReaderBottomBar(
                     nav = nav, book = book, haptics = haptics,
                     showScrubber = chrome,
+                    voice = playerVoice,
                     rate = settings.listenRate,
                     onRate = setRate,
                     onListen = {
                         haptics.confirm()
-                        chrome = false
                         nav.listenController?.start()
+                        // The bars around the toolbar leave; it stays a moment as the player, so
+                        // its controls are seen, then tucks into the footer. (A voice that can't
+                        // start says why, and nothing changes.)
+                        if (nav.listen.active) {
+                            chrome = false
+                            peek = true
+                        }
                     },
                     onContents = { sheet = Sheet.CONTENTS },
                     onText = { sheet = Sheet.TEXT },
+                    onPlaced = { controls.bottom = it },
                 )
             }
 
             // The last page: celebrate, and offer what's next.
             AnimatedVisibility(
-                visible = nav.atEnd && !finishedDismissed && !chrome && !nav.listen.active && opening.settled,
+                visible = nav.atEnd && !finishedDismissed && !barUp && !nav.listen.active && opening.settled,
                 enter = slideInVertically(motion.defaultSpatialSpec()) { it } + fadeIn(),
                 exit = slideOutVertically(motion.fastSpatialSpec()) { it } + fadeOut(),
                 modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 48.dp),
@@ -633,6 +809,16 @@ fun ReaderScreen(
                 forEpub = book.format == BookFormat.EPUB,
             )
         }
+        Sheet.VOICE -> ReaderSheet(onGone = { sheet = Sheet.NONE }) {
+            VoicePicker(
+                language = readIn,
+                settings = settings,
+                onSettings = onSettings,
+                modifier = Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
+                bookLanguage = nav.bookLanguage,
+                onLanguage = { picked -> library.setLanguage(book.id, picked ?: nav.bookLanguage) },
+            )
+        }
         Sheet.NONE -> {}
     }
 
@@ -684,54 +870,6 @@ private val FullHeightOnly = setOf(SheetValue.Hidden, SheetValue.Expanded)
 private const val SHORTEST_PAGE_MS = 3_000L
 private const val LONGEST_PAGE_MS = 180_000L
 
-/** How long the way back from a jump stays on offer. */
-private const val JUMP_BACK_MS = 12_000L
-
-/**
- * "Back · 42%": after a jump through the contents, a search or the scrubber, a pill that takes
- * you back to the page you left. It goes away by itself.
- */
-@Composable
-private fun JumpBack(nav: ReaderNav, haptics: Haptics, visible: Boolean, modifier: Modifier = Modifier) {
-    val origin = nav.cameFrom
-    // Kept while the pill fades, after the offer itself has gone.
-    var shown by remember { mutableStateOf(origin) }
-    if (origin != null) shown = origin
-    LaunchedEffect(origin) {
-        if (origin == null) return@LaunchedEffect
-        delay(JUMP_BACK_MS)
-        if (nav.cameFrom === origin) nav.cameFrom = null
-    }
-    val motion = MaterialTheme.motionScheme
-    AnimatedVisibility(
-        visible = origin != null && visible,
-        enter = scaleIn(motion.fastSpatialSpec(), initialScale = 0.8f) + fadeIn(motion.fastEffectsSpec()),
-        exit = scaleOut(motion.fastSpatialSpec(), targetScale = 0.8f) + fadeOut(motion.fastEffectsSpec()),
-        modifier = modifier.windowInsetsPadding(WindowInsets.statusBarsIgnoringVisibility).padding(top = 76.dp),
-    ) {
-        Surface(
-            onClick = {
-                haptics.tick()
-                shown?.back?.invoke()
-                nav.cameFrom = null
-            },
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.inverseSurface,
-            contentColor = MaterialTheme.colorScheme.inverseOnSurface,
-            shadowElevation = 4.dp,
-        ) {
-            Row(Modifier.padding(start = 14.dp, end = 18.dp, top = 12.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(JacketIcons.Back, null, Modifier.size(18.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    stringResource(R.string.common_back) + " · " + stringResource(R.string.percent, shown?.percent ?: 0),
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
-        }
-    }
-}
-
 /**
  * The lower half of a phone standing half-open on a table: where you are, and two broad buttons
  * to turn the page without picking the phone up; or, while the book is read aloud, the sentence
@@ -757,7 +895,7 @@ private fun TabletopDesk(nav: ReaderNav, book: Book, settings: Settings, onRate:
             } else {
                 Text(nav.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
-                    listOf(footerText(nav, book, settings), stringResource(R.string.percent, book.percent)).filter { it.isNotBlank() }.joinToString(" · "),
+                    listOf(footerText(nav, book, settings), stringResource(R.string.percent, book.percent)).filter { it.isNotBlank() }.joinToString(stringResource(R.string.separator)),
                     style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1,
                 )
                 Spacer(Modifier.height(16.dp))
@@ -786,7 +924,7 @@ private fun shareHighlights(context: android.content.Context, book: Book, annota
         for (highlight in highlights) {
             append("\n\n> ").append(highlight.text.trim())
             val place = listOf(highlight.chapter, context.getString(R.string.percent, (highlight.progress * 100).toInt())).filter { it.isNotBlank() }
-            append("\n(").append(place.joinToString(" · ")).append(')')
+            append("\n(").append(place.joinToString(context.getString(R.string.separator))).append(')')
             if (highlight.note.isNotBlank()) append("\n").append(highlight.note.trim())
         }
     }
@@ -812,6 +950,52 @@ private fun footerText(nav: ReaderNav, book: Book, settings: Settings): String {
     }
 }
 
+/**
+ * What's left of the chapter for the mini player: the minutes the voice still needs, once its pace
+ * through this book is known (and "Time left" is on); until then what the footer says of the pages.
+ */
+@Composable
+private fun listeningLeft(nav: ReaderNav, settings: Settings, pace: Float): String {
+    val left = nav.chapterLeft
+    return if (settings.timeLeft && pace > 0f && left >= 0f && !nav.atEnd) {
+        stringResource(R.string.reader_footer_time_left, ceil(pace * left / 60_000f).toInt().coerceAtLeast(1))
+    } else {
+        nav.footer
+    }
+}
+
+/** What the tucking away of the controls goes by, while listening: their last touch, and where they sit in the window. */
+private class ControlsWatch {
+    var touchedAt = 0L
+    var pressed = false
+    var top = Rect.Zero
+    var bottom = Rect.Zero
+    /** They sit over the line being read aloud. */
+    var covering = false
+}
+
+/** TalkBack (or the like) is reading the screen out under a finger: nothing should leave by itself. */
+private fun android.content.Context.exploresByTouch(): Boolean =
+    getSystemService(android.view.accessibility.AccessibilityManager::class.java)?.isTouchExplorationEnabled == true
+
+/** While listening, the controls tuck away this long after their last touch... */
+private const val LISTEN_CONTROLS_MS = 4_000L
+
+/** ...or this long after it, when they sit over the line being read. */
+private const val COVERED_CONTROLS_MS = 2_000L
+
+/** How often they check, while they are up. */
+private const val CONTROLS_POLL_MS = 250L
+
+/**
+ * When listening ends, the toolbar is seen turning back into the reading one for this long before
+ * it leaves: the mark on the sentence the voice stopped on outlasts it by about a second.
+ */
+private const val STOPPED_CONTROLS_MS = 1_000L
+
+/** A page changing this soon after the reader's own swipe, turn or jump was theirs, not the voice's. */
+private const val LISTENER_TURN_MS = 2_000L
+
 /** The longest the landed cover waits for the first page; after that the book opens on a loading indicator. */
 private const val HOLD_CAP_MS = 2_500L
 
@@ -827,6 +1011,9 @@ private val Transition<EnterExitState>.landed: Boolean
 
 /** The toolbar follows the top bar in by this much. */
 private const val CHROME_STAGGER_MS = 90L
+
+/** The footer hops back up this long after the toolbar starts dropping away. */
+private const val FOOTER_GAP_MS = 120L
 
 /** How long the controls stay after arriving, unless you touch them. */
 private const val CHROME_SHOWN_MS = 2_400L
@@ -847,21 +1034,25 @@ private fun ReaderTopBar(
         title = {
             Column {
                 Text(book.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                // A new chapter rolls up into place.
+                // A new chapter rolls up into place. Where there's no chapter name (front matter, a
+                // book without contents), the line folds away so the title sits in the middle of
+                // the bar, level with the icons, instead of riding above an empty line.
                 val motion = MaterialTheme.motionScheme
                 AnimatedContent(
-                    targetState = nav.title,
+                    targetState = nav.title.trim(),
                     transitionSpec = {
                         (slideInVertically(motion.fastSpatialSpec()) { it / 2 } + fadeIn(motion.fastEffectsSpec()))
                             .togetherWith(slideOutVertically(motion.fastSpatialSpec()) { -it / 2 } + fadeOut(motion.fastEffectsSpec()))
-                            .using(SizeTransform(clip = false))
+                            .using(SizeTransform(clip = false) { _, _ -> motion.fastSpatialSpec() })
                     },
                     label = "chapter",
                 ) { title ->
-                    Text(
-                        title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    )
+                    if (title.isNotEmpty()) {
+                        Text(
+                            title, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
             }
         },
@@ -906,78 +1097,86 @@ private fun ReaderTopBar(
     )
 }
 
+/**
+ * The controls at the bottom of the page, floating over it: "Back to the voice" when the listener
+ * has wandered off, the chapter slider with the full controls, and the toolbar, which is the
+ * reading toolbar or the player (the same bar, turning from one into the other where it sits).
+ */
 @Composable
 private fun ReaderBottomBar(
     nav: ReaderNav,
     book: Book,
     haptics: Haptics,
     showScrubber: Boolean,
+    voice: ListenVoice,
     rate: Float,
     onRate: (Float) -> Unit,
     onListen: () -> Unit,
     onContents: () -> Unit,
     onText: () -> Unit,
+    /** Where the controls sit in the window, as they come and go: they keep off the line being read aloud. */
+    onPlaced: (Rect) -> Unit,
 ) {
+    val motion = MaterialTheme.motionScheme
     Column(
-        Modifier.fillMaxWidth().navigationBarsPadding().padding(bottom = 12.dp),
+        // Clear of the navigation bar whether or not it is showing, so the toolbar never moves.
+        Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.navigationBarsIgnoringVisibility).padding(bottom = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        AnimatedVisibility(visible = showScrubber && nav.sectionCount > 1) {
-            Column {
-                Scrubber(nav, book, haptics)
-                Spacer(Modifier.height(12.dp))
-            }
-        }
-        val controller = nav.listenController
-        val spring = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
-        // The reading toolbar and the audiobook player swap places with a springy scale.
-        AnimatedContent(
-            targetState = nav.listen.active && controller != null,
-            transitionSpec = {
-                (fadeIn() + scaleIn(spring, initialScale = 0.85f)) togetherWith (fadeOut() + scaleOut(targetScale = 0.85f))
-            },
-            label = "toolbar",
-        ) { listening ->
-            if (listening && controller != null) {
-                ListenBar(
-                    nav.listen, controller, rate, onRate, haptics,
-                    progress = nav.section.toFloat() / (nav.sectionCount - 1).coerceAtLeast(1),
-                    hasChapters = nav.toc.isNotEmpty(),
-                )
-            } else {
-                HorizontalFloatingToolbar(
-                    expanded = true,
-                    floatingActionButton = {
-                        FloatingToolbarDefaults.VibrantFloatingActionButton(onClick = { haptics.tick(); onText() }) {
-                            Icon(JacketIcons.TextFormat, stringResource(R.string.reader_text_settings))
-                        }
-                    },
-                    colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
-                ) {
-                    IconButton(onClick = { haptics.tick(); onContents() }) {
-                        Icon(
-                            JacketIcons.Contents,
-                            if (nav.toc.isNotEmpty()) stringResource(R.string.reader_contents_and_notes) else stringResource(R.string.reader_notes),
-                        )
-                    }
-                    if (controller != null) {
-                        IconButton(onClick = onListen) { Icon(JacketIcons.Headphones, stringResource(R.string.reader_listen)) }
-                    }
-                    val (previousLabel, nextLabel) = when {
-                        nav.toc.isNotEmpty() -> R.string.reader_previous_chapter to R.string.reader_next_chapter
-                        book.format == BookFormat.TXT -> R.string.reader_previous_paragraph to R.string.reader_next_paragraph
-                        else -> R.string.reader_previous_page to R.string.reader_next_page
-                    }
-                    IconButton(
-                        onClick = { haptics.tick(); nav.step(-1) },
-                        enabled = nav.canStep(-1),
-                    ) { Icon(JacketIcons.Previous, stringResource(previousLabel)) }
-                    IconButton(
-                        onClick = { haptics.tick(); nav.step(1) },
-                        enabled = nav.canStep(1),
-                    ) { Icon(JacketIcons.Next, stringResource(nextLabel)) }
+        Column(
+            Modifier.onGloballyPositioned { onPlaced(it.boundsInWindow()) },
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            val controller = nav.listenController
+            val listening = nav.listen.active && controller != null
+            // Back to the voice heads the stack: above the chapter slider and the player alike.
+            controller?.let { BackToVoiceButton(nav.listen, it, haptics) }
+            // It springs up off the toolbar and drops back onto it, moving and scaling only: the
+            // stack isn't laid out again frame by frame.
+            AnimatedVisibility(
+                visible = showScrubber && nav.sectionCount > 1,
+                enter = slideInVertically(motion.fastSpatialSpec()) { it / 3 } +
+                    scaleIn(motion.fastSpatialSpec(), initialScale = 0.9f, transformOrigin = BottomMiddle) + fadeIn(motion.fastEffectsSpec()),
+                exit = slideOutVertically(motion.fastSpatialSpec()) { it / 3 } +
+                    scaleOut(motion.fastSpatialSpec(), targetScale = 0.9f, transformOrigin = BottomMiddle) + fadeOut(motion.fastEffectsSpec()),
+            ) {
+                Column {
+                    Scrubber(nav, book, haptics)
+                    Spacer(Modifier.height(12.dp))
                 }
             }
+            // On a window too narrow for the voice's icon on the bar, its name unfolds above the
+            // toolbar as it becomes the player. (Not the player's wavy line: over the page it
+            // would run across the text.)
+            PlayerLine(
+                nav.listen, progress = nav.section.toFloat() / (nav.sectionCount - 1).coerceAtLeast(1),
+                voice = voice, haptics = haptics, visible = listening, line = false,
+            )
+            val (previousLabel, nextLabel) = when {
+                nav.toc.isNotEmpty() -> R.string.reader_previous_chapter to R.string.reader_next_chapter
+                book.format == BookFormat.TXT -> R.string.reader_previous_paragraph to R.string.reader_next_paragraph
+                else -> R.string.reader_previous_page to R.string.reader_next_page
+            }
+            ReaderToolbar(
+                listening = listening,
+                reading = ReadingActions(
+                    contentsLabel = if (nav.toc.isNotEmpty()) stringResource(R.string.reader_contents_and_notes) else stringResource(R.string.reader_notes),
+                    onContents = onContents,
+                    onListen = onListen.takeIf { controller != null },
+                    previousLabel = stringResource(previousLabel),
+                    nextLabel = stringResource(nextLabel),
+                    canStep = { nav.canStep(it) },
+                    onStep = { nav.step(it) },
+                    onText = onText,
+                ),
+                listen = nav.listen,
+                controller = controller,
+                rate = rate,
+                onRate = onRate,
+                haptics = haptics,
+                hasChapters = nav.toc.isNotEmpty(),
+                voice = voice,
+            )
         }
     }
 }
@@ -1047,26 +1246,127 @@ private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics) {
     }
 }
 
+/**
+ * The line under the page, in the room every page keeps for it. While you read: what's left of the
+ * chapter, and how far through the book you are. While you listen it is the mini player, in the
+ * same place and no taller, so starting and stopping read-aloud never changes the page above it;
+ * a tap on it brings up the full controls.
+ */
 @Composable
-private fun ReaderFooter(nav: ReaderNav, book: Book, page: PageColors, settings: Settings) {
+private fun ReaderFooter(
+    nav: ReaderNav,
+    book: Book,
+    page: PageColors,
+    settings: Settings,
+    voice: ListenVoice,
+    /** The voice's pace through this book (see [ReaderScreen]); 0 while unknown. */
+    listenPace: Float,
+    haptics: Haptics,
+    onControls: () -> Unit,
+) {
+    val controller = nav.listenController
+    val listening = nav.listen.active && controller != null
+    val motion = MaterialTheme.motionScheme
+    val showControls = stringResource(R.string.listen_show_controls)
+    // Plain text runs to the bottom of the screen, under this line (an EPUB page stops above it).
+    val runsUnder = book.format == BookFormat.TXT
     Row(
         Modifier
             .fillMaxWidth()
+            .then(
+                if (runsUnder) {
+                    // The page's own colour behind the line, fading in from just above it: the
+                    // words, and the mini player, are read on paper rather than across the text.
+                    Modifier.drawBehind {
+                        val rise = 20.dp.toPx()
+                        drawRect(
+                            Brush.verticalGradient(0f to page.background.copy(alpha = 0f), 1f to page.background, startY = -rise, endY = rise / 2),
+                            topLeft = Offset(0f, -rise),
+                            size = Size(size.width, size.height + rise),
+                        )
+                    }
+                } else {
+                    Modifier
+                },
+            )
+            .then(
+                if (listening) {
+                    Modifier.clickable(interactionSource = null, indication = null, onClickLabel = showControls) {
+                        haptics.tick()
+                        onControls()
+                    }
+                } else {
+                    Modifier
+                },
+            )
             .windowInsetsPadding(WindowInsets.navigationBarsIgnoringVisibility.union(WindowInsets.displayCutout))
-            .padding(horizontal = 24.dp, vertical = 10.dp),
+            .heightIn(min = FooterSpace)
+            .padding(horizontal = 24.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // "5 pages left" gives way to "4" quietly: the page is the thing that moves.
-        val effects = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+        val effects = motion.fastEffectsSpec<Float>()
+        // The words give way to the player where they stand, and back.
         AnimatedContent(
-            targetState = footerText(nav, book, settings),
-            transitionSpec = { fadeIn(effects) togetherWith fadeOut(effects) },
+            targetState = listening,
+            transitionSpec = {
+                (fadeIn(motion.defaultEffectsSpec()) + slideInVertically(motion.fastSpatialSpec()) { it / 3 })
+                    .togetherWith(fadeOut(effects) + slideOutVertically(motion.fastSpatialSpec()) { -it / 3 })
+                    .using(SizeTransform(clip = false) { _, _ -> motion.defaultSpatialSpec() })
+            },
+            contentAlignment = Alignment.CenterStart,
             modifier = Modifier.weight(1f),
-            label = "footer",
-        ) { text ->
-            Text(text, style = MaterialTheme.typography.labelMedium, color = page.secondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            label = "footer-mode",
+        ) { player ->
+            if (player && controller != null) {
+                MiniPlayer(
+                    nav.listen, controller, voice,
+                    left = listeningLeft(nav, settings, listenPace),
+                    progress = if (nav.chapterProgress >= 0f) nav.chapterProgress else nav.section.toFloat() / (nav.sectionCount - 1).coerceAtLeast(1),
+                    colors = page,
+                    haptics = haptics,
+                )
+            } else {
+                // "5 pages left" gives way to "4" quietly: the page is the thing that moves.
+                AnimatedContent(
+                    targetState = footerText(nav, book, settings),
+                    transitionSpec = { fadeIn(effects) togetherWith fadeOut(effects) },
+                    label = "footer",
+                ) { text ->
+                    Text(text, style = MaterialTheme.typography.labelMedium, color = page.secondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
         }
-        Text(stringResource(R.string.percent, book.percent), style = MaterialTheme.typography.labelMedium, color = page.secondary, textAlign = TextAlign.End)
+        Text(
+            stringResource(R.string.percent, book.percent), style = MaterialTheme.typography.labelMedium, color = page.secondary,
+            textAlign = TextAlign.End, modifier = Modifier.padding(start = 8.dp),
+        )
+        // While you listen, a tap on the page moves the voice, so the way back to the controls
+        // is a button of its own, in the corner under the thumb. Drawn at the footer's scale, it
+        // keeps a full-size target, reaching a little over the page's margin like the play button.
+        AnimatedVisibility(
+            visible = listening,
+            enter = scaleIn(motion.fastSpatialSpec()) + fadeIn(motion.fastEffectsSpec()),
+            exit = scaleOut(motion.fastSpatialSpec()) + fadeOut(motion.fastEffectsSpec()),
+            modifier = Modifier.padding(start = 10.dp),
+        ) {
+            val size = IconButtonDefaults.extraSmallContainerSize()
+            Box(Modifier.size(size), contentAlignment = Alignment.Center) {
+                FilledTonalIconButton(
+                    onClick = {
+                        haptics.tick()
+                        onControls()
+                    },
+                    shapes = IconButtonDefaults.shapes(),
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = page.secondary.copy(alpha = 0.16f),
+                        contentColor = page.text,
+                    ),
+                    modifier = Modifier.size(size),
+                ) {
+                    Icon(JacketIcons.ExpandLess, showControls, Modifier.size(IconButtonDefaults.extraSmallIconSize))
+                }
+            }
+        }
     }
 }
 

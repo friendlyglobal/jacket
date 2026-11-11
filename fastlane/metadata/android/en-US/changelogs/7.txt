@@ -1,0 +1,7 @@
+Welcome to Jacket 1.0, the first public release.
+• Natural voices that read aloud in 31 languages, offline
+• Tap any sentence to listen from there; listening resumes where you stopped
+• Your book's cover on the outer screen, and on the folded screen with a player
+• Page turns that follow your finger
+• Free classics, collections, your own covers, four widgets
+• 18 languages. No internet permission, ads or tracking.

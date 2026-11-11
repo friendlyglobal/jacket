@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Natural voices, the welcome pages and the sample book (see values/strings_voices.xml for what each is). -->
+<resources>
+    <string name="settings_group_listening">الاستماع</string>
+    <string name="voice_title">الصوت</string>
+    <string name="voice_phone">صوت الهاتف</string>
+    <string name="voice_phone_description">مدمج في هاتفك. يقرأ كل لغة يعرفها.</string>
+    <string name="voice_natural">طبيعي</string>
+    <string name="voice_female">صوت نسائي %1$d</string>
+    <string name="voice_male">صوت رجالي %1$d</string>
+    <string name="voice_hear">استمع إلى %1$s</string>
+    <string name="voice_stop_sample">إيقاف</string>
+    <string name="voice_change">تغيير</string>
+    <string name="voice_book_language">لغة الكتاب: %1$s</string>
+    <string name="voice_book_language_hint">غير صحيحة؟ غيّرها ليقرأه الصوت المناسب.</string>
+    <string name="voice_language_title">بأي لغة هذا الكتاب؟</string>
+    <string name="voice_language_from_book">كما يذكر الكتاب</string>
+    <string name="voice_only_language">للكتب بهذه اللغة فقط: %1$s</string>
+    <string name="voice_only_language_description">الكتب باللغات الأخرى تحتفظ بصوتها.</string>
+    <string name="voice_not_in_language">%1$s: الأصوات الطبيعية لا تتحدث هذه اللغة بعد، لذا يقرأ صوت الهاتف.</string>
+    <string name="voice_private">الأصوات الطبيعية تتحدث على هاتفك نفسه. لا يُرسَل أي شيء مما تقرؤه إلى أي مكان.</string>
+    <string name="voice_about">عن هذه الأصوات</string>
+    <string name="voice_about_text">الأصوات الطبيعية تأتي مع Jacket وتعمل بدون إنترنت. استخدامها مجاني، لكن لا يجوز استخدامها لخداع أحد أو إيذائه، مثل تقديم صوت على أنه صوت شخص حقيقي. الشروط الكاملة موجودة في الإعدادات، ضمن التراخيص.</string>
+    <string name="voice_slow">هذا الصوت ثقيل على هذا الهاتف. انقر لتغييره.</string>
+    <string name="listen_preparing">جارٍ تجهيز الصوت…</string>
+    <string name="voice_stopped">توقف الصوت الطبيعي. حاول مرة أخرى أو انتقل إلى صوت الهاتف.</string>
+    <string name="voice_fell_back">تعذّر تشغيل الصوت الطبيعي، لذا يقرأ صوت الهاتف.</string>
+    <string name="voice_phone_settings">إعدادات صوت الهاتف</string>
+    <string name="voice_phone_settings_description">اختر كيف يبدو صوت هاتفك.</string>
+    <string name="voice_settings_hint">يُقرأ كل كتاب بلغته. الأصوات الطبيعية تتحدث لغات كثيرة، وصوت الهاتف يقرأ البقية.</string>
+    <string name="onboarding_cover_body">بينما تقرأ في الداخل، ترتدي الشاشة الخارجية غلاف كتابك. أغلق الهاتف ويبقى الغلاف، وضَعْه نصف مفتوح فتستقر الصفحة فوق الطيّة.</string>
+    <string name="onboarding_cover_outside">الغلاف في الخارج</string>
+    <string name="onboarding_read_title">صفحات حقيقية تُقلَب كالورق</string>
+    <string name="onboarding_read_body">ترتفع الصفحات تحت إصبعك وتنزلق أو تلتف أو تتوزع. اضغط مطولًا على الكلمات لتمييزها وإضافة ملاحظة.</string>
+    <string name="onboarding_read_listen_body">تُقلَب الصفحات كالورق، صفحتان متجاورتان عند فتح الهاتف. أو استرخِ واستمع: الأصوات الطبيعية تقرأ أي كتاب بصوت عالٍ.</string>
+    <string name="onboarding_listen_title">أو استمع فقط</string>
+    <string name="onboarding_listen_body">الأصوات الطبيعية تقرأ أي كتاب بصوت عالٍ، وتضيء كل كلمة عند نطقها. وتستمر القراءة والشاشة مطفأة.</string>
+    <string name="onboarding_yours_title">اجعله على ذوقك</string>
+    <string name="onboarding_yours_body">بضعة اختيارات للبداية. يمكنك تغييرها في أي وقت.</string>
+    <string name="onboarding_yours_sample">كان يا ما كان، كتابٌ وجد قارئه.</string>
+    <string name="onboarding_start_title">كتبك تبقى لك</string>
+    <string name="onboarding_widget">أبقِ غلاف كتابك على شاشتك الرئيسية بأداة Jacket.</string>
+    <string name="library_empty_title_phone">كتابك التالي يبدأ هنا</string>
+    <string name="library_empty_message_phone">أضف ملف EPUB أو PDF أو قصة مصورة CBZ أو ملفًا نصيًا. يحتفظ Jacket بنسخة خاصة، ويمنحها صفحات حقيقية تُقلَب، ويستطيع قراءتها بصوت طبيعي.</string>
+    <string name="library_try_sample">جرّب كتابًا نموذجيًا</string>
+    <string name="sample_failed">تعذّر فتح الكتاب النموذجي.</string>
+</resources>

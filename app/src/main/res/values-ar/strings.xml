@@ -77,7 +77,7 @@
         <item quantity="other">%1$d كتاب</item>
     </plurals>
     <string name="library_shelf_reading">قيد القراءة</string>
-    <string name="library_shelf_finished_count">المكتملة · %1$d</string>
+    <string name="library_shelf_finished_count">المكتملة (%1$d)</string>
     <string name="library_search_placeholder">ابحث في العناوين والمؤلفين</string>
     <string name="library_clear_search">محو البحث</string>
     <string name="library_more_options">خيارات إضافية</string>
@@ -175,6 +175,8 @@
     <string name="settings_about_version">الإصدار %1$s</string>
     <string name="settings_about_source">الرمز المصدري</string>
     <string name="settings_about_source_description">مفتوح المصدر على GitHub</string>
+    <string name="settings_about_privacy">سياسة الخصوصية</string>
+    <string name="settings_about_privacy_description">لا يجمع Jacket أي بيانات عنك</string>
     <string name="settings_about_licenses">تراخيص البرامج مفتوحة المصدر</string>
     <string name="settings_about_licenses_description">تطبيق Jacket مرخّص بموجب Apache 2.0، ومبني على Readium وJetpack وخطوط مفتوحة</string>
 
@@ -255,9 +257,9 @@
 
     <string name="notes_tab_contents">المحتويات</string>
     <string name="notes_tab_bookmarks">الإشارات</string>
-    <string name="notes_tab_bookmarks_count">الإشارات · %1$d</string>
+    <string name="notes_tab_bookmarks_count">الإشارات (%1$d)</string>
     <string name="notes_tab_highlights">التمييزات</string>
-    <string name="notes_tab_highlights_count">التمييزات · %1$d</string>
+    <string name="notes_tab_highlights_count">التمييزات (%1$d)</string>
     <string name="notes_no_bookmarks">لا توجد إشارات مرجعية بعد</string>
     <string name="notes_no_bookmarks_hint">انقر على الشريط أعلى الصفحة لحفظ موضعك فيها.</string>
     <string name="notes_no_highlights">لا توجد تمييزات بعد</string>

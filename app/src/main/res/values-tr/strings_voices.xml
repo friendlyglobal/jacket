@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Natural voices, the welcome pages and the sample book (see values/strings_voices.xml for what each is). -->
+<resources>
+    <string name="settings_group_listening">Dinleme</string>
+    <string name="voice_title">Ses</string>
+    <string name="voice_phone">Telefonun sesi</string>
+    <string name="voice_phone_description">Telefonunuzda hazır gelir. Bildiği her dilde okur.</string>
+    <string name="voice_natural">Doğal</string>
+    <string name="voice_female">Kadın sesi %1$d</string>
+    <string name="voice_male">Erkek sesi %1$d</string>
+    <string name="voice_hear">Dinle: %1$s</string>
+    <string name="voice_stop_sample">Durdur</string>
+    <string name="voice_change">Değiştir</string>
+    <string name="voice_book_language">Kitabın dili: %1$s</string>
+    <string name="voice_book_language_hint">Doğru değil mi? Değiştirin, kitabı doğru ses okusun.</string>
+    <string name="voice_language_title">Bu kitap hangi dilde?</string>
+    <string name="voice_language_from_book">Kitabın belirttiği dil</string>
+    <string name="voice_only_language">Yalnızca bu dildeki kitaplar için: %1$s</string>
+    <string name="voice_only_language_description">Başka dillerdeki kitaplar kendi sesini korur.</string>
+    <string name="voice_not_in_language">%1$s: doğal sesler henüz bu dili konuşmuyor, bu yüzden telefonun sesi okuyor.</string>
+    <string name="voice_private">Doğal sesler doğrudan telefonunuzda konuşur. Okuduğunuz hiçbir şey hiçbir yere gönderilmez.</string>
+    <string name="voice_about">Bu sesler hakkında</string>
+    <string name="voice_about_text">Doğal sesler Jacket ile birlikte gelir ve internet olmadan çalışır. Kullanımı serbesttir, ancak kimseyi kandırmak veya kimseye zarar vermek için, örneğin bir sesi gerçek bir kişininmiş gibi göstererek kullanılamaz. Koşulların tamamı Ayarlar\'da, Lisanslar bölümündedir.</string>
+    <string name="voice_slow">Bu ses bu telefon için fazla ağır. Değiştirmek için dokunun.</string>
+    <string name="listen_preparing">Ses hazırlanıyor…</string>
+    <string name="voice_stopped">Doğal ses durdu. Yeniden deneyin veya telefonun sesine geçin.</string>
+    <string name="voice_fell_back">Doğal ses başlatılamadı, bu yüzden telefonun sesi okuyor.</string>
+    <string name="voice_phone_settings">Telefon sesi ayarları</string>
+    <string name="voice_phone_settings_description">Telefonunuzun kendi sesinin nasıl duyulacağını seçin.</string>
+    <string name="voice_settings_hint">Her kitap kendi dilinde okunur. Doğal sesler birçok dil konuşur; gerisini telefonun sesi okur.</string>
+    <string name="onboarding_cover_body">Siz içeride okurken dış ekran kitabınızın kapağını giyer. Telefonu kapatın, kapak kalır; yarı açık bırakın, sayfa katlama çizgisinin üstünde durur.</string>
+    <string name="onboarding_cover_outside">Kapak dışarıda</string>
+    <string name="onboarding_read_title">Kâğıt gibi çevrilen gerçek sayfalar</string>
+    <string name="onboarding_read_body">Sayfalar parmağınızın altında kalkar ve kayar, kıvrılır ya da dağıtılır. Kelimelere basılı tutarak onları vurgulayın ve not ekleyin.</string>
+    <string name="onboarding_read_listen_body">Sayfalar kâğıt gibi çevrilir; telefon açıkken ikisi yan yana durur. Ya da arkanıza yaslanıp dinleyin: doğal sesler her kitabı sesli okur.</string>
+    <string name="onboarding_listen_title">Ya da sadece dinleyin</string>
+    <string name="onboarding_listen_body">Doğal sesler her kitabı sesli okur; her kelime söylendikçe aydınlanır. Ekran kapalıyken de devam eder.</string>
+    <string name="onboarding_yours_title">Kendinize göre ayarlayın</string>
+    <string name="onboarding_yours_body">Başlangıç için birkaç seçim. İstediğiniz zaman değiştirebilirsiniz.</string>
+    <string name="onboarding_yours_sample">Bir varmış bir yokmuş, bir kitap okurunu bulmuş.</string>
+    <string name="onboarding_start_title">Kitaplarınız sizin kalır</string>
+    <string name="onboarding_widget">Jacket widget\'ıyla kitabınızın kapağını ana ekranınızda tutun.</string>
+    <string name="library_empty_title_phone">Bir sonraki kitabınız burada başlıyor</string>
+    <string name="library_empty_message_phone">Bir EPUB, PDF, CBZ çizgi roman veya metin dosyası ekleyin. Jacket özel bir kopyasını saklar, ona çevrilecek gerçek sayfalar verir ve doğal bir sesle sesli okuyabilir.</string>
+    <string name="library_try_sample">Örnek bir kitap deneyin</string>
+    <string name="sample_failed">Örnek kitap açılamadı.</string>
+</resources>

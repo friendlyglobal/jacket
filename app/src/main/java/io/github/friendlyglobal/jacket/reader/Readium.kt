@@ -144,8 +144,22 @@ fun readerConfiguration(selection: ActionMode.Callback): EpubNavigatorFragment.C
                 width = HtmlDecorationTemplate.Width.WRAP,
                 element = { decoration ->
                     val color = (decoration.style as? UnreadVeil)?.color ?: 0
-                    // !important: Readium's page themes clear element backgrounds.
-                    "<div style=\"background-color: ${color.toCss()} !important; margin: -1px 0 0 -1px; padding: 0 2px 2px 0;\"></div>"
+                    // !important: Readium's page themes clear element backgrounds. The data
+                    // attribute lets the reader ask the page where the voice has got to.
+                    "<div data-jacket=\"unread\" style=\"background-color: ${color.toCss()} !important; margin: -1px 0 0 -1px; padding: 0 2px 2px 0;\"></div>"
+                },
+            ),
+        )
+        // Where the voice stopped: the sentence's highlight, staying a moment after listening ends.
+        set(
+            HereMark::class,
+            HtmlDecorationTemplate(
+                layout = HtmlDecorationTemplate.Layout.BOXES,
+                width = HtmlDecorationTemplate.Width.WRAP,
+                element = { decoration ->
+                    val color = (decoration.style as? HereMark)?.color ?: 0
+                    "<div style=\"background-color: ${color.toCss()} !important; border-radius: 4px; " +
+                        "margin: -1px 0 0 -1px; padding: 0 2px 2px 0; box-sizing: border-box;\"></div>"
                 },
             ),
         )
@@ -265,6 +279,22 @@ fun epubPreferences(settings: Settings, page: PageColors): EpubPreferences = Epu
         TextAlignment.JUSTIFY -> true
     },
 )
+
+/**
+ * Decoration style for the sentence the voice stopped on: a wash of [color], whose own alpha is how
+ * strong it is (the reader fades it out by handing over paler and paler ones).
+ */
+class HereMark(@ColorInt val color: Int) : Decoration.Style {
+    override fun describeContents() = 0
+    override fun writeToParcel(dest: Parcel, flags: Int) = dest.writeInt(color)
+    override fun equals(other: Any?) = other is HereMark && other.color == color
+    override fun hashCode() = color
+
+    companion object CREATOR : Parcelable.Creator<HereMark> {
+        override fun createFromParcel(source: Parcel) = HereMark(source.readInt())
+        override fun newArray(size: Int) = arrayOfNulls<HereMark>(size)
+    }
+}
 
 /** Decoration style for read-along: a translucent veil in the page color over unread words. */
 class UnreadVeil(@ColorInt val color: Int) : Decoration.Style {

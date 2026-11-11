@@ -9,6 +9,7 @@ import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.BookFormat
 import io.github.friendlyglobal.jacket.data.Library
+import io.github.friendlyglobal.jacket.voice.guessLanguage
 import java.io.File
 import java.util.UUID
 import java.util.zip.ZipFile
@@ -19,6 +20,8 @@ class BookMeta(
     val author: String?,
     val cover: Bitmap?,
     val sections: Int,
+    /** The language the book is in, when the file says (EPUB) or it can be told from the text. */
+    val language: String? = null,
 )
 
 object BookImporter {
@@ -91,7 +94,8 @@ object BookImporter {
                 BookFormat.EPUB -> Epub.readMeta(stored)
                 BookFormat.PDF -> Pdf.readMeta(stored)
                 BookFormat.CBZ -> Comic.readMeta(stored)
-                BookFormat.TXT -> BookMeta(null, null, null, 0)
+                // A text file doesn't say what language it is in: its first pages do.
+                BookFormat.TXT -> BookMeta(null, null, null, 0, runCatching { guessLanguage(readStart(stored)) }.getOrNull())
             }
             val title = meta.title?.trim()?.takeIf { it.isNotEmpty() } ?: prettifyFileName(context, name)
             val author = meta.author?.trim().orEmpty()
@@ -111,12 +115,21 @@ object BookImporter {
                 sizeBytes = stored.length(),
                 addedAt = System.currentTimeMillis(),
                 sectionCount = meta.sections,
+                language = meta.language,
             )
         } catch (t: Throwable) {
             partial.delete()
             stored?.delete()
             throw t
         }
+    }
+
+    /** The first few pages of a text file, read as the reader will read it. */
+    private fun readStart(file: File): String {
+        val bytes = file.inputStream().use { input -> ByteArray(24_000).let { it.copyOf(input.read(it).coerceAtLeast(0)) } }
+        return runCatching {
+            Charsets.UTF_8.newDecoder().onMalformedInput(java.nio.charset.CodingErrorAction.REPORT).decode(java.nio.ByteBuffer.wrap(bytes)).toString()
+        }.getOrElse { String(bytes, Charsets.ISO_8859_1) }
     }
 
     private fun detectFormat(name: String, mime: String?, file: File): BookFormat? {

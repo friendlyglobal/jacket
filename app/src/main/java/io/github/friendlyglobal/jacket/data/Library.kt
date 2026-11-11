@@ -11,7 +11,7 @@ import io.github.friendlyglobal.jacket.importer.BookImporter
 import io.github.friendlyglobal.jacket.widget.WidgetSync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,9 +19,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import io.github.friendlyglobal.jacket.importer.Bitmaps
 import java.io.File
 import java.io.FileOutputStream
 
@@ -43,12 +45,20 @@ data class ImportReport(val imported: List<Book>, val failed: List<String>) {
  * The on-device library: imported files live in app storage, metadata in one JSON file.
  * Nothing leaves the device.
  */
-class Library(private val context: Context) {
+class Library(private val context: Context) : LibraryOrganizer {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val disk = Dispatchers.IO.limitedParallelism(1)
     private val stateFile = AtomicFile(File(context.filesDir, "library.json"))
+
+    /** The library as it was when Jacket last started: what is read if [stateFile] can't be. */
+    private val previousFile = File(context.filesDir, "library.previous.json")
     private val importLock = Mutex()
-    private var saveJob: Job? = null
+
+    /** A save has been asked for. However many changes come while it waits, one save takes them all. */
+    private val saves = Channel<Unit>(Channel.CONFLATED)
+
+    /** The state last written to [stateFile] (or read from it, whole, at the start). */
+    @Volatile private var written: LibraryState? = null
 
     val booksDir = File(context.filesDir, "books").apply { mkdirs() }
     val coversDir = File(context.filesDir, "covers").apply { mkdirs() }
@@ -80,6 +90,14 @@ class Library(private val context: Context) {
     }
 
     init {
+        // Changes are saved half a second after the first of them. A change never puts a waiting
+        // save off: turned in a hurry, pages would otherwise go unsaved for as long as they turn.
+        scope.launch {
+            for (ask in saves) {
+                delay(SAVE_AFTER_MS)
+                withContext(disk) { writeState(_state.value) }
+            }
+        }
         // Jacket 0.2 unpacked EPUBs to disk; Readium reads the files directly, so free that space.
         scope.launch(disk) { File(context.filesDir, "unpacked").deleteRecursively() }
         scope.launch(disk) { _missing.value = scanMissing(_state.value) }
@@ -238,6 +256,13 @@ class Library(private val context: Context) {
         if (missing.isEmpty()) null else import(missing.map { it.first })
     }
 
+    /** The language [id] is read aloud in: what the book says of itself, or what the listener chose instead. */
+    fun setLanguage(id: String, language: String?) {
+        if (_state.value.find(id)?.language == language) return
+        _state.update { s -> s.copy(books = s.books.map { if (it.id == id) it.copy(language = language) else it }) }
+        changed()
+    }
+
     /** Marks a book finished (or back to reading). */
     fun setFinished(id: String, finished: Boolean) {
         val now = System.currentTimeMillis()
@@ -245,6 +270,84 @@ class Library(private val context: Context) {
             s.copy(books = s.books.map { if (it.id == id) it.copy(finishedAt = if (finished) now else 0L) else it })
         }
         changed()
+    }
+
+    override fun setPinned(id: String, pinned: Boolean) {
+        val now = System.currentTimeMillis()
+        _state.update { s -> s.copy(books = s.books.map { if (it.id == id) it.copy(pinnedAt = if (pinned) now else 0L) else it }) }
+        changed()
+    }
+
+    override fun editDetails(id: String, title: String, author: String) {
+        val name = title.trim()
+        _state.update { s ->
+            s.copy(books = s.books.map { if (it.id == id) it.copy(title = name.ifEmpty { it.title }, author = author.trim()) else it })
+        }
+        changed()
+    }
+
+    override fun setCollections(id: String, collections: Set<String>) {
+        _state.update { s ->
+            val known = s.collections.mapTo(HashSet()) { it.id }
+            s.copy(books = s.books.map { if (it.id == id) it.copy(collections = collections.filterTo(HashSet()) { c -> c in known }) else it })
+        }
+        changed()
+    }
+
+    override fun createCollection(name: String): String {
+        val collection = BookCollection(java.util.UUID.randomUUID().toString(), name.trim(), System.currentTimeMillis())
+        _state.update { it.copy(collections = it.collections + collection) }
+        changed()
+        return collection.id
+    }
+
+    override fun renameCollection(id: String, name: String) {
+        val trimmed = name.trim().takeIf { it.isNotEmpty() } ?: return
+        _state.update { s -> s.copy(collections = s.collections.map { if (it.id == id) it.copy(name = trimmed) else it }) }
+        changed()
+    }
+
+    override fun deleteCollection(id: String) {
+        _state.update { s ->
+            s.copy(
+                collections = s.collections.filterNot { it.id == id },
+                books = s.books.map { if (id in it.collections) it.copy(collections = it.collections - id) else it },
+                settings = if (s.settings.collection == id) s.settings.copy(collection = null) else s.settings,
+            )
+        }
+        changed()
+    }
+
+    override fun showCollection(id: String?) = updateSettings { it.copy(collection = id) }
+
+    override fun setCover(id: String, cover: android.graphics.Bitmap?, seed: Int?) {
+        scope.launch(disk) {
+            val book = _state.value.find(id) ?: return@launch
+            // A file of its own each time: covers are cached by file, so the new one shows at once.
+            val name = cover?.let { "$id-${System.currentTimeMillis()}.jpg" }
+            if (cover != null && name != null) Bitmaps.saveJpeg(cover, File(coversDir, name), maxHeight = 1400)
+            val tint = cover?.let { seed ?: Bitmaps.seedOf(it) }
+            // The custom cover being replaced; the one the book came with stays.
+            val replaced = book.coverFile.takeIf { book.coverCustomized }
+            _state.update { s ->
+                s.copy(books = s.books.map { b ->
+                    when {
+                        b.id != id -> b
+                        name != null -> b.copy(
+                            coverFile = name,
+                            seedColor = tint,
+                            coverCustomized = true,
+                            originalCover = if (b.coverCustomized) b.originalCover else b.coverFile,
+                            originalSeed = if (b.coverCustomized) b.originalSeed else b.seedColor,
+                        )
+                        b.coverCustomized -> b.copy(coverFile = b.originalCover, seedColor = b.originalSeed, coverCustomized = false, originalCover = null, originalSeed = null)
+                        else -> b
+                    }
+                })
+            }
+            replaced?.let { File(coversDir, it).delete() }
+            changed()
+        }
     }
 
     fun addAnnotation(annotation: Annotation) {
@@ -301,38 +404,73 @@ class Library(private val context: Context) {
         scope.launch(disk) {
             fileOf(book).delete()
             coverOf(book)?.delete()
+            book.originalCover?.let { File(coversDir, it).delete() }
         }
     }
 
     private fun changed(saveNow: Boolean = false) {
-        saveJob?.cancel()
-        saveJob = scope.launch {
-            if (!saveNow) delay(500)
-            withContext(disk) { writeState(_state.value) }
-        }
+        if (saveNow) scope.launch(disk) { writeState(_state.value) } else saves.trySend(Unit)
         WidgetSync.request(context)
     }
 
+    /**
+     * Writes whatever hasn't been written yet, before returning. For when Jacket leaves the screen:
+     * Android may close it from there without another word (an update does, and so does a swipe
+     * out of Recents), and the page just turned to is the reader's place.
+     */
+    fun flush() = runBlocking(disk) { writeState(_state.value) }
+
+    /**
+     * Reads the library. Whatever can't be read is kept, never saved over: an unreadable file is
+     * moved aside and the library as it last started is read in its place, and a file with
+     * entries that couldn't be read is copied aside before the rest of it is used.
+     */
     private fun readState(): LibraryState {
-        if (!stateFile.baseFile.exists()) return LibraryState()
-        return try {
-            LibraryJson.decode(String(stateFile.readFully(), Charsets.UTF_8))
-        } catch (e: Exception) {
-            // Keep the unreadable file for recovery instead of saving an empty library over it.
-            val aside = File(context.filesDir, "library.corrupt-${System.currentTimeMillis()}.json")
-            stateFile.baseFile.renameTo(aside)
-            Log.e(TAG, "Library file unreadable; moved to ${aside.name}", e)
-            LibraryState()
+        val file = stateFile.baseFile
+        if (!file.exists() && !previousFile.exists()) return LibraryState()
+        val read = runCatching { LibraryJson.read(String(stateFile.readFully(), Charsets.UTF_8)) }
+            .onFailure { e ->
+                val aside = File(context.filesDir, "library.corrupt-${System.currentTimeMillis()}.json")
+                if (file.exists()) file.renameTo(aside)
+                Log.e(TAG, "Library file unreadable; moved to ${aside.name}", e)
+            }
+            .getOrNull()
+        if (read == null) {
+            val previous = runCatching { LibraryJson.read(previousFile.readText()).state }
+                .onFailure { e -> Log.e(TAG, "No earlier library to go back to", e) }
+                .getOrNull() ?: return LibraryState()
+            Log.w(TAG, "Went back to the library as it last started")
+            // Not what is on disk: it is written at the first chance.
+            saves.trySend(Unit)
+            return previous
         }
+        if (read.unread > 0) {
+            // Named after the file as it is, so starting again before anything is saved copies it once.
+            val aside = File(context.filesDir, "library.partly-read-${file.lastModified()}.json")
+            runCatching { file.copyTo(aside, overwrite = true) }
+            Log.e(TAG, "${read.unread} entries of the library couldn't be read; the file is kept as ${aside.name}")
+            // What was read is all the next save will hold.
+            saves.trySend(Unit)
+        } else {
+            written = read.state
+            // A file that reads whole is the one to go back to, should the next not.
+            scope.launch(disk) { runCatching { file.copyTo(previousFile, overwrite = true) } }
+        }
+        return read.state
     }
 
-    /** Atomic and fsynced; a failure (e.g. disk full) is logged and retried on the next change. */
+    /**
+     * Atomic and fsynced; a failure (e.g. disk full) is logged and retried on the next change.
+     * Runs on [disk] only, one write at a time.
+     */
     private fun writeState(state: LibraryState) {
+        if (state === written) return
         var out: FileOutputStream? = null
         try {
             out = stateFile.startWrite()
             out.write(LibraryJson.encode(state).toByteArray(Charsets.UTF_8))
             stateFile.finishWrite(out)
+            written = state
         } catch (e: Exception) {
             out?.let(stateFile::failWrite)
             Log.e(TAG, "Couldn't save the library", e)
@@ -341,6 +479,9 @@ class Library(private val context: Context) {
 
     private companion object {
         const val TAG = "JacketLibrary"
+
+        /** How long a change waits to be saved, for the ones that come right behind it. */
+        const val SAVE_AFTER_MS = 500L
 
         /** Reading time is kept per day for a little over a year. */
         const val KEPT_DAYS = 400

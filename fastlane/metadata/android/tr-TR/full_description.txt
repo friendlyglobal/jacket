@@ -1,42 +1,50 @@
-Jacket, katlanabilir telefonlar için açık kaynaklı bir e-okuyucudur. Siz iç ekranda okurken dış ekran, kitabınızın kapağını bir albüm kapağı gibi kenardan kenara gösterir; böylece çevrenizdekiler ne okuduğunuzu görebilir.
+Jacket, katlanabilir telefonunuza okuduğunuz kitabı giydiren ücretsiz ve açık kaynaklı bir e-okuyucudur. Siz içeride okurken dış ekran, kitabın kapağını bir albüm kapağı gibi kenardan kenara gösterir. Dinlemeyi tercih ederseniz doğal sesler her kitabı doğrudan telefonunuzda sesli okur. Jacket her Android telefonda çalışır; kapak özellikleri ise katlanabilir telefonlar için tasarlandı.
 
 KAPAK, DIŞARIDA
-• Kitap tipi katlanabilir telefonlar: siz içeride okurken kapak, Android'in çift ekran modu sayesinde dış ekranı doldurur.
-• Galaxy Z Flip: Flex Window için bir kapak ekranı widget'ı.
-• Her telefon veya tablet: aynı widget, ana ekranınızda.
-• Dış ekrandaki kapağı istediğiniz zaman Ayarlar'dan kapatabilirsiniz.
-
-OKUMA
-• Kendi dosyalarınızdan EPUB, PDF, CBZ çizgi roman ve düz metin. Kitap ekle'yi kullanın ya da başka bir uygulamada Birlikte aç veya Paylaş'ı seçin.
-• EPUB'lar açık kaynaklı Readium araç setiyle işlenir: gerçek sayfalar, telefon açıkken yan yana iki sayfa veya dilerseniz kesintisiz kaydırma.
-• Alt bölümleriyle içindekiler, okurken takip edilen geçerli bölüm, bölümde kalan sayfalar ve başparmağınızın altındaki bölümü önizleyen bir kaydırma çubuğu.
-• Yer işaretleri, notlarla birlikte farklı renklerde vurgular ve EPUB'larda tam metin arama.
+• Kitap gibi açılan katlanabilirler: siz içeride okurken kapak dış ekranı doldurur ve okumanızı canlı olarak izler: Yeni, Okunuyor, Az kaldı, Dinleniyor, Bitti ve az güç harcayan bir bekleme durumu.
+• İsterseniz kararan kapakta vurgularınızdan biri görünür.
+• Kapalıyken kapak: telefonu açık bir kitapla katlayın, kapak ekranda kalır; alttaki oynatıcıyla telefonu açmadan duraklatabilir veya atlayabilirsiniz.
+• Galaxy Z Flip: bir kapak ekranı widget'ı. Motorola Razr: Jacket'i harici ekranda açın.
 
 DİNLEME
-• Sesli kitap modu, EPUB ve düz metin kitapları telefonunuzun metin okuma sesiyle yüksek sesle okur ve okunan her kelimeyi vurgular.
-• Ekran kapalıyken de çalmaya devam eder; kilit ekranından ve kulaklıktan kontrol edilebilir.
-• Uyku zamanlayıcısı: belirlediğiniz bir süre sonra veya bölüm sonunda durur.
+• Doğal sesler Jacket'le birlikte gelir ve internet olmadan 31 dil konuşur. Geri kalan dilleri telefonunuzun kendi sesi okur.
+• Her kelime söylendiği anda sayfada parlar ve sayfa sesle birlikte çevrilir.
+• Herhangi bir cümleye dokunun, oradan dinleyin. Durduğunuzda, bir dahaki sefere kaldığınız cümleden devam eder.
+• Ekran kapalıyken de sürer; kilit ekranından ve kulaklıktan kontrol edilir.
+• 0,8× ile 2× arası hız ve 15, 30 ya da 60 dakika sonra veya bölüm sonunda duran uyku zamanlayıcısı.
 
-OKUMA KONFORU
-• Literata, Atkinson Hyperlegible ve OpenDyslexic yazı tipleri.
-• Metin boyutu, satır aralığı, kenar boşlukları ve iki yana yaslama.
-• Kitap, Kâğıt, Koyu ve Siyah sayfa renkleri.
+OKUMA
+• Kendi dosyalarınızdan EPUB, PDF, CBZ çizgi roman ve düz metin; Kitap ekle, Birlikte aç veya Paylaş ile.
+• Gerçek EPUB sayfaları, telefon açıkken iki sayfa yan yana veya kaydırma.
+• Parmağınızı izleyen sayfa çevirme: Kâğıt, Kıvrım, Kartlar veya Kaydır.
+• İçindekiler, yer işaretleri, beş renkte vurgular, notlar ve EPUB'larda arama.
+• Literata, Atkinson Hyperlegible ve OpenDyslexic yazı tipleri; metin boyutu, satır aralığı, kenar boşlukları ve iki yana yaslama; dört sayfa rengi.
+• PDF'lerde ve çizgi romanlarda iki parmakla veya iki kez dokunarak yakınlaştırma.
+
+KİTAPLIĞINIZ
+• Ücretsiz kitaplar: telif hakkı sona ermiş, 16 dilde 114 klasik; tarayıcınızla indirmeye hazır.
+• Bir kitap kulübü, bir gezi ya da bir tür için koleksiyonlar.
+• Herhangi bir kitaba yeni bir kapak verin: bir fotoğraf ya da kendi renklerinizle bir tasarım.
+• Widget'lar: kitabınızın kapağı, bir oynatıcı, rafınız ve okuma seriniz.
+• Bugünkü okuma süreniz ve seriniz, bölümde kalan süre ve yeni kitapları ekleyen izlenen klasör.
+
+GÜNLÜK KOLAYLIKLAR
+• Masaüstü modu: yarı katlıyken sayfa katlama çizgisinin üstünde, denetimler altında.
+• Kenarlardan kaydırarak parlaklık ve sıcaklık, geceleri koyu sayfalar.
 • Ses tuşlarıyla sayfa çevirme.
+• Bir vurguyu alıntı olarak ya da bir kitabın tüm notlarını tek seferde paylaşın.
+• Bir atlamadan sonra sizi sayfanıza döndüren "Dön" düğmesi.
 
-KİTAPLIK
-• Kitaplarınızı arayın ve sıralayın.
-• Bitenler rafı ve son sayfaya ulaştığınızda bir kitap sonu ekranı.
-• Bir yedek dosyasını dışa aktarın, daha sonra ya da başka bir telefonda yeniden içe aktarın.
-
-TASARIM
-• Material 3 Expressive: okuduğunuz kitabın kapağından alınan renkler, yaylı animasyonlar ve dokunsal geri bildirim.
+KENDİ DİLİNİZDE
+Türkçe, İngilizce, İspanyolca, Brezilya Portekizcesi, Fransızca, İtalyanca, Almanca, Felemenkçe, Lehçe, Rusça, Ukraynaca, Arapça, Hintçe, Endonezce, Japonca, Korece, Basitleştirilmiş ve Geleneksel Çince.
 
 GİZLİLİK
-• İnternet izni yok: ne Jacket ne de onunla açtığınız kitaplar ağa bağlanabilir.
+• İnternet izni yok: ne Jacket ne de onda açtığınız kitaplar ağa bağlanabilir. Sesler doğrudan telefonunuzda konuşur.
 • Hesap yok, reklam yok, analiz yok, izleme yok.
+• Seçtiğiniz bir dosyaya yedekleme: kitap listesi, konumlar, yer işaretleri, vurgular ve ayarlar (kitap dosyaları hariç).
 • Apache License 2.0 kapsamında ücretsiz ve açık kaynak: https://github.com/friendlyglobal/jacket
 
 BİLMENİZDE YARAR VAR
-• Dış ekran desteği telefona bağlıdır. Dış ekranı olmayan telefonlarda bu seçenekler gizlenir.
-• DRM korumalı (kopya korumalı) kitaplar açılamaz.
-• Düz metin kitaplarda sesli okuma, uygulamadan çıktığınızda durur. EPUB'larda sesli okuma arka planda devam eder.
+• Dış ekran desteği telefona bağlıdır; dış ekran yoksa bu seçenekler gizlenir.
+• DRM korumalı kitaplar açılamaz.
+• PDF'ler ve çizgi romanlar sesli okunmaz; metin kitaplarının sesli okunması uygulamadan çıkınca durur.

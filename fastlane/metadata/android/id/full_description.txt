@@ -1,42 +1,50 @@
-Jacket adalah e-reader sumber terbuka untuk ponsel lipat. Selagi Anda membaca di layar dalam, layar luar menampilkan sampul buku Anda dari tepi ke tepi, seperti sampul album, sehingga orang-orang di sekitar Anda bisa melihat apa yang sedang Anda baca.
+Jacket adalah e-reader gratis dan open source yang membuat ponsel lipat Anda memakai buku yang sedang Anda baca. Selagi Anda membaca di layar dalam, layar luar menampilkan sampul buku dari tepi ke tepi, seperti sampul album. Kalau lebih suka mendengarkan, suara alami membacakan buku apa pun, langsung di ponsel Anda. Jacket berjalan di ponsel Android mana pun, dan fitur sampulnya paling terasa di ponsel lipat.
 
 SAMPUL, DI BAGIAN LUAR
-• Ponsel lipat bergaya buku: sampul memenuhi layar luar selagi Anda membaca di dalam, menggunakan mode layar ganda Android.
-• Galaxy Z Flip: widget layar depan untuk Flex Window.
-• Ponsel atau tablet apa pun: widget yang sama di layar utama Anda.
-• Matikan sampul di layar luar kapan saja melalui Setelan.
-
-MEMBACA
-• EPUB, PDF, komik CBZ, dan teks biasa dari file Anda sendiri. Gunakan Tambah buku, atau Buka dengan atau Bagikan dari aplikasi lain.
-• EPUB dirender dengan toolkit sumber terbuka Readium: halaman sungguhan, dua halaman berdampingan saat ponsel dibuka, atau gulir bersambung jika Anda lebih suka.
-• Daftar isi dengan subbab, bab saat ini yang terlacak selagi Anda membaca, sisa halaman di bab, dan penggeser yang menampilkan pratinjau bab di bawah ibu jari Anda.
-• Bookmark, sorotan dalam beberapa warna dengan catatan, dan penelusuran teks lengkap di dalam EPUB.
+• Ponsel lipat bergaya buku: sampul memenuhi layar luar selagi Anda membaca di dalam, dan mengikuti bacaan Anda secara langsung: Baru, Sedang dibaca, Hampir selesai, Sedang didengarkan, Selesai, dan mode redup hemat daya.
+• Jika mau, sampul yang diredupkan menampilkan salah satu sorotan Anda.
+• Sampul saat tertutup: lipat ponsel dengan buku terbuka dan sampulnya tetap tampil, dengan pemutar di bagian bawah untuk menjeda atau melompat tanpa membuka ponsel.
+• Galaxy Z Flip: widget layar depan. Motorola Razr: buka Jacket di layar eksternal.
 
 MENDENGARKAN
-• Mode buku audio membacakan buku EPUB dan teks biasa dengan suara teks ke ucapan ponsel Anda, sambil menyorot setiap kata saat diucapkan.
-• Tetap diputar saat layar mati, dengan kontrol di layar kunci dan headphone.
-• Timer tidur: berhenti setelah waktu tertentu atau di akhir bab.
+• Suara alami sudah termasuk di Jacket dan menguasai 31 bahasa tanpa internet. Bahasa lainnya dibacakan suara ponsel.
+• Setiap kata menyala di halaman saat diucapkan, dan halaman berganti mengikuti suara.
+• Ketuk kalimat mana pun untuk mendengarkan dari situ. Kalau berhenti, lain kali bacaan berlanjut dari kalimat terakhir Anda.
+• Tetap berjalan saat layar mati, dengan kontrol di layar kunci dan headphone.
+• Kecepatan 0,8× hingga 2×, dan timer tidur 15, 30, atau 60 menit atau di akhir bab.
 
-KENYAMANAN MEMBACA
-• Font Literata, Atkinson Hyperlegible, dan OpenDyslexic.
-• Ukuran teks, spasi baris, margin, dan rata kiri-kanan.
-• Warna halaman Buku, Kertas, Gelap, dan Hitam.
+MEMBACA
+• EPUB, PDF, komik CBZ, dan teks biasa dari file Anda sendiri, lewat Tambah buku, Buka dengan, atau Bagikan.
+• Halaman EPUB sungguhan, dua halaman berdampingan saat ponsel dibuka, atau gulir.
+• Balik halaman yang mengikuti jari Anda: Kertas, Lipat, Kartu, atau Geser.
+• Daftar isi, bookmark, sorotan dalam lima warna, catatan, dan penelusuran di dalam EPUB.
+• Font Literata, Atkinson Hyperlegible, dan OpenDyslexic; ukuran teks, spasi baris, margin, dan rata penuh; empat warna halaman.
+• Cubit atau ketuk dua kali untuk memperbesar PDF dan komik.
+
+PUSTAKA ANDA
+• Buku gratis: 114 karya klasik dalam 16 bahasa yang hak ciptanya sudah berakhir, siap diunduh lewat browser Anda.
+• Koleksi untuk klub buku, perjalanan, atau genre.
+• Beri buku apa pun sampul baru: foto, atau desain dengan warna pilihan Anda.
+• Widget: sampul buku Anda, pemutar, rak Anda, dan rangkaian baca Anda.
+• Waktu baca hari ini dan rangkaian hari Anda, sisa waktu di bab, dan folder yang dipantau untuk menambahkan buku baru.
+
+SETIAP HARI
+• Mode meja: saat setengah terlipat, halaman di atas lipatan dan kontrol di bawahnya.
+• Kecerahan dan kehangatan dengan usapan di tepi layar, serta halaman gelap di malam hari.
 • Balik halaman dengan tombol volume.
+• Bagikan sorotan sebagai kutipan, atau semua catatan sebuah buku sekaligus.
+• Tombol "Kembali" mengantar Anda ke halaman semula setelah melompat.
 
-PUSTAKA
-• Telusuri dan urutkan buku Anda.
-• Rak Selesai, dan layar akhir buku saat Anda mencapai halaman terakhir.
-• Ekspor file cadangan, lalu impor lagi nanti atau di ponsel lain.
-
-DESAIN
-• Material 3 Expressive: warna yang diambil dari sampul buku yang sedang Anda baca, gerakan yang lentur, dan respons haptik.
+DALAM BAHASA ANDA
+Indonesia, Inggris, Spanyol, Portugis Brasil, Prancis, Italia, Jerman, Belanda, Polandia, Rusia, Ukraina, Turki, Arab, Hindi, Jepang, Korea, serta Mandarin Sederhana dan Tradisional.
 
 PRIVASI
-• Tanpa izin internet: baik Jacket maupun buku yang Anda buka di dalamnya tidak dapat terhubung ke jaringan.
-• Tanpa akun, tanpa iklan, tanpa analitik, tanpa pelacakan.
-• Gratis dan sumber terbuka dengan lisensi Apache License 2.0: https://github.com/friendlyglobal/jacket
+• Tanpa izin internet: Jacket maupun buku yang Anda buka di dalamnya tidak bisa terhubung ke jaringan. Suaranya berbicara langsung di ponsel Anda.
+• Tanpa akun, iklan, analitik, atau pelacakan.
+• Cadangkan ke file pilihan Anda: daftar buku, posisi baca, bookmark, sorotan, dan setelan (tanpa file bukunya).
+• Gratis dan open source dengan lisensi Apache License 2.0: https://github.com/friendlyglobal/jacket
 
 PERLU DIKETAHUI
-• Dukungan layar luar bergantung pada ponsel. Di ponsel tanpa layar luar, opsi tersebut disembunyikan.
-• Buku yang dilindungi DRM (proteksi salinan) tidak dapat dibuka.
-• Fitur bacakan untuk buku teks biasa berhenti saat Anda keluar dari aplikasi. Fitur bacakan untuk EPUB tetap berjalan di latar belakang.
+• Dukungan layar luar bergantung pada ponsel; jika tidak ada, opsi tersebut disembunyikan.
+• Buku yang dilindungi DRM tidak dapat dibuka.
+• PDF dan komik tidak dibacakan, dan bacakan untuk buku teks berhenti saat Anda keluar dari aplikasi.

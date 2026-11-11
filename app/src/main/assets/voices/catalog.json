@@ -1,0 +1,205 @@
+{
+  "_comment": "The natural voices shipped inside Jacket. Their model files are put next to this file, in voices/<id>/, by the fetchVoices task in app/build.gradle.kts.",
+  "packs": [
+    {
+      "id": "supertonic3",
+      "name": "Supertonic 3",
+      "engine": "supertonic",
+      "files": {
+        "durationPredictor": "duration_predictor.int8.onnx",
+        "textEncoder": "text_encoder.int8.onnx",
+        "vectorEstimator": "vector_estimator.int8.onnx",
+        "vocoder": "vocoder.int8.onnx",
+        "ttsJson": "tts.json",
+        "unicodeIndexer": "unicode_indexer.bin",
+        "voiceStyle": "voice.bin"
+      },
+      "languages": [
+        "ar",
+        "bg",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "en",
+        "es",
+        "et",
+        "fi",
+        "fr",
+        "hi",
+        "hr",
+        "hu",
+        "id",
+        "it",
+        "ja",
+        "ko",
+        "lt",
+        "lv",
+        "nl",
+        "pl",
+        "pt",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sv",
+        "tr",
+        "uk",
+        "vi"
+      ],
+      "accents": {
+        "pt": "PT"
+      },
+      "voices": [
+        {
+          "id": "F1",
+          "name": "Clara",
+          "speaker": 0,
+          "gender": "female",
+          "number": 1
+        },
+        {
+          "id": "F2",
+          "name": "Sofia",
+          "speaker": 1,
+          "gender": "female",
+          "number": 2
+        },
+        {
+          "id": "F3",
+          "name": "Nora",
+          "speaker": 2,
+          "gender": "female",
+          "number": 3
+        },
+        {
+          "id": "F4",
+          "name": "Mila",
+          "speaker": 3,
+          "gender": "female",
+          "number": 4
+        },
+        {
+          "id": "F5",
+          "name": "Ana",
+          "speaker": 4,
+          "gender": "female",
+          "number": 5
+        },
+        {
+          "id": "M1",
+          "name": "Leo",
+          "speaker": 5,
+          "gender": "male",
+          "number": 1
+        },
+        {
+          "id": "M2",
+          "name": "Hugo",
+          "speaker": 6,
+          "gender": "male",
+          "number": 2
+        },
+        {
+          "id": "M3",
+          "name": "Theo",
+          "speaker": 7,
+          "gender": "male",
+          "number": 3
+        },
+        {
+          "id": "M4",
+          "name": "Max",
+          "speaker": 8,
+          "gender": "male",
+          "number": 4
+        },
+        {
+          "id": "M5",
+          "name": "Davi",
+          "speaker": 9,
+          "gender": "male",
+          "number": 5
+        }
+      ],
+      "default": "F2",
+      "license": {
+        "name": "OpenRAIL-M",
+        "url": "https://huggingface.co/Supertone/supertonic-3/blob/main/LICENSE",
+        "attribution": "Supertonic 3 © Supertone Inc. Made smaller (8-bit) for phones by the sherpa-onnx project.",
+        "notice": "Free to use. The licence forbids harmful uses, such as passing the voice off as a real person or deceiving people with it.",
+        "file": "OpenRAIL-M.txt"
+      },
+      "source": "https://huggingface.co/Supertone/supertonic-3",
+      "samples": {
+        "en": "Hello! This is my voice. Shall we read a good book together?",
+        "es": "¡Hola! Esta es mi voz. ¿Leemos juntos un buen libro?",
+        "pt": "Olá! Esta é a minha voz. Vamos ler um bom livro juntos?",
+        "fr": "Bonjour ! Voici ma voix. On lit un bon livre ensemble ?",
+        "it": "Ciao! Questa è la mia voce. Leggiamo insieme un bel libro?",
+        "de": "Hallo! Das ist meine Stimme. Wollen wir zusammen ein gutes Buch lesen?",
+        "nl": "Hallo! Dit is mijn stem. Zullen we samen een goed boek lezen?",
+        "pl": "Cześć! To mój głos. Poczytamy razem dobrą książkę?",
+        "ru": "Здравствуйте! Это мой голос. Почитаем вместе хорошую книгу?",
+        "uk": "Привіт! Це мій голос. Почитаємо разом гарну книжку?",
+        "tr": "Merhaba! Bu benim sesim. Birlikte güzel bir kitap okuyalım mı?",
+        "ar": "مرحبًا! هذا صوتي. هل نقرأ كتابًا جميلًا معًا؟",
+        "hi": "नमस्ते! यह मेरी आवाज़ है। क्या हम साथ में एक अच्छी किताब पढ़ें?",
+        "id": "Halo! Ini suara saya. Mau membaca buku yang bagus bersama?",
+        "ja": "こんにちは。これがわたしの声です。いっしょに本を読みませんか？",
+        "ko": "안녕하세요! 제 목소리예요. 좋은 책을 함께 읽어 볼까요?",
+        "bg": "Здравейте! Това е моят глас. Да прочетем заедно една хубава книга?",
+        "cs": "Dobrý den! Tohle je můj hlas. Přečteme si spolu hezkou knihu?",
+        "da": "Hej! Det her er min stemme. Skal vi læse en god bog sammen?",
+        "el": "Γεια σας! Αυτή είναι η φωνή μου. Διαβάζουμε μαζί ένα καλό βιβλίο;",
+        "et": "Tere! See on minu hääl. Kas loeme koos üht head raamatut?",
+        "fi": "Hei! Tämä on minun ääneni. Luetaanko yhdessä hyvä kirja?",
+        "hr": "Bok! Ovo je moj glas. Hoćemo li zajedno pročitati dobru knjigu?",
+        "hu": "Szia! Ez az én hangom. Olvassunk együtt egy jó könyvet?",
+        "lt": "Sveiki! Tai mano balsas. Gal kartu paskaitykime gerą knygą?",
+        "lv": "Sveiki! Šī ir mana balss. Vai palasīsim kopā labu grāmatu?",
+        "ro": "Bună! Aceasta este vocea mea. Citim împreună o carte bună?",
+        "sk": "Dobrý deň! Toto je môj hlas. Prečítame si spolu peknú knihu?",
+        "sl": "Pozdravljeni! To je moj glas. Ali skupaj preberemo dobro knjigo?",
+        "sv": "Hej! Det här är min röst. Ska vi läsa en bra bok tillsammans?",
+        "vi": "Xin chào! Đây là giọng của tôi. Chúng ta cùng đọc một cuốn sách hay nhé?"
+      }
+    },
+    {
+      "id": "cadu",
+      "name": "Piper (cadu)",
+      "engine": "piper",
+      "files": {
+        "model": "pt_BR-cadu-medium.onnx",
+        "tokens": "tokens.txt"
+      },
+      "languages": [
+        "pt"
+      ],
+      "accents": {
+        "pt": "BR"
+      },
+      "voices": [
+        {
+          "id": "M1",
+          "name": "Caio",
+          "speaker": 0,
+          "gender": "male",
+          "number": 1
+        }
+      ],
+      "default": "M1",
+      "license": {
+        "name": "MIT",
+        "url": "https://huggingface.co/rhasspy/piper-voices/blob/main/pt/pt_BR/cadu/medium/MODEL_CARD",
+        "attribution": "Brazilian voice: Piper “cadu”, from the Piper voices collection (MIT). It was recorded by a volunteer who gave the recordings to the public domain (CC0). Prepared for this engine by the sherpa-onnx project; Jacket stores its weights at half size.",
+        "notice": "",
+        "file": "MIT.txt"
+      },
+      "source": "https://huggingface.co/rhasspy/piper-voices",
+      "samples": {
+        "pt": "Olá! Esta é a minha voz. Vamos ler um bom livro juntos?"
+      }
+    }
+  ]
+}

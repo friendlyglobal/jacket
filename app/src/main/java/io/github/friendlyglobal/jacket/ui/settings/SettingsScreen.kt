@@ -62,9 +62,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import io.github.friendlyglobal.jacket.data.Backup
 import io.github.friendlyglobal.jacket.library
+import io.github.friendlyglobal.jacket.ui.voices.VoicePicker
+import io.github.friendlyglobal.jacket.ui.voices.voiceLabel
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.ui.platform.LocalConfiguration
 import kotlinx.coroutines.launch
+import android.text.format.DateUtils
+import io.github.friendlyglobal.jacket.autoBackup
+import io.github.friendlyglobal.jacket.data.AutoBackup
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 private const val SOURCE_URL = "https://github.com/friendlyglobal/jacket"
+private const val PRIVACY_URL = "https://usefriendly.app/products/jacket/privacy/"
 
 @Composable
 fun SettingsScreen(
@@ -81,6 +93,18 @@ fun SettingsScreen(
     val haptics = rememberHaptics()
     val context = LocalContext.current
     var message by remember { mutableStateOf<String?>(null) }
+    // The voice is chosen here as it will sound in the phone's own language.
+    var choosingVoice by remember { mutableStateOf(false) }
+    val phoneLanguage = LocalConfiguration.current.locales[0]?.toLanguageTag()
+    // A backup that keeps itself up to date: a file chosen once, in Drive say, written after changes.
+    val autoBackup = context.autoBackup
+    val autoStatus by autoBackup.status.collectAsStateWithLifecycle()
+    val keeper = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(Backup.MIME)) { uri ->
+        if (uri != null) {
+            haptics.confirm()
+            autoBackup.enable(uri)
+        }
+    }
     val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(Backup.MIME)) { uri ->
         if (uri != null) scope.launch {
             message = runCatching { library.exportBackup(uri) }
@@ -226,6 +250,28 @@ fun SettingsScreen(
             item { GroupTitle(stringResource(R.string.settings_group_reading), column) }
             item { ReadingControls(settings, onSettings, column) }
 
+            item { GroupTitle(stringResource(R.string.settings_group_listening), column) }
+            item {
+                Group(column) {
+                    SegmentedListItem(
+                        onClick = { haptics.tick(); choosingVoice = true },
+                        shapes = ListItemDefaults.segmentedShapes(0, 2),
+                        leadingContent = { Icon(JacketIcons.Voice, null) },
+                        supportingContent = { Text(voiceLabel(phoneLanguage, settings)) },
+                    ) { Text(stringResource(R.string.voice_title)) }
+                    SegmentedListItem(
+                        onClick = {
+                            haptics.tick()
+                            runCatching { context.startActivity(Intent("com.android.settings.TTS_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                        },
+                        shapes = ListItemDefaults.segmentedShapes(1, 2),
+                        leadingContent = { Icon(JacketIcons.Volume, null) },
+                        supportingContent = { Text(stringResource(R.string.voice_phone_settings_description)) },
+                    ) { Text(stringResource(R.string.voice_phone_settings)) }
+                }
+            }
+            item { Hint(stringResource(R.string.voice_settings_hint), column) }
+
             item { GroupTitle(stringResource(R.string.settings_group_appearance), column) }
             item {
                 Group(column) {
@@ -284,13 +330,22 @@ fun SettingsScreen(
                             haptics.tick()
                             exporter.launch("Jacket backup ${java.time.LocalDate.now()}.json")
                         },
-                        shapes = ListItemDefaults.segmentedShapes(0, 2),
+                        shapes = ListItemDefaults.segmentedShapes(0, 3),
                         leadingContent = { Icon(JacketIcons.Download, null) },
                         supportingContent = { Text(stringResource(R.string.settings_backup_save_description)) },
                     ) { Text(stringResource(R.string.settings_backup_save)) }
+                    AutoBackupRow(
+                        status = autoStatus,
+                        onChange = { on ->
+                            haptics.toggle(on)
+                            if (on) keeper.launch(AUTO_BACKUP_NAME) else autoBackup.disable()
+                        },
+                        // It couldn't write: the file may have gone, or the permission with it.
+                        onChooseAgain = { haptics.tick(); keeper.launch(AUTO_BACKUP_NAME) },
+                    )
                     SegmentedListItem(
                         onClick = { haptics.tick(); importer.launch(arrayOf(Backup.MIME, "application/octet-stream", "text/plain")) },
-                        shapes = ListItemDefaults.segmentedShapes(1, 2),
+                        shapes = ListItemDefaults.segmentedShapes(2, 3),
                         leadingContent = { Icon(JacketIcons.Upload, null) },
                         supportingContent = { Text(stringResource(R.string.settings_backup_restore_description)) },
                     ) { Text(stringResource(R.string.settings_backup_restore)) }
@@ -304,27 +359,48 @@ fun SettingsScreen(
                         runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() ?: ""
                     }
                     SegmentedListItem(
-                        shapes = ListItemDefaults.segmentedShapes(0, 3),
+                        shapes = ListItemDefaults.segmentedShapes(0, 4),
                         leadingContent = { Icon(JacketIcons.Info, null) },
                         supportingContent = { Text(stringResource(R.string.settings_about_version, version)) },
                     ) { Text(stringResource(R.string.app_name)) }
+                    // Play asks for the policy inside the app too; the browser opens it, so Jacket
+                    // itself still needs no internet permission.
+                    SegmentedListItem(
+                        onClick = {
+                            haptics.tick()
+                            runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, PRIVACY_URL.toUri())) }
+                        },
+                        shapes = ListItemDefaults.segmentedShapes(1, 4),
+                        leadingContent = { Icon(JacketIcons.Lock, null) },
+                        supportingContent = { Text(stringResource(R.string.settings_about_privacy_description)) },
+                    ) { Text(stringResource(R.string.settings_about_privacy)) }
                     SegmentedListItem(
                         onClick = {
                             haptics.tick()
                             runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, SOURCE_URL.toUri())) }
                         },
-                        shapes = ListItemDefaults.segmentedShapes(1, 3),
+                        shapes = ListItemDefaults.segmentedShapes(2, 4),
                         leadingContent = { Icon(JacketIcons.Code, null) },
                         supportingContent = { Text(stringResource(R.string.settings_about_source_description)) },
                     ) { Text(stringResource(R.string.settings_about_source)) }
                     SegmentedListItem(
                         onClick = { haptics.tick(); onLicenses() },
-                        shapes = ListItemDefaults.segmentedShapes(2, 3),
+                        shapes = ListItemDefaults.segmentedShapes(3, 4),
                         leadingContent = { Icon(JacketIcons.Gavel, null) },
                         supportingContent = { Text(stringResource(R.string.settings_about_licenses_description)) },
                     ) { Text(stringResource(R.string.settings_about_licenses)) }
                 }
             }
+        }
+    }
+    if (choosingVoice) {
+        ModalBottomSheet(onDismissRequest = { choosingVoice = false }) {
+            VoicePicker(
+                language = phoneLanguage,
+                settings = settings,
+                onSettings = onSettings,
+                modifier = Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
+            )
         }
     }
     message?.let { text ->
@@ -382,6 +458,53 @@ private fun GroupTitle(text: String, modifier: Modifier) {
 @Composable
 private fun Group(modifier: Modifier, content: @Composable () -> Unit) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) { content() }
+}
+
+/** The file name a backup kept up to date starts with. */
+private const val AUTO_BACKUP_NAME = "Jacket backup.json"
+
+/**
+ * "Keep a backup up to date": off, it says what it does; on, when the file was last written and
+ * where it is ("Updated 5 minutes ago · Jacket backup.json in Drive"), or that it couldn't be.
+ */
+@Composable
+private fun AutoBackupRow(status: AutoBackup.Status, onChange: (Boolean) -> Unit, onChooseAgain: () -> Unit) {
+    val where = listOfNotNull(status.name, status.place).joinToString(stringResource(R.string.separator))
+    val description = when {
+        !status.on -> stringResource(R.string.settings_backup_auto_description)
+        status.failed -> stringResource(R.string.settings_backup_auto_failed)
+        status.writtenAt > 0L -> {
+            val now = System.currentTimeMillis()
+            val locale = LocalConfiguration.current.locales[0] ?: java.util.Locale.ROOT
+            // "Updated just now", else "Updated 5 minutes ago" (the time read mid-sentence, so lower case).
+            val updated = if (now - status.writtenAt < DateUtils.MINUTE_IN_MILLIS) {
+                stringResource(R.string.settings_backup_auto_just_now)
+            } else {
+                val ago = DateUtils.getRelativeTimeSpanString(status.writtenAt, now, DateUtils.MINUTE_IN_MILLIS).toString()
+                stringResource(R.string.settings_backup_auto_updated, ago.replaceFirstChar { it.lowercase(locale) })
+            }
+            updated + if (where.isNotEmpty()) stringResource(R.string.separator) + where else ""
+        }
+        else -> where.ifEmpty { stringResource(R.string.settings_backup_auto_description) }
+    }
+    SegmentedListItem(
+        checked = status.on,
+        onCheckedChange = { if (status.on && status.failed) onChooseAgain() else onChange(it) },
+        shapes = ListItemDefaults.segmentedShapes(1, 3),
+        leadingContent = { Icon(JacketIcons.Upload, null) },
+        supportingContent = {
+            Text(description, color = if (status.failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
+        },
+        trailingContent = {
+            Switch(
+                checked = status.on,
+                onCheckedChange = null,
+                thumbContent = if (status.on) {
+                    { Icon(JacketIcons.Check, null, Modifier.size(SwitchDefaults.IconSize)) }
+                } else null,
+            )
+        },
+    ) { Text(stringResource(R.string.settings_backup_auto)) }
 }
 
 @Composable

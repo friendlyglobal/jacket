@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Natural voices, the welcome pages and the sample book (see values/strings_voices.xml for what each is). -->
+<resources>
+    <string name="settings_group_listening">听书</string>
+    <string name="voice_title">语音</string>
+    <string name="voice_phone">手机语音</string>
+    <string name="voice_phone_description">手机自带，能朗读它会的所有语言。</string>
+    <string name="voice_natural">自然语音</string>
+    <string name="voice_female">女声 %1$d</string>
+    <string name="voice_male">男声 %1$d</string>
+    <string name="voice_hear">试听%1$s</string>
+    <string name="voice_stop_sample">停止</string>
+    <string name="voice_change">更改</string>
+    <string name="voice_book_language">书的语言：%1$s</string>
+    <string name="voice_book_language_hint">不对？改一下，让合适的语音来朗读。</string>
+    <string name="voice_language_title">这本书是什么语言？</string>
+    <string name="voice_language_from_book">书中标注的语言</string>
+    <string name="voice_only_language">仅用于这种语言的书：%1$s</string>
+    <string name="voice_only_language_description">其他语言的书保留各自的语音。</string>
+    <string name="voice_not_in_language">%1$s：自然语音暂时还不会这种语言，所以由手机语音朗读。</string>
+    <string name="voice_private">自然语音就在你的手机上发声。你读的内容不会发送到任何地方。</string>
+    <string name="voice_about">关于这些语音</string>
+    <string name="voice_about_text">自然语音随 Jacket 提供，无需联网即可使用。可以免费使用，但不得用于欺骗或伤害他人，例如把语音冒充成真人。完整条款见“设置”中的“许可”。</string>
+    <string name="voice_slow">这部手机带不动这个语音。点按即可更换。</string>
+    <string name="listen_preparing">正在准备语音…</string>
+    <string name="voice_stopped">自然语音停止了。请重试，或改用手机语音。</string>
+    <string name="voice_fell_back">自然语音无法启动，现在由手机语音朗读。</string>
+    <string name="voice_phone_settings">手机语音设置</string>
+    <string name="voice_phone_settings_description">选择手机自带语音的声音。</string>
+    <string name="voice_settings_hint">每本书都用它自己的语言朗读。自然语音会多种语言，其余的由手机语音朗读。</string>
+    <string name="onboarding_cover_body">你在内屏阅读时，外屏会穿上这本书的封面。合上手机，封面仍在；半开立在桌上，书页就在折痕上方。</string>
+    <string name="onboarding_cover_outside">外屏显示封面</string>
+    <string name="onboarding_read_title">真正的书页，像纸一样翻动</string>
+    <string name="onboarding_read_body">书页在指下掀起，然后滑动、卷曲或发牌般翻开。长按文字即可划线并添加笔记。</string>
+    <string name="onboarding_read_listen_body">书页像纸一样翻动，手机展开时两页并排。也可以靠着听：自然语音能朗读任何一本书。</string>
+    <string name="onboarding_listen_title">或者只是听</string>
+    <string name="onboarding_listen_body">自然语音能朗读任何一本书，读到哪个字，哪个字就亮起来。关掉屏幕也会继续。</string>
+    <string name="onboarding_yours_title">按你的喜好来</string>
+    <string name="onboarding_yours_body">先做几个选择，以后随时可以更改。</string>
+    <string name="onboarding_yours_sample">从前，有一本书遇见了它的读者。</string>
+    <string name="onboarding_start_title">你的书始终属于你</string>
+    <string name="onboarding_widget">用 Jacket 的小组件，把书的封面放在主屏幕上。</string>
+    <string name="library_empty_title_phone">你的下一本书从这里开始</string>
+    <string name="library_empty_message_phone">添加 EPUB、PDF、CBZ 漫画或文本文件。Jacket 会保存一份私密副本，让它有真正可翻的书页，还能用自然语音朗读。</string>
+    <string name="library_try_sample">试读一本示例图书</string>
+    <string name="sample_failed">无法打开示例图书。</string>
+</resources>

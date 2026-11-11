@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Natural voices, the welcome pages and the sample book (see values/strings_voices.xml for what each is). -->
+<resources>
+    <string name="settings_group_listening">Luisteren</string>
+    <string name="voice_title">Stem</string>
+    <string name="voice_phone">Stem van de telefoon</string>
+    <string name="voice_phone_description">Ingebouwd in je telefoon. Leest elke taal die hij kent.</string>
+    <string name="voice_natural">Natuurlijk</string>
+    <string name="voice_female">Vrouwenstem %1$d</string>
+    <string name="voice_male">Mannenstem %1$d</string>
+    <string name="voice_hear">%1$s beluisteren</string>
+    <string name="voice_stop_sample">Stoppen</string>
+    <string name="voice_change">Wijzigen</string>
+    <string name="voice_book_language">Taal van het boek: %1$s</string>
+    <string name="voice_book_language_hint">Klopt dit niet? Wijzig het, zodat de juiste stem voorleest.</string>
+    <string name="voice_language_title">In welke taal is dit boek?</string>
+    <string name="voice_language_from_book">Wat het boek aangeeft</string>
+    <string name="voice_only_language">Alleen voor boeken in deze taal: %1$s</string>
+    <string name="voice_only_language_description">Boeken in andere talen houden hun eigen stem.</string>
+    <string name="voice_not_in_language">%1$s: de natuurlijke stemmen spreken deze taal nog niet, dus leest de stem van je telefoon voor.</string>
+    <string name="voice_private">Natuurlijke stemmen spreken op je telefoon zelf. Niets van wat je leest wordt ergens naartoe gestuurd.</string>
+    <string name="voice_about">Over deze stemmen</string>
+    <string name="voice_about_text">De natuurlijke stemmen horen bij Jacket en werken zonder internet. Je mag ze vrij gebruiken, maar niet om iemand te misleiden of te schaden, bijvoorbeeld door een stem voor een echt persoon te laten doorgaan. De volledige voorwaarden staan in Instellingen, onder Licenties.</string>
+    <string name="voice_slow">Deze stem is te zwaar voor deze telefoon. Tik om te wijzigen.</string>
+    <string name="listen_preparing">Stem wordt voorbereid…</string>
+    <string name="voice_stopped">De natuurlijke stem is gestopt. Probeer het opnieuw of schakel over naar de stem van je telefoon.</string>
+    <string name="voice_fell_back">De natuurlijke stem kon niet starten, dus leest de stem van je telefoon voor.</string>
+    <string name="voice_phone_settings">Instellingen voor de stem van de telefoon</string>
+    <string name="voice_phone_settings_description">Kies hoe de stem van je telefoon klinkt.</string>
+    <string name="voice_settings_hint">Elk boek wordt in zijn eigen taal voorgelezen. Natuurlijke stemmen spreken veel talen; de stem van je telefoon leest de rest.</string>
+    <string name="onboarding_cover_body">Terwijl je binnenin leest, draagt het buitenscherm de omslag van je boek. Klap de telefoon dicht en de omslag blijft; zet hem half open neer en de pagina staat boven de vouw.</string>
+    <string name="onboarding_cover_outside">Omslag aan de buitenkant</string>
+    <string name="onboarding_read_title">Echte pagina\'s, die omslaan als papier</string>
+    <string name="onboarding_read_body">Pagina\'s komen omhoog onder je vinger en schuiven, krullen of worden weggelegd. Houd woorden ingedrukt om ze te markeren en een notitie toe te voegen.</string>
+    <string name="onboarding_read_listen_body">Pagina\'s slaan om als papier, twee naast elkaar als de telefoon open is. Of leun achterover en luister: natuurlijke stemmen lezen elk boek voor.</string>
+    <string name="onboarding_listen_title">Of luister gewoon</string>
+    <string name="onboarding_listen_body">Natuurlijke stemmen lezen elk boek voor, en elk woord licht op als het wordt uitgesproken. Het gaat door met het scherm uit.</string>
+    <string name="onboarding_yours_title">Maak het van jou</string>
+    <string name="onboarding_yours_body">Een paar keuzes om mee te beginnen. Je kunt ze altijd wijzigen.</string>
+    <string name="onboarding_yours_sample">Er was eens een boek dat zijn lezer vond.</string>
+    <string name="onboarding_start_title">Je boeken blijven van jou</string>
+    <string name="onboarding_widget">Houd de omslag van je boek op je startscherm met de widget van Jacket.</string>
+    <string name="library_empty_title_phone">Je volgende boek begint hier</string>
+    <string name="library_empty_message_phone">Voeg een EPUB, pdf, CBZ-strip of tekstbestand toe. Jacket bewaart een privékopie, geeft het echte pagina\'s om om te slaan en kan het voorlezen met een natuurlijke stem.</string>
+    <string name="library_try_sample">Een voorbeeldboek proberen</string>
+    <string name="sample_failed">Het voorbeeldboek kon niet worden geopend.</string>
+</resources>

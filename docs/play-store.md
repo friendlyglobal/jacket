@@ -1,12 +1,12 @@
 # Play Console working sheet
 
-Answers for the Play Console forms for **Jacket 1.0.0-rc.1 (versionCode 4)**,
+Answers for the Play Console forms for **Jacket 1.0.0 (versionCode 7)**,
 applicationId `app.usefriendly.jacket`. Play changes its form wording from time to
 time: where an answer below depends on Play's definitions, check it against the current form
 before you submit.
 
 Store listing text lives in `fastlane/metadata/android/en-US/` (`title.txt`,
-`short_description.txt`, `full_description.txt`, `changelogs/4.txt`).
+`short_description.txt`, `full_description.txt`, `changelogs/7.txt`).
 
 ## 1. Data safety
 
@@ -31,10 +31,11 @@ Edge cases, in case a reviewer asks (verify against the current form wording):
   list, reading positions, bookmarks, highlights, notes and settings (not book files) to the
   user's Google account backup. That is a Google-run device backup the developer cannot
   access; Play's form does not count it as collection by the developer.
-- **Read-aloud.** At the user's request, Jacket passes the text being read to the
-  text-to-speech engine installed on the phone (a separate app chosen by the user, such as
-  Google Speech Services). This is a user-initiated, on-device hand-off, not sharing by the
-  developer.
+- **Read-aloud.** Jacket's natural voices are part of the app and turn text into speech inside
+  it, on the device: nothing is passed on. If the user chooses the phone's own voice instead
+  (or the book is in a language the natural voices don't speak), Jacket passes the text being
+  read to the text-to-speech engine installed on the phone (a separate app, such as Google
+  Speech Services). That is a user-initiated, on-device hand-off, not sharing by the developer.
 - **Open with, Share, backup export.** These go through Android's own share sheet and file
   picker, started by the user, to a destination the user picks.
 
@@ -65,9 +66,9 @@ Edge cases, in case a reviewer asks (verify against the current form wording):
 | App access | All functionality is available without special access (no login) |
 | Advertising ID | No; the app does not use it and the merged manifest has no `AD_ID` permission |
 | News, government, financial features, health | No / None |
-| Privacy policy URL | https://friendlyglobal.github.io/jacket/privacy.html |
-| Website (optional) | https://github.com/friendlyglobal/jacket |
-| Contact email | Required by Play and shown publicly; use an address you are happy to publish |
+| Privacy policy URL | https://usefriendly.app/products/jacket/privacy/ (also linked in the app under Settings › About) |
+| Website (optional) | https://usefriendly.app/products/jacket/ (support page: https://usefriendly.app/products/jacket/support/) |
+| Contact email | hello@usefriendly.app, the address the website already lists (Play shows it publicly) |
 
 ## 4. Permissions
 
@@ -94,10 +95,10 @@ permissions, listed here for reviewer or user questions.
 **Foreground service declaration** (*App content → Foreground service permissions*):
 
 - Type: **Media playback**.
-- Description: "Jacket reads the user's book aloud with the phone's text-to-speech engine. The
-  media playback foreground service keeps reading while the screen is off or another app is in
-  front, and provides the media notification and lock-screen controls. It runs only while the
-  user is listening."
+- Description: "Jacket reads the user's book aloud, with voices built into the app or with the
+  phone's text-to-speech engine. The media playback foreground service keeps reading while the
+  screen is off or another app is in front, and provides the media notification and lock-screen
+  controls. It runs only while the user is listening."
 - Impact if deferred or interrupted: "Read-aloud would stop mid-sentence as soon as the screen
   turns off, which defeats listening to a book with the phone in a pocket."
 - Video: a short screen recording (unlisted YouTube or a shared Drive link) that starts

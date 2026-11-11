@@ -1,42 +1,50 @@
-Jacket is an open-source e-reader for foldable phones. While you read on the inner screen, the outer screen shows the cover of your book edge to edge, like album art, so the people around you can see what you're reading.
+Jacket is a free, open-source e-reader that lets your foldable wear the book you're reading. While you read inside, the outer screen shows the book's cover edge to edge, like album art. When you'd rather listen, natural voices read any book aloud, right on your phone. It works on any Android phone, and the cover features come into their own on foldables.
 
 THE COVER, ON THE OUTSIDE
-• Book-style foldables: the cover fills the outer screen while you read inside, using Android's dual-screen mode.
-• Galaxy Z Flip: a cover-screen widget for the Flex Window.
-• Any phone or tablet: the same widget on your home screen.
-• Turn the outer-screen cover off in Settings at any time.
+• Book-style foldables: the cover fills the outer screen while you read inside, following your reading live: New, Reading, Almost there, Listening, Finished, and a low-power ambient state.
+• If you like, the dimmed cover shows one of your highlights.
+• Cover when closed: fold the phone shut on an open book and the cover stays on, with a player along the bottom so you can pause or skip without unfolding.
+• Galaxy Z Flip: a cover-screen widget. Motorola Razr: open Jacket on the external display.
 
-READING
-• EPUB, PDF, CBZ comics and plain text, from your own files. Use Add books, or Open with or Share from another app.
-• EPUBs are rendered with the open-source Readium toolkit: real pages, a two-page spread when unfolded, or continuous scrolling if you prefer.
-• Contents with sub-chapters, the current chapter tracked as you read, pages left in the chapter, and a scrubber that previews the chapter under your thumb.
-• Bookmarks, highlights in several colors with notes, and full-text search inside EPUBs.
+LISTEN
+• Natural voices come with Jacket and speak 31 languages without the internet. Your phone's own voice reads the rest.
+• Each word lights up on the page as it's spoken, and the page turns with the voice.
+• Tap any sentence to hear it from there. Stop, and next time it carries on from the sentence you left.
+• Keeps going with the screen off, with lock-screen and headphone controls.
+• Speed from 0.8× to 2×, and a sleep timer for 15, 30 or 60 minutes or the end of the chapter.
 
-LISTENING
-• Audiobook mode reads EPUB and plain-text books aloud with your phone's text-to-speech voice, highlighting each word as it's spoken.
-• Keeps playing with the screen off, with lock-screen and headphone controls.
-• Sleep timer: stop after a set time or at the end of the chapter.
+READ
+• EPUB, PDF, CBZ comics and plain text from your own files, through Add books, Open with or Share.
+• Real EPUB pages, two side by side when unfolded, or scrolling.
+• Page turns that follow your finger: Paper, Curl, Cards or Slide.
+• Contents, bookmarks, highlights in five colors, notes, and search inside EPUBs.
+• Literata, Atkinson Hyperlegible and OpenDyslexic fonts; text size, line spacing, margins and justification; four page colors.
+• Pinch or double-tap to zoom PDFs and comics.
 
-READING COMFORT
-• Literata, Atkinson Hyperlegible and OpenDyslexic fonts.
-• Text size, line spacing, margins and justification.
-• Book, Paper, Dark and Black page colors.
-• Turn pages with the volume keys.
+YOUR LIBRARY
+• Free books: 114 classics in 16 languages whose copyright has run out, ready to download through your browser.
+• Collections for a book club, a trip or a genre.
+• Give any book a new cover: a photo, or a design in your colors.
+• Widgets: your book's cover, a player, your shelf, and your reading streak.
+• Today's reading time and your streak, time left in the chapter, and a watched folder that adds new books.
 
-LIBRARY
-• Search and sort your books.
-• A Finished shelf, and an end-of-book screen when you reach the last page.
-• Export a backup file and import it again later or on another phone.
+DAILY COMFORTS
+• Tabletop mode: half-folded, the page sits above the fold and the controls below.
+• Edge swipes for brightness and warmth, and dark pages at night.
+• Volume keys turn pages.
+• Share a highlight as a quote, or all of a book's notes at once.
+• A "Back" pill returns you to your page after a jump.
 
-DESIGN
-• Material 3 Expressive: colors taken from the cover of the book you're reading, springy motion and haptic feedback.
+IN YOUR LANGUAGE
+English, Spanish, Brazilian Portuguese, French, Italian, German, Dutch, Polish, Russian, Ukrainian, Turkish, Arabic, Hindi, Indonesian, Japanese, Korean, and Simplified and Traditional Chinese.
 
 PRIVACY
-• No internet permission: neither Jacket nor the books you open in it can connect to the network.
+• No internet permission: neither Jacket nor the books you open in it can reach the network. The voices speak on your phone itself.
 • No accounts, no ads, no analytics, no tracking.
+• Backup to a file you choose: your books list, places, bookmarks, highlights and settings (not the book files themselves).
 • Free and open source under the Apache License 2.0: https://github.com/friendlyglobal/jacket
 
 GOOD TO KNOW
-• Outer-screen support depends on the phone. On phones without an outer screen, those options are hidden.
-• DRM-protected (copy-protected) books can't be opened.
-• Read-aloud for plain-text books stops when you leave the app. EPUB read-aloud keeps playing in the background.
+• Outer-screen support depends on the phone; without one, those options are hidden.
+• DRM-protected books can't be opened.
+• PDFs and comics aren't read aloud, and read-aloud for plain-text books stops when you leave the app.

@@ -1,1 +1,1 @@
-Liseuse pour pliables qui affiche la couverture du livre sur l'écran externe
+Liseuse pour pliables : couverture du livre dehors, voix naturelles dedans
