@@ -281,6 +281,11 @@
     <string name="listen_sleep_30_minutes">30 dakika</string>
     <string name="listen_sleep_1_hour">1 saat</string>
     <string name="listen_sleep_end_of_chapter">Bölüm sonu</string>
+    <string name="listen_speed">Hız: %1$s</string>
+    <string name="listen_sleep_other">Başka bir süre…</string>
+    <string name="listen_sleep_other_title">Okumayı şu süre sonra durdur</string>
+    <string name="listen_sleep_other_minutes">Dakika</string>
+    <string name="listen_sleep_other_start">Zamanlayıcıyı başlat</string>
     <string name="listen_no_voice">Bu telefonda yüklü bir metin okuma sesi yok.</string>
     <string name="listen_no_readable_text">Bu kitapta sesli okunabilecek metin yok.</string>
     <string name="listen_stopped_error">Sesli okuma durdu: %1$s</string>

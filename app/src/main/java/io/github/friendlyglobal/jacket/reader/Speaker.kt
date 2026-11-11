@@ -409,7 +409,7 @@ class NaturalSpeaker(context: Context, private val voices: Voices, private val r
             // The reader may have answered the start by stopping, or by asking for something else.
             if (current !== line) return
             if (hasWords(line.text)) {
-                speech.speak(line, line.text, language, endsParagraph = line.utterance.last, upcoming = queue.take(2).map { it.text })
+                speech.speak(line, line.text, language, endsParagraph = line.utterance.last, upcoming = queue.take(NaturalSpeech.MOST_AHEAD).map { it.text })
                 return
             }
             // Nothing in it for the voice (see speak): it is over as it starts, and the next follows.

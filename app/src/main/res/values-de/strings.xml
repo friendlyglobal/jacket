@@ -280,6 +280,11 @@
     <string name="listen_sleep_30_minutes">30 Minuten</string>
     <string name="listen_sleep_1_hour">1 Stunde</string>
     <string name="listen_sleep_end_of_chapter">Kapitelende</string>
+    <string name="listen_speed">Tempo: %1$s</string>
+    <string name="listen_sleep_other">Andere Dauer …</string>
+    <string name="listen_sleep_other_title">Vorlesen beenden nach</string>
+    <string name="listen_sleep_other_minutes">Minuten</string>
+    <string name="listen_sleep_other_start">Timer starten</string>
     <string name="listen_no_voice">Auf diesem Smartphone ist keine Sprachausgabe-Stimme installiert.</string>
     <string name="listen_no_readable_text">Dieses Buch hat keinen Text, der vorgelesen werden kann.</string>
     <string name="listen_stopped_error">Vorlesen gestoppt: %1$s</string>

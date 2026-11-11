@@ -280,6 +280,11 @@
     <string name="listen_sleep_30_minutes">30 minuten</string>
     <string name="listen_sleep_1_hour">1 uur</string>
     <string name="listen_sleep_end_of_chapter">Einde hoofdstuk</string>
+    <string name="listen_speed">Snelheid: %1$s</string>
+    <string name="listen_sleep_other">Andere duur…</string>
+    <string name="listen_sleep_other_title">Stoppen met voorlezen na</string>
+    <string name="listen_sleep_other_minutes">Minuten</string>
+    <string name="listen_sleep_other_start">Timer starten</string>
     <string name="listen_no_voice">Op deze telefoon is geen stem voor tekst-naar-spraak geïnstalleerd.</string>
     <string name="listen_no_readable_text">Dit boek heeft geen tekst die kan worden voorgelezen.</string>
     <string name="listen_stopped_error">Voorlezen gestopt: %1$s</string>

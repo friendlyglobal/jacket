@@ -238,6 +238,10 @@ class Origin(
     val back: () -> Unit,
 )
 
+/** Skipping by chapter from the player; null for a book without chapters (or a format that has none). */
+internal fun ReaderNav.chapterSteps(): ChapterSteps? =
+    if (toc.isEmpty()) null else ChapterSteps(title = chapter.ifBlank { title }, canStep = { canStep(it) }, onStep = { step(it) })
+
 /** The open book's [ReaderNav], for views that only need to report in (see [ReaderError]). */
 internal val LocalReaderNav = compositionLocalOf<ReaderNav?> { null }
 
@@ -464,10 +468,13 @@ fun ReaderScreen(
 
     // Sleep timer: pause after the chosen time, or when the chapter changes.
     val listen = nav.listen
-    LaunchedEffect(listen.sleep, listen.sleepEndsAt) {
+    LaunchedEffect(listen.sleep, listen.sleepEndsAt, listen.chapterSkips) {
         val timer = listen.sleep
         if (timer == SleepTimer.OFF) return@LaunchedEffect
         if (timer == SleepTimer.CHAPTER) {
+            // A chapter skipped to from the player is the one whose end is waited for: once the
+            // page and the voice have settled in it.
+            if (listen.chapterSkips > 0) delay(CHAPTER_SKIP_SETTLE_MS)
             // Whichever comes first: the voice moving into the next chapter file, or the page
             // (following the voice) reaching the next chapter in the contents.
             val start = listen.spokenFile to nav.tocIndex
@@ -983,6 +990,7 @@ private fun TabletopDesk(nav: ReaderNav, book: Book, settings: Settings, onRate:
                     nav.listen, controller, settings.listenRate, onRate, haptics,
                     progress = nav.section.toFloat() / (nav.sectionCount - 1).coerceAtLeast(1),
                     hasChapters = nav.toc.isNotEmpty(),
+                    chapters = nav.chapterSteps(),
                 )
             } else {
                 Text(nav.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -1069,6 +1077,9 @@ private class ControlsWatch {
 /** TalkBack (or the like) is reading the screen out under a finger: nothing should leave by itself. */
 private fun android.content.Context.exploresByTouch(): Boolean =
     getSystemService(android.view.accessibility.AccessibilityManager::class.java)?.isTouchExplorationEnabled == true
+
+/** How long the page and the voice are given to arrive in a chapter skipped to, before "end of chapter" watches for its end. */
+private const val CHAPTER_SKIP_SETTLE_MS = 2_500L
 
 /** While listening, the controls tuck away this long after their last touch... */
 private const val LISTEN_CONTROLS_MS = 4_000L
@@ -1240,9 +1251,12 @@ private fun ReaderBottomBar(
             // On a window too narrow for the voice's icon on the bar, its name unfolds above the
             // toolbar as it becomes the player. (Not the player's wavy line: over the page it
             // would run across the text.)
+            val chapters = nav.chapterSteps()
             PlayerLine(
                 nav.listen, progress = nav.section.toFloat() / (nav.sectionCount - 1).coerceAtLeast(1),
                 voice = voice, haptics = haptics, visible = listening, line = false,
+                // The slider just above names the chapter already, when it is there.
+                chapters = chapters, chapterTitle = !(showScrubber && nav.sectionCount > 1),
             )
             val (previousLabel, nextLabel) = when {
                 nav.toc.isNotEmpty() -> R.string.reader_previous_chapter to R.string.reader_next_chapter
@@ -1268,6 +1282,7 @@ private fun ReaderBottomBar(
                 haptics = haptics,
                 hasChapters = nav.toc.isNotEmpty(),
                 voice = voice,
+                chapters = chapters,
             )
         }
     }

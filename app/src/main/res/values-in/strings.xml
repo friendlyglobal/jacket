@@ -272,6 +272,11 @@
     <string name="listen_sleep_30_minutes">30 menit</string>
     <string name="listen_sleep_1_hour">1 jam</string>
     <string name="listen_sleep_end_of_chapter">Akhir bab</string>
+    <string name="listen_speed">Kecepatan: %1$s</string>
+    <string name="listen_sleep_other">Durasi lain…</string>
+    <string name="listen_sleep_other_title">Berhenti membaca setelah</string>
+    <string name="listen_sleep_other_minutes">Menit</string>
+    <string name="listen_sleep_other_start">Mulai timer</string>
     <string name="listen_no_voice">Ponsel ini tidak memiliki suara teks ke ucapan yang terinstal.</string>
     <string name="listen_no_readable_text">Buku ini tidak memiliki teks yang dapat dibacakan.</string>
     <string name="listen_stopped_error">Pembacaan berhenti: %1$s</string>

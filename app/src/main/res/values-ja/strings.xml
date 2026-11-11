@@ -272,6 +272,11 @@
     <string name="listen_sleep_30_minutes">30 分</string>
     <string name="listen_sleep_1_hour">1 時間</string>
     <string name="listen_sleep_end_of_chapter">章の終わり</string>
+    <string name="listen_speed">速度: %1$s</string>
+    <string name="listen_sleep_other">その他の長さ…</string>
+    <string name="listen_sleep_other_title">読み上げを止めるまでの時間</string>
+    <string name="listen_sleep_other_minutes">分</string>
+    <string name="listen_sleep_other_start">タイマーを開始</string>
     <string name="listen_no_voice">このスマートフォンにはテキスト読み上げの音声がインストールされていません。</string>
     <string name="listen_no_readable_text">この本には読み上げられるテキストがありません。</string>
     <string name="listen_stopped_error">読み上げが停止しました：%1$s</string>

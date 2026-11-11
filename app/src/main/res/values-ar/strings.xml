@@ -317,6 +317,11 @@
     <string name="listen_sleep_30_minutes">30 دقيقة</string>
     <string name="listen_sleep_1_hour">ساعة واحدة</string>
     <string name="listen_sleep_end_of_chapter">نهاية الفصل</string>
+    <string name="listen_speed">السرعة: %1$s</string>
+    <string name="listen_sleep_other">مدة أخرى…</string>
+    <string name="listen_sleep_other_title">إيقاف القراءة بعد</string>
+    <string name="listen_sleep_other_minutes">الدقائق</string>
+    <string name="listen_sleep_other_start">بدء المؤقت</string>
     <string name="listen_no_voice">لا يوجد صوت مثبَّت لتحويل النص إلى كلام على هذا الهاتف.</string>
     <string name="listen_no_readable_text">لا يحتوي هذا الكتاب على نص يمكن قراءته بصوت عالٍ.</string>
     <string name="listen_stopped_error">توقفت القراءة بصوت عالٍ: %1$s</string>

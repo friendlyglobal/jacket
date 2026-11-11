@@ -289,6 +289,11 @@
     <string name="listen_sleep_30_minutes">30 minutos</string>
     <string name="listen_sleep_1_hour">1 hora</string>
     <string name="listen_sleep_end_of_chapter">Al final del capítulo</string>
+    <string name="listen_speed">Velocidad: %1$s</string>
+    <string name="listen_sleep_other">Otra duración…</string>
+    <string name="listen_sleep_other_title">Dejar de leer tras</string>
+    <string name="listen_sleep_other_minutes">Minutos</string>
+    <string name="listen_sleep_other_start">Iniciar temporizador</string>
     <string name="listen_no_voice">Este teléfono no tiene instalada ninguna voz de texto a voz.</string>
     <string name="listen_no_readable_text">Este libro no tiene texto que se pueda leer en voz alta.</string>
     <string name="listen_stopped_error">Lectura en voz alta detenida: %1$s</string>

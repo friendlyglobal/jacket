@@ -324,6 +324,12 @@
     <string name="listen_sleep_30_minutes">30 minutes</string>
     <string name="listen_sleep_1_hour">1 hour</string>
     <string name="listen_sleep_end_of_chapter">End of chapter</string>
+    <!-- The player's speed, for a screen reader (%1$s is e.g. "1.25×"); and a sleep timer of the listener's own length: the menu entry, then the dialog it opens (a field for a number of minutes). -->
+    <string name="listen_speed">Speed: %1$s</string>
+    <string name="listen_sleep_other">Other length…</string>
+    <string name="listen_sleep_other_title">Stop reading after</string>
+    <string name="listen_sleep_other_minutes">Minutes</string>
+    <string name="listen_sleep_other_start">Start timer</string>
     <string name="listen_no_voice">This phone has no text-to-speech voice installed.</string>
     <string name="listen_no_readable_text">This book has no text that can be read aloud.</string>
     <!-- %1$s: the reason, from the speech engine. -->

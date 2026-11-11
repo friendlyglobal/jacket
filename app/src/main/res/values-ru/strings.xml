@@ -298,6 +298,11 @@
     <string name="listen_sleep_30_minutes">30 минут</string>
     <string name="listen_sleep_1_hour">1 час</string>
     <string name="listen_sleep_end_of_chapter">Конец главы</string>
+    <string name="listen_speed">Скорость: %1$s</string>
+    <string name="listen_sleep_other">Другое время…</string>
+    <string name="listen_sleep_other_title">Остановить чтение через</string>
+    <string name="listen_sleep_other_minutes">Минуты</string>
+    <string name="listen_sleep_other_start">Запустить таймер</string>
     <string name="listen_no_voice">На этом телефоне не установлен голос для синтеза речи.</string>
     <string name="listen_no_readable_text">В этой книге нет текста, который можно прочитать вслух.</string>
     <string name="listen_stopped_error">Чтение вслух остановлено: %1$s</string>

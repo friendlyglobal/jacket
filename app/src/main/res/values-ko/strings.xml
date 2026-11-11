@@ -272,6 +272,11 @@
     <string name="listen_sleep_30_minutes">30분</string>
     <string name="listen_sleep_1_hour">1시간</string>
     <string name="listen_sleep_end_of_chapter">장 끝까지</string>
+    <string name="listen_speed">속도: %1$s</string>
+    <string name="listen_sleep_other">다른 시간…</string>
+    <string name="listen_sleep_other_title">다음 시간 후 읽기 중지</string>
+    <string name="listen_sleep_other_minutes">분</string>
+    <string name="listen_sleep_other_start">타이머 시작</string>
     <string name="listen_no_voice">이 휴대전화에는 텍스트 음성 변환(TTS) 음성이 설치되어 있지 않습니다.</string>
     <string name="listen_no_readable_text">이 책에는 소리 내어 읽을 수 있는 텍스트가 없습니다.</string>
     <string name="listen_stopped_error">소리 내어 읽기가 중지되었습니다: %1$s</string>

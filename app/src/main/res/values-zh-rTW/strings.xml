@@ -272,6 +272,11 @@
     <string name="listen_sleep_30_minutes">30 分鐘</string>
     <string name="listen_sleep_1_hour">1 小時</string>
     <string name="listen_sleep_end_of_chapter">本章結束</string>
+    <string name="listen_speed">速度：%1$s</string>
+    <string name="listen_sleep_other">其他時長…</string>
+    <string name="listen_sleep_other_title">多久後停止朗讀</string>
+    <string name="listen_sleep_other_minutes">分鐘</string>
+    <string name="listen_sleep_other_start">開始定時</string>
     <string name="listen_no_voice">這支手機尚未安裝文字轉語音的語音。</string>
     <string name="listen_no_readable_text">這本書沒有可朗讀的文字。</string>
     <string name="listen_stopped_error">朗讀已停止：%1$s</string>

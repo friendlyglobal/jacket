@@ -175,6 +175,8 @@ data class Settings(
     val sort: LibrarySort = LibrarySort.RECENT,
     /** Read-aloud speed, 1 = the voice's normal pace. */
     val listenRate: Float = 1f,
+    /** The sleep timer last set to a length of the listener's own, in minutes: offered again beside the usual ones. 0 while there's been none. */
+    val sleepMinutes: Int = 0,
     val lineSpacing: LineSpacing = LineSpacing.BOOK,
     val margins: PageMargins = PageMargins.NORMAL,
     val alignment: TextAlignment = TextAlignment.BOOK,
@@ -275,6 +277,7 @@ internal object LibraryJson {
             put("layout", state.settings.layout.name)
             put("sort", state.settings.sort.name)
             put("listenRate", state.settings.listenRate.toDouble())
+            put("sleepMinutes", state.settings.sleepMinutes)
             put("lineSpacing", state.settings.lineSpacing.name)
             put("margins", state.settings.margins.name)
             put("alignment", state.settings.alignment.name)
@@ -339,6 +342,7 @@ internal object LibraryJson {
                 layout = enumOr(s.optString("layout"), PageLayout.PAGES),
                 sort = enumOr(s.optString("sort"), LibrarySort.RECENT),
                 listenRate = s.optDouble("listenRate", 1.0).toFloat().takeIf { it.isFinite() && it in 0.5f..3f } ?: 1f,
+                sleepMinutes = s.optInt("sleepMinutes", 0).takeIf { it in 1..999 } ?: 0,
                 lineSpacing = enumOr(s.optString("lineSpacing"), LineSpacing.BOOK),
                 margins = enumOr(s.optString("margins"), PageMargins.NORMAL),
                 alignment = enumOr(s.optString("alignment"), TextAlignment.BOOK),
