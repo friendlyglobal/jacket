@@ -29,6 +29,8 @@
     <string name="cover_listening">Listening</string>
     <!-- Title for a book whose file name has no usable text. -->
     <string name="book_untitled">Untitled</string>
+    <!-- The title of a book made from words shared from another app, when they come without a subject. Also its file's name. -->
+    <string name="shared_text_title">Shared text</string>
 
     <!-- Cover-screen widget styles -->
     <string name="cover_style_jacket">Jacket</string>

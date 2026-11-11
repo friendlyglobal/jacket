@@ -19,6 +19,7 @@
     <string name="cover_almost_done">Почти дочитано</string>
     <string name="cover_listening">Слушаю</string>
     <string name="book_untitled">Без названия</string>
+    <string name="shared_text_title">Полученный текст</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">Полка</string>

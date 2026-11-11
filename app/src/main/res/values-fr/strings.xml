@@ -19,6 +19,7 @@
     <string name="cover_almost_done">Presque terminé</string>
     <string name="cover_listening">Écoute en cours</string>
     <string name="book_untitled">Sans titre</string>
+    <string name="shared_text_title">Texte partagé</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">Étagère</string>

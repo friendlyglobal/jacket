@@ -20,6 +20,7 @@
     <string name="cover_almost_done">快读完了</string>
     <string name="cover_listening">在听</string>
     <string name="book_untitled">无标题</string>
+    <string name="shared_text_title">分享的文字</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">书架</string>

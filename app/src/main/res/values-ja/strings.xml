@@ -20,6 +20,7 @@
     <string name="cover_almost_done">あと少し</string>
     <string name="cover_listening">読み上げ中</string>
     <string name="book_untitled">無題</string>
+    <string name="shared_text_title">共有されたテキスト</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">本棚</string>

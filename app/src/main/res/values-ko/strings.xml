@@ -20,6 +20,7 @@
     <string name="cover_almost_done">거의 다 읽었어요</string>
     <string name="cover_listening">듣는 중</string>
     <string name="book_untitled">제목 없음</string>
+    <string name="shared_text_title">공유된 텍스트</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">책장</string>

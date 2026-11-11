@@ -20,6 +20,7 @@
     <string name="cover_almost_done">Az kaldı</string>
     <string name="cover_listening">Dinleniyor</string>
     <string name="book_untitled">Adsız</string>
+    <string name="shared_text_title">Paylaşılan metin</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">Raf</string>

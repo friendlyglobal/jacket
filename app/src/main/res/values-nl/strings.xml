@@ -19,6 +19,7 @@
     <string name="cover_almost_done">Bijna uit</string>
     <string name="cover_listening">Ik luister</string>
     <string name="book_untitled">Zonder titel</string>
+    <string name="shared_text_title">Gedeelde tekst</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">Plank</string>

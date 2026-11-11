@@ -20,6 +20,7 @@
     <string name="cover_almost_done">बस थोड़ी बाकी</string>
     <string name="cover_listening">सुनी जा रही</string>
     <string name="book_untitled">बिना शीर्षक</string>
+    <string name="shared_text_title">शेयर किया गया टेक्स्ट</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">शेल्फ़</string>
