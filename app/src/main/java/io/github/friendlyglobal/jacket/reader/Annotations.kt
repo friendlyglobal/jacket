@@ -16,6 +16,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -138,6 +139,8 @@ fun NotesSheet(
     onDelete: (Annotation) -> Unit,
     /** Sends every highlight and note to another app, as text. */
     onShare: (() -> Unit)? = null,
+    /** Saves them as a file instead. */
+    onSave: (() -> Unit)? = null,
 ) {
     val bookmarks = annotations.filter { it.kind == AnnotationKind.BOOKMARK }.sortedBy { it.progress }
     val highlights = annotations.filter { it.kind == AnnotationKind.HIGHLIGHT }.sortedBy { it.progress }
@@ -188,7 +191,7 @@ fun NotesSheet(
                 NotesTab.HIGHLIGHTS -> if (highlights.isEmpty()) {
                     EmptyNotes(JacketIcons.Highlight, stringResource(R.string.notes_no_highlights), stringResource(R.string.notes_no_highlights_hint))
                 } else {
-                    AnnotationList(highlights, haptics, onPick, onEdit, onDelete, onShare)
+                    AnnotationList(highlights, haptics, onPick, onEdit, onDelete, onShare, onSave)
                 }
             }
         }
@@ -228,16 +231,29 @@ private fun AnnotationList(
     onEdit: ((Annotation) -> Unit)?,
     onDelete: (Annotation) -> Unit,
     onShare: (() -> Unit)? = null,
+    onSave: (() -> Unit)? = null,
 ) {
     LazyColumn(Modifier.fillMaxWidth().navigationBarsPadding()) {
-        if (onShare != null) {
-            // All of them at once, to keep somewhere else.
+        if (onShare != null || onSave != null) {
+            // All of them at once, to keep somewhere else: as a file, or sent to another app.
             item(key = "share") {
-                Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.End) {
-                    FilledTonalButton(onClick = { haptics.tick(); onShare() }) {
-                        Icon(JacketIcons.Share, null, Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.selection_share))
+                FlowRow(
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                ) {
+                    if (onSave != null) {
+                        FilledTonalButton(onClick = { haptics.tick(); onSave() }) {
+                            Icon(JacketIcons.Download, null, Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.highlights_save))
+                        }
+                    }
+                    if (onShare != null) {
+                        FilledTonalButton(onClick = { haptics.tick(); onShare() }) {
+                            Icon(JacketIcons.Share, null, Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.selection_share))
+                        }
                     }
                 }
             }

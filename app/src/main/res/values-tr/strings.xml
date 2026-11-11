@@ -243,6 +243,11 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Not</string>
     <string name="notes_done">Bitti</string>
+    <string name="highlights_save">Dosya olarak kaydet</string>
+    <string name="highlights_saved">Vurgular kaydedildi.</string>
+    <string name="highlights_save_failed">Vurgular kaydedilemedi: %1$s</string>
+    <string name="settings_highlights_save">Vurguları ve notları kaydet</string>
+    <string name="settings_highlights_save_description">Tüm kitaplarınızdaki vurgular ve notlar, her not uygulamasının açabileceği tek bir dosyada.</string>
     <string name="footnote_title">Dipnot</string>
     <string name="footnote_title_marked">Dipnot %1$s</string>
     <string name="footnote_go_to">Dipnota git</string>

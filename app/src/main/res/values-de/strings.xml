@@ -242,6 +242,11 @@
     <string name="notes_highlight_quote">„%1$s“</string>
     <string name="notes_note">Notiz</string>
     <string name="notes_done">Fertig</string>
+    <string name="highlights_save">Als Datei speichern</string>
+    <string name="highlights_saved">Markierungen gespeichert.</string>
+    <string name="highlights_save_failed">Markierungen konnten nicht gespeichert werden: %1$s</string>
+    <string name="settings_highlights_save">Markierungen und Notizen speichern</string>
+    <string name="settings_highlights_save_description">Die Markierungen und Notizen aller Bücher in einer Datei, die jede Notiz-App öffnet.</string>
     <string name="footnote_title">Anmerkung</string>
     <string name="footnote_title_marked">Anmerkung %1$s</string>
     <string name="footnote_go_to">Zur Anmerkung</string>

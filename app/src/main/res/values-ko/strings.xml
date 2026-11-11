@@ -236,6 +236,11 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">메모</string>
     <string name="notes_done">완료</string>
+    <string name="highlights_save">파일로 저장</string>
+    <string name="highlights_saved">하이라이트를 저장했습니다.</string>
+    <string name="highlights_save_failed">하이라이트를 저장할 수 없습니다: %1$s</string>
+    <string name="settings_highlights_save">하이라이트와 메모 저장</string>
+    <string name="settings_highlights_save_description">모든 책의 하이라이트와 메모를 어떤 메모 앱에서도 열 수 있는 파일 하나에 담습니다.</string>
     <string name="footnote_title">주석</string>
     <string name="footnote_title_marked">주석 %1$s</string>
     <string name="footnote_go_to">주석으로 이동</string>

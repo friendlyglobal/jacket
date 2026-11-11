@@ -256,6 +256,11 @@
     <string name="notes_highlight_quote">«%1$s»</string>
     <string name="notes_note">Нотатка</string>
     <string name="notes_done">Готово</string>
+    <string name="highlights_save">Зберегти у файл</string>
+    <string name="highlights_saved">Виділення збережено.</string>
+    <string name="highlights_save_failed">Не вдалося зберегти виділення: %1$s</string>
+    <string name="settings_highlights_save">Зберегти виділення й нотатки</string>
+    <string name="settings_highlights_save_description">Виділення й нотатки з усіх книг в одному файлі, який відкриє будь-який застосунок для нотаток.</string>
     <string name="footnote_title">Примітка</string>
     <string name="footnote_title_marked">Примітка %1$s</string>
     <string name="footnote_go_to">Перейти до примітки</string>

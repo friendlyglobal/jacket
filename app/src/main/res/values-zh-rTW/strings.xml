@@ -236,6 +236,11 @@
     <string name="notes_highlight_quote">「%1$s」</string>
     <string name="notes_note">筆記</string>
     <string name="notes_done">完成</string>
+    <string name="highlights_save">儲存為檔案</string>
+    <string name="highlights_saved">畫線已儲存。</string>
+    <string name="highlights_save_failed">無法儲存畫線：%1$s</string>
+    <string name="settings_highlights_save">儲存畫線和筆記</string>
+    <string name="settings_highlights_save_description">把所有書籍的畫線和筆記存成一個檔案，任何筆記 App 都能開啟。</string>
     <string name="footnote_title">註釋</string>
     <string name="footnote_title_marked">註釋 %1$s</string>
     <string name="footnote_go_to">前往註釋</string>

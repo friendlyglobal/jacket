@@ -236,6 +236,11 @@
     <string name="notes_highlight_quote">「%1$s」</string>
     <string name="notes_note">メモ</string>
     <string name="notes_done">完了</string>
+    <string name="highlights_save">ファイルとして保存</string>
+    <string name="highlights_saved">ハイライトを保存しました。</string>
+    <string name="highlights_save_failed">ハイライトを保存できませんでした：%1$s</string>
+    <string name="settings_highlights_save">ハイライトとメモを保存</string>
+    <string name="settings_highlights_save_description">すべての本のハイライトとメモを、どのメモアプリでも開ける 1 つのファイルにまとめます。</string>
     <string name="footnote_title">注</string>
     <string name="footnote_title_marked">注 %1$s</string>
     <string name="footnote_go_to">注へ移動</string>

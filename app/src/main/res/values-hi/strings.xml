@@ -243,6 +243,11 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">नोट</string>
     <string name="notes_done">हो गया</string>
+    <string name="highlights_save">फ़ाइल के रूप में सेव करें</string>
+    <string name="highlights_saved">हाइलाइट सेव हो गए।</string>
+    <string name="highlights_save_failed">हाइलाइट सेव नहीं हो सके: %1$s</string>
+    <string name="settings_highlights_save">हाइलाइट और नोट सेव करें</string>
+    <string name="settings_highlights_save_description">सभी किताबों के हाइलाइट और नोट एक फ़ाइल में, जिसे कोई भी नोट ऐप खोल सकता है।</string>
     <string name="footnote_title">टिप्पणी</string>
     <string name="footnote_title_marked">टिप्पणी %1$s</string>
     <string name="footnote_go_to">टिप्पणी पर जाएँ</string>

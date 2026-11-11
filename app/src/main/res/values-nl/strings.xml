@@ -242,6 +242,11 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Notitie</string>
     <string name="notes_done">Klaar</string>
+    <string name="highlights_save">Opslaan als bestand</string>
+    <string name="highlights_saved">Markeringen opgeslagen.</string>
+    <string name="highlights_save_failed">Kan markeringen niet opslaan: %1$s</string>
+    <string name="settings_highlights_save">Markeringen en notities opslaan</string>
+    <string name="settings_highlights_save_description">De markeringen en notities van al je boeken in één bestand dat elke notitie-app kan openen.</string>
     <string name="footnote_title">Noot</string>
     <string name="footnote_title_marked">Noot %1$s</string>
     <string name="footnote_go_to">Naar de noot</string>

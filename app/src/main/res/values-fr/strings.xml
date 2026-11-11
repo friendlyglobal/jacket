@@ -249,6 +249,11 @@
     <string name="notes_highlight_quote">« %1$s »</string>
     <string name="notes_note">Note</string>
     <string name="notes_done">OK</string>
+    <string name="highlights_save">Enregistrer dans un fichier</string>
+    <string name="highlights_saved">Surlignages enregistrés.</string>
+    <string name="highlights_save_failed">Impossible d\'enregistrer les surlignages : %1$s</string>
+    <string name="settings_highlights_save">Enregistrer les surlignages et les notes</string>
+    <string name="settings_highlights_save_description">Les surlignages et les notes de tous vos livres dans un seul fichier, lisible par n\'importe quelle appli de notes.</string>
     <string name="footnote_title">Note</string>
     <string name="footnote_title_marked">Note %1$s</string>
     <string name="footnote_go_to">Aller à la note</string>

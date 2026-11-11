@@ -271,6 +271,11 @@
     <string name="notes_highlight_quote">«%1$s»</string>
     <string name="notes_note">ملاحظة</string>
     <string name="notes_done">تم</string>
+    <string name="highlights_save">حفظ كملف</string>
+    <string name="highlights_saved">تم حفظ التمييزات.</string>
+    <string name="highlights_save_failed">تعذّر حفظ التمييزات: %1$s</string>
+    <string name="settings_highlights_save">حفظ التمييزات والملاحظات</string>
+    <string name="settings_highlights_save_description">تمييزات وملاحظات كل الكتب في ملف واحد يفتحه أي تطبيق ملاحظات.</string>
     <string name="footnote_title">حاشية</string>
     <string name="footnote_title_marked">الحاشية %1$s</string>
     <string name="footnote_go_to">الانتقال إلى الحاشية</string>

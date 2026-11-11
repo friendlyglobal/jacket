@@ -249,6 +249,11 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Nota</string>
     <string name="notes_done">Hecho</string>
+    <string name="highlights_save">Guardar como archivo</string>
+    <string name="highlights_saved">Resaltados guardados.</string>
+    <string name="highlights_save_failed">No se pudieron guardar los resaltados: %1$s</string>
+    <string name="settings_highlights_save">Guardar resaltados y notas</string>
+    <string name="settings_highlights_save_description">Los resaltados y las notas de todos tus libros en un archivo que abre cualquier app de notas.</string>
     <string name="footnote_title">Nota</string>
     <string name="footnote_title_marked">Nota %1$s</string>
     <string name="footnote_go_to">Ir a la nota</string>

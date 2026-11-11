@@ -249,6 +249,11 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Nota</string>
     <string name="notes_done">Fine</string>
+    <string name="highlights_save">Salva come file</string>
+    <string name="highlights_saved">Evidenziazioni salvate.</string>
+    <string name="highlights_save_failed">Impossibile salvare le evidenziazioni: %1$s</string>
+    <string name="settings_highlights_save">Salva evidenziazioni e note</string>
+    <string name="settings_highlights_save_description">Le evidenziazioni e le note di tutti i libri in un unico file, che qualsiasi app di note può aprire.</string>
     <string name="footnote_title">Nota</string>
     <string name="footnote_title_marked">Nota %1$s</string>
     <string name="footnote_go_to">Vai alla nota</string>

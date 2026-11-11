@@ -256,6 +256,11 @@
     <string name="notes_highlight_quote">„%1$s”</string>
     <string name="notes_note">Notatka</string>
     <string name="notes_done">Gotowe</string>
+    <string name="highlights_save">Zapisz jako plik</string>
+    <string name="highlights_saved">Zapisano zaznaczenia.</string>
+    <string name="highlights_save_failed">Nie udało się zapisać zaznaczeń: %1$s</string>
+    <string name="settings_highlights_save">Zapisz zaznaczenia i notatki</string>
+    <string name="settings_highlights_save_description">Zaznaczenia i notatki ze wszystkich książek w jednym pliku, który otworzy każda aplikacja do notatek.</string>
     <string name="footnote_title">Przypis</string>
     <string name="footnote_title_marked">Przypis %1$s</string>
     <string name="footnote_go_to">Przejdź do przypisu</string>

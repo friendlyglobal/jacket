@@ -236,6 +236,11 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Catatan</string>
     <string name="notes_done">Selesai</string>
+    <string name="highlights_save">Simpan sebagai file</string>
+    <string name="highlights_saved">Sorotan disimpan.</string>
+    <string name="highlights_save_failed">Tidak dapat menyimpan sorotan: %1$s</string>
+    <string name="settings_highlights_save">Simpan sorotan dan catatan</string>
+    <string name="settings_highlights_save_description">Sorotan dan catatan dari semua buku dalam satu file yang bisa dibuka aplikasi catatan apa pun.</string>
     <string name="footnote_title">Catatan kaki</string>
     <string name="footnote_title_marked">Catatan kaki %1$s</string>
     <string name="footnote_go_to">Buka catatan kaki</string>

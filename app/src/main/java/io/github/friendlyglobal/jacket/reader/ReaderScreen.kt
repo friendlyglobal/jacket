@@ -3,6 +3,9 @@ package io.github.friendlyglobal.jacket.reader
 import android.os.SystemClock
 import android.view.View
 import android.view.ViewTreeObserver
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -111,6 +114,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -407,6 +411,21 @@ fun ReaderScreen(
     val setRate: (Float) -> Unit = { rate ->
         onSettings { it.copy(listenRate = rate) }
         nav.listenController?.setRate(rate)
+    }
+
+    // This book's highlights and notes as a file, wherever the system's file picker puts it.
+    val resources = LocalResources.current
+    val highlightsFile = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(HIGHLIGHTS_MIME)) { uri ->
+        if (uri != null) scope.launch {
+            val text = highlightsText(book, highlightsOf(annotations), asFile = true) { highlightPlace(resources, it) }
+            val saved = runCatching { saveText(context, uri, text) }
+            if (saved.isSuccess) haptics.confirm() else haptics.reject()
+            val message = saved.fold(
+                { resources.getString(R.string.highlights_saved) },
+                { resources.getString(R.string.highlights_save_failed, it.message.orEmpty()) },
+            )
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        }
     }
 
     val close: () -> Unit = {
@@ -839,6 +858,7 @@ fun ReaderScreen(
                 onEdit = { item -> leave { nav.editing = item.id } },
                 onDelete = { item -> library.deleteAnnotation(item.id) },
                 onShare = { shareHighlights(context, book, annotations) },
+                onSave = { highlightsFile.launch(highlightsFileName(book.title, resources.getString(R.string.notes_tab_highlights))) },
             )
         }
         Sheet.SEARCH -> ReaderSheet(onGone = { sheet = Sheet.NONE }, fullHeight = true) { leave ->
@@ -1014,20 +1034,11 @@ private fun TabletopDesk(nav: ReaderNav, book: Book, settings: Settings, onRate:
     }
 }
 
-/** Everything highlighted in [book], with its notes, as text for another app: a quote per paragraph. */
+/** Everything highlighted in [book], with its notes, as text for another app: a quote per paragraph (see [highlightsText]). */
 private fun shareHighlights(context: android.content.Context, book: Book, annotations: List<Annotation>) {
-    val highlights = annotations.filter { it.kind == AnnotationKind.HIGHLIGHT && it.text.isNotBlank() }.sortedBy { it.progress }
+    val highlights = highlightsOf(annotations)
     if (highlights.isEmpty()) return
-    val text = buildString {
-        append("# ").append(book.title)
-        if (book.author.isNotBlank()) append(" — ").append(book.author)
-        for (highlight in highlights) {
-            append("\n\n> ").append(highlight.text.trim())
-            val place = listOf(highlight.chapter, context.getString(R.string.percent, (highlight.progress * 100).toInt())).filter { it.isNotBlank() }
-            append("\n(").append(place.joinToString(context.getString(R.string.separator))).append(')')
-            if (highlight.note.isNotBlank()) append("\n").append(highlight.note.trim())
-        }
-    }
+    val text = highlightsText(book, highlights) { highlightPlace(context.resources, it) }
     runCatching {
         val send = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain")
             .putExtra(android.content.Intent.EXTRA_SUBJECT, book.title)
