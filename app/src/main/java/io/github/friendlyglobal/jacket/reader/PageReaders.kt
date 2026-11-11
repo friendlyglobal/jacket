@@ -86,6 +86,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.Settings
@@ -514,6 +517,19 @@ fun TextReader(
 
     // Read aloud: which paragraph is being spoken, and which characters of it so far.
     val listen = nav.listen
+    // The place saved is the paragraph at the top of the screen, which keeps up with the voice
+    // while it can be seen. With the screen off or another app in front it can't: the text stays
+    // where it was left while the voice reads on. Once the voice is past what that screen showed,
+    // the paragraph it has reached is saved as the place itself, and the text is taken to it when
+    // it is seen again (whether or not the voice is still speaking). -1 while the text is keeping up.
+    val owner = LocalLifecycleOwner.current
+    val savePlace by rememberUpdatedState(onProgress)
+    val unseenAt = remember { intArrayOf(-1) }
+    LifecycleEventEffect(Lifecycle.Event.ON_START) {
+        val reached = unseenAt[0]
+        unseenAt[0] = -1
+        if (reached in text.indices) scope.launch { listState.scrollToItem(reached) }
+    }
     var spokenParagraph by remember { mutableIntStateOf(-1) }
     var wordStart by remember { mutableIntStateOf(0) }
     var wordEnd by remember { mutableIntStateOf(0) }
@@ -689,6 +705,13 @@ fun TextReader(
                 spokenParagraph = utterance.paragraph
                 wordStart = utterance.offset
                 wordEnd = utterance.offset
+                // Out of sight, the text can't follow (unless the listener had left it to look elsewhere).
+                val unseen = !owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) && !listen.offPage
+                val leftBehind = unseen && listState.layoutInfo.visibleItemsInfo.none { it.index == utterance.paragraph }
+                if (leftBehind && utterance.paragraph != unseenAt[0] && utterance.paragraph in text.indices) {
+                    unseenAt[0] = utterance.paragraph
+                    savePlace(utterance.paragraph, 0f, utterance.paragraph / text.size.toFloat(), text.size)
+                }
                 // The first piece of a paragraph queues the next one: no gap between paragraphs.
                 if (utterance.first) controller.say(utterance.paragraph + 1, 0, true)
             }
