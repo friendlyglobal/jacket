@@ -1,21 +1,58 @@
 # Jacket
 
-**Real pages to turn, natural voices to listen to, and a cover your foldable can wear.**
+**Let your foldable wear your book.** Jacket is a free, open-source e-reader for Android. Pages
+turn like paper, natural voices read any book aloud on the phone itself, and on a foldable the
+outer screen shows the cover of the book you're reading, like album art.
 
-Jacket is an open-source Android reader for any phone. Pages turn like paper, natural voices
-read any book aloud on the phone itself, and nothing you read ever leaves it. On a foldable,
-while you read on the inner screen, the outer screen shows the book's cover edge to edge, like
-album art, so the people around you see what you're reading. On flip phones, the cover fills the
-cover-screen widget instead.
+<p align="center">
+  <img src="fastlane/metadata/android/en-US/images/tenInchScreenshots/1.png" width="100%" alt="A folded phone showing a book's cover, the sentence being read and the player, next to the same book open as a two-page spread">
+</p>
 
-It's built with Material 3 Expressive: springy motion, shape morphing, haptics, and colors taken
-from the cover of the book you're reading.
+**[Download for Android](https://github.com/friendlyglobal/jacket/releases/tag/test-12)** ·
+Google Play: coming soon ·
+[Website](https://usefriendly.app/products/jacket/) ·
+[Privacy policy](https://usefriendly.app/products/jacket/privacy/) ·
+[Support](https://usefriendly.app/products/jacket/support/)
 
-> **Status: 1.0 release candidate.** The outer-screen cover has been confirmed on a book-style
-> foldable. Test builds are on the [releases page](https://github.com/friendlyglobal/jacket/releases),
-> and reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome.
+<p>
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="24%" alt="Let your foldable wear your book: the folded phone shows the cover, the sentence being read and the player">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="24%" alt="Or just listen: the page with the sentence being read highlighted, and the player">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="24%" alt="Real pages, turned like paper: a page lifting under the finger">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="24%" alt="Your library: covers in a grid, with shelves, sorting and search">
+</p>
+<p>
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width="24%" alt="Your next book starts here: 114 free classics in 16 languages">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="24%" alt="Make it yours: text size, typeface, page colour and layout">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" width="24%" alt="Give any book a new cover: a photo, or a design in your colours">
+  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" width="24%" alt="Your books stay yours: no accounts, no ads, no analytics, no tracking">
+</p>
 
-## What it does
+- **The cover, on the outside.** While you read inside a foldable, the outer screen shows the
+  book's cover edge to edge and follows your reading. Fold it shut and the cover can stay on,
+  with a player while it reads aloud. On a Galaxy Z Flip it's a cover-screen widget.
+- **Real pages.** The page lifts under your finger and turns like paper. Unfold the phone for a
+  two-page spread.
+- **Or just listen.** Natural voices come with the app and speak 31 languages, with no internet.
+  Each word lights up as it's read, and the page turns with the voice.
+- **Your own books, and free ones.** EPUB, PDF, CBZ comics and plain text, plus 114 classics in
+  16 languages to download for free.
+- **Nothing leaves your phone.** Jacket has no internet permission: no accounts, no ads, no
+  analytics, no tracking.
+- **In 18 languages**, with a Brazilian voice for Brazilian readers.
+
+## Install
+
+- **From GitHub:** open the [latest test build](https://github.com/friendlyglobal/jacket/releases/tag/test-12),
+  download the `.apk` and open it. Your browser asks once to be allowed to install apps. It's
+  about 200 MB, because the voices are inside, and it runs on Android 8 and later.
+- **Google Play:** coming soon.
+
+> **Status: 1.0 release candidate.** Test builds are signed for testing only. When 1.0 comes out,
+> moving to it (or to the Play version) means saving a backup (Settings › Backup), uninstalling,
+> installing the new one and restoring. Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr
+> owners are very welcome in [issues](https://github.com/friendlyglobal/jacket/issues).
+
+## Everything it does
 
 ### Reading
 - **Your own files:** EPUB, PDF, CBZ comics and plain text. Use **Add books**, or *Open with* /
@@ -144,7 +181,8 @@ are a first pass; corrections from native speakers are welcome (`app/src/main/re
 
 ## Privacy
 
-See [PRIVACY.md](PRIVACY.md).
+Read the [privacy policy](https://usefriendly.app/products/jacket/privacy/) (its source is
+[PRIVACY.md](PRIVACY.md)).
 
 Everything stays on the device. Jacket has no internet permission, so neither the app nor the
 books you open in it can reach the network. The natural voices are part of the app and speak on
