@@ -565,9 +565,13 @@ fun TextReader(
             override val previousLabel = R.string.listen_previous_paragraph
             override val nextLabel = R.string.listen_next_paragraph
 
-            /** Where the voice stopped: the paragraph, and the word in it. */
+            /** Where the voice stopped: the paragraph, and the word in it; and when (elapsed-time millis). */
             var stoppedParagraph = -1
             var stoppedWord = 0
+            var stoppedAt = 0L
+
+            /** When it was last paused (elapsed-time millis); 0 while it speaks. */
+            var pausedAt = 0L
 
             fun say(index: Int, from: Int, queue: Boolean) {
                 if (index !in text.indices) {
@@ -594,6 +598,7 @@ fun TextReader(
                 }
                 // The voice is back: the mark of where it stopped has done its work.
                 hereJob[0]?.cancel()
+                pausedAt = 0L
                 listen.active = true
                 listen.playing = true
                 listen.preparing = speaker.slowToStart
@@ -612,7 +617,10 @@ fun TextReader(
                 listen.offPage = false
                 val shown = listState.layoutInfo.visibleItemsInfo.any { it.index == stoppedParagraph }
                 if (shown && stoppedParagraph in text.indices) {
-                    play(stoppedParagraph, sentenceAround(text[stoppedParagraph], stoppedWord).first)
+                    // After a long while, from a sentence or two before it: the listener finds the thread.
+                    val back = sentencesToRewind(SystemClock.elapsedRealtime() - stoppedAt)
+                    val (paragraph, from) = sentencesBack(text, stoppedParagraph, stoppedWord, back)
+                    play(paragraph, from)
                 } else {
                     play(listState.firstVisibleItemIndex, 0)
                 }
@@ -624,12 +632,21 @@ fun TextReader(
                 token[0]++
                 speaker.stop()
                 speaker.release()
+                if (listen.playing) pausedAt = SystemClock.elapsedRealtime()
                 listen.playing = false
                 listen.preparing = false
             }
 
             fun resume() {
-                if (spokenParagraph < 0) start() else play(spokenParagraph, wordStart)
+                if (spokenParagraph < 0) return start()
+                // From the word it stopped on; after a long pause, from a sentence or two before.
+                val back = if (pausedAt > 0L) sentencesToRewind(SystemClock.elapsedRealtime() - pausedAt) else 0
+                if (back == 0) {
+                    play(spokenParagraph, wordStart)
+                } else {
+                    val (paragraph, from) = sentencesBack(text, spokenParagraph, wordStart, back)
+                    play(paragraph, from)
+                }
             }
 
             override fun skip(delta: Int) {
@@ -657,9 +674,11 @@ fun TextReader(
                 listen.offPage = false
                 listen.phrase = ""
                 spokenParagraph = -1
+                pausedAt = 0L
                 if (paragraph in text.indices) {
                     stoppedParagraph = paragraph
                     stoppedWord = word
+                    stoppedAt = SystemClock.elapsedRealtime()
                 }
                 // The text stays where it is. Following the voice, the sentence it stopped on is in
                 // front of you, and is marked; gone to look elsewhere, you are offered the way back to it.

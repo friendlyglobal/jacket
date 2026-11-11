@@ -45,10 +45,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import io.github.friendlyglobal.jacket.R
+import io.github.friendlyglobal.jacket.data.AnnotationKind
 import io.github.friendlyglobal.jacket.data.CoverStyle
 import io.github.friendlyglobal.jacket.data.LibraryState
 import io.github.friendlyglobal.jacket.data.Settings
+import io.github.friendlyglobal.jacket.reader.HIGHLIGHTS_MIME
 import io.github.friendlyglobal.jacket.reader.ReadingControls
+import io.github.friendlyglobal.jacket.reader.allHighlightsMarkdown
+import io.github.friendlyglobal.jacket.reader.highlightPlace
+import io.github.friendlyglobal.jacket.reader.highlightsFileName
+import io.github.friendlyglobal.jacket.reader.saveText
 import io.github.friendlyglobal.jacket.ui.ConnectedChoice
 import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.hasHinge
@@ -113,6 +119,19 @@ fun SettingsScreen(
                 .fold(
                     { resources.getString(R.string.settings_backup_saved) },
                     { resources.getString(R.string.settings_backup_save_failed, it.message) },
+                )
+        }
+    }
+    // Every book's highlights and notes in one Markdown file, as the reader saves one book's.
+    val highlightsFile = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(HIGHLIGHTS_MIME)) { uri ->
+        if (uri != null) scope.launch {
+            val text = allHighlightsMarkdown(library.state.value) { highlightPlace(resources, it) }
+            message = runCatching { saveText(context, uri, text.orEmpty()) }
+                .onSuccess { haptics.confirm() }
+                .onFailure { haptics.reject() }
+                .fold(
+                    { resources.getString(R.string.highlights_saved) },
+                    { resources.getString(R.string.highlights_save_failed, it.message.orEmpty()) },
                 )
         }
     }
@@ -349,6 +368,27 @@ fun SettingsScreen(
                         leadingContent = { Icon(JacketIcons.Upload, null) },
                         supportingContent = { Text(stringResource(R.string.settings_backup_restore_description)) },
                     ) { Text(stringResource(R.string.settings_backup_restore)) }
+                }
+            }
+
+            item { GroupTitle(stringResource(R.string.notes_tab_highlights), column) }
+            item {
+                Group(column) {
+                    SegmentedListItem(
+                        onClick = {
+                            haptics.tick()
+                            // Nothing to put in a file yet: said here, rather than after a file has been named for it.
+                            if (state.annotations.none { it.kind == AnnotationKind.HIGHLIGHT && it.text.isNotBlank() }) {
+                                message = resources.getString(R.string.notes_no_highlights)
+                            } else {
+                                val word = resources.getString(R.string.notes_tab_highlights)
+                                highlightsFile.launch(highlightsFileName(resources.getString(R.string.app_name), word, java.time.LocalDate.now().toString()))
+                            }
+                        },
+                        shapes = ListItemDefaults.segmentedShapes(0, 1),
+                        leadingContent = { Icon(JacketIcons.Highlight, null) },
+                        supportingContent = { Text(stringResource(R.string.settings_highlights_save_description)) },
+                    ) { Text(stringResource(R.string.settings_highlights_save)) }
                 }
             }
 

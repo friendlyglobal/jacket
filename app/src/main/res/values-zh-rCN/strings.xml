@@ -236,6 +236,14 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">笔记</string>
     <string name="notes_done">完成</string>
+    <string name="highlights_save">保存为文件</string>
+    <string name="highlights_saved">划线已保存。</string>
+    <string name="highlights_save_failed">无法保存划线：%1$s</string>
+    <string name="settings_highlights_save">保存划线和笔记</string>
+    <string name="settings_highlights_save_description">把所有图书的划线和笔记存成一个文件，任何笔记应用都能打开。</string>
+    <string name="footnote_title">注释</string>
+    <string name="footnote_title_marked">注释 %1$s</string>
+    <string name="footnote_go_to">前往注释</string>
 
     <string name="search_placeholder">在本书中搜索</string>
     <string name="search_clear">清除</string>
@@ -269,6 +277,11 @@
     <string name="listen_sleep_30_minutes">30 分钟</string>
     <string name="listen_sleep_1_hour">1 小时</string>
     <string name="listen_sleep_end_of_chapter">本章结束</string>
+    <string name="listen_speed">速度：%1$s</string>
+    <string name="listen_sleep_other">其他时长…</string>
+    <string name="listen_sleep_other_title">多久后停止朗读</string>
+    <string name="listen_sleep_other_minutes">分钟</string>
+    <string name="listen_sleep_other_start">开始定时</string>
     <string name="listen_no_voice">此手机未安装文字转语音的语音。</string>
     <string name="listen_no_readable_text">这本书没有可朗读的文字。</string>
     <string name="listen_stopped_error">朗读已停止：%1$s</string>

@@ -225,7 +225,7 @@ internal class NaturalSpeech(
         session = next
         // What comes next is made while this plays: a sentence or two, no further, so little is
         // wasted (in battery, too) if the listener stops or jumps.
-        ahead = upcoming.take(if (hot()) 1 else AHEAD).flatMapIndexed { i, later ->
+        ahead = upcoming.take(if (hot()) 1 else sentencesAhead(speed)).flatMapIndexed { i, later ->
             SpeechPieces.of(later, quickStart = false).take(2).mapIndexed { p, range ->
                 synth.request(later.substring(range), language, speed, UPCOMING - i * 4 - p)
             }
@@ -337,7 +337,7 @@ internal class NaturalSpeech(
         made++
         // The first sentence after loading pays for the model warming up, and a very short one is
         // mostly overhead: neither says how the phone will fare.
-        if (made == 1 || clip.millis < 1_500) return
+        if (made == 1 || !tellsThePace(clip.millis, clip.speed)) return
         val sample = clip.synthMillis / clip.millis.toFloat()
         pace = if (measured == 0) sample else pace * 0.6f + sample * 0.4f
         measured++
@@ -356,24 +356,42 @@ internal class NaturalSpeech(
         }
     }
 
-    private companion object {
-        const val TAG = "JacketVoice"
-        const val CURRENT = 100
-        const val UPCOMING = 50
+    internal companion object {
+        private const val TAG = "JacketVoice"
+        private const val CURRENT = 100
+        private const val UPCOMING = 50
 
-        /** Sentences made ahead of the one being spoken. */
-        const val AHEAD = 2
+        /** Sentences made ahead of the one being spoken, at the voice's own pace. */
+        private const val AHEAD = 2
+
+        /** The most that are made ahead, however fast it reads. */
+        const val MOST_AHEAD = 6
+
+        /**
+         * How many sentences are made ahead of the one being spoken at [speed]. A voice reading
+         * three times as fast gets through them three times as fast: it is the seconds in hand
+         * that are kept the same, so a quick reader has no less of a margin than a slow one.
+         */
+        fun sentencesAhead(speed: Float): Int = kotlin.math.ceil(AHEAD * speed.coerceAtLeast(1f)).toInt().coerceAtMost(MOST_AHEAD)
+
+        /**
+         * Whether a clip of [millis] made at [speed] says how the phone is keeping up: one whose
+         * sentence would last a second and a half at the voice's own pace. Counted by the clip's
+         * own length, a brisk reader's sentences were all too short to count, and a phone that
+         * couldn't keep up at speed was never eased, nor its listener told.
+         */
+        fun tellsThePace(millis: Long, speed: Float): Boolean = millis * speed >= 1_500f
 
         /** Breaths, at normal pace: within a sentence cut in two, between sentences, between paragraphs. */
-        const val CLAUSE_MS = 110f
-        const val SENTENCE_MS = 300f
-        const val PARAGRAPH_MS = 600f
+        private const val CLAUSE_MS = 110f
+        private const val SENTENCE_MS = 300f
+        private const val PARAGRAPH_MS = 600f
 
         /** Stopped and started again within this: a change of pace, not a pause. */
-        const val SEAMLESS_MS = 400L
+        private const val SEAMLESS_MS = 400L
 
         /** After this long a pause, the sentence is read again from its start. */
-        const val FORGET_PAUSE_MS = 90_000L
-        const val GIVE_UP_AFTER = 3
+        private const val FORGET_PAUSE_MS = 90_000L
+        private const val GIVE_UP_AFTER = 3
     }
 }

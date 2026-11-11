@@ -242,6 +242,14 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Notitie</string>
     <string name="notes_done">Klaar</string>
+    <string name="highlights_save">Opslaan als bestand</string>
+    <string name="highlights_saved">Markeringen opgeslagen.</string>
+    <string name="highlights_save_failed">Kan markeringen niet opslaan: %1$s</string>
+    <string name="settings_highlights_save">Markeringen en notities opslaan</string>
+    <string name="settings_highlights_save_description">De markeringen en notities van al je boeken in één bestand dat elke notitie-app kan openen.</string>
+    <string name="footnote_title">Noot</string>
+    <string name="footnote_title_marked">Noot %1$s</string>
+    <string name="footnote_go_to">Naar de noot</string>
 
     <string name="search_placeholder">Doorzoek dit boek</string>
     <string name="search_clear">Wissen</string>
@@ -277,6 +285,11 @@
     <string name="listen_sleep_30_minutes">30 minuten</string>
     <string name="listen_sleep_1_hour">1 uur</string>
     <string name="listen_sleep_end_of_chapter">Einde hoofdstuk</string>
+    <string name="listen_speed">Snelheid: %1$s</string>
+    <string name="listen_sleep_other">Andere duur…</string>
+    <string name="listen_sleep_other_title">Stoppen met voorlezen na</string>
+    <string name="listen_sleep_other_minutes">Minuten</string>
+    <string name="listen_sleep_other_start">Timer starten</string>
     <string name="listen_no_voice">Op deze telefoon is geen stem voor tekst-naar-spraak geïnstalleerd.</string>
     <string name="listen_no_readable_text">Dit boek heeft geen tekst die kan worden voorgelezen.</string>
     <string name="listen_stopped_error">Voorlezen gestopt: %1$s</string>

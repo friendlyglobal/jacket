@@ -281,6 +281,16 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Note</string>
     <string name="notes_done">Done</string>
+    <!-- Highlights and notes saved as a Markdown file: the button in the reader beside Share, what is said afterwards (%1$s: the reason, from the system), and the row in Settings that saves every book's at once. -->
+    <string name="highlights_save">Save as a file</string>
+    <string name="highlights_saved">Highlights saved.</string>
+    <string name="highlights_save_failed">Couldn\'t save the highlights: %1$s</string>
+    <string name="settings_highlights_save">Save highlights and notes</string>
+    <string name="settings_highlights_save_description">Every book\'s highlights and notes, in one file any notes app can open.</string>
+    <!-- A note of the book's (a footnote), shown over the page when its number is tapped. %1$s is the note's own mark: "12", "*". -->
+    <string name="footnote_title">Note</string>
+    <string name="footnote_title_marked">Note %1$s</string>
+    <string name="footnote_go_to">Go to the note</string>
 
     <!-- Search in book -->
     <string name="search_placeholder">Search this book</string>
@@ -320,6 +330,12 @@
     <string name="listen_sleep_30_minutes">30 minutes</string>
     <string name="listen_sleep_1_hour">1 hour</string>
     <string name="listen_sleep_end_of_chapter">End of chapter</string>
+    <!-- The player's speed, for a screen reader (%1$s is e.g. "1.25×"); and a sleep timer of the listener's own length: the menu entry, then the dialog it opens (a field for a number of minutes). -->
+    <string name="listen_speed">Speed: %1$s</string>
+    <string name="listen_sleep_other">Other length…</string>
+    <string name="listen_sleep_other_title">Stop reading after</string>
+    <string name="listen_sleep_other_minutes">Minutes</string>
+    <string name="listen_sleep_other_start">Start timer</string>
     <string name="listen_no_voice">This phone has no text-to-speech voice installed.</string>
     <string name="listen_no_readable_text">This book has no text that can be read aloud.</string>
     <!-- %1$s: the reason, from the speech engine. -->

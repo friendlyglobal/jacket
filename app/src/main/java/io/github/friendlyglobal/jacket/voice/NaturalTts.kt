@@ -158,7 +158,8 @@ class NaturalTtsEngine internal constructor(
             ?: languageKey(_settings.value.language.code).takeIf { it in pack.languages }
             ?: "en".takeIf { it in pack.languages }
             ?: pack.languages.first()
-        speech.speak(requestId, text, spoken, lookahead.endsParagraph(text), lookahead.after(text))
+        // As many as the fastest reading makes ahead: the voice takes what its pace calls for.
+        speech.speak(requestId, text, spoken, lookahead.endsParagraph(text), lookahead.after(text, NaturalSpeech.MOST_AHEAD))
     }
 
     override fun stop() {

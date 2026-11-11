@@ -121,6 +121,7 @@ dependencies {
     implementation(libs.readium.streamer)
     implementation(libs.readium.navigator)
     implementation(libs.readium.tts)
+    implementation(libs.jsoup)
 
     implementation(libs.media3.session)
     // Natural voices: the engine. The voices themselves are fetched below.

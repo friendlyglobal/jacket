@@ -154,6 +154,7 @@ internal fun BoxScope.ClosedCover(
                                             nav.listen, controller, settings.listenRate, onRate, haptics,
                                             progress = nav.section.toFloat() / (nav.sectionCount - 1).coerceAtLeast(1),
                                             hasChapters = nav.toc.isNotEmpty(),
+                                            chapters = nav.chapterSteps(),
                                         )
                                         Spacer(Modifier.height(12.dp))
                                     } else if (controller != null) {

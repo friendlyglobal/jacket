@@ -236,6 +236,14 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Catatan</string>
     <string name="notes_done">Selesai</string>
+    <string name="highlights_save">Simpan sebagai file</string>
+    <string name="highlights_saved">Sorotan disimpan.</string>
+    <string name="highlights_save_failed">Tidak dapat menyimpan sorotan: %1$s</string>
+    <string name="settings_highlights_save">Simpan sorotan dan catatan</string>
+    <string name="settings_highlights_save_description">Sorotan dan catatan dari semua buku dalam satu file yang bisa dibuka aplikasi catatan apa pun.</string>
+    <string name="footnote_title">Catatan kaki</string>
+    <string name="footnote_title_marked">Catatan kaki %1$s</string>
+    <string name="footnote_go_to">Buka catatan kaki</string>
 
     <string name="search_placeholder">Telusuri buku ini</string>
     <string name="search_clear">Hapus</string>
@@ -269,6 +277,11 @@
     <string name="listen_sleep_30_minutes">30 menit</string>
     <string name="listen_sleep_1_hour">1 jam</string>
     <string name="listen_sleep_end_of_chapter">Akhir bab</string>
+    <string name="listen_speed">Kecepatan: %1$s</string>
+    <string name="listen_sleep_other">Durasi lain…</string>
+    <string name="listen_sleep_other_title">Berhenti membaca setelah</string>
+    <string name="listen_sleep_other_minutes">Menit</string>
+    <string name="listen_sleep_other_start">Mulai timer</string>
     <string name="listen_no_voice">Ponsel ini tidak memiliki suara teks ke ucapan yang terinstal.</string>
     <string name="listen_no_readable_text">Buku ini tidak memiliki teks yang dapat dibacakan.</string>
     <string name="listen_stopped_error">Pembacaan berhenti: %1$s</string>

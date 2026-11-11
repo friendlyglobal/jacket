@@ -102,6 +102,7 @@ import org.readium.navigator.media.tts.TtsNavigator
 import org.readium.navigator.media.tts.TtsNavigatorFactory
 import org.readium.navigator.media.tts.android.AndroidTtsPreferences
 import org.readium.r2.navigator.DecorableNavigator
+import org.readium.r2.navigator.HyperlinkNavigator
 import org.readium.r2.navigator.Decoration
 import org.readium.r2.navigator.OverflowableNavigator
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
@@ -111,6 +112,7 @@ import org.readium.r2.navigator.input.InputListener
 import org.readium.r2.navigator.input.TapEvent
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
+import org.readium.r2.shared.publication.html.cssSelector
 import org.readium.r2.shared.publication.services.content.Content
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.navigator.preferences.ReadingProgression
@@ -263,6 +265,8 @@ private fun EpubPages(
     val settingsNow by rememberUpdatedState(preferences)
 
     val navigators = remember(publication) { EpubNavigatorFactory(publication) }
+    // A tap on a note's number shows the note over the page, rather than jump to it (see NoteLinks).
+    val notes = remember(publication) { NoteLinks(publication, { navigator }, scope) }
 
     /** Readium's navigator for this book, opening at [from] (the first page if null). */
     fun navigatorAt(from: Locator?) = navigators.createFragmentFactory(
@@ -270,6 +274,10 @@ private fun EpubPages(
         initialPreferences = settingsNow,
         listener = object : EpubNavigatorFragment.Listener {
             override fun onExternalLinkActivated(url: AbsoluteUrl) = openLink(context, url)
+
+            // A link to a note is shown as one; any other link inside the book is followed as ever.
+            override fun shouldFollowInternalLink(link: Link, context: HyperlinkNavigator.LinkContext?): Boolean =
+                !notes.take(link, context)
         },
         paginationListener = object : EpubNavigatorFragment.PaginationListener {
             override fun onPageChanged(pageIndex: Int, totalPages: Int, locator: Locator) {
@@ -343,17 +351,7 @@ private fun EpubPages(
                     else -> false
                 }
             }
-
-            override fun onKey(event: org.readium.r2.navigator.input.KeyEvent): Boolean {
-                if (event.type != org.readium.r2.navigator.input.KeyEvent.Type.Down || event.modifiers.isNotEmpty()) return false
-                return when (event.key) {
-                    org.readium.r2.navigator.input.Key.ArrowLeft -> { turner.turnToward(toRight = false); true }
-                    org.readium.r2.navigator.input.Key.ArrowRight -> { turner.turnToward(toRight = true); true }
-                    org.readium.r2.navigator.input.Key.ArrowDown, org.readium.r2.navigator.input.Key.Space -> { turner.turn(1); true }
-                    org.readium.r2.navigator.input.Key.ArrowUp -> { turner.turn(-1); true }
-                    else -> false
-                }
-            }
+            // Keys never get as far as the page: the activity takes them first (see ReaderKeys).
         }
         val center = object : InputListener {
             override fun onTap(event: TapEvent): Boolean {
@@ -776,6 +774,13 @@ private fun EpubPages(
             ) { navigator?.go(place, animated = false) }
         }
     }
+    notes.onNote = { note, link ->
+        haptics.tick()
+        nav.note = ShownNote(note) {
+            markOrigin()
+            navigator?.go(link, animated = false)
+        }
+    }
     nav.goTo = { mark ->
         mark.locator?.let { runCatching { Locator.fromJSON(JSONObject(it)) }.getOrNull() }
             ?.let {
@@ -786,6 +791,13 @@ private fun EpubPages(
     nav.turnPage = { delta ->
         nav.movedAt = SystemClock.uptimeMillis()
         turner.turn(delta)
+    }
+    // For the keys and the mouse wheel: which way the book reads, and whether it has pages to turn.
+    LaunchedEffect(navigator) {
+        navigator?.overflow?.collect {
+            nav.rightToLeft = it.readingProgression == ReadingProgression.RTL
+            nav.paged = !it.scroll
+        }
     }
 
     // Search the whole book; results stream in as Readium works through it.
@@ -915,8 +927,13 @@ private fun EpubPages(
         }
         nav.step = { delta ->
             contents.step(nav.tocIndex, delta)?.let {
-                markOrigin()
-                navigator?.go(it, animated = false)
+                // While the book is read aloud the voice goes to the chapter too, and reads on from there.
+                if (nav.listen.active) {
+                    listen.readChapter(it)
+                } else {
+                    markOrigin()
+                    navigator?.go(it, animated = false)
+                }
             }
         }
         nav.canStep = { delta -> contents.step(nav.tocIndex, delta) != null }
@@ -1507,6 +1524,15 @@ private class ReadAloud(
      * again on the page that holds it, the voice carries on from it rather than from the top of the page.
      */
     var stoppedAt: Locator? = null
+
+    /** When it stopped there (elapsed-time millis); 0 for a sentence the book was left on some other day. */
+    private var stoppedAtTime = 0L
+
+    /** When the voice was last paused (elapsed-time millis); 0 while it speaks, and once the pause has been answered for. */
+    private var pausedAt = 0L
+
+    /** The voice is on its way to another chapter (see [readChapter]). */
+    private var chapterJob: Job? = null
     private var mediaSession: androidx.media3.session.MediaSession? = null
     /** Highlight tint and page color, for the read-along decorations. */
     var colors: Pair<Int, Int> = 0 to 0
@@ -1573,7 +1599,16 @@ private class ReadAloud(
             // still, past any that lie wholly before the page).
             val onPage = if (from == null) {
                 resume?.let { (block, offset) -> stepTo(tts, bare(block.text), offset) }
-                navigator()?.let { skipToPage(tts, it) } == true
+                // Taken up again after a long while, it starts a sentence or two before the one
+                // it stopped on, so the listener finds the thread; the page goes there with it
+                // if that sentence isn't on the one in view.
+                val back = if (resume != null) rewindAfterStop() else 0
+                if (back > 0) {
+                    stepBack(tts, back)
+                    false
+                } else {
+                    navigator()?.let { skipToPage(tts, it) } == true
+                }
             } else {
                 skipToSentence(tts, from).let { false }
             }
@@ -1589,9 +1624,19 @@ private class ReadAloud(
                 // A voice that hasn't been told to play yet reports "not playing": that is where it
                 // starts from, not a pause, and showing it would flick the player to paused and back.
                 var started = !playing
+                // Whether it has been asked to speak: told apart from speaking, which waits on the voice.
+                var asked = false
                 tts.playback.collect { playback ->
                     val now = playback.playWhenReady && playback.state is TtsNavigator.State.Ready
                     if (now) started = true
+                    // A pause is timed, wherever it came from (the player, a headphone button, the
+                    // sleep timer), and a long one is answered for when the voice is asked to read on:
+                    // here, if it wasn't the player's own button that asked (see toggle).
+                    if (!jumping) {
+                        if (asked && !playback.playWhenReady) pausedAt = SystemClock.elapsedRealtime()
+                        if (!asked && playback.playWhenReady) takeRewind().takeIf { it > 0 }?.let { back -> launch { stepBack(tts, back) } }
+                    }
+                    asked = playback.playWhenReady
                     // Held still while a tap moves the voice: it carries on reading where it lands.
                     if (started && !jumping) {
                         listen.playing = now
@@ -1726,6 +1771,94 @@ private class ReadAloud(
             return false
         } finally {
             withContext(NonCancellable) { runCatching { n.applyDecorations(emptyList(), PROBE) } }
+        }
+    }
+
+    /**
+     * How many sentences back the voice starts, when it is started again on the sentence it stopped
+     * on (see [sentencesToRewind]). None where it wasn't the voice that left the book there: a page
+     * someone was reading is where reading aloud starts.
+     */
+    private fun rewindAfterStop(): Int {
+        if (stoppedAt?.isSpoken != true) return 0
+        val away = if (stoppedAtTime > 0L) SystemClock.elapsedRealtime() - stoppedAtTime else UNKNOWN_PAUSE_MS
+        return sentencesToRewind(away)
+    }
+
+    /** How many sentences back the voice goes for the pause it is coming out of; asked once for each pause. */
+    private fun takeRewind(): Int {
+        val since = pausedAt
+        pausedAt = 0L
+        return if (since > 0L) sentencesToRewind(SystemClock.elapsedRealtime() - since) else 0
+    }
+
+    /** Steps the voice [sentences] sentences back, or as many as there are before it. */
+    private suspend fun stepBack(tts: TtsNavigator<*, *, *, *>, sentences: Int) {
+        repeat(sentences) { if (!skipSentence(tts, tts.location.value, forward = false)) return }
+    }
+
+    /**
+     * Takes the voice to the chapter at [link], and the page with it: the next or the previous
+     * chapter, from the player. The page goes first, as it would for a reader; the voice then reads
+     * on from the chapter's first words (those the contents point at, else the first on the page).
+     */
+    fun readChapter(link: Link) {
+        val n = navigator() ?: return
+        val tts = tts
+        if (tts == null) {
+            // Still starting up: the page goes, and the voice starts from it.
+            n.go(link, animated = false)
+            return
+        }
+        chapterJob?.cancel()
+        chapterJob = scope.launch {
+            val reading = tts.playback.value.playWhenReady
+            var arrived = false
+            // Held still on the way, as for a tap on a sentence: nothing of the old place is said or followed.
+            jumping = true
+            pausedAt = 0L
+            // Said before the page moves: "end of chapter" is waiting for this chapter's end, and
+            // the page arriving in another one is not it.
+            listen.skippingChapter = true
+            listen.chapterSkips++
+            try {
+                tts.pause()
+                followedAt = SystemClock.uptimeMillis()
+                val before = n.currentLocator.value
+                n.go(link, animated = false)
+                withTimeoutOrNull(ARRIVAL_MS) { n.currentLocator.first { it !== before } }
+                // A moment for the chapter's first page to be laid out where the page has landed.
+                delay(CHAPTER_SETTLE_MS)
+                followedAt = SystemClock.uptimeMillis()
+                val page = n.currentLocator.value
+                val blocks = files.of(page.href, page.mediaType).blocks
+                // The block the contents point at, where they name one...
+                val named = link.url().fragment?.takeIf { it.isNotEmpty() }?.let { id ->
+                    blocks.firstOrNull { block ->
+                        val name = block.locator.locations.cssSelector
+                        name == "#$id" || name?.startsWith("#$id ") == true || name?.startsWith("#$id>") == true
+                    }
+                }
+                // ...else the one the page now opens with.
+                val top = runCatching { n.evaluateJavascript(TOP_TEXT_SCRIPT)?.let(::JSONObject)?.optString("text") }.getOrNull().orEmpty()
+                val spot = if (named != null) null else tappedAt(blocks.map { it.text }, "", top)
+                val block = named ?: spot?.let { blocks[it.block] }
+                if (block != null) {
+                    arrived = true
+                    jumpTo(tts, block, spot?.offset ?: 0)
+                }
+            } finally {
+                listen.skippingChapter = false
+                if (!arrived) {
+                    jumping = false
+                    // A chapter that opens on a page without words: the voice stays where it was,
+                    // and the listener is offered the way back to it.
+                    if (this@ReadAloud.tts === tts && listen.active) {
+                        listen.offPage = true
+                        if (reading) tts.play()
+                    }
+                }
+            }
         }
     }
 
@@ -1933,6 +2066,8 @@ private class ReadAloud(
     private suspend fun jumpTo(tts: TtsNavigator<*, *, *, *>, block: Content.TextElement, offset: Int) {
         here?.cancel()
         jumping = true
+        // Sent somewhere by hand, it reads from exactly there, however long it had been paused.
+        pausedAt = 0L
         try {
             tts.pause()
             val text = bare(block.text)
@@ -1971,7 +2106,20 @@ private class ReadAloud(
 
     override fun toggle() {
         val tts = tts ?: return start() // start() ignores taps while it's still starting up
-        if (tts.playback.value.playWhenReady) tts.pause() else tts.play()
+        if (tts.playback.value.playWhenReady) {
+            tts.pause()
+            return
+        }
+        // After a long pause it goes back a sentence or two first, so the listener finds the thread.
+        val back = takeRewind()
+        if (back == 0) {
+            tts.play()
+        } else {
+            scope.launch {
+                stepBack(tts, back)
+                if (this@ReadAloud.tts === tts) tts.play()
+            }
+        }
     }
 
     override fun skip(delta: Int) {
@@ -2046,7 +2194,12 @@ private class ReadAloud(
         val placed = lastPlaced
         lastSpoken = null
         lastPlaced = null
-        if (spoken != null) stoppedAt = spoken
+        if (spoken != null) {
+            stoppedAt = spoken
+            stoppedAtTime = SystemClock.elapsedRealtime()
+        }
+        pausedAt = 0L
+        chapterJob?.cancel()
         session?.cancel()
         session = null
         mediaSession?.let(ListenService::detach)
@@ -2089,6 +2242,9 @@ private class ReadAloud(
         /** No start passes over more sentences than this, nor waits longer than this for the voice to move on by one. */
         const val MAX_START_SKIPS = 80
         const val START_SKIP_MS = 1_000L
+
+        /** How long the first page of a chapter gone to is given to settle before it is asked for its words. */
+        const val CHAPTER_SETTLE_MS = 250L
 
         /** The longest a tap waits for the voice to be at the tapped block. */
         const val JUMP_GO_MS = 3_000L

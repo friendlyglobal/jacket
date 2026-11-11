@@ -1,6 +1,9 @@
 package io.github.friendlyglobal.jacket.reader
 
 import android.content.res.Resources
+import android.icu.text.MeasureFormat
+import android.icu.util.Measure
+import android.icu.util.MeasureUnit
 import android.os.SystemClock
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
@@ -25,6 +28,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -33,6 +37,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
@@ -49,7 +56,9 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipAnchorPosition
@@ -71,6 +80,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
@@ -78,6 +89,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -87,14 +100,21 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.Morph
 import androidx.graphics.shapes.toPath
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.friendlyglobal.jacket.R
+import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.PageColors
@@ -110,6 +130,13 @@ enum class SleepTimer(val minutes: Int, @StringRes val label: Int) {
     MIN_30(30, R.string.listen_sleep_30_minutes),
     MIN_60(60, R.string.listen_sleep_1_hour),
     CHAPTER(0, R.string.listen_sleep_end_of_chapter),
+
+    /** A length of the listener's own choosing: how long is in [ListenState.sleepEndsAt]. */
+    OTHER(0, R.string.listen_sleep_other),
+    ;
+
+    /** Runs for a length of time (rather than to the end of the chapter, or not at all). */
+    val timed: Boolean get() = this != OFF && this != CHAPTER
 }
 
 /** Audiobook mode: whether it's on, and whether it's speaking right now. */
@@ -137,15 +164,21 @@ class ListenState {
      */
     var offPage by mutableStateOf(false)
 
-    /** The sleep timer's menu is open over the player. */
+    /** The sleep timer's menu is open over the player, or the choosing of its length. */
     var sleepMenu by mutableStateOf(false)
+    /** The speeds are open over the player. */
+    var rateMenu by mutableStateOf(false)
+    /** How many times the listener has skipped to another chapter from the player: "end of chapter" then waits for the new one's end. */
+    var chapterSkips by mutableIntStateOf(0)
+    /** The voice is on its way to a chapter skipped to. */
+    var skippingChapter by mutableStateOf(false)
     /** The player is saying that the phone can't keep up with the voice. */
     var warning by mutableStateOf(false)
     /** That has been said once for this voice: afterwards the dot on its icon stands for it. */
     var warned = false
 
     /** Something of the player's is open over it: the controls stay where they are meanwhile. */
-    val held: Boolean get() = sleepMenu || warning
+    val held: Boolean get() = sleepMenu || rateMenu || warning
 }
 
 /** The voice reading the book, for the player: its name, whether it's a natural one, and whether the phone is keeping up with it. */
@@ -179,7 +212,8 @@ interface ListenController {
     suspend fun spokenLine(): Rect? = null
 }
 
-val ListenRates = listOf(0.8f, 1f, 1.25f, 1.5f, 1.75f, 2f)
+/** Stepping by chapter from the player: the chapter being read, by name, and the way to the one before or after it. */
+class ChapterSteps(val title: String, val canStep: (Int) -> Boolean, val onStep: (Int) -> Unit)
 
 /**
  * How fast the voice gets through a book, learnt from the pages it turns as it reads: the time
@@ -272,14 +306,16 @@ fun ListenBar(
     voice: ListenVoice? = null,
     /** Shows "Back to the voice" above the player; off where the screen puts it above its other controls. */
     backToVoice: Boolean = true,
+    /** Skipping to the next or the previous chapter; null for a book without chapters. */
+    chapters: ChapterSteps? = null,
 ) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         // Moved away from where the voice is: the way back, unless the screen stacks it itself.
         if (backToVoice) BackToVoiceButton(listen, controller, haptics)
-        PlayerLine(listen, progress, voice, haptics, visible = true)
+        PlayerLine(listen, progress, voice, haptics, visible = true, chapters = chapters)
         ReaderToolbar(
             listening = true, reading = null, listen = listen, controller = controller,
-            rate = rate, onRate = onRate, haptics = haptics, hasChapters = hasChapters, voice = voice,
+            rate = rate, onRate = onRate, haptics = haptics, hasChapters = hasChapters, voice = voice, chapters = chapters,
         )
     }
 }
@@ -287,7 +323,8 @@ fun ListenBar(
 /**
  * What rides on top of the toolbar while it is the player: the wavy progress line, which goes flat
  * when paused and runs by itself while the voice gets ready; and, on a window too narrow for the
- * voice's icon on the bar, the voice by name. They arrive one after the other, from the toolbar
+ * voice's icon on the bar, the voice by name; and, on one too narrow for two more buttons, the
+ * steps to the next and the previous chapter. They arrive one after the other, from the toolbar
  * up, on the theme's springs, and fold away together when listening ends.
  *
  * Without the [line] where the player floats over the page: there it would run across the text,
@@ -301,6 +338,9 @@ internal fun PlayerLine(
     haptics: Haptics,
     visible: Boolean,
     line: Boolean = true,
+    chapters: ChapterSteps? = null,
+    /** Names the chapter between its two steps; off where the screen names it just above. */
+    chapterTitle: Boolean = true,
 ) {
     val playing = listen.playing
     val preparing = listen.preparing && playing
@@ -334,6 +374,18 @@ internal fun PlayerLine(
                     onClick = { haptics.tick(); voice.onClick() },
                     modifier = Modifier.widthIn(max = 300.dp).padding(bottom = 10.dp),
                 )
+            }
+        }
+        // The chapter steps sit on the bar beside the sentence skips where there's room for two
+        // more buttons. A narrower screen keeps them above the player, around the chapter's name.
+        if (chapters != null && !chaptersFitOnBar()) {
+            AnimatedVisibility(
+                visible = arrived >= 2,
+                enter = fadeIn(motion.defaultEffectsSpec()) + scaleIn(motion.fastSpatialSpec(), initialScale = 0.7f) +
+                    slideInVertically(motion.fastSpatialSpec()) { it / 2 } + expandVertically(motion.defaultSpatialSpec()),
+                exit = leave,
+            ) {
+                ChapterPill(chapters, chapterTitle, haptics, Modifier.widthIn(max = 320.dp).padding(bottom = 10.dp))
             }
         }
         AnimatedVisibility(
@@ -400,9 +452,10 @@ internal fun ReaderToolbar(
     hasChapters: Boolean,
     voice: ListenVoice?,
     modifier: Modifier = Modifier,
+    chapters: ChapterSteps? = null,
 ) {
     if (reading == null) {
-        if (controller != null) PlayerToolbar(listen, controller, rate, onRate, haptics, hasChapters, voice, modifier)
+        if (controller != null) PlayerToolbar(listen, controller, rate, onRate, haptics, hasChapters, voice, modifier, chapters)
         return
     }
     val player = listening && controller != null
@@ -430,7 +483,7 @@ internal fun ReaderToolbar(
         }
         if (controller != null) {
             AnimatedVisibility(playerBar, enter = hopIn, exit = dropOut, label = "player-bar") {
-                PlayerToolbar(listen, controller, rate, onRate, haptics, hasChapters, voice)
+                PlayerToolbar(listen, controller, rate, onRate, haptics, hasChapters, voice, chapters = chapters)
             }
         }
     }
@@ -477,7 +530,7 @@ private fun ReadingToolbar(reading: ReadingActions, haptics: Haptics) {
     }
 }
 
-/** The toolbar as the player: skips, speed, the voice, the sleep timer, stop, and play/pause. */
+/** The toolbar as the player: skips by sentence (and by chapter, where they fit), speed, the voice, the sleep timer, stop, and play/pause. */
 @Composable
 private fun PlayerToolbar(
     listen: ListenState,
@@ -488,28 +541,33 @@ private fun PlayerToolbar(
     hasChapters: Boolean,
     voice: ListenVoice?,
     modifier: Modifier = Modifier,
+    chapters: ChapterSteps? = null,
 ) {
+    // The chapter steps flank the sentence skips, as on any player, where the bar has room for them.
+    val chaptersOnBar = chapters?.takeIf { chaptersFitOnBar() }
     HorizontalFloatingToolbar(
         expanded = true,
         modifier = modifier,
         colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
         floatingActionButton = { PlayButton(listen, controller, haptics) },
     ) {
+        if (chaptersOnBar != null) {
+            IconButton(onClick = { haptics.tick(); chaptersOnBar.onStep(-1) }, enabled = chaptersOnBar.canStep(-1)) {
+                Icon(JacketIcons.ChapterBack, stringResource(R.string.reader_previous_chapter))
+            }
+        }
         IconButton(onClick = { haptics.tick(); controller.skip(-1) }) {
             Icon(JacketIcons.SkipBack, stringResource(controller.previousLabel))
         }
         IconButton(onClick = { haptics.tick(); controller.skip(1) }) {
             Icon(JacketIcons.SkipForward, stringResource(controller.nextLabel))
         }
-        TextButton(
-            onClick = {
-                haptics.tick()
-                onRate(ListenRates[(ListenRates.indexOf(rate).coerceAtLeast(0) + 1) % ListenRates.size])
-            },
-            colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current),
-        ) {
-            Text(rateLabel(LocalResources.current, rate), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+        if (chaptersOnBar != null) {
+            IconButton(onClick = { haptics.tick(); chaptersOnBar.onStep(1) }, enabled = chaptersOnBar.canStep(1)) {
+                Icon(JacketIcons.ChapterForward, stringResource(R.string.reader_next_chapter))
+            }
         }
+        RateButton(listen, rate, onRate, haptics)
         // The voice sits on the bar beside the moon where there's room for one more icon.
         if (voice != null && voiceFitsOnBar()) VoiceButton(voice, listen, haptics)
         SleepButton(listen, hasChapters, haptics)
@@ -571,6 +629,80 @@ private fun PlayButton(listen: ListenState, controller: ListenController, haptic
                 }
                 Face.PAUSE -> Icon(JacketIcons.Pause, stringResource(R.string.listen_pause))
                 Face.PLAY -> Icon(JacketIcons.Play, stringResource(R.string.listen_play))
+            }
+        }
+    }
+}
+
+/**
+ * The speed: the bar shows the one in use, and a tap lists the others, from half the voice's own
+ * pace to three times it.
+ */
+@Composable
+private fun RateButton(listen: ListenState, rate: Float, onRate: (Float) -> Unit, haptics: Haptics) {
+    var open by remember { mutableStateOf(false) }
+    // The bar stays under its own menu.
+    DisposableEffect(open) {
+        listen.rateMenu = open
+        onDispose { listen.rateMenu = false }
+    }
+    val resources = LocalResources.current
+    val label = rateLabel(resources, rate)
+    val described = stringResource(R.string.listen_speed, label)
+    Box {
+        TextButton(
+            onClick = { haptics.tick(); open = true },
+            colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current),
+            modifier = Modifier.semantics { contentDescription = described },
+        ) {
+            // Said by the button, as "Speed: 1.25×": not a second time as a bare number.
+            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, modifier = Modifier.clearAndSetSemantics {})
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            listenRateChoices(rate).forEach { choice ->
+                DropdownMenuItem(
+                    text = { Text(rateLabel(resources, choice)) },
+                    leadingIcon = if (choice == rate) { { Icon(JacketIcons.Check, null) } } else null,
+                    onClick = {
+                        haptics.tick()
+                        onRate(choice)
+                        open = false
+                    },
+                )
+            }
+        }
+    }
+}
+
+/** Windows at least this wide fit the chapter steps on the player's bar, beside the sentence skips. */
+private val CHAPTERS_ON_BAR_FROM = 500.dp
+
+/** The two chapter steps fit on the player's bar; on a narrower window they sit above the player. */
+@Composable
+internal fun chaptersFitOnBar(): Boolean =
+    with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() } >= CHAPTERS_ON_BAR_FROM
+
+/** The steps to the previous and the next chapter, around the name of the one being read: above the player on a narrow window. */
+@Composable
+private fun ChapterPill(chapters: ChapterSteps, named: Boolean, haptics: Haptics, modifier: Modifier = Modifier) {
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        modifier = modifier,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { haptics.tick(); chapters.onStep(-1) }, enabled = chapters.canStep(-1)) {
+                Icon(JacketIcons.ChapterBack, stringResource(R.string.reader_previous_chapter))
+            }
+            if (named && chapters.title.isNotBlank()) {
+                Text(
+                    chapters.title, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center, modifier = Modifier.weight(1f, fill = false).padding(horizontal = 4.dp),
+                )
+            }
+            IconButton(onClick = { haptics.tick(); chapters.onStep(1) }, enabled = chapters.canStep(1)) {
+                Icon(JacketIcons.ChapterForward, stringResource(R.string.reader_next_chapter))
             }
         }
     }
@@ -654,15 +786,15 @@ private fun VoiceButton(voice: ListenVoice, listen: ListenState, haptics: Haptic
 
 /** The minutes a timed sleep has left, counting down; null when none is running. */
 @Composable
-private fun sleepMinutesLeft(listen: ListenState): Int? {
+private fun rememberSleepMinutesLeft(listen: ListenState): Int? {
     var now by remember { mutableLongStateOf(SystemClock.uptimeMillis()) }
     LaunchedEffect(listen.sleep, listen.sleepEndsAt) {
-        while (listen.sleep.minutes > 0) {
+        while (listen.sleep.timed) {
             now = SystemClock.uptimeMillis()
             delay(15_000)
         }
     }
-    return if (listen.sleep.minutes > 0) ((listen.sleepEndsAt - now) / 60_000 + 1).coerceAtLeast(1).toInt() else null
+    return if (listen.sleep.timed) sleepMinutesLeft(listen.sleepEndsAt, now) else null
 }
 
 /** What the moon says of the timer: off, counting down, or waiting for the chapter to end. */
@@ -673,16 +805,29 @@ private fun sleepLabel(listen: ListenState, minutesLeft: Int?): String = when {
     else -> stringResource(R.string.listen_sleep_timer)
 }
 
-/** The moon: pick when reading stops by itself; shows the minutes left while counting down. */
+/**
+ * The moon: pick when reading stops by itself; shows the minutes left while counting down. The
+ * usual lengths are a tap away, and "Other length" takes any number of minutes; the last one
+ * chosen that way is kept beside the usual ones, for the listener who sets the same every night.
+ */
 @Composable
 private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Haptics) {
     var open by remember { mutableStateOf(false) }
-    // The bar stays under its own menu.
-    DisposableEffect(open) {
-        listen.sleepMenu = open
+    var choosing by remember { mutableStateOf(false) }
+    // The bar stays under its own menu, and under the choosing of a length.
+    DisposableEffect(open, choosing) {
+        listen.sleepMenu = open || choosing
         onDispose { listen.sleepMenu = false }
     }
-    val minutesLeft = sleepMinutesLeft(listen)
+    val library = LocalContext.current.library
+    val settings by library.state.collectAsStateWithLifecycle()
+    // The listener's own length, unless it is one of the usual ones anyway.
+    val own = settings.settings.sleepMinutes.takeIf { minutes -> minutes > 0 && SleepTimer.entries.none { it.minutes == minutes } }
+    val start = { timer: SleepTimer, minutes: Int ->
+        listen.sleep = timer
+        listen.sleepEndsAt = SystemClock.uptimeMillis() + minutes * 60_000L
+    }
+    val minutesLeft = rememberSleepMinutesLeft(listen)
     Box {
         val label = sleepLabel(listen, minutesLeft)
         IconButton(onClick = { haptics.tick(); open = true }) {
@@ -697,20 +842,102 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
             }
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            SleepTimer.entries.filter { it != SleepTimer.CHAPTER || hasChapters }.forEach { option ->
+            // A length chosen by hand that isn't the one kept (it was changed since) still shows as running.
+            val running = listen.sleep
+            val preset = @Composable { option: SleepTimer ->
                 DropdownMenuItem(
                     text = { Text(stringResource(option.label)) },
-                    leadingIcon = if (option == listen.sleep) { { Icon(JacketIcons.Check, null) } } else null,
+                    leadingIcon = if (option == running) { { Icon(JacketIcons.Check, null) } } else null,
                     onClick = {
                         haptics.tick()
-                        listen.sleep = option
-                        listen.sleepEndsAt = SystemClock.uptimeMillis() + option.minutes * 60_000L
+                        start(option, option.minutes)
                         open = false
                     },
                 )
             }
+            SleepTimer.entries.filter { it == SleepTimer.OFF || it.minutes > 0 }.forEach { preset(it) }
+            // The listener's own length, with the other lengths.
+            if (own != null) {
+                DropdownMenuItem(
+                    text = { Text(sleepLengthLabel(own)) },
+                    leadingIcon = if (running == SleepTimer.OTHER) { { Icon(JacketIcons.Check, null) } } else null,
+                    onClick = {
+                        haptics.tick()
+                        start(SleepTimer.OTHER, own)
+                        open = false
+                    },
+                )
+            }
+            if (hasChapters) preset(SleepTimer.CHAPTER)
+            DropdownMenuItem(
+                text = { Text(stringResource(SleepTimer.OTHER.label)) },
+                leadingIcon = if (running == SleepTimer.OTHER && own == null) { { Icon(JacketIcons.Check, null) } } else null,
+                onClick = {
+                    haptics.tick()
+                    open = false
+                    choosing = true
+                },
+            )
         }
     }
+    if (choosing) {
+        SleepLengthDialog(
+            initial = settings.settings.sleepMinutes,
+            onDismiss = { choosing = false },
+            onStart = { minutes ->
+                haptics.confirm()
+                library.updateSettings { it.copy(sleepMinutes = minutes) }
+                start(SleepTimer.OTHER, minutes)
+                choosing = false
+            },
+        )
+    }
+}
+
+/** A length of time in words, as the phone's language puts it: "45 minutes", "1 hour, 30 minutes". */
+@Composable
+private fun sleepLengthLabel(minutes: Int): String {
+    val locale = LocalConfiguration.current.locales[0] ?: java.util.Locale.ROOT
+    return remember(minutes, locale) {
+        val format = MeasureFormat.getInstance(locale, MeasureFormat.FormatWidth.WIDE)
+        val hours = Measure(minutes / 60, MeasureUnit.HOUR)
+        val rest = Measure(minutes % 60, MeasureUnit.MINUTE)
+        when {
+            minutes < 60 -> format.format(rest)
+            minutes % 60 == 0 -> format.format(hours)
+            else -> format.formatMeasures(hours, rest)
+        }
+    }
+}
+
+/** "Other length": a sleep timer of any number of minutes, typed in. It opens on the last one chosen. */
+@Composable
+private fun SleepLengthDialog(initial: Int, onDismiss: () -> Unit, onStart: (Int) -> Unit) {
+    val first = if (initial > 0) initial.toString() else ""
+    // Opened with what's there selected, so typing replaces it.
+    var typed by remember { mutableStateOf(TextFieldValue(first, TextRange(0, first.length))) }
+    val minutes = sleepMinutesOf(typed.text)
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(JacketIcons.Bedtime, null) },
+        title = { Text(stringResource(R.string.listen_sleep_other_title)) },
+        text = {
+            OutlinedTextField(
+                value = typed,
+                onValueChange = { typed = it.copy(text = sleepMinutesTyped(it.text)) },
+                label = { Text(stringResource(R.string.listen_sleep_other_minutes)) },
+                supportingText = if (minutes != null && minutes >= 60) { { Text(sleepLengthLabel(minutes)) } } else null,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { minutes?.let(onStart) }),
+                modifier = Modifier.fillMaxWidth().focusRequester(focus),
+            )
+        },
+        confirmButton = { TextButton(onClick = { minutes?.let(onStart) }, enabled = minutes != null) { Text(stringResource(R.string.listen_sleep_other_start)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+    )
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -781,7 +1008,7 @@ internal fun MiniPlayer(
             }
         }
         if (listen.sleep != SleepTimer.OFF) {
-            val minutesLeft = sleepMinutesLeft(listen)
+            val minutesLeft = rememberSleepMinutesLeft(listen)
             val label = sleepLabel(listen, minutesLeft)
             Row(
                 Modifier.padding(start = 8.dp).clearAndSetSemantics { contentDescription = label },

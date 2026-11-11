@@ -256,6 +256,14 @@
     <string name="notes_highlight_quote">„%1$s”</string>
     <string name="notes_note">Notatka</string>
     <string name="notes_done">Gotowe</string>
+    <string name="highlights_save">Zapisz jako plik</string>
+    <string name="highlights_saved">Zapisano zaznaczenia.</string>
+    <string name="highlights_save_failed">Nie udało się zapisać zaznaczeń: %1$s</string>
+    <string name="settings_highlights_save">Zapisz zaznaczenia i notatki</string>
+    <string name="settings_highlights_save_description">Zaznaczenia i notatki ze wszystkich książek w jednym pliku, który otworzy każda aplikacja do notatek.</string>
+    <string name="footnote_title">Przypis</string>
+    <string name="footnote_title_marked">Przypis %1$s</string>
+    <string name="footnote_go_to">Przejdź do przypisu</string>
 
     <string name="search_placeholder">Szukaj w tej książce</string>
     <string name="search_clear">Wyczyść</string>
@@ -295,6 +303,11 @@
     <string name="listen_sleep_30_minutes">30 minut</string>
     <string name="listen_sleep_1_hour">1 godzina</string>
     <string name="listen_sleep_end_of_chapter">Koniec rozdziału</string>
+    <string name="listen_speed">Tempo: %1$s</string>
+    <string name="listen_sleep_other">Inny czas…</string>
+    <string name="listen_sleep_other_title">Zakończ czytanie po</string>
+    <string name="listen_sleep_other_minutes">Minuty</string>
+    <string name="listen_sleep_other_start">Włącz</string>
     <string name="listen_no_voice">Na tym telefonie nie zainstalowano głosu syntezatora mowy.</string>
     <string name="listen_no_readable_text">Ta książka nie zawiera tekstu, który można przeczytać na głos.</string>
     <string name="listen_stopped_error">Czytanie na głos zatrzymane: %1$s</string>

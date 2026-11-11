@@ -243,6 +243,14 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">नोट</string>
     <string name="notes_done">हो गया</string>
+    <string name="highlights_save">फ़ाइल के रूप में सेव करें</string>
+    <string name="highlights_saved">हाइलाइट सेव हो गए।</string>
+    <string name="highlights_save_failed">हाइलाइट सेव नहीं हो सके: %1$s</string>
+    <string name="settings_highlights_save">हाइलाइट और नोट सेव करें</string>
+    <string name="settings_highlights_save_description">सभी किताबों के हाइलाइट और नोट एक फ़ाइल में, जिसे कोई भी नोट ऐप खोल सकता है।</string>
+    <string name="footnote_title">टिप्पणी</string>
+    <string name="footnote_title_marked">टिप्पणी %1$s</string>
+    <string name="footnote_go_to">टिप्पणी पर जाएँ</string>
 
     <string name="search_placeholder">इस किताब में खोजें</string>
     <string name="search_clear">मिटाएँ</string>
@@ -278,6 +286,11 @@
     <string name="listen_sleep_30_minutes">30 मिनट</string>
     <string name="listen_sleep_1_hour">1 घंटा</string>
     <string name="listen_sleep_end_of_chapter">अध्याय के अंत तक</string>
+    <string name="listen_speed">गति: %1$s</string>
+    <string name="listen_sleep_other">कोई और अवधि…</string>
+    <string name="listen_sleep_other_title">इतनी देर बाद पढ़ना बंद करें</string>
+    <string name="listen_sleep_other_minutes">मिनट</string>
+    <string name="listen_sleep_other_start">टाइमर शुरू करें</string>
     <string name="listen_no_voice">इस फ़ोन में कोई टेक्स्ट-टू-स्पीच आवाज़ इंस्टॉल नहीं है।</string>
     <string name="listen_no_readable_text">इस किताब में ऐसा कोई टेक्स्ट नहीं है जिसे पढ़कर सुनाया जा सके।</string>
     <string name="listen_stopped_error">पढ़कर सुनाना रुक गया: %1$s</string>

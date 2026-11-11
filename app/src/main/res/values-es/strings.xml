@@ -249,6 +249,14 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Nota</string>
     <string name="notes_done">Hecho</string>
+    <string name="highlights_save">Guardar como archivo</string>
+    <string name="highlights_saved">Resaltados guardados.</string>
+    <string name="highlights_save_failed">No se pudieron guardar los resaltados: %1$s</string>
+    <string name="settings_highlights_save">Guardar resaltados y notas</string>
+    <string name="settings_highlights_save_description">Los resaltados y las notas de todos tus libros en un archivo que abre cualquier app de notas.</string>
+    <string name="footnote_title">Nota</string>
+    <string name="footnote_title_marked">Nota %1$s</string>
+    <string name="footnote_go_to">Ir a la nota</string>
 
     <string name="search_placeholder">Buscar en este libro</string>
     <string name="search_clear">Borrar</string>
@@ -286,6 +294,11 @@
     <string name="listen_sleep_30_minutes">30 minutos</string>
     <string name="listen_sleep_1_hour">1 hora</string>
     <string name="listen_sleep_end_of_chapter">Al final del capítulo</string>
+    <string name="listen_speed">Velocidad: %1$s</string>
+    <string name="listen_sleep_other">Otra duración…</string>
+    <string name="listen_sleep_other_title">Dejar de leer tras</string>
+    <string name="listen_sleep_other_minutes">Minutos</string>
+    <string name="listen_sleep_other_start">Iniciar temporizador</string>
     <string name="listen_no_voice">Este teléfono no tiene instalada ninguna voz de texto a voz.</string>
     <string name="listen_no_readable_text">Este libro no tiene texto que se pueda leer en voz alta.</string>
     <string name="listen_stopped_error">Lectura en voz alta detenida: %1$s</string>

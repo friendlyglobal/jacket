@@ -1,6 +1,11 @@
 package io.github.friendlyglobal.jacket.reader
 
 import android.os.SystemClock
+import android.view.View
+import android.view.ViewTreeObserver
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -40,6 +45,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.viewinterop.AndroidView
 import io.github.friendlyglobal.jacket.data.PageColor
 import io.github.friendlyglobal.jacket.ui.rememberTabletopFold
 import kotlin.math.ceil
@@ -107,6 +114,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -195,8 +203,14 @@ class ReaderNav {
     var atEnd by mutableStateOf(false)
     /** A highlight tapped on the page, to edit. */
     var editing by mutableStateOf<String?>(null)
-    /** Turns a page for the volume keys: +1 forward, -1 back. */
+    /** A note of the book's whose number was tapped on the page, shown over it. */
+    internal var note by mutableStateOf<ShownNote?>(null)
+    /** Turns a page for the keys and the mouse wheel: +1 forward, -1 back. */
     var turnPage: (Int) -> Unit = { step(it) }
+    /** The book reads right to left: the arrow keys go the other way round. */
+    var rightToLeft by mutableStateOf(false)
+    /** The book is laid out in pages (not one long scroll): a mouse wheel turns them. */
+    var paged by mutableStateOf(false)
 
     /** The first page is on screen (or nothing more is coming): the opening cover may lift. */
     var contentReady by mutableStateOf(false)
@@ -228,13 +242,12 @@ class Origin(
     val back: () -> Unit,
 )
 
+/** Skipping by chapter from the player; null for a book without chapters (or a format that has none). */
+internal fun ReaderNav.chapterSteps(): ChapterSteps? =
+    if (toc.isEmpty()) null else ChapterSteps(title = chapter.ifBlank { title }, canStep = { canStep(it) }, onStep = { step(it) })
+
 /** The open book's [ReaderNav], for views that only need to report in (see [ReaderError]). */
 internal val LocalReaderNav = compositionLocalOf<ReaderNav?> { null }
-
-/** Where the activity sends volume-key presses while a book is open and volume paging is on. */
-object ReaderKeys {
-    var handler: ((Int) -> Unit)? = null
-}
 
 typealias ProgressSink = (position: Int, offset: Float, progress: Float, sections: Int) -> Unit
 
@@ -389,10 +402,30 @@ fun ReaderScreen(
     // cover its landing spot) by the time it appears.
     SystemBarsHidden(hidden = coverUp || (!barUp && sheet == Sheet.NONE && !closing))
     // A sheet is a window of its own: it would sit on top of the cover.
-    LaunchedEffect(coverUp) { if (coverUp) sheet = Sheet.NONE }
+    LaunchedEffect(coverUp) {
+        if (coverUp) {
+            sheet = Sheet.NONE
+            nav.note = null
+        }
+    }
     val setRate: (Float) -> Unit = { rate ->
         onSettings { it.copy(listenRate = rate) }
         nav.listenController?.setRate(rate)
+    }
+
+    // This book's highlights and notes as a file, wherever the system's file picker puts it.
+    val resources = LocalResources.current
+    val highlightsFile = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(HIGHLIGHTS_MIME)) { uri ->
+        if (uri != null) scope.launch {
+            val text = highlightsText(book, highlightsOf(annotations), asFile = true) { highlightPlace(resources, it) }
+            val saved = runCatching { saveText(context, uri, text) }
+            if (saved.isSuccess) haptics.confirm() else haptics.reject()
+            val message = saved.fold(
+                { resources.getString(R.string.highlights_saved) },
+                { resources.getString(R.string.highlights_save_failed, it.message.orEmpty()) },
+            )
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        }
     }
 
     val close: () -> Unit = {
@@ -418,21 +451,54 @@ fun ReaderScreen(
         }
     }
 
-    // Volume keys turn pages while reading (not while listening, when they're for volume).
-    // Nor under the cover of a folded phone, where pages would turn unseen.
-    DisposableEffect(settings.volumeKeys, nav.listen.active, coverUp) {
-        val handler: ((Int) -> Unit)? = if (settings.volumeKeys && !nav.listen.active && !coverUp) { delta -> nav.turnPage(delta) } else null
-        ReaderKeys.handler = handler
+    // A keyboard, a remote, a Bluetooth page-turner or a mouse wheel turns the pages, and Space
+    // pauses the voice (see ReaderKeys). The volume keys do too when that's switched on (not while
+    // listening, when they're for volume). Nothing turns under the cover of a folded phone, where
+    // pages would turn unseen.
+    val pageFocus = remember { PageFocus() }
+    val volumeKeys by rememberUpdatedState(settings.volumeKeys)
+    val pagesInSight by rememberUpdatedState(!coverUp && !closing)
+    DisposableEffect(nav) {
+        val target = ReaderKeys.Target(
+            context = {
+                KeyContext(
+                    rightToLeft = nav.rightToLeft,
+                    listening = nav.listen.active && nav.listenController != null,
+                    volumeKeys = volumeKeys,
+                    pages = pagesInSight,
+                    paged = nav.paged,
+                )
+            },
+            perform = { command ->
+                if (command == ReaderCommand.NEXT_PAGE || command == ReaderCommand.PREVIOUS_PAGE) pageFocus.take()
+                when (command) {
+                    ReaderCommand.NEXT_PAGE -> nav.turnPage(1)
+                    ReaderCommand.PREVIOUS_PAGE -> nav.turnPage(-1)
+                    ReaderCommand.PLAY_PAUSE -> nav.listenController?.let {
+                        haptics.toggle(!nav.listen.playing)
+                        it.toggle()
+                    }
+                    ReaderCommand.NOTHING -> {}
+                }
+            },
+        )
+        ReaderKeys.target = target
         // Only clear our own: opening the next book briefly overlaps the outgoing reader.
-        onDispose { if (ReaderKeys.handler === handler) ReaderKeys.handler = null }
+        onDispose { if (ReaderKeys.target === target) ReaderKeys.target = null }
     }
 
     // Sleep timer: pause after the chosen time, or when the chapter changes.
     val listen = nav.listen
-    LaunchedEffect(listen.sleep, listen.sleepEndsAt) {
+    LaunchedEffect(listen.sleep, listen.sleepEndsAt, listen.chapterSkips) {
         val timer = listen.sleep
         if (timer == SleepTimer.OFF) return@LaunchedEffect
         if (timer == SleepTimer.CHAPTER) {
+            // A chapter skipped to from the player is the one whose end is waited for: once the
+            // voice has arrived in it, and the page has said which chapter that is.
+            if (listen.chapterSkips > 0) {
+                snapshotFlow { listen.skippingChapter }.first { !it }
+                delay(CHAPTER_SKIP_SETTLE_MS)
+            }
             // Whichever comes first: the voice moving into the next chapter file, or the page
             // (following the voice) reaching the next chapter in the contents.
             val start = listen.spokenFile to nav.tocIndex
@@ -612,6 +678,7 @@ fun ReaderScreen(
 
     val motion = MaterialTheme.motionScheme
     Box(Modifier.fillMaxSize().background(page.background).onSizeChanged { windowHeight = it.height }) {
+        FocusHolder(pageFocus)
         // The page and its controls. They grow with the window the backdrop opens on them: a page
         // the size of the book under the cover, the whole screen once it is open.
         Box(
@@ -796,6 +863,7 @@ fun ReaderScreen(
                 onEdit = { item -> leave { nav.editing = item.id } },
                 onDelete = { item -> library.deleteAnnotation(item.id) },
                 onShare = { shareHighlights(context, book, annotations) },
+                onSave = { highlightsFile.launch(highlightsFileName(book.title, resources.getString(R.string.notes_tab_highlights))) },
             )
         }
         Sheet.SEARCH -> ReaderSheet(onGone = { sheet = Sheet.NONE }, fullHeight = true) { leave ->
@@ -837,6 +905,69 @@ fun ReaderScreen(
                 onDone = { leave {} },
             )
         }
+    }
+
+    // A note's number tapped on the page: the note over the page, and the way to it in its place.
+    nav.note?.let { shown ->
+        ReaderSheet(onGone = { nav.note = null }) { leave ->
+            NoteSheet(
+                shown.note, settings, haptics,
+                onGoTo = {
+                    chrome = false
+                    leave { shown.goTo() }
+                },
+            )
+        }
+    }
+}
+
+/** The unseen view that keeps the window's focus for the reader (see [FocusHolder]). */
+private class PageFocus {
+    var view: View? = null
+
+    fun take() {
+        view?.takeIf { it.isAttachedToWindow && !it.isFocused }?.requestFocus()
+    }
+}
+
+/**
+ * Keeps the keys coming while a book is open. The first key pressed after fingers were in use is
+ * the one that takes the window out of touch mode, and Android spends it on choosing something to
+ * focus, unless a plain view has the focus already. After a touch that is never so here: the focus
+ * is with the page (Readium's pager, which hands it on to its pages), with the screen as a whole,
+ * or with nothing. The first press of a page-turner after every touch would be lost.
+ *
+ * Android says it is leaving touch mode just before it looks at the focus. This is something for
+ * the window to have in focus at that moment: a view of one pixel, unseen, that TalkBack passes
+ * over, and that takes the focus then. The keys themselves are taken by the activity (see
+ * [ReaderKeys]). Fingers never lose the focus to it: a selection on the page keeps its handles.
+ *
+ * A page turned by a key takes the focus here too: left with the page, the page would ring its
+ * first link in the colour of the keyboard's focus on every page turned.
+ */
+@Composable
+private fun FocusHolder(focus: PageFocus) {
+    AndroidView(
+        factory = { context ->
+            View(context).apply {
+                isFocusable = true
+                isFocusableInTouchMode = true
+                defaultFocusHighlightEnabled = false
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                focus.view = this
+            }
+        },
+        modifier = Modifier.size(1.dp),
+    )
+    val window = LocalView.current
+    DisposableEffect(window) {
+        val leavingTouch = ViewTreeObserver.OnTouchModeChangeListener { inTouchMode ->
+            // Not from a field being typed in: its keys are its own.
+            if (!inTouchMode && window.rootView.findFocus()?.onCheckIsTextEditor() != true) focus.take()
+        }
+        val observer = window.viewTreeObserver
+        observer.addOnTouchModeChangeListener(leavingTouch)
+        onDispose { if (observer.isAlive) observer.removeOnTouchModeChangeListener(leavingTouch) }
     }
 }
 
@@ -895,6 +1026,7 @@ private fun TabletopDesk(nav: ReaderNav, book: Book, settings: Settings, onRate:
                     nav.listen, controller, settings.listenRate, onRate, haptics,
                     progress = nav.section.toFloat() / (nav.sectionCount - 1).coerceAtLeast(1),
                     hasChapters = nav.toc.isNotEmpty(),
+                    chapters = nav.chapterSteps(),
                 )
             } else {
                 Text(nav.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -918,20 +1050,11 @@ private fun TabletopDesk(nav: ReaderNav, book: Book, settings: Settings, onRate:
     }
 }
 
-/** Everything highlighted in [book], with its notes, as text for another app: a quote per paragraph. */
+/** Everything highlighted in [book], with its notes, as text for another app: a quote per paragraph (see [highlightsText]). */
 private fun shareHighlights(context: android.content.Context, book: Book, annotations: List<Annotation>) {
-    val highlights = annotations.filter { it.kind == AnnotationKind.HIGHLIGHT && it.text.isNotBlank() }.sortedBy { it.progress }
+    val highlights = highlightsOf(annotations)
     if (highlights.isEmpty()) return
-    val text = buildString {
-        append("# ").append(book.title)
-        if (book.author.isNotBlank()) append(" — ").append(book.author)
-        for (highlight in highlights) {
-            append("\n\n> ").append(highlight.text.trim())
-            val place = listOf(highlight.chapter, context.getString(R.string.percent, (highlight.progress * 100).toInt())).filter { it.isNotBlank() }
-            append("\n(").append(place.joinToString(context.getString(R.string.separator))).append(')')
-            if (highlight.note.isNotBlank()) append("\n").append(highlight.note.trim())
-        }
-    }
+    val text = highlightsText(book, highlights) { highlightPlace(context.resources, it) }
     runCatching {
         val send = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain")
             .putExtra(android.content.Intent.EXTRA_SUBJECT, book.title)
@@ -981,6 +1104,9 @@ private class ControlsWatch {
 /** TalkBack (or the like) is reading the screen out under a finger: nothing should leave by itself. */
 private fun android.content.Context.exploresByTouch(): Boolean =
     getSystemService(android.view.accessibility.AccessibilityManager::class.java)?.isTouchExplorationEnabled == true
+
+/** How long after the voice arrives in a chapter skipped to "end of chapter" starts watching for its end: the page takes a moment to say where it is. */
+private const val CHAPTER_SKIP_SETTLE_MS = 1_500L
 
 /** While listening, the controls tuck away this long after their last touch... */
 private const val LISTEN_CONTROLS_MS = 4_000L
@@ -1152,9 +1278,12 @@ private fun ReaderBottomBar(
             // On a window too narrow for the voice's icon on the bar, its name unfolds above the
             // toolbar as it becomes the player. (Not the player's wavy line: over the page it
             // would run across the text.)
+            val chapters = nav.chapterSteps()
             PlayerLine(
                 nav.listen, progress = nav.section.toFloat() / (nav.sectionCount - 1).coerceAtLeast(1),
                 voice = voice, haptics = haptics, visible = listening, line = false,
+                // The slider just above names the chapter already, when it is there.
+                chapters = chapters, chapterTitle = !(showScrubber && nav.sectionCount > 1),
             )
             val (previousLabel, nextLabel) = when {
                 nav.toc.isNotEmpty() -> R.string.reader_previous_chapter to R.string.reader_next_chapter
@@ -1180,6 +1309,7 @@ private fun ReaderBottomBar(
                 haptics = haptics,
                 hasChapters = nav.toc.isNotEmpty(),
                 voice = voice,
+                chapters = chapters,
             )
         }
     }

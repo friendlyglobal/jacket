@@ -249,6 +249,14 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Nota</string>
     <string name="notes_done">Concluído</string>
+    <string name="highlights_save">Salvar como arquivo</string>
+    <string name="highlights_saved">Destaques salvos.</string>
+    <string name="highlights_save_failed">Não foi possível salvar os destaques: %1$s</string>
+    <string name="settings_highlights_save">Salvar destaques e notas</string>
+    <string name="settings_highlights_save_description">Os destaques e as notas de todos os seus livros em um arquivo que qualquer app de notas abre.</string>
+    <string name="footnote_title">Nota</string>
+    <string name="footnote_title_marked">Nota %1$s</string>
+    <string name="footnote_go_to">Ir para a nota</string>
 
     <string name="search_placeholder">Pesquisar neste livro</string>
     <string name="search_clear">Limpar</string>
@@ -286,6 +294,11 @@
     <string name="listen_sleep_30_minutes">30 minutos</string>
     <string name="listen_sleep_1_hour">1 hora</string>
     <string name="listen_sleep_end_of_chapter">Fim do capítulo</string>
+    <string name="listen_speed">Velocidade: %1$s</string>
+    <string name="listen_sleep_other">Outra duração…</string>
+    <string name="listen_sleep_other_title">Parar a leitura depois de</string>
+    <string name="listen_sleep_other_minutes">Minutos</string>
+    <string name="listen_sleep_other_start">Iniciar timer</string>
     <string name="listen_no_voice">Este celular não tem nenhuma voz de conversão de texto em voz instalada.</string>
     <string name="listen_no_readable_text">Este livro não tem texto que possa ser lido em voz alta.</string>
     <string name="listen_stopped_error">A leitura em voz alta parou: %1$s</string>
