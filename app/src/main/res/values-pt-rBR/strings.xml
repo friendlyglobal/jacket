@@ -249,6 +249,9 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Nota</string>
     <string name="notes_done">Concluído</string>
+    <string name="footnote_title">Nota</string>
+    <string name="footnote_title_marked">Nota %1$s</string>
+    <string name="footnote_go_to">Ir para a nota</string>
 
     <string name="search_placeholder">Pesquisar neste livro</string>
     <string name="search_clear">Limpar</string>

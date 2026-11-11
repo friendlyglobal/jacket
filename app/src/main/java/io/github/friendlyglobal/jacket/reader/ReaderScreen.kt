@@ -195,6 +195,8 @@ class ReaderNav {
     var atEnd by mutableStateOf(false)
     /** A highlight tapped on the page, to edit. */
     var editing by mutableStateOf<String?>(null)
+    /** A note of the book's whose number was tapped on the page, shown over it. */
+    internal var note by mutableStateOf<ShownNote?>(null)
     /** Turns a page for the keys and the mouse wheel: +1 forward, -1 back. */
     var turnPage: (Int) -> Unit = { step(it) }
     /** The book reads right to left: the arrow keys go the other way round. */
@@ -388,7 +390,12 @@ fun ReaderScreen(
     // cover its landing spot) by the time it appears.
     SystemBarsHidden(hidden = coverUp || (!barUp && sheet == Sheet.NONE && !closing))
     // A sheet is a window of its own: it would sit on top of the cover.
-    LaunchedEffect(coverUp) { if (coverUp) sheet = Sheet.NONE }
+    LaunchedEffect(coverUp) {
+        if (coverUp) {
+            sheet = Sheet.NONE
+            nav.note = null
+        }
+    }
     val setRate: (Float) -> Unit = { rate ->
         onSettings { it.copy(listenRate = rate) }
         nav.listenController?.setRate(rate)
@@ -859,6 +866,19 @@ fun ReaderScreen(
                 // Gone first, then deleted: the sheet shows the highlight until it has left.
                 onDelete = { leave { library.deleteAnnotation(editing.id) } },
                 onDone = { leave {} },
+            )
+        }
+    }
+
+    // A note's number tapped on the page: the note over the page, and the way to it in its place.
+    nav.note?.let { shown ->
+        ReaderSheet(onGone = { nav.note = null }) { leave ->
+            NoteSheet(
+                shown.note, settings, haptics,
+                onGoTo = {
+                    chrome = false
+                    leave { shown.goTo() }
+                },
             )
         }
     }

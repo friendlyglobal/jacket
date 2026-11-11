@@ -256,6 +256,9 @@
     <string name="notes_highlight_quote">«%1$s»</string>
     <string name="notes_note">Заметка</string>
     <string name="notes_done">Готово</string>
+    <string name="footnote_title">Примечание</string>
+    <string name="footnote_title_marked">Примечание %1$s</string>
+    <string name="footnote_go_to">Перейти к примечанию</string>
 
     <string name="search_placeholder">Поиск в этой книге</string>
     <string name="search_clear">Очистить</string>

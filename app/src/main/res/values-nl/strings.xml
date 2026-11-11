@@ -242,6 +242,9 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Notitie</string>
     <string name="notes_done">Klaar</string>
+    <string name="footnote_title">Noot</string>
+    <string name="footnote_title_marked">Noot %1$s</string>
+    <string name="footnote_go_to">Naar de noot</string>
 
     <string name="search_placeholder">Doorzoek dit boek</string>
     <string name="search_clear">Wissen</string>

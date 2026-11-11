@@ -236,6 +236,9 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">笔记</string>
     <string name="notes_done">完成</string>
+    <string name="footnote_title">注释</string>
+    <string name="footnote_title_marked">注释 %1$s</string>
+    <string name="footnote_go_to">前往注释</string>
 
     <string name="search_placeholder">在本书中搜索</string>
     <string name="search_clear">清除</string>

@@ -256,6 +256,9 @@
     <string name="notes_highlight_quote">„%1$s”</string>
     <string name="notes_note">Notatka</string>
     <string name="notes_done">Gotowe</string>
+    <string name="footnote_title">Przypis</string>
+    <string name="footnote_title_marked">Przypis %1$s</string>
+    <string name="footnote_go_to">Przejdź do przypisu</string>
 
     <string name="search_placeholder">Szukaj w tej książce</string>
     <string name="search_clear">Wyczyść</string>

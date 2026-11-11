@@ -236,6 +236,9 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">메모</string>
     <string name="notes_done">완료</string>
+    <string name="footnote_title">주석</string>
+    <string name="footnote_title_marked">주석 %1$s</string>
+    <string name="footnote_go_to">주석으로 이동</string>
 
     <string name="search_placeholder">이 책에서 검색</string>
     <string name="search_clear">지우기</string>

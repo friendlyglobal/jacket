@@ -281,6 +281,10 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Note</string>
     <string name="notes_done">Done</string>
+    <!-- A note of the book's (a footnote), shown over the page when its number is tapped. %1$s is the note's own mark: "12", "*". -->
+    <string name="footnote_title">Note</string>
+    <string name="footnote_title_marked">Note %1$s</string>
+    <string name="footnote_go_to">Go to the note</string>
 
     <!-- Search in book -->
     <string name="search_placeholder">Search this book</string>

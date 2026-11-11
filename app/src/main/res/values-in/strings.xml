@@ -236,6 +236,9 @@
     <string name="notes_highlight_quote">“%1$s”</string>
     <string name="notes_note">Catatan</string>
     <string name="notes_done">Selesai</string>
+    <string name="footnote_title">Catatan kaki</string>
+    <string name="footnote_title_marked">Catatan kaki %1$s</string>
+    <string name="footnote_go_to">Buka catatan kaki</string>
 
     <string name="search_placeholder">Telusuri buku ini</string>
     <string name="search_clear">Hapus</string>

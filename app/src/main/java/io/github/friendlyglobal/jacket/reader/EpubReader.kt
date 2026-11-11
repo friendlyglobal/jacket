@@ -102,6 +102,7 @@ import org.readium.navigator.media.tts.TtsNavigator
 import org.readium.navigator.media.tts.TtsNavigatorFactory
 import org.readium.navigator.media.tts.android.AndroidTtsPreferences
 import org.readium.r2.navigator.DecorableNavigator
+import org.readium.r2.navigator.HyperlinkNavigator
 import org.readium.r2.navigator.Decoration
 import org.readium.r2.navigator.OverflowableNavigator
 import org.readium.r2.navigator.epub.EpubNavigatorFactory
@@ -263,6 +264,8 @@ private fun EpubPages(
     val settingsNow by rememberUpdatedState(preferences)
 
     val navigators = remember(publication) { EpubNavigatorFactory(publication) }
+    // A tap on a note's number shows the note over the page, rather than jump to it (see NoteLinks).
+    val notes = remember(publication) { NoteLinks(publication, { navigator }, scope) }
 
     /** Readium's navigator for this book, opening at [from] (the first page if null). */
     fun navigatorAt(from: Locator?) = navigators.createFragmentFactory(
@@ -270,6 +273,10 @@ private fun EpubPages(
         initialPreferences = settingsNow,
         listener = object : EpubNavigatorFragment.Listener {
             override fun onExternalLinkActivated(url: AbsoluteUrl) = openLink(context, url)
+
+            // A link to a note is shown as one; any other link inside the book is followed as ever.
+            override fun shouldFollowInternalLink(link: Link, context: HyperlinkNavigator.LinkContext?): Boolean =
+                !notes.take(link, context)
         },
         paginationListener = object : EpubNavigatorFragment.PaginationListener {
             override fun onPageChanged(pageIndex: Int, totalPages: Int, locator: Locator) {
@@ -764,6 +771,13 @@ private fun EpubPages(
                 percent = nav.section * 100 / (nav.sectionCount - 1).coerceAtLeast(1),
                 chapter = nav.title.trim(),
             ) { navigator?.go(place, animated = false) }
+        }
+    }
+    notes.onNote = { note, link ->
+        haptics.tick()
+        nav.note = ShownNote(note) {
+            markOrigin()
+            navigator?.go(link, animated = false)
         }
     }
     nav.goTo = { mark ->

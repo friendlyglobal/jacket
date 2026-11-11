@@ -271,6 +271,9 @@
     <string name="notes_highlight_quote">«%1$s»</string>
     <string name="notes_note">ملاحظة</string>
     <string name="notes_done">تم</string>
+    <string name="footnote_title">حاشية</string>
+    <string name="footnote_title_marked">الحاشية %1$s</string>
+    <string name="footnote_go_to">الانتقال إلى الحاشية</string>
 
     <string name="search_placeholder">ابحث في هذا الكتاب</string>
     <string name="search_clear">محو</string>
