@@ -170,6 +170,8 @@ class ListenState {
     var rateMenu by mutableStateOf(false)
     /** How many times the listener has skipped to another chapter from the player: "end of chapter" then waits for the new one's end. */
     var chapterSkips by mutableIntStateOf(0)
+    /** The voice is on its way to a chapter skipped to. */
+    var skippingChapter by mutableStateOf(false)
     /** The player is saying that the phone can't keep up with the voice. */
     var warning by mutableStateOf(false)
     /** That has been said once for this voice: afterwards the dot on its icon stands for it. */
@@ -653,7 +655,8 @@ private fun RateButton(listen: ListenState, rate: Float, onRate: (Float) -> Unit
             colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current),
             modifier = Modifier.semantics { contentDescription = described },
         ) {
-            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+            // Said by the button, as "Speed: 1.25×": not a second time as a bare number.
+            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, modifier = Modifier.clearAndSetSemantics {})
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             listenRateChoices(rate).forEach { choice ->
@@ -841,7 +844,7 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             // A length chosen by hand that isn't the one kept (it was changed since) still shows as running.
             val running = listen.sleep
-            SleepTimer.entries.filter { it != SleepTimer.OTHER && (it != SleepTimer.CHAPTER || hasChapters) }.forEach { option ->
+            val preset = @Composable { option: SleepTimer ->
                 DropdownMenuItem(
                     text = { Text(stringResource(option.label)) },
                     leadingIcon = if (option == running) { { Icon(JacketIcons.Check, null) } } else null,
@@ -852,6 +855,8 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
                     },
                 )
             }
+            SleepTimer.entries.filter { it == SleepTimer.OFF || it.minutes > 0 }.forEach { preset(it) }
+            // The listener's own length, with the other lengths.
             if (own != null) {
                 DropdownMenuItem(
                     text = { Text(sleepLengthLabel(own)) },
@@ -863,6 +868,7 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
                     },
                 )
             }
+            if (hasChapters) preset(SleepTimer.CHAPTER)
             DropdownMenuItem(
                 text = { Text(stringResource(SleepTimer.OTHER.label)) },
                 leadingIcon = if (running == SleepTimer.OTHER && own == null) { { Icon(JacketIcons.Check, null) } } else null,
@@ -891,7 +897,7 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
 /** A length of time in words, as the phone's language puts it: "45 minutes", "1 hour, 30 minutes". */
 @Composable
 private fun sleepLengthLabel(minutes: Int): String {
-    val locale = LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
+    val locale = LocalConfiguration.current.locales[0] ?: java.util.Locale.ROOT
     return remember(minutes, locale) {
         val format = MeasureFormat.getInstance(locale, MeasureFormat.FormatWidth.WIDE)
         val hours = Measure(minutes / 60, MeasureUnit.HOUR)

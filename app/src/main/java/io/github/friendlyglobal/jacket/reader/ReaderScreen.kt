@@ -494,8 +494,11 @@ fun ReaderScreen(
         if (timer == SleepTimer.OFF) return@LaunchedEffect
         if (timer == SleepTimer.CHAPTER) {
             // A chapter skipped to from the player is the one whose end is waited for: once the
-            // page and the voice have settled in it.
-            if (listen.chapterSkips > 0) delay(CHAPTER_SKIP_SETTLE_MS)
+            // voice has arrived in it, and the page has said which chapter that is.
+            if (listen.chapterSkips > 0) {
+                snapshotFlow { listen.skippingChapter }.first { !it }
+                delay(CHAPTER_SKIP_SETTLE_MS)
+            }
             // Whichever comes first: the voice moving into the next chapter file, or the page
             // (following the voice) reaching the next chapter in the contents.
             val start = listen.spokenFile to nav.tocIndex
@@ -1102,8 +1105,8 @@ private class ControlsWatch {
 private fun android.content.Context.exploresByTouch(): Boolean =
     getSystemService(android.view.accessibility.AccessibilityManager::class.java)?.isTouchExplorationEnabled == true
 
-/** How long the page and the voice are given to arrive in a chapter skipped to, before "end of chapter" watches for its end. */
-private const val CHAPTER_SKIP_SETTLE_MS = 2_500L
+/** How long after the voice arrives in a chapter skipped to "end of chapter" starts watching for its end: the page takes a moment to say where it is. */
+private const val CHAPTER_SKIP_SETTLE_MS = 1_500L
 
 /** While listening, the controls tuck away this long after their last touch... */
 private const val LISTEN_CONTROLS_MS = 4_000L

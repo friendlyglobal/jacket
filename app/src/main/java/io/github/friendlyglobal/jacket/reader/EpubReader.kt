@@ -1817,6 +1817,10 @@ private class ReadAloud(
             // Held still on the way, as for a tap on a sentence: nothing of the old place is said or followed.
             jumping = true
             pausedAt = 0L
+            // Said before the page moves: "end of chapter" is waiting for this chapter's end, and
+            // the page arriving in another one is not it.
+            listen.skippingChapter = true
+            listen.chapterSkips++
             try {
                 tts.pause()
                 followedAt = SystemClock.uptimeMillis()
@@ -1842,9 +1846,9 @@ private class ReadAloud(
                 if (block != null) {
                     arrived = true
                     jumpTo(tts, block, spot?.offset ?: 0)
-                    listen.chapterSkips++
                 }
             } finally {
+                listen.skippingChapter = false
                 if (!arrived) {
                     jumping = false
                     // A chapter that opens on a page without words: the voice stays where it was,
