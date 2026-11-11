@@ -178,21 +178,28 @@ fun EpubReader(
             withContext(Dispatchers.IO + NonCancellable) {
                 val file = context.library.fileOf(book)
                 val publication = context.readium.open(file)
-                Opened(publication, savedLocator(book, publication, file))
+                val spoken = SpokenFiles(publication)
+                val saved = savedLocator(book, publication, file)
+                // A sentence the voice stopped on, as Jacket 1.0.0 saved it, says which of its file's
+                // blocks it is in, not where on the pages: told the pages' way before the book is
+                // opened at it. (One saved since comes out as it went in.)
+                val start = if (saved?.isSpoken == true) spoken.placed(saved) else saved
+                Opened(publication, start, spoken)
             }
         }
         value = result
         awaitDispose { result.getOrNull()?.publication?.let(::closeSoon) }
     }
     val result = opened ?: return ReaderLoading()
-    val (publication, start) = result.getOrElse {
+    val (publication, start, spoken) = result.getOrElse {
         return ReaderError(stringResource(R.string.reader_error_open_book, it.message.orEmpty()))
     }
     if (publication.readingOrder.isEmpty()) return ReaderError(stringResource(R.string.reader_error_no_pages))
-    EpubPages(book, publication, start, settings, page, nav, haptics, annotations, onCenterTap)
+    EpubPages(book, publication, start, spoken, settings, page, nav, haptics, annotations, onCenterTap)
 }
 
-private data class Opened(val publication: Publication, val start: Locator?)
+/** A book opened: where to start it, and its files as read-aloud reads them. */
+private data class Opened(val publication: Publication, val start: Locator?, val spoken: SpokenFiles)
 
 /** Closes the book once its pages have been torn down (the fragment goes after composition). */
 private fun closeSoon(publication: Publication) {
@@ -204,6 +211,8 @@ private fun EpubPages(
     book: Book,
     publication: Publication,
     start: Locator?,
+    /** The book's files as read-aloud reads them: the voice's place is told in the pages' terms through these. */
+    spokenFiles: SpokenFiles,
     settings: Settings,
     page: PageColors,
     nav: ReaderNav,
@@ -229,6 +238,23 @@ private fun EpubPages(
     // The place being kept while pages re-flow, and the putting back of them (see ResizeKeeper).
     val resize = remember { ResizeKeeper() }
     var current by remember { mutableStateOf<Locator?>(null) }
+    // The sentence the voice is on, while the book is read aloud (see where the voice reports it).
+    // A book left on a sentence opens with that sentence as its place, until the reader moves on:
+    // saved as it is, and counted again only once it is seen on its page (see saveSpoken).
+    val voiceAt = remember {
+        SpokenPlace().apply {
+            sentence = start?.takeIf { it.isSpoken }
+            saved = sentence
+        }
+    }
+
+    /**
+     * The place to keep while the pages re-flow, and to open a navigator at: the page in front of
+     * the reader ([page], as Readium reports it), or the sentence the voice has reached out of
+     * sight of it (see [placeKept]).
+     */
+    fun placeToKeep(page: Locator? = current): Locator? =
+        placeKept(voiceAt.sentence, voiceAt.unseen) { resize.place ?: resize.keep(page) }
     // The settings a navigator is made with; changes made later are submitted to it as they come.
     val settingsNow by rememberUpdatedState(preferences)
 
@@ -267,7 +293,7 @@ private fun EpubPages(
     val factory = remember(publication) {
         object : FragmentFactory() {
             override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
-                val from = resize.target ?: resize.place ?: resize.keep(current) ?: start
+                val from = resize.target ?: placeToKeep() ?: start
                 // Kept until the navigator is seen on that page: what it reports before then is
                 // where it is on its way, not where the reader is.
                 resize.target = from
@@ -362,9 +388,6 @@ private fun EpubPages(
         val resource = contents.resourceOf(here.href)
         if (direction > 0) resource != contents.fileCount - 1 || file.index < file.count - 1 else resource != 0 || file.index > 0
     }
-    // The sentence the voice is on, while the book is read aloud (see where the voice reports it).
-    val voiceAt = remember { SpokenPlace() }
-
     /**
      * Saves the page at [locator] as the reader's place, [progress] of the way through the book.
      * Not every page Readium reports is that. While pages re-flow, and while a navigator is on its
@@ -395,6 +418,61 @@ private fun EpubPages(
     fun pagesAt(place: Locator): Int? = filePage.takeIf { it.count > 0 && it.href == place.href.toString() }?.count
 
     /**
+     * How far down its file the page in front of the listener starts, when that page is where the
+     * voice is: it has followed the voice there, and [sentence] is on it. Null when it isn't, or
+     * can't be told: out of sight, being put back after a fold, or turned by the listener to look
+     * elsewhere.
+     */
+    fun pageWithVoice(sentence: Locator): Double? {
+        val shown = current ?: return null
+        val n = navigator ?: return null
+        if (voiceAt.unseen || nav.listen.offPage || resize.target != null) return null
+        if (!owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) return null
+        // A page the listener has just turned to is theirs (read-aloud is about to say they have left the voice).
+        if (SystemClock.uptimeMillis() - nav.movedAt < LISTENER_MOVE_MS) return null
+        return shown.locations.progression?.takeIf { shown.shows(sentence, pagesAt(shown), n.overflow.value) }
+    }
+
+    /**
+     * Saves the sentence the voice is on as the reader's place. While the voice is speaking, the
+     * book's place is that sentence. It is saved as the voice goes, because the page can't be
+     * asked: shut in a pocket or behind another app it doesn't turn, and Readium goes on reporting
+     * the page the screen went dark on.
+     *
+     * How far through the book that is, is told the way a page tells it, so that listening and
+     * reading count alike and the number doesn't jump between the two: by the page the sentence is
+     * on, while that page is in front of the listener, and otherwise by where the sentence is in
+     * its file (see [SpokenFiles.placed], which every sentence here has been through, and
+     * [spokenWithin]).
+     */
+    fun saveSpoken() {
+        val sentence = voiceAt.sentence ?: return
+        val file = contents.resourceOf(sentence.href)
+        val told = sentence.locations.progression ?: 0.0
+        val page = pageWithVoice(sentence)
+        // Scrolling, there are no pages to count from.
+        val pages = current?.takeIf { !navigatorScrolls(navigator) && contents.resourceOf(it.href) == file }?.let(::pagesAt)
+        val seen = voiceAt.seenOn?.takeIf { it.file == file }
+        // In sight on a page: what that page counts, beside the sentence's own count.
+        if (page != null) voiceAt.seenOn = SeenOn(file, page, pages, pageLead(page, told, seen?.lead, moved = seen != null && seen.pages == pages && seen.page != page))
+        val within = spokenWithin(told, page, voiceAt.seenOn?.takeIf { it.file == file }?.lead, pages)
+        // While the pages are put back after a fold, in sight, the count stays as it is: the page
+        // can't be asked for a moment, and counted without it the number would flicker.
+        val reflowing = page == null && resize.target != null && !voiceAt.unseen
+        val held = voiceAt.savedProgress.takeIf { reflowing && it >= 0.0 && voiceAt.saved?.href == sentence.href }
+        val progress = held ?: spans?.total(file, within) ?: return
+        // A sentence already saved is saved again only when its page has something new to say (the
+        // voice has turned it): not to be counted over again, another way, as the screen goes dark.
+        if (sentence === voiceAt.saved && (page == null || progress == voiceAt.savedProgress)) return
+        // The Readium position it falls in (about a page of text), kept beside every saved place.
+        val position = positions.indexOfLast { (it.locations.totalProgression ?: 0.0) <= progress }.coerceAtLeast(0)
+        library.updateLocator(book.id, sentence.toJSON().toString(), progress.toFloat(), position, positions.size)
+        voiceAt.saved = sentence
+        voiceAt.savedProgress = progress
+        voiceAt.savedAt = SystemClock.uptimeMillis()
+    }
+
+    /**
      * Puts the page back at the place being kept once the pages have settled into their new
      * layout, and sees it there: Readium reporting the page that holds the place is what ends the
      * keeping. [veiled] hides a page already in view while it jumps about.
@@ -402,7 +480,7 @@ private fun EpubPages(
     fun putBack(veiled: Boolean = true) {
         // The place from before the first change: pages re-flow through several sizes as a phone
         // folds, and it may be folded and unfolded again without a page being turned.
-        if (resize.target == null) resize.target = resize.place ?: resize.keep(current)
+        if (resize.target == null) resize.target = placeToKeep()
         resize.job?.cancel()
         resize.job = scope.launch {
             // The text would be seen jumping about while the pages re-flow and the place is
@@ -484,7 +562,7 @@ private fun EpubPages(
         val reflows = before != null &&
             before.copy(theme = preferences.theme, backgroundColor = preferences.backgroundColor, textColor = preferences.textColor) != preferences
         // Kept before the new settings reach the pages.
-        if (reflows && resize.target == null) resize.target = resize.place ?: resize.keep(current)
+        if (reflows && resize.target == null) resize.target = placeToKeep()
         n.submitPreferences(preferences)
         if (reflows) putBack()
     }
@@ -499,7 +577,7 @@ private fun EpubPages(
             val pages = filePage.takeIf { pagesAt(locator) != null }
             val were = resize.pages
             if (resize.target == null && pages != null && were != null && were.href == pages.href && were.count != pages.count) {
-                resize.target = resize.place ?: resize.keep(before)
+                resize.target = placeToKeep(before)
                 if (resize.target != null) putBack()
             }
             if (pages != null) resize.pages = pages
@@ -513,6 +591,8 @@ private fun EpubPages(
             nav.sectionCount = SCRUB_STEPS
             nav.section = (progress * (SCRUB_STEPS - 1)).roundToInt()
             savePage(locator, progress)
+            // The voice has turned the page: its place is counted from this one now.
+            if (voiceHoldsThePlace(nav.listen.active, nav.listen.playing)) saveSpoken()
 
             // For the cover screen: the chapter's name and how far through it this page is.
             fun placeInChapter() {
@@ -727,7 +807,7 @@ private fun EpubPages(
 
     val listen = remember(publication) {
         ReadAloud(
-            context, publication, book.id, { navigator }, nav.listen, scope,
+            context, publication, spokenFiles, book.id, { navigator }, nav.listen, scope,
             fileOf = { href -> contents.resourceOf(href) },
             resizing = { resize.job?.isActive == true || SystemClock.uptimeMillis() - resize.restoredAt < RESIZE_SETTLE_MS },
             movedAt = { nav.movedAt },
@@ -739,19 +819,7 @@ private fun EpubPages(
     }
     listen.colors = page.link.toArgb() to page.background.toArgb()
 
-    // While the voice is speaking, the book's place is the sentence it is on. It is saved as the
-    // voice goes, because the page can't be asked: shut in a pocket or behind another app it
-    // doesn't turn, and Readium goes on reporting the page the screen went dark on.
-    fun saveSpoken() {
-        val sentence = voiceAt.sentence?.takeIf { it !== voiceAt.saved } ?: return
-        val within = sentence.locations.progression ?: 0.0
-        val progress = spans?.total(contents.resourceOf(sentence.href), within) ?: sentence.locations.totalProgression ?: return
-        // The Readium position it falls in (about a page of text), kept beside every saved place.
-        val position = positions.indexOfLast { (it.locations.totalProgression ?: 0.0) <= progress }.coerceAtLeast(0)
-        library.updateLocator(book.id, sentence.toJSON().toString(), progress.toFloat(), position, positions.size)
-        voiceAt.saved = sentence
-        voiceAt.savedAt = SystemClock.uptimeMillis()
-    }
+    // While the voice is speaking, the book's place is the sentence it is on (see saveSpoken).
     listen.onSpoken = { sentence ->
         voiceAt.sentence = sentence
         // Out of sight, the page can't follow (unless the listener had left it to look elsewhere).
@@ -761,7 +829,10 @@ private fun EpubPages(
         if (SystemClock.uptimeMillis() - voiceAt.savedAt >= SPOKEN_SAVE_MS) saveSpoken()
     }
     // Paused or stopped: the sentence the voice stopped on is saved there and then.
-    LaunchedEffect(nav.listen.playing, spans) { if (!nav.listen.playing) saveSpoken() }
+    // And once the book is open on its page: a sentence it was left on is counted from the page
+    // it is now on. (It may have been saved out of sight of any page, and Jacket 1.0.0 saved it
+    // by a count of its own, far from the pages'.)
+    LaunchedEffect(nav.listen.playing, spans, nav.contentReady) { if (!nav.listen.playing && nav.contentReady) saveSpoken() }
     // So is the one it is on when the screen is left. Coming back after the voice read on unseen,
     // the page goes to where the voice is (or stopped).
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { saveSpoken() }
@@ -769,7 +840,18 @@ private fun EpubPages(
         val sentence = voiceAt.sentence
         if (voiceAt.unseen && sentence != null) {
             voiceAt.unseen = false
-            navigator?.go(sentence, animated = false)
+            if (resize.target != null) {
+                // The pages re-flowed out of sight as well (the phone was shut on the book) and wait
+                // to be put back: at the sentence, not at the page the phone was shut on.
+                resize.target = sentence
+                putBack()
+            } else {
+                navigator?.go(sentence, animated = false)
+                // An unfolding phone shows its pages a moment before it changes their size. Until
+                // Readium is seen at the sentence, that is still the place to put them back at.
+                resize.place = sentence
+                resize.restoredAt = SystemClock.uptimeMillis()
+            }
         }
     }
 
@@ -836,10 +918,13 @@ private fun EpubPages(
         nav.canStep = { delta -> contents.step(nav.tocIndex, delta) != null }
         onDispose {}
     }
-    // Read-aloud lives as long as the book is open, whatever else changes.
+    // Read-aloud lives as long as the book is open, whatever else changes. Another book opened
+    // over this one (from a widget, a shortcut) ends it mid-sentence: that sentence is the place.
+    val saveLastSpoken by rememberUpdatedState { saveSpoken() }
     DisposableEffect(listen) {
         nav.listenController = listen
         onDispose {
+            saveLastSpoken()
             listen.stop()
             nav.listenController = null
         }
@@ -948,24 +1033,34 @@ private class ResizeKeeper {
 /** The sentence the voice is on, and what has been done about it. */
 private class SpokenPlace {
     var sentence: Locator? = null
-    /** The sentence last saved as the book's place, and when. */
+    /** The sentence last saved as the book's place, how far through the book it was saved as, and when. */
     var saved: Locator? = null
+    var savedProgress = -1.0
     var savedAt = 0L
     /** The voice has read on while the page was out of sight and couldn't follow. */
     var unseen = false
+    /** The page the voice was last seen on (see [spokenWithin]). */
+    var seenOn: SeenOn? = null
 }
+
+/**
+ * The page the voice was last seen on: the chapter [file] it is in, how far down the file the
+ * [page] starts, how many [pages] the file had, and what the page's count of the place is ahead
+ * of the sentence's own ([lead], see [pageLead]).
+ */
+private class SeenOn(val file: Int, val page: Double, val pages: Int?, val lead: Double)
 
 /**
  * Whether Readium, reporting [this] place, is on the page that holds [kept]. A place kept by its
  * words (a page's first words, the sentence the voice was on) is found by them, on whichever page
- * they now fall: it need only be somewhere near where it was.
+ * they now fall: it need only be somewhere near where it was (see [Pages.holdsWords]).
  */
 private fun Locator.shows(kept: Locator, pages: Int?, overflow: OverflowableNavigator.Overflow): Boolean {
     if (!href.removeFragment().isEquivalent(kept.href.removeFragment())) return false
     val at = locations.progression ?: return false
     val wanted = kept.locations.progression ?: return true
     return when {
-        kept.text.highlight != null -> kotlin.math.abs(at - wanted) <= BY_WORDS_NEAR
+        kept.text.highlight != null -> Pages.holdsWords(at, wanted, pages)
         pages == null || pages <= 0 || overflow.scroll -> Pages.near(at, wanted)
         overflow.readingProgression == ReadingProgression.LTR -> Pages.shows(at, wanted, pages)
         // Right to left, Readium counts its pages the other way: within a page is as near as can be told.
@@ -994,9 +1089,6 @@ private suspend fun Locator.byFirstWords(navigator: EpubNavigatorFragment): Loca
 
 /** How many letters of a page's first words are enough to find it by. */
 private const val FIRST_WORDS_ENOUGH = 24
-
-/** Words found this far (of the file) from where their place was are some other words like them. */
-private const val BY_WORDS_NEAR = 0.05
 
 /**
  * Waits until the page has re-flowed for the new [size] (the web view reports that size and its
@@ -1369,6 +1461,8 @@ private enum class TapOutcome {
 private class ReadAloud(
     private val context: Context,
     private val publication: Publication,
+    /** The book's files as the voice reads them: where its sentences are, in the pages' terms. */
+    private val files: SpokenFiles,
     private val bookId: String,
     private val navigator: () -> EpubNavigatorFragment?,
     private val listen: ListenState,
@@ -1396,9 +1490,13 @@ private class ReadAloud(
     /**
      * The voice has started on a sentence. Told whether or not the page can follow: shut in a
      * pocket or behind another app it can't turn, and this is the only word of where the voice is.
+     * The sentence is told as a place the pages can go by (see [SpokenFiles.placed]).
      */
     var onSpoken: (Locator) -> Unit = {}
+
+    /** The sentence the voice is on, as Readium's read-aloud names it, and ([lastPlaced]) as the pages are sent to it. */
     private var lastSpoken: Locator? = null
+    private var lastPlaced: Locator? = null
 
     /**
      * The sentence the voice stopped on (or, from the book's saved place, last stopped on): started
@@ -1459,7 +1557,7 @@ private class ReadAloud(
             val start = from ?: resume?.first?.locator ?: navigator()?.let { n ->
                 // What the page shows from its first word on finds the block wherever the page begins.
                 val top = runCatching { n.evaluateJavascript(TOP_TEXT_SCRIPT)?.let(::JSONObject)?.optString("text") }.getOrNull()
-                publication.readAloudStart(n.firstVisibleElementLocator(), n.currentLocator.value, top)
+                files.readAloudStart(n.firstVisibleElementLocator(), n.currentLocator.value, top)
             }
             val tts = open(start) ?: return@launch
             // Readium can only start at a block of text, and the first one on a page has usually
@@ -1536,7 +1634,13 @@ private class ReadAloud(
                         listen.spoken = spokenTo
                     }
                     // A new sentence: while the voice speaks, it is the reader's place in the book.
-                    if (location.utteranceLocator != lastSpoken) onSpoken(location.utteranceLocator)
+                    // The pages are told where it is in their own terms, not in read-aloud's: sent
+                    // after a sentence they can't find by its words, they go by where it is.
+                    if (location.utteranceLocator != lastSpoken) {
+                        val placed = files.placed(location.utteranceLocator)
+                        lastPlaced = placed
+                        onSpoken(placed)
+                    }
                     lastSpoken = location.utteranceLocator
                     val n = navigator() ?: return@collect
                     // Turn the page to follow the voice, unless the listener has gone to look elsewhere.
@@ -1545,7 +1649,7 @@ private class ReadAloud(
                         // A tapped sentence is in front of the listener: no call to move the page for it.
                         if (!listen.offPage && !stay && location.utteranceLocator != tappedSentence) {
                             followedAt = SystemClock.uptimeMillis()
-                            n.go(location.utteranceLocator, animated = false)
+                            n.go(lastPlaced ?: location.utteranceLocator, animated = false)
                             followedAt = SystemClock.uptimeMillis()
                         }
                         stay = false
@@ -1569,6 +1673,8 @@ private class ReadAloud(
         val script = "$WHERE_SCRIPT(${overflow.scroll}, ${overflow.readingProgression == ReadingProgression.RTL})"
         val first = tts.location.value
         var passed = 0
+        // How many sentences in a row, just passed, the page couldn't say where they are.
+        var unplaced = 0
         // Which laying-out of the probe the page last answered for: each one is numbered.
         var answered = -1
         try {
@@ -1576,7 +1682,7 @@ private class ReadAloud(
                 val at = tts.location.value
                 // Not into the next chapter file: its pages aren't the one being asked.
                 if (at.href != first.href) break
-                n.applyDecorations(listOf(Decoration("probe", at.utteranceLocator, HereMark(0))), PROBE)
+                n.applyDecorations(listOf(Decoration("probe", at.utteranceLocator.findable(), HereMark(0))), PROBE)
                 // Readium lays a decoration out on the page's next frame, not at once: ask until
                 // this one is there. (One the page can't find never is.)
                 val found = withTimeoutOrNull(PROBE_MS) {
@@ -1586,12 +1692,29 @@ private class ReadAloud(
                         if (answer == null) delay(PROBE_POLL_MS)
                     }
                     answer
-                } ?: break
-                answered = found.optInt("n", -1)
-                when (found.optInt("at", 1)) {
-                    0 -> return true
-                    -1 -> if (skipSentence(tts, at, forward = true)) passed++ else break
-                    else -> break
+                }
+                if (found != null) answered = found.optInt("n", -1)
+                when (found?.optInt("at", UNPLACED) ?: UNPLACED) {
+                    0 -> {
+                        // The sentences just before it that the page couldn't place may be the
+                        // page's first: the voice begins with them. Better heard again than not at all.
+                        repeat(unplaced) { if (!skipSentence(tts, tts.location.value, forward = false)) return true }
+                        return true
+                    }
+                    -1 -> {
+                        unplaced = 0
+                        if (skipSentence(tts, at, forward = true)) passed++ else break
+                    }
+                    // A sentence the page can't place says nothing of where the page is: the next
+                    // one will. (Taken for one after the page, it sent the voice back to the top
+                    // of its paragraph, and the page after it: pages back, in a long one.)
+                    UNPLACED -> if (++unplaced <= MAX_UNPLACED && skipSentence(tts, at, forward = true)) passed++ else break
+                    else -> {
+                        // Past the page: it was one of those the page couldn't place, if any.
+                        if (unplaced == 0) break
+                        repeat(unplaced) { if (!skipSentence(tts, tts.location.value, forward = false)) return true }
+                        return true
+                    }
                 }
             }
             // No sentence found on the page: back to where it started, and the old way from there.
@@ -1656,14 +1779,12 @@ private class ReadAloud(
         val said = sentence.text.highlight?.let(::bare)?.takeIf { it.isNotEmpty() } ?: return null
         if (!n.currentLocator.value.href.isEquivalent(sentence.href)) return null
         val opening = said.take(SAME_SENTENCE_CHARS)
-        val blocks = publication.textBlocks(sentence.href, sentence.mediaType)
+        val file = files.of(sentence.href, sentence.mediaType)
         // Its own block, by name; else the one block that holds its words.
-        val block = blocks.firstOrNull { it.locator.locations == sentence.locations && bare(it.text).contains(opening) }
-            ?: blocks.singleOrNull { bare(it.text).contains(opening) }
-            ?: return null
+        val block = file.blockOf(sentence)?.let(file.blocks::get) ?: return null
         // On the page in view? The page says, the sentence laid out there as an unseen mark.
         try {
-            n.applyDecorations(listOf(Decoration("resume", sentence, HereMark(0))), PROBE)
+            n.applyDecorations(listOf(Decoration("resume", sentence.findable(), HereMark(0))), PROBE)
             val script = "$WHERE_SCRIPT(${n.overflow.value.scroll}, ${n.overflow.value.readingProgression == ReadingProgression.RTL})"
             val found = withTimeoutOrNull(PROBE_MS) {
                 var answer: JSONObject? = null
@@ -1764,7 +1885,7 @@ private class ReadAloud(
 
     override fun backToVoice() {
         listen.offPage = false
-        val at = lastSpoken ?: return
+        val at = lastPlaced ?: lastSpoken ?: return
         scope.launch {
             followedAt = SystemClock.uptimeMillis()
             navigator()?.go(at, animated = false)
@@ -1790,7 +1911,7 @@ private class ReadAloud(
             ?: return TapOutcome.NO_TEXT
         if (jumping) return TapOutcome.MOVED
         val page = n.currentLocator.value
-        val blocks = publication.textBlocks(page.href, page.mediaType)
+        val blocks = files.of(page.href, page.mediaType).blocks
         val spot = tappedAt(blocks.map { it.text }, tapped.optString("before"), tapped.optString("after"))
         if (spot == null) return TapOutcome.LOST
         jumpTo(tts, blocks[spot.block], spot.offset)
@@ -1918,7 +2039,9 @@ private class ReadAloud(
         val wasListening = listen.active
         val elsewhere = listen.offPage
         val spoken = lastSpoken
+        val placed = lastPlaced
         lastSpoken = null
+        lastPlaced = null
         if (spoken != null) stoppedAt = spoken
         session?.cancel()
         session = null
@@ -1940,7 +2063,7 @@ private class ReadAloud(
             n?.applyDecorations(emptyList(), GROUP)
             // The page stays as it is. With the sentence the voice stopped on in view, that
             // sentence is marked; otherwise the listener is offered the way back to it.
-            if (wasListening && spoken != null) if (inView) markHere(spoken) else onStoppedElsewhere(spoken)
+            if (wasListening && spoken != null) if (inView) markHere(spoken) else onStoppedElsewhere(placed ?: spoken)
         }
     }
 
@@ -1955,6 +2078,10 @@ private class ReadAloud(
         /** Where a sentence is laid out, to tell whether it is on the page in view (never seen). */
         const val PROBE = "start-probe"
 
+        /** The page couldn't say where a sentence is; and how many of those in a row a start passes over before it gives up. */
+        const val UNPLACED = 2
+        const val MAX_UNPLACED = 3
+
         /** No start passes over more sentences than this, nor waits longer than this for the voice to move on by one. */
         const val MAX_START_SKIPS = 80
         const val START_SKIP_MS = 1_000L
@@ -1963,7 +2090,7 @@ private class ReadAloud(
         const val JUMP_GO_MS = 3_000L
 
         /** Two voices' sentences are the same one if they open with this many of the same characters. */
-        const val SAME_SENTENCE_CHARS = 24
+        const val SAME_SENTENCE_CHARS = SENTENCE_OPENING
 
         /** How long the page is given to lay the probe out, and how often it is asked meanwhile (about a frame). */
         const val PROBE_MS = 400L
@@ -1972,8 +2099,9 @@ private class ReadAloud(
         /**
          * Where the sentence laid out by [PROBE] is, as { n, at }: n numbers the laying-out (each
          * is one more than the last), and at is -1 wholly before the page in view (on an earlier
-         * page, or scrolled off the top), 0 at least partly on it, 1 after it. Null until the
-         * page has laid it out. Called with (scroll, rightToLeft).
+         * page, or scrolled off the top), 0 at least partly on it, 1 after it, [UNPLACED] when
+         * the page found the sentence nowhere it could draw. Null until the page has laid it
+         * out. Called with (scroll, rightToLeft).
          */
         val WHERE_SCRIPT = """
             (function(scroll, rtl) {
@@ -1987,7 +2115,7 @@ private class ReadAloud(
                 if (r.right > 1 && r.left < w - 1 && r.bottom > 1 && r.top < h - 1) here = true;
                 if (!(scroll ? r.bottom <= 1 : (rtl ? r.left >= w - 1 : r.right <= 1))) before = false;
               }
-              return { n: parseInt(item.id.slice(item.id.lastIndexOf('-') + 1)) || 0, at: !any ? 1 : here ? 0 : before ? -1 : 1 };
+              return { n: parseInt(item.id.slice(item.id.lastIndexOf('-') + 1)) || 0, at: !any ? $UNPLACED : here ? 0 : before ? -1 : 1 };
             })
         """.trimIndent()
 

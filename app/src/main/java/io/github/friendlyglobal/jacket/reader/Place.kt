@@ -38,7 +38,96 @@ internal object Pages {
 
     /** The same, where there are no pages to count (scrolling, or a page count not yet known). */
     fun near(reported: Double, kept: Double): Boolean = abs(reported - kept) <= NEAR
+
+    /** Words found this far (of the file) from where their place was are some other words like them. */
+    const val BY_WORDS = 0.05
+
+    /**
+     * Whether a page Readium reports as starting at [reported] can be the one holding a place that
+     * is kept by its words, [kept] of the way down the file: a page's first words, or the sentence
+     * the voice is on. The words are somewhere on the page, so it starts at them or up to a page
+     * before them ([pages] in the file, when that is known), give or take [BY_WORDS].
+     */
+    fun holdsWords(reported: Double, kept: Double, pages: Int?): Boolean {
+        val page = if (pages != null && pages > 0) 1.0 / pages else 0.0
+        return kept >= reported - BY_WORDS && kept <= reported + page + BY_WORDS
+    }
 }
+
+/**
+ * How far down a chapter file its text is, by the letters that come before: 0 at the file's first
+ * letter, 1 after its last. It is how the voice's place is told in the terms a page's place is.
+ *
+ * Readium's read-aloud names a sentence by the block of text it is in, and says how far down the
+ * file that block is by counting blocks: the 30th of 120 is "a quarter of the way down". But a
+ * file's blocks are a line here and three pages there (a list of contents, verse, a licence at
+ * the end), so a quarter of the blocks down can be a tenth of the way through the pages. Taken
+ * for a place on the pages, that count opens the book chapters away from the sentence it was
+ * left at, and counts the listener twice as far through the book as the pages do, or half. The
+ * letters before a block are where it falls on the pages, to within a picture or the white space
+ * around a heading.
+ *
+ * [texts] are the file's blocks of text in order, as Readium's read-aloud reads them.
+ */
+internal class TextPlaces(private val texts: List<String>) {
+    private val starts = IntArray(texts.size)
+    private val letters: Int
+
+    init {
+        var before = 0
+        texts.forEachIndexed { block, text ->
+            starts[block] = before
+            before += text.count { !unseen(it) }
+        }
+        letters = before
+    }
+
+    /** How far down the file [block] starts. */
+    fun of(block: Int): Double = if (letters == 0 || block !in texts.indices) 0.0 else starts[block].toDouble() / letters
+
+    /** How far down the file the sentence [sentence] of [block] starts: the block's own start, if it isn't found in it. */
+    fun of(block: Int, sentence: String?): Double {
+        if (letters == 0 || block !in texts.indices) return 0.0
+        val opening = opening(sentence)
+        val into = if (opening.isEmpty()) 0 else bare(texts[block]).indexOf(opening).coerceAtLeast(0)
+        return (starts[block] + into).toDouble() / letters
+    }
+
+    /** Whether [sentence] is one of [block]'s: voices cut and space sentences their own way, so it is known by its opening. */
+    fun holds(block: Int, sentence: String?): Boolean {
+        val opening = opening(sentence)
+        return opening.isNotEmpty() && block in texts.indices && bare(texts[block]).contains(opening)
+    }
+
+    /**
+     * Which block a sentence of the voice's is in. [exact] is the block Readium's reading of the
+     * file names outright, when the sentence comes straight from it. A sentence that was saved
+     * (and so carries its place in the file, [around], rather than Readium's count of blocks) is
+     * looked for by its words: among the blocks that go by the name it carries, [named], the one
+     * nearest where it was; failing that, the one block in the file that holds them.
+     */
+    fun blockOf(sentence: String?, exact: Int?, named: List<Int>, around: Double?): Int? {
+        if (exact != null && exact in texts.indices && (opening(sentence).isEmpty() || holds(exact, sentence))) return exact
+        val among = named.filter { holds(it, sentence) }
+        if (among.isNotEmpty()) return among.minByOrNull { abs(of(it, sentence) - (around ?: 0.0)) }
+        return texts.indices.singleOrNull { holds(it, sentence) }
+    }
+
+    private fun opening(sentence: String?): String = sentence?.let(::bare)?.take(SENTENCE_OPENING).orEmpty()
+}
+
+/** Two voices' sentences are the same one if they open with this many of the same letters. */
+internal const val SENTENCE_OPENING = 24
+
+/**
+ * How much of [words] to ask a page for, so that it finds them. Readium's pages look for a
+ * sentence by its words, give or take a few (the page has a line break where the voice's reading
+ * of the file has a space). The search they use (approx-string-match 1.1.0) loses any words whose
+ * length is a multiple of 32 characters, from 64 up: it finds where they end and takes them for
+ * no words at all. About one sentence in thirty is such a length. Asked for one character fewer,
+ * the page finds them.
+ */
+internal fun findableLength(words: String): Int = if (words.length >= 64 && words.length % 32 == 0) words.length - 1 else words.length
 
 /**
  * Whose place is the book's. While the voice is speaking it is the voice's: the sentence being
@@ -46,6 +135,49 @@ internal object Pages {
  * time, paused included, it is the page in front of the reader.
  */
 internal fun voiceHoldsThePlace(listening: Boolean, speaking: Boolean): Boolean = listening && speaking
+
+/**
+ * The place to keep while the pages re-flow (a fold, an unfold, a new text size) and to open a new
+ * navigator at: the page in front of the reader, [page]. Unless the voice has read on with the
+ * page out of sight ([unseen]: the phone shut, the screen off, another app in front). The page
+ * can't turn there, so it is still the one it was left on, however long ago, and the place is the
+ * sentence the voice has reached, [spoken]. Put back at that old page, the book loses everything
+ * heard since: its place is saved from whatever page is showing as soon as the voice stops.
+ */
+internal fun <T : Any> placeKept(spoken: T?, unseen: Boolean, page: () -> T?): T? = spoken?.takeIf { unseen } ?: page()
+
+/**
+ * How far down its chapter file the voice's place is counted, for the book's progress. A page
+ * counts from where it starts, and so does the voice while its sentence is on the page in front of
+ * the listener, which starts [page] of the way down: listening and reading then give the same
+ * number, and starting or stopping the voice doesn't move it.
+ *
+ * Out of sight there is no page to ask ([page] is null), and the count is made from the
+ * sentence's own place, [told] (see [TextPlaces]). The two don't quite agree (pictures and white
+ * space take room on a page that words don't), so the sentence's place is carried on from where a
+ * page last had it: [lead] is what the page's count was ahead of the sentence's when the voice
+ * came onto that page, in this file. And it is counted from where its page would start, of the
+ * file's [pages], as a page is. The number then holds still while the voice stays on a page it
+ * can't be seen on, goes up a page at a time as it reads on, and is the same again when the page
+ * comes back into view.
+ */
+internal fun spokenWithin(told: Double, page: Double?, lead: Double?, pages: Int?): Double {
+    if (page != null) return page
+    val at = (told + (lead ?: 0.0)).coerceIn(0.0, 1.0)
+    return if (pages != null && pages > 0) Pages.holding(at, pages).toDouble() / pages else at
+}
+
+/**
+ * The lead the voice is counted by out of sight (see [spokenWithin]), now that its sentence, which
+ * is [told] of the way down the file by its own count, is seen on a page that starts [page] of the
+ * way down. All a page says of a sentence on it is that the sentence comes after the page's
+ * start, so the lead is at least [page] less [told]. [known] is the lead held so far, and unless
+ * the voice has [moved] on to another page of the same pages (when the lead is the new page's),
+ * the greater of the two is the nearer the truth: the same page says less of a sentence further
+ * down it, and pages newly laid out by a fold say no more of the place than the old ones did.
+ */
+internal fun pageLead(page: Double, told: Double, known: Double?, moved: Boolean): Double =
+    if (known == null || moved) page - told else maxOf(known, page - told)
 
 /** How a book is opened at the place it was left. */
 internal sealed interface Reopen {
@@ -178,7 +310,9 @@ private const val TOP_CHARS = 64
 private const val FEWEST_TOP_CHARS = 12
 
 /** Text without its spaces, line breaks and unseen characters (soft hyphens, joiners), as it is searched. */
-internal fun bare(text: String): String = text.filterNot { it.isWhitespace() || Character.isSpaceChar(it) || Character.getType(it) == Character.FORMAT.toInt() }
+internal fun bare(text: String): String = text.filterNot(::unseen)
+
+private fun unseen(char: Char): Boolean = char.isWhitespace() || Character.isSpaceChar(char) || Character.getType(char) == Character.FORMAT.toInt()
 
 private val Spaces = Regex("\\s+")
 
