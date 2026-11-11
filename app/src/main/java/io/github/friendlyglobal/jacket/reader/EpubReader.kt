@@ -343,17 +343,7 @@ private fun EpubPages(
                     else -> false
                 }
             }
-
-            override fun onKey(event: org.readium.r2.navigator.input.KeyEvent): Boolean {
-                if (event.type != org.readium.r2.navigator.input.KeyEvent.Type.Down || event.modifiers.isNotEmpty()) return false
-                return when (event.key) {
-                    org.readium.r2.navigator.input.Key.ArrowLeft -> { turner.turnToward(toRight = false); true }
-                    org.readium.r2.navigator.input.Key.ArrowRight -> { turner.turnToward(toRight = true); true }
-                    org.readium.r2.navigator.input.Key.ArrowDown, org.readium.r2.navigator.input.Key.Space -> { turner.turn(1); true }
-                    org.readium.r2.navigator.input.Key.ArrowUp -> { turner.turn(-1); true }
-                    else -> false
-                }
-            }
+            // Keys never get as far as the page: the activity takes them first (see ReaderKeys).
         }
         val center = object : InputListener {
             override fun onTap(event: TapEvent): Boolean {
@@ -786,6 +776,13 @@ private fun EpubPages(
     nav.turnPage = { delta ->
         nav.movedAt = SystemClock.uptimeMillis()
         turner.turn(delta)
+    }
+    // For the keys and the mouse wheel: which way the book reads, and whether it has pages to turn.
+    LaunchedEffect(navigator) {
+        navigator?.overflow?.collect {
+            nav.rightToLeft = it.readingProgression == ReadingProgression.RTL
+            nav.paged = !it.scroll
+        }
     }
 
     // Search the whole book; results stream in as Readium works through it.

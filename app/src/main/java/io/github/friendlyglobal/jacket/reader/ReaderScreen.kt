@@ -195,8 +195,12 @@ class ReaderNav {
     var atEnd by mutableStateOf(false)
     /** A highlight tapped on the page, to edit. */
     var editing by mutableStateOf<String?>(null)
-    /** Turns a page for the volume keys: +1 forward, -1 back. */
+    /** Turns a page for the keys and the mouse wheel: +1 forward, -1 back. */
     var turnPage: (Int) -> Unit = { step(it) }
+    /** The book reads right to left: the arrow keys go the other way round. */
+    var rightToLeft by mutableStateOf(false)
+    /** The book is laid out in pages (not one long scroll): a mouse wheel turns them. */
+    var paged by mutableStateOf(false)
 
     /** The first page is on screen (or nothing more is coming): the opening cover may lift. */
     var contentReady by mutableStateOf(false)
@@ -230,11 +234,6 @@ class Origin(
 
 /** The open book's [ReaderNav], for views that only need to report in (see [ReaderError]). */
 internal val LocalReaderNav = compositionLocalOf<ReaderNav?> { null }
-
-/** Where the activity sends volume-key presses while a book is open and volume paging is on. */
-object ReaderKeys {
-    var handler: ((Int) -> Unit)? = null
-}
 
 typealias ProgressSink = (position: Int, offset: Float, progress: Float, sections: Int) -> Unit
 
@@ -418,13 +417,38 @@ fun ReaderScreen(
         }
     }
 
-    // Volume keys turn pages while reading (not while listening, when they're for volume).
-    // Nor under the cover of a folded phone, where pages would turn unseen.
-    DisposableEffect(settings.volumeKeys, nav.listen.active, coverUp) {
-        val handler: ((Int) -> Unit)? = if (settings.volumeKeys && !nav.listen.active && !coverUp) { delta -> nav.turnPage(delta) } else null
-        ReaderKeys.handler = handler
+    // A keyboard, a remote, a Bluetooth page-turner or a mouse wheel turns the pages, and Space
+    // pauses the voice (see ReaderKeys). The volume keys do too when that's switched on (not while
+    // listening, when they're for volume). Nothing turns under the cover of a folded phone, where
+    // pages would turn unseen.
+    val volumeKeys by rememberUpdatedState(settings.volumeKeys)
+    val pagesInSight by rememberUpdatedState(!coverUp && !closing)
+    DisposableEffect(nav) {
+        val target = ReaderKeys.Target(
+            context = {
+                KeyContext(
+                    rightToLeft = nav.rightToLeft,
+                    listening = nav.listen.active && nav.listenController != null,
+                    volumeKeys = volumeKeys,
+                    pages = pagesInSight,
+                    paged = nav.paged,
+                )
+            },
+            perform = { command ->
+                when (command) {
+                    ReaderCommand.NEXT_PAGE -> nav.turnPage(1)
+                    ReaderCommand.PREVIOUS_PAGE -> nav.turnPage(-1)
+                    ReaderCommand.PLAY_PAUSE -> nav.listenController?.let {
+                        haptics.toggle(!nav.listen.playing)
+                        it.toggle()
+                    }
+                    ReaderCommand.NOTHING -> {}
+                }
+            },
+        )
+        ReaderKeys.target = target
         // Only clear our own: opening the next book briefly overlaps the outgoing reader.
-        onDispose { if (ReaderKeys.handler === handler) ReaderKeys.handler = null }
+        onDispose { if (ReaderKeys.target === target) ReaderKeys.target = null }
     }
 
     // Sleep timer: pause after the chosen time, or when the chapter changes.

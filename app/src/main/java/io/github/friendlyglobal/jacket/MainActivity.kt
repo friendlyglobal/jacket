@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.KeyEvent
+import android.view.MotionEvent
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedContent
@@ -122,21 +123,21 @@ class MainActivity : AppCompatActivity() {
         library.flush()
     }
 
-    /** Volume keys turn pages while reading, when that's switched on (see [ReaderKeys]). */
+    /**
+     * While a book is open, the arrow and page keys, Space and (when that's switched on) the volume
+     * keys are the book's (see [ReaderKeys]): taken here, before whatever has the focus, so a
+     * keyboard or a page-turner works without the page being touched first. A key being typed into
+     * a field is the field's.
+     */
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val delta = when (event.keyCode) {
-            KeyEvent.KEYCODE_VOLUME_DOWN -> 1
-            KeyEvent.KEYCODE_VOLUME_UP -> -1
-            else -> 0
-        }
-        val handler = ReaderKeys.handler
-        if (delta != 0 && handler != null) {
-            // Both the press and the release are ours, so the volume panel never appears.
-            if (event.action == KeyEvent.ACTION_DOWN) handler(delta)
-            return true
-        }
+        val typing = currentFocus?.onCheckIsTextEditor() == true
+        if (!typing && ReaderKeys.key(event)) return true
         return super.dispatchKeyEvent(event)
     }
+
+    /** A mouse wheel turns the pages of a book laid out in pages. */
+    override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean =
+        ReaderKeys.wheel(event) || super.dispatchGenericMotionEvent(event)
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
