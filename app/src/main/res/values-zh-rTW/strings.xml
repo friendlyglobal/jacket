@@ -209,6 +209,7 @@
     </plurals>
     <string name="reader_error_open_book">無法開啟這本書。\n%1$s</string>
     <string name="reader_error_no_pages">這本書沒有可顯示的頁面。</string>
+    <string name="reader_error_protected">這本書受版權保護（DRM），Jacket 無法開啟。</string>
     <string name="reader_error_pdf">無法開啟這個 PDF。目前尚不支援受密碼保護的 PDF。</string>
     <string name="reader_error_comic">無法開啟這本漫畫。</string>
     <string name="reader_error_text">這個檔案是空的或無法讀取。</string>

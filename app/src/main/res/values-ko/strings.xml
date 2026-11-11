@@ -209,6 +209,7 @@
     </plurals>
     <string name="reader_error_open_book">이 책을 열 수 없습니다.\n%1$s</string>
     <string name="reader_error_no_pages">이 책에는 표시할 페이지가 없습니다.</string>
+    <string name="reader_error_protected">이 책은 복사 방지(DRM)가 걸려 있어 Jacket에서 열 수 없습니다.</string>
     <string name="reader_error_pdf">이 PDF를 열 수 없습니다. 비밀번호로 보호된 PDF는 아직 지원되지 않습니다.</string>
     <string name="reader_error_comic">이 만화를 열 수 없습니다.</string>
     <string name="reader_error_text">파일이 비어 있거나 읽을 수 없습니다.</string>

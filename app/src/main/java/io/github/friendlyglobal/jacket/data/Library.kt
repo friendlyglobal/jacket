@@ -121,6 +121,8 @@ class Library(private val context: Context) : LibraryOrganizer {
     private suspend fun importNow(uris: List<Uri>): ImportReport = withContext(Dispatchers.IO) {
         val imported = mutableListOf<Book>()
         val failed = mutableListOf<String>()
+        // Imports come one at a time (see [import]), so any half-copied file here is an old one.
+        BookImporter.clearUnfinished(booksDir)
         for (uri in uris) {
             val name = BookImporter.displayName(context, uri) ?: uri.lastPathSegment ?: "file"
             val size = BookImporter.size(context, uri)
@@ -229,6 +231,15 @@ class Library(private val context: Context) : LibraryOrganizer {
      */
     suspend fun scanWatchedFolder(): ImportReport? = withContext(Dispatchers.IO) {
         val tree = _state.value.settings.watchFolder?.let(Uri::parse) ?: return@withContext null
+        // The permission to read the folder is this phone's alone. A library brought over from
+        // another phone (Android's own restore of it) names a folder this one was never given:
+        // it can't be watched, and Settings shouldn't go on saying it is.
+        if (context.contentResolver.persistedUriPermissions.none { it.isReadPermission && it.uri == tree }) {
+            Log.w(TAG, "No permission to read the watched folder; it is no longer watched")
+            _state.update { s -> s.copy(settings = s.settings.copy(watchFolder = null, watchSeen = emptySet())) }
+            changed()
+            return@withContext null
+        }
         val seen = _state.value.settings.watchSeen
         val found = runCatching {
             val children = DocumentsContract.buildChildDocumentsUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))

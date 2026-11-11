@@ -216,6 +216,7 @@
     </plurals>
     <string name="reader_error_open_book">यह किताब खोली नहीं जा सकी।\n%1$s</string>
     <string name="reader_error_no_pages">इस किताब में दिखाने के लिए कोई पेज नहीं है।</string>
+    <string name="reader_error_protected">यह किताब कॉपी से सुरक्षित (DRM) है, इसलिए Jacket इसे नहीं खोल सकता।</string>
     <string name="reader_error_pdf">यह PDF खोली नहीं जा सकी। पासवर्ड से सुरक्षित PDF अभी काम नहीं करतीं।</string>
     <string name="reader_error_comic">यह कॉमिक खोली नहीं जा सकी।</string>
     <string name="reader_error_text">यह फ़ाइल खाली है या पढ़ी नहीं जा सकी।</string>

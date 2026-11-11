@@ -215,6 +215,7 @@
     </plurals>
     <string name="reader_error_open_book">Kan dit boek niet openen.\n%1$s</string>
     <string name="reader_error_no_pages">Dit boek heeft geen pagina\'s om te tonen.</string>
+    <string name="reader_error_protected">Dit boek is beveiligd tegen kopiëren (DRM), dus Jacket kan het niet openen.</string>
     <string name="reader_error_pdf">Deze PDF kan niet worden geopend. PDF\'s met een wachtwoord worden nog niet ondersteund.</string>
     <string name="reader_error_comic">Deze strip kan niet worden geopend.</string>
     <string name="reader_error_text">Dit bestand is leeg of kan niet worden gelezen.</string>

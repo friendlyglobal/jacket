@@ -209,6 +209,7 @@
     </plurals>
     <string name="reader_error_open_book">Tidak dapat membuka buku ini.\n%1$s</string>
     <string name="reader_error_no_pages">Buku ini tidak memiliki halaman untuk ditampilkan.</string>
+    <string name="reader_error_protected">Buku ini dilindungi dari penyalinan (DRM), jadi Jacket tidak dapat membukanya.</string>
     <string name="reader_error_pdf">PDF ini tidak dapat dibuka. PDF yang dilindungi sandi belum didukung.</string>
     <string name="reader_error_comic">Komik ini tidak dapat dibuka.</string>
     <string name="reader_error_text">File ini kosong atau tidak dapat dibaca.</string>

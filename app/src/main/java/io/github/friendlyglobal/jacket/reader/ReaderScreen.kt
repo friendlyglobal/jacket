@@ -201,6 +201,9 @@ class ReaderNav {
     /** The first page is on screen (or nothing more is coming): the opening cover may lift. */
     var contentReady by mutableStateOf(false)
 
+    /** A tap on the page brings the controls up, or sends them away: for a page with no taps of its own (see [ReaderError]). */
+    var toggleControls: () -> Unit = {}
+
     /**
      * When the reader last moved through the book themselves (uptime millis): a swipe or scroll on
      * the page, a page turned, a jump. Pages also move by themselves (re-flowing for the player, a
@@ -605,6 +608,7 @@ fun ReaderScreen(
             chrome = true
         }
     }
+    nav.toggleControls = toggleChrome
 
     val motion = MaterialTheme.motionScheme
     Box(Modifier.fillMaxSize().background(page.background).onSizeChanged { windowHeight = it.height }) {
@@ -1380,7 +1384,12 @@ internal fun ReaderError(message: String) {
     // Nothing more is coming: the cover may open on the message.
     val nav = LocalReaderNav.current
     SideEffect { nav?.contentReady = true }
-    Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+    Box(
+        // A tap brings the controls back, as on any page: the way out to the library is among
+        // them, and they leave by themselves a moment after the book opens.
+        Modifier.fillMaxSize().clickable(interactionSource = null, indication = null) { nav?.toggleControls?.invoke() }.padding(32.dp),
+        contentAlignment = Alignment.Center,
+    ) {
         Text(message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
     }
 }

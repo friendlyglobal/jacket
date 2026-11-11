@@ -27,9 +27,10 @@ object Backup {
     /**
      * Folds a backup into the current library: books already here keep their files and take the
      * backup's place in them if it's further along; books not here come back as entries waiting
-     * for their file. Bookmarks and highlights are merged by id; settings come from the backup.
+     * for their file. Bookmarks and highlights are merged by id; settings come from the backup,
+     * all but the folder this phone watches.
      * Collections are merged by id or name; a book here keeps its own and joins the backup's, and
-     * stays pinned if it was pinned in either.
+     * stays pinned if it was pinned in either. Reading time comes back with them (see [mergeReading]).
      */
     fun merge(current: LibraryState, backup: LibraryState): LibraryState {
         fun sameBook(a: Book, b: Book) = a.id == b.id || (a.sourceName == b.sourceName && a.sizeBytes == b.sizeBytes)
@@ -56,9 +57,26 @@ object Backup {
             .filter { it.id !in known }
             .map { it.copy(bookId = ids[it.bookId] ?: it.bookId) }
             .filter { a -> books.any { it.id == a.bookId } }
-        val settings = backup.settings.copy(collection = backup.settings.collection?.let { collectionIds[it] })
-        return current.copy(books = books, settings = settings, annotations = annotations, collections = collections)
+        val settings = backup.settings.copy(
+            collection = backup.settings.collection?.let { collectionIds[it] },
+            // The folder watched for new books stays this phone's own: the permission to read it
+            // was given here, and the backup's (another phone's, or an older choice) has none.
+            watchFolder = current.settings.watchFolder,
+            watchSeen = current.settings.watchSeen,
+        )
+        return current.copy(
+            books = books, settings = settings, annotations = annotations, collections = collections,
+            reading = mergeReading(current.reading, backup.reading),
+        )
     }
+
+    /**
+     * The time read each day, from here and from a backup, so that a new phone carries on with the
+     * reading time and the streak the old one had. A day in both counts once, at the longer of the
+     * two: added together, restoring this phone's own backup would double every day in it.
+     */
+    internal fun mergeReading(current: Map<String, Long>, backup: Map<String, Long>): Map<String, Long> =
+        (current.keys + backup.keys).associateWith { day -> maxOf(current[day] ?: 0L, backup[day] ?: 0L) }
 
     /** A backup's file names are only names: no folders, so nothing outside the books folder is touched. */
     private fun Book.safe(): Book = copy(

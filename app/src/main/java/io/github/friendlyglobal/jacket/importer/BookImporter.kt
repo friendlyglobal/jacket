@@ -48,9 +48,21 @@ object BookImporter {
         }
     }.getOrNull() ?: -1L
 
+    /** What a file is called while it is being copied in: it is a book only once it is whole. */
+    private const val PARTIAL = ".part"
+
+    /**
+     * Clears away copies that were never finished: Jacket was closed (or the phone turned off)
+     * while a book was coming in. Nothing else would ever remove them, and a book is big. Only
+     * for when no import is under way.
+     */
+    fun clearUnfinished(booksDir: File) {
+        booksDir.listFiles { file -> file.isFile && file.name.endsWith(PARTIAL) }?.forEach { it.delete() }
+    }
+
     /** Copies [uri] to [dest] (via a temporary file, so a failed copy leaves nothing behind). */
     fun copyInto(context: Context, uri: Uri, dest: File) {
-        val partial = File(dest.parentFile, dest.name + ".part")
+        val partial = File(dest.parentFile, dest.name + PARTIAL)
         try {
             val input = context.contentResolver.openInputStream(uri) ?: error("Can't open $uri")
             input.use { i -> partial.outputStream().use { i.copyTo(it) } }
@@ -79,12 +91,14 @@ object BookImporter {
     /** Copies the file into app storage, reads its metadata and cover, and returns the new [Book]. */
     fun import(context: Context, uri: Uri, name: String, library: Library): Book {
         val id = UUID.randomUUID().toString()
-        val partial = File(library.booksDir, "$id.part")
-        val input = context.contentResolver.openInputStream(uri) ?: error("Can't open $uri")
-        input.use { i -> partial.outputStream().use { i.copyTo(it) } }
-
+        val partial = File(library.booksDir, "$id$PARTIAL")
         var stored: File? = null
         try {
+            // Inside the try: a copy cut short (the phone ran out of room, the download behind the
+            // file failed) must not leave what it had written behind, least of all on a full phone.
+            val input = context.contentResolver.openInputStream(uri) ?: error("Can't open $uri")
+            input.use { i -> partial.outputStream().use { i.copyTo(it) } }
+
             val format = detectFormat(name, context.contentResolver.getType(uri), partial)
                 ?: error("Unsupported file: $name")
             stored = File(library.booksDir, "$id.${format.extension}")
@@ -120,6 +134,7 @@ object BookImporter {
         } catch (t: Throwable) {
             partial.delete()
             stored?.delete()
+            File(library.coversDir, "$id.jpg").delete()
             throw t
         }
     }
