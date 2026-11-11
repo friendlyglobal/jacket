@@ -455,6 +455,7 @@ fun ReaderScreen(
     // pauses the voice (see ReaderKeys). The volume keys do too when that's switched on (not while
     // listening, when they're for volume). Nothing turns under the cover of a folded phone, where
     // pages would turn unseen.
+    val pageFocus = remember { PageFocus() }
     val volumeKeys by rememberUpdatedState(settings.volumeKeys)
     val pagesInSight by rememberUpdatedState(!coverUp && !closing)
     DisposableEffect(nav) {
@@ -469,6 +470,7 @@ fun ReaderScreen(
                 )
             },
             perform = { command ->
+                if (command == ReaderCommand.NEXT_PAGE || command == ReaderCommand.PREVIOUS_PAGE) pageFocus.take()
                 when (command) {
                     ReaderCommand.NEXT_PAGE -> nav.turnPage(1)
                     ReaderCommand.PREVIOUS_PAGE -> nav.turnPage(-1)
@@ -673,7 +675,7 @@ fun ReaderScreen(
 
     val motion = MaterialTheme.motionScheme
     Box(Modifier.fillMaxSize().background(page.background).onSizeChanged { windowHeight = it.height }) {
-        FocusHolder()
+        FocusHolder(pageFocus)
         // The page and its controls. They grow with the window the backdrop opens on them: a page
         // the size of the book under the cover, the whole screen once it is open.
         Box(
@@ -916,17 +918,32 @@ fun ReaderScreen(
     }
 }
 
+/** The unseen view that keeps the window's focus for the reader (see [FocusHolder]). */
+private class PageFocus {
+    var view: View? = null
+
+    fun take() {
+        view?.takeIf { it.isAttachedToWindow && !it.isFocused }?.requestFocus()
+    }
+}
+
 /**
- * Keeps the keys coming while a book is open. A window with nothing in focus doesn't get the next
- * key press: Android spends it on choosing something to focus. And nothing is in focus after a
- * touch on a screen of buttons (a button can't hold the focus while fingers are in use), so the
- * first press of a page-turner after every touch would be lost. This is something for the window
- * to keep in focus whenever nothing else has it: a view of one pixel, unseen, that TalkBack passes
- * over. The keys themselves are taken by the activity (see [ReaderKeys]).
+ * Keeps the keys coming while a book is open. The first key pressed after fingers were in use is
+ * the one that takes the window out of touch mode, and Android spends it on choosing something to
+ * focus, unless a plain view has the focus already. After a touch that is never so here: the focus
+ * is with the page (Readium's pager, which hands it on to its pages), with the screen as a whole,
+ * or with nothing. The first press of a page-turner after every touch would be lost.
+ *
+ * Android says it is leaving touch mode just before it looks at the focus. This is something for
+ * the window to have in focus at that moment: a view of one pixel, unseen, that TalkBack passes
+ * over, and that takes the focus then. The keys themselves are taken by the activity (see
+ * [ReaderKeys]). Fingers never lose the focus to it: a selection on the page keeps its handles.
+ *
+ * A page turned by a key takes the focus here too: left with the page, the page would ring its
+ * first link in the colour of the keyboard's focus on every page turned.
  */
 @Composable
-private fun FocusHolder() {
-    val holder = remember { arrayOfNulls<View>(1) }
+private fun FocusHolder(focus: PageFocus) {
     AndroidView(
         factory = { context ->
             View(context).apply {
@@ -934,24 +951,20 @@ private fun FocusHolder() {
                 isFocusableInTouchMode = true
                 defaultFocusHighlightEnabled = false
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
-                holder[0] = this
+                focus.view = this
             }
         },
         modifier = Modifier.size(1.dp),
     )
     val window = LocalView.current
     DisposableEffect(window) {
-        val hold = Runnable { if (window.rootView.findFocus() == null) holder[0]?.requestFocus() }
-        // Whenever the focus is let go of (a touch, a page rebuilt after a fold), not just once.
-        val listener = ViewTreeObserver.OnGlobalFocusChangeListener { _, now -> if (now == null) window.post(hold) }
-        val observer = window.viewTreeObserver
-        observer.addOnGlobalFocusChangeListener(listener)
-        // Once the view above is there to take it.
-        window.postDelayed(hold, 100)
-        onDispose {
-            window.removeCallbacks(hold)
-            if (observer.isAlive) observer.removeOnGlobalFocusChangeListener(listener)
+        val leavingTouch = ViewTreeObserver.OnTouchModeChangeListener { inTouchMode ->
+            // Not from a field being typed in: its keys are its own.
+            if (!inTouchMode && window.rootView.findFocus()?.onCheckIsTextEditor() != true) focus.take()
         }
+        val observer = window.viewTreeObserver
+        observer.addOnTouchModeChangeListener(leavingTouch)
+        onDispose { if (observer.isAlive) observer.removeOnTouchModeChangeListener(leavingTouch) }
     }
 }
 
