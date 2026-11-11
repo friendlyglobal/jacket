@@ -1,0 +1,5 @@
+Jacket 1.0.1 tiene il segno nel libro.
+• L'ascolto non fa più tornare indietro il segno, e lettura e ascolto mostrano la stessa percentuale
+• Dopo un ascolto in background, il libro si apre dove la voce si è fermata
+• L'ascolto parte dalla pagina in cui sei, non qualche pagina prima
+• Un segno salvato male dalla 1.0.0 viene corretto la prossima volta che apri il libro

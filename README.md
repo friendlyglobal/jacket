@@ -43,14 +43,15 @@ Google Play: coming soon ·
 ## Install
 
 - **From GitHub:** open the [latest release](https://github.com/friendlyglobal/jacket/releases/latest),
-  download `Jacket-1.0.0.apk` and open it. Your browser asks once to be allowed to install apps.
+  download `Jacket-1.0.1.apk` and open it. Your browser asks once to be allowed to install apps.
   It's about 200 MB, because the voices are inside, and it runs on Android 8 and later. Later
   versions install over it the same way, keeping your books and places.
 - **Google Play:** coming soon.
 
-> **Coming from a test build?** Test builds were signed for testing, so 1.0.0 can't install over
-> them. In the test build, save a backup (Settings › Backup), then uninstall it, install 1.0.0,
-> restore the backup and add your book files again: each one finds its place and notes.
+> **Coming from a test build?** Test builds were signed for testing, so this release can't
+> install over them. In the test build, save a backup (Settings › Backup), then uninstall it,
+> install the release, restore the backup and add your book files again: each one finds its
+> place and notes.
 
 Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
 [issues](https://github.com/friendlyglobal/jacket/issues).

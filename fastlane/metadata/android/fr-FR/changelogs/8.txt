@@ -1,0 +1,5 @@
+Jacket 1.0.1 garde votre place dans le livre.
+• L'écoute ne fait plus reculer votre place, et la lecture et l'écoute affichent le même pourcentage
+• Après une écoute en arrière-plan, le livre s'ouvre là où la voix s'est arrêtée
+• L'écoute commence à la page où vous êtes, pas quelques pages avant
+• Une place mal enregistrée par la 1.0.0 est corrigée à la prochaine ouverture du livre

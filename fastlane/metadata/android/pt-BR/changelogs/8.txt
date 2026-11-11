@@ -1,0 +1,5 @@
+O Jacket 1.0.1 guarda o seu lugar no livro.
+• Ouvir não faz mais o seu lugar voltar, e a leitura e o áudio mostram a mesma porcentagem
+• Depois de ouvir em segundo plano, o livro abre onde a voz parou
+• O áudio começa na página em que você está, e não algumas páginas antes
+• Um lugar que a 1.0.0 salvou errado é corrigido na próxima vez que você abrir o livro

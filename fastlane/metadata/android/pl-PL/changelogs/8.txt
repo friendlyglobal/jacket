@@ -1,0 +1,5 @@
+Jacket 1.0.1 pamięta, gdzie jesteś w książce.
+• Słuchanie nie cofa już miejsca w książce, a czytanie i słuchanie pokazują ten sam procent
+• Po słuchaniu w tle książka otwiera się tam, gdzie głos przestał czytać
+• Słuchanie zaczyna się od strony, na której jesteś, a nie kilka stron wcześniej
+• Miejsce źle zapisane przez wersję 1.0.0 zostanie poprawione przy następnym otwarciu książki

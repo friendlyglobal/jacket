@@ -1,0 +1,5 @@
+Jacket 1.0.1 menjaga posisi baca Anda di buku.
+• Mendengarkan tidak lagi memundurkan posisi Anda, dan membaca serta mendengarkan menunjukkan persentase yang sama
+• Setelah mendengarkan di latar belakang, buku terbuka di tempat suara berhenti
+• Mendengarkan dimulai dari halaman Anda saat ini, bukan beberapa halaman sebelumnya
+• Posisi yang salah disimpan oleh versi 1.0.0 diperbaiki saat Anda membuka buku itu lagi
