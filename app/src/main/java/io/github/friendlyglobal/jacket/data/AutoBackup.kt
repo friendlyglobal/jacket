@@ -83,19 +83,23 @@ class AutoBackup(private val context: Context, private val library: Library) {
 
     private suspend fun write() = withContext(Dispatchers.IO) {
         val uri = _status.value.uri ?: return@withContext
-        val bytes = Backup.write(library.state.value).toByteArray(Charsets.UTF_8)
+        val state = library.state.value
+        val bytes = Backup.write(state).toByteArray(Charsets.UTF_8)
         val previous = prefs.getInt(LENGTH, 0)
         val written = runCatching {
             val resolver = context.contentResolver
+            // A library with no books in it never takes the place of a backup that has some. It
+            // may be no library at all: one that couldn't be read when Jacket started, or a new
+            // phone's, pointed at the old phone's backup. Saving a backup by hand still does.
+            val kept = !Backup.mayReplace(state) { resolver.openInputStream(uri)?.use { String(it.readBytes(), Charsets.UTF_8) } }
+            if (kept) {
+                Log.w(TAG, "The library has no books and the backup has: the backup is left as it is")
+                lastWriteUptime = SystemClock.uptimeMillis()
+                return@withContext
+            }
             // "wt" empties the file first. Some apps holding files only take "w", which writes over
             // the start and leaves the rest: then the end is padded with spaces, which JSON ignores.
-            val truncating = runCatching { resolver.openOutputStream(uri, "wt") }.getOrNull()
-            val out = truncating ?: resolver.openOutputStream(uri, "w") ?: error("Can't open $uri")
-            out.use {
-                it.write(bytes)
-                if (truncating == null && bytes.size < previous) it.write(ByteArray(previous - bytes.size) { ' '.code.toByte() })
-            }
-            maxOf(bytes.size, if (truncating == null) previous else 0)
+            resolver.writeWhole(uri, bytes, atLeast = previous.toLong())?.toInt() ?: error("Can't open $uri")
         }
         lastWriteUptime = SystemClock.uptimeMillis()
         written.onSuccess { length ->

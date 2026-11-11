@@ -1,6 +1,7 @@
 package io.github.friendlyglobal.jacket.data
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -77,6 +78,36 @@ class BackupTest {
             for (i in 0 until books.length()) books.getJSONObject(i).remove("sha256")
         }.toString()
         assertEquals(listOf(null, null), Backup.read(older).books.map { it.sha256 })
+    }
+
+    @Test
+    fun anEmptyLibraryNeverReplacesAnAutomaticBackupThatHasBooks() {
+        val good = Backup.write(LibraryState(books = listOf(book("b1", "one.epub", opened = 10, progress = 0.5f)), annotations = listOf(highlight)))
+        // The library couldn't be read when Jacket started (or this is a new phone): no books.
+        assertFalse(Backup.mayReplace(LibraryState()) { good })
+        assertFalse(Backup.mayReplace(LibraryState(settings = Settings(volumeKeys = true), reading = mapOf("2026-11-11" to 60_000L))) { good })
+        // The same backup with spaces after it, as an app that won't empty files leaves it.
+        assertFalse(Backup.mayReplace(LibraryState()) { "$good     " })
+    }
+
+    @Test
+    fun aLibraryWithBooksReplacesAnyAutomaticBackupWithoutReadingIt() {
+        val state = LibraryState(books = listOf(book("b2", "two.epub")))
+        assertTrue(Backup.mayReplace(state) { throw AssertionError("the file was read") })
+    }
+
+    @Test
+    fun anEmptyLibraryMayBeWrittenWhereThereAreNoBooksToLose() {
+        val empty = LibraryState()
+        // The file just made for the backup.
+        assertTrue(Backup.mayReplace(empty) { "" })
+        assertTrue(Backup.mayReplace(empty) { null })
+        // A backup of an empty library, some other file, and a backup cut short.
+        assertTrue(Backup.mayReplace(empty) { Backup.write(LibraryState(settings = Settings(volumeKeys = true))) })
+        assertTrue(Backup.mayReplace(empty) { "{\"books\":[{\"id\":\"x\"}]}" })
+        assertTrue(Backup.mayReplace(empty) { "not json" })
+        val good = Backup.write(LibraryState(books = listOf(book("b1", "one.epub"))))
+        assertTrue(Backup.mayReplace(empty) { good.take(good.length / 2) })
     }
 
     @Test
