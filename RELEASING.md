@@ -94,18 +94,21 @@ Signatures and existing installs:
 - Play builds are signed with Google's app signing key, GitHub builds with your upload key. A
   phone cannot update one with the other; switching means uninstalling (export a backup first).
 
-## 4. Host the privacy policy
+## 4. Publish the privacy policy
 
-Play needs the URL before you can finish App content.
+Play needs the URL before you can finish App content, and the app links to it from
+Settings › About.
 
-1. Push `docs/privacy.html` to `main`.
-2. On GitHub: Settings → Pages → Build and deployment → Source: **Deploy from a branch** →
-   Branch: **main**, folder **/docs** → Save.
-3. After a minute or two, open https://friendlyglobal.github.io/jacket/privacy.html on your phone.
+The policy lives on the Friendly website, https://usefriendly.app/products/jacket/privacy/,
+with the product page at `/products/jacket/` and support at `/products/jacket/support/`. They
+come from `app/products/jacket/` in gabesanto/friendly-website (PR #63 added them).
 
-Everything in `docs/` becomes public on that site, including `concept.html` and
-`play-store.md`. Keep `PRIVACY.md` and `docs/privacy.html` in sync, and change the effective
-date on both when the policy changes.
+1. Merge that PR and wait for the Cloudflare build to deploy.
+2. Open the privacy URL on your phone and check that it loads without signing in.
+
+`PRIVACY.md` here is the source. When it changes, update the website's
+`app/products/jacket/privacy/page.tsx` and its date in the same week. `docs/privacy.html` is
+the older standalone copy; you don't need to turn on GitHub Pages for it.
 
 ## 5. Play Console
 

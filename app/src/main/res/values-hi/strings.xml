@@ -151,6 +151,8 @@
     <string name="settings_about_version">वर्शन %1$s</string>
     <string name="settings_about_source">सोर्स कोड</string>
     <string name="settings_about_source_description">GitHub पर ओपन सोर्स</string>
+    <string name="settings_about_privacy">गोपनीयता नीति</string>
+    <string name="settings_about_privacy_description">Jacket आपका कोई भी डेटा इकट्ठा नहीं करता</string>
     <string name="settings_about_licenses">ओपन सोर्स लाइसेंस</string>
     <string name="settings_about_licenses_description">Jacket, Apache 2.0 के तहत है और Readium, Jetpack व ओपन फ़ॉन्ट पर बना है</string>
 

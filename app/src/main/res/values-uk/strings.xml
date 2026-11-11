@@ -162,6 +162,8 @@
     <string name="settings_about_version">Версія %1$s</string>
     <string name="settings_about_source">Вихідний код</string>
     <string name="settings_about_source_description">Відкритий код на GitHub</string>
+    <string name="settings_about_privacy">Політика конфіденційності</string>
+    <string name="settings_about_privacy_description">Jacket не збирає жодних даних</string>
     <string name="settings_about_licenses">Ліцензії відкритого ПЗ</string>
     <string name="settings_about_licenses_description">Jacket поширюється за ліцензією Apache 2.0 і використовує Readium, Jetpack та відкриті шрифти</string>
 

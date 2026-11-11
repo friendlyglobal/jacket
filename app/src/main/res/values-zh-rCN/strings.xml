@@ -145,6 +145,8 @@
     <string name="settings_about_version">版本 %1$s</string>
     <string name="settings_about_source">源代码</string>
     <string name="settings_about_source_description">在 GitHub 上开源</string>
+    <string name="settings_about_privacy">隐私政策</string>
+    <string name="settings_about_privacy_description">Jacket 不收集任何数据</string>
     <string name="settings_about_licenses">开源许可</string>
     <string name="settings_about_licenses_description">Jacket 采用 Apache 2.0 许可，基于 Readium、Jetpack 和开源字体构建</string>
 

@@ -145,6 +145,8 @@
     <string name="settings_about_version">Versi %1$s</string>
     <string name="settings_about_source">Kode sumber</string>
     <string name="settings_about_source_description">Sumber terbuka di GitHub</string>
+    <string name="settings_about_privacy">Kebijakan privasi</string>
+    <string name="settings_about_privacy_description">Jacket tidak mengumpulkan data Anda sama sekali</string>
     <string name="settings_about_licenses">Lisensi sumber terbuka</string>
     <string name="settings_about_licenses_description">Jacket berlisensi Apache 2.0, dibangun dengan Readium, Jetpack, dan font terbuka</string>
 

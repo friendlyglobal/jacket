@@ -145,6 +145,8 @@
     <string name="settings_about_version">バージョン %1$s</string>
     <string name="settings_about_source">ソースコード</string>
     <string name="settings_about_source_description">GitHub でオープンソースとして公開中</string>
+    <string name="settings_about_privacy">プライバシー ポリシー</string>
+    <string name="settings_about_privacy_description">Jacket はデータを一切収集しません</string>
     <string name="settings_about_licenses">オープンソース ライセンス</string>
     <string name="settings_about_licenses_description">Jacket は Apache 2.0 ライセンスで、Readium、Jetpack、オープンフォントを使用しています</string>
 

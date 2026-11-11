@@ -76,6 +76,7 @@ import io.github.friendlyglobal.jacket.data.AutoBackup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 private const val SOURCE_URL = "https://github.com/friendlyglobal/jacket"
+private const val PRIVACY_URL = "https://usefriendly.app/products/jacket/privacy/"
 
 @Composable
 fun SettingsScreen(
@@ -358,22 +359,33 @@ fun SettingsScreen(
                         runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() ?: ""
                     }
                     SegmentedListItem(
-                        shapes = ListItemDefaults.segmentedShapes(0, 3),
+                        shapes = ListItemDefaults.segmentedShapes(0, 4),
                         leadingContent = { Icon(JacketIcons.Info, null) },
                         supportingContent = { Text(stringResource(R.string.settings_about_version, version)) },
                     ) { Text(stringResource(R.string.app_name)) }
+                    // Play asks for the policy inside the app too; the browser opens it, so Jacket
+                    // itself still needs no internet permission.
+                    SegmentedListItem(
+                        onClick = {
+                            haptics.tick()
+                            runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, PRIVACY_URL.toUri())) }
+                        },
+                        shapes = ListItemDefaults.segmentedShapes(1, 4),
+                        leadingContent = { Icon(JacketIcons.Lock, null) },
+                        supportingContent = { Text(stringResource(R.string.settings_about_privacy_description)) },
+                    ) { Text(stringResource(R.string.settings_about_privacy)) }
                     SegmentedListItem(
                         onClick = {
                             haptics.tick()
                             runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, SOURCE_URL.toUri())) }
                         },
-                        shapes = ListItemDefaults.segmentedShapes(1, 3),
+                        shapes = ListItemDefaults.segmentedShapes(2, 4),
                         leadingContent = { Icon(JacketIcons.Code, null) },
                         supportingContent = { Text(stringResource(R.string.settings_about_source_description)) },
                     ) { Text(stringResource(R.string.settings_about_source)) }
                     SegmentedListItem(
                         onClick = { haptics.tick(); onLicenses() },
-                        shapes = ListItemDefaults.segmentedShapes(2, 3),
+                        shapes = ListItemDefaults.segmentedShapes(3, 4),
                         leadingContent = { Icon(JacketIcons.Gavel, null) },
                         supportingContent = { Text(stringResource(R.string.settings_about_licenses_description)) },
                     ) { Text(stringResource(R.string.settings_about_licenses)) }

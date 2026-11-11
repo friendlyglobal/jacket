@@ -177,6 +177,8 @@
     <string name="settings_about_version">Version %1$s</string>
     <string name="settings_about_source">Source code</string>
     <string name="settings_about_source_description">Open source on GitHub</string>
+    <string name="settings_about_privacy">Privacy policy</string>
+    <string name="settings_about_privacy_description">Jacket collects none of your data</string>
     <string name="settings_about_licenses">Open-source licenses</string>
     <string name="settings_about_licenses_description">Jacket is Apache 2.0, built on Readium, Jetpack and open fonts</string>
 

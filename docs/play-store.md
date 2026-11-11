@@ -66,9 +66,9 @@ Edge cases, in case a reviewer asks (verify against the current form wording):
 | App access | All functionality is available without special access (no login) |
 | Advertising ID | No; the app does not use it and the merged manifest has no `AD_ID` permission |
 | News, government, financial features, health | No / None |
-| Privacy policy URL | https://friendlyglobal.github.io/jacket/privacy.html |
-| Website (optional) | https://github.com/friendlyglobal/jacket |
-| Contact email | Required by Play and shown publicly; use an address you are happy to publish |
+| Privacy policy URL | https://usefriendly.app/products/jacket/privacy/ (also linked in the app under Settings › About) |
+| Website (optional) | https://usefriendly.app/products/jacket/ (support page: https://usefriendly.app/products/jacket/support/) |
+| Contact email | hello@usefriendly.app, the address the website already lists (Play shows it publicly) |
 
 ## 4. Permissions
 

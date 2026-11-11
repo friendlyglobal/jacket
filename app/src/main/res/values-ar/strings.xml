@@ -175,6 +175,8 @@
     <string name="settings_about_version">الإصدار %1$s</string>
     <string name="settings_about_source">الرمز المصدري</string>
     <string name="settings_about_source_description">مفتوح المصدر على GitHub</string>
+    <string name="settings_about_privacy">سياسة الخصوصية</string>
+    <string name="settings_about_privacy_description">لا يجمع Jacket أي بيانات عنك</string>
     <string name="settings_about_licenses">تراخيص البرامج مفتوحة المصدر</string>
     <string name="settings_about_licenses_description">تطبيق Jacket مرخّص بموجب Apache 2.0، ومبني على Readium وJetpack وخطوط مفتوحة</string>
 

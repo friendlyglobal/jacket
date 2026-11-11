@@ -162,6 +162,8 @@
     <string name="settings_about_version">Версия %1$s</string>
     <string name="settings_about_source">Исходный код</string>
     <string name="settings_about_source_description">Открытый код на GitHub</string>
+    <string name="settings_about_privacy">Политика конфиденциальности</string>
+    <string name="settings_about_privacy_description">Jacket не собирает никаких данных</string>
     <string name="settings_about_licenses">Лицензии открытого ПО</string>
     <string name="settings_about_licenses_description">Jacket распространяется по лицензии Apache 2.0 и использует Readium, Jetpack и открытые шрифты</string>
 
