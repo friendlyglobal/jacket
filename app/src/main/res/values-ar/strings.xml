@@ -244,6 +244,7 @@
     </plurals>
     <string name="reader_error_open_book">تعذّر فتح هذا الكتاب.\n%1$s</string>
     <string name="reader_error_no_pages">لا يحتوي هذا الكتاب على صفحات لعرضها.</string>
+    <string name="reader_error_protected">هذا الكتاب محمي من النسخ (DRM)، لذلك لا يستطيع Jacket فتحه.</string>
     <string name="reader_error_pdf">تعذّر فتح ملف PDF هذا. ملفات PDF المحمية بكلمة مرور غير مدعومة بعد.</string>
     <string name="reader_error_comic">تعذّر فتح هذه القصة المصوّرة.</string>
     <string name="reader_error_text">هذا الملف فارغ أو تعذّرت قراءته.</string>

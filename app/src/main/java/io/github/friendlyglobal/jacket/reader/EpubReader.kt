@@ -114,6 +114,7 @@ import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.services.content.Content
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.navigator.preferences.ReadingProgression
+import org.readium.r2.shared.publication.services.isRestricted
 import org.readium.r2.shared.publication.services.locateProgression
 import org.readium.r2.shared.publication.services.search.isSearchable
 import org.readium.r2.shared.publication.services.search.search
@@ -194,6 +195,9 @@ fun EpubReader(
     val (publication, start, spoken) = result.getOrElse {
         return ReaderError(stringResource(R.string.reader_error_open_book, it.message.orEmpty()))
     }
+    // A copy-protected book (Adobe's DRM, Readium LCP: a shop's or a library's) opens, but locked,
+    // and Readium's pages refuse a locked book by throwing: Jacket would close under the reader.
+    if (publication.isRestricted) return ReaderError(stringResource(R.string.reader_error_protected))
     if (publication.readingOrder.isEmpty()) return ReaderError(stringResource(R.string.reader_error_no_pages))
     EpubPages(book, publication, start, spoken, settings, page, nav, haptics, annotations, onCenterTap)
 }

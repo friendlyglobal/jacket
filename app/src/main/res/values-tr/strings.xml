@@ -216,6 +216,7 @@
     </plurals>
     <string name="reader_error_open_book">Bu kitap açılamadı.\n%1$s</string>
     <string name="reader_error_no_pages">Bu kitapta gösterilecek sayfa yok.</string>
+    <string name="reader_error_protected">Bu kitap kopya korumalı (DRM), bu yüzden Jacket onu açamıyor.</string>
     <string name="reader_error_pdf">Bu PDF açılamadı. Parola korumalı PDF\'ler henüz desteklenmiyor.</string>
     <string name="reader_error_comic">Bu çizgi roman açılamadı.</string>
     <string name="reader_error_text">Bu dosya boş veya okunamadı.</string>

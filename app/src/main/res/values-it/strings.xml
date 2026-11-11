@@ -222,6 +222,7 @@
     </plurals>
     <string name="reader_error_open_book">Impossibile aprire questo libro.\n%1$s</string>
     <string name="reader_error_no_pages">Questo libro non ha pagine da mostrare.</string>
+    <string name="reader_error_protected">Questo libro è protetto dalla copia (DRM), quindi Jacket non può aprirlo.</string>
     <string name="reader_error_pdf">Impossibile aprire questo PDF. I PDF protetti da password non sono ancora supportati.</string>
     <string name="reader_error_comic">Impossibile aprire questo fumetto.</string>
     <string name="reader_error_text">Questo file è vuoto o non è stato possibile leggerlo.</string>

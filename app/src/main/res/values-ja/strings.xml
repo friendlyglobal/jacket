@@ -209,6 +209,7 @@
     </plurals>
     <string name="reader_error_open_book">この本を開けませんでした。\n%1$s</string>
     <string name="reader_error_no_pages">この本には表示できるページがありません。</string>
+    <string name="reader_error_protected">この本はコピー保護（DRM）されているため、Jacket では開けません。</string>
     <string name="reader_error_pdf">この PDF を開けませんでした。パスワードで保護された PDF にはまだ対応していません。</string>
     <string name="reader_error_comic">このコミックを開けませんでした。</string>
     <string name="reader_error_text">このファイルは空か、読み込めませんでした。</string>

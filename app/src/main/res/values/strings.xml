@@ -249,6 +249,7 @@
     <!-- %1$s: the reason, from the system. -->
     <string name="reader_error_open_book">Couldn\'t open this book.\n%1$s</string>
     <string name="reader_error_no_pages">This book has no pages to show.</string>
+    <string name="reader_error_protected">This book is copy-protected (DRM), so Jacket can\'t open it.</string>
     <string name="reader_error_pdf">This PDF couldn\'t be opened. Password-protected PDFs aren\'t supported yet.</string>
     <string name="reader_error_comic">This comic couldn\'t be opened.</string>
     <string name="reader_error_text">This file is empty or couldn\'t be read.</string>
