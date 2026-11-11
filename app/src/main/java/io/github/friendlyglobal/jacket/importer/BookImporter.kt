@@ -33,6 +33,9 @@ data class FileContent(val size: Long, val sha256: String)
 /** The file being added is one the library already has: [book] was made from the very same bytes. */
 class AlreadyInLibrary(val book: Book) : Exception("Already in the library")
 
+/** The text file being added has nothing in it to read. */
+class NothingToRead(name: String) : Exception("Nothing to read in $name")
+
 object BookImporter {
     /** Offered to the system file picker. Generic types are included because many providers report EPUB/CBZ as zip or octet-stream. */
     val MIME_TYPES = arrayOf(
@@ -144,6 +147,9 @@ object BookImporter {
 
             val format = detectFormat(name, context.contentResolver.getType(uri), partial)
                 ?: error("Unsupported file: $name")
+            // A text file with nothing in it would be a book that only ever opens on a message
+            // saying so: it is refused here, with the same message.
+            if (format == BookFormat.TXT && !hasText(partial)) throw NothingToRead(name)
             stored = File(library.booksDir, "$id.${format.extension}")
             check(partial.renameTo(stored)) { "Couldn't store $name" }
 
@@ -182,6 +188,23 @@ object BookImporter {
             throw t
         }
     }
+
+    /**
+     * Whether a text file has anything in it to read: a letter, a digit, a mark, anything but
+     * spaces and line breaks (and the mark some editors put at the very start of a file). The
+     * reader makes its paragraphs of the same, so a file without any opens on "This file is
+     * empty or couldn't be read". Stops at the first thing it finds, however long the file.
+     */
+    internal fun hasText(file: File): Boolean = runCatching {
+        file.reader(Charsets.UTF_8).buffered().use { text ->
+            var c = text.read()
+            if (c == BYTE_ORDER_MARK) c = text.read()
+            while (c >= 0 && c.toChar().isWhitespace()) c = text.read()
+            c >= 0
+        }
+    }.getOrDefault(false)
+
+    private const val BYTE_ORDER_MARK = 0xFEFF
 
     /** The first few pages of a text file, read as the reader will read it. */
     private fun readStart(file: File): String {

@@ -10,6 +10,7 @@ import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.importer.AlreadyInLibrary
 import io.github.friendlyglobal.jacket.importer.BookImporter
 import io.github.friendlyglobal.jacket.importer.FileContent
+import io.github.friendlyglobal.jacket.importer.NothingToRead
 import io.github.friendlyglobal.jacket.widget.WidgetSync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,8 +34,14 @@ import java.io.FileOutputStream
  * What came of adding files: the books they are ([imported]), and the names of the files that
  * couldn't be read ([failed]). Some of [imported] may have been in the library before, their
  * files with them ([already]): they are there to be opened, and nothing was added for them.
+ * And some of [failed] may be text files with nothing in them ([empty]).
  */
-data class ImportReport(val imported: List<Book>, val failed: List<String>, val already: List<Book> = emptyList()) {
+data class ImportReport(
+    val imported: List<Book>,
+    val failed: List<String>,
+    val already: List<Book> = emptyList(),
+    val empty: List<String> = emptyList(),
+) {
     /** What happened, for a snackbar; empty when nothing was imported or failed. */
     fun message(resources: Resources): String {
         val here = already.distinctBy { it.id }
@@ -49,7 +56,12 @@ data class ImportReport(val imported: List<Book>, val failed: List<String>, val 
             1 -> resources.getString(R.string.import_already_one, here[0].title)
             else -> resources.getQuantityString(R.plurals.import_already_books, here.size, here.size)
         }
-        val couldNotRead = if (failed.isEmpty()) "" else resources.getString(R.string.import_failed, failed.joinToString())
+        val couldNotRead = when {
+            failed.isEmpty() -> ""
+            // One file with nothing in it, and nothing else to say: what the reader says of such a file.
+            imported.isEmpty() && failed.size == 1 && empty.size == 1 -> resources.getString(R.string.reader_error_text)
+            else -> resources.getString(R.string.import_failed, failed.joinToString())
+        }
         // Each is a sentence of its own; whichever there are, are said one after another.
         return listOf(added, alreadyHere, couldNotRead).filter { it.isNotEmpty() }
             .reduceOrNull { said, next -> resources.getString(R.string.import_added_and_failed, said, next) }.orEmpty()
@@ -149,6 +161,7 @@ class Library(private val context: Context) : LibraryOrganizer {
         val imported = mutableListOf<Book>()
         val failed = mutableListOf<String>()
         val already = mutableListOf<Book>()
+        val empty = mutableListOf<String>()
         // Imports come one at a time (see [import]), so any half-copied file here is an old one.
         BookImporter.clearUnfinished(booksDir)
         for (uri in uris) {
@@ -190,6 +203,7 @@ class Library(private val context: Context) : LibraryOrganizer {
                     } else {
                         Log.w(TAG, "Import failed for $name", e)
                         failed += name
+                        if (e is NothingToRead) empty += name
                     }
                 }
         }
@@ -197,7 +211,7 @@ class Library(private val context: Context) : LibraryOrganizer {
             _missing.value = scanMissing(_state.value)
             changed(saveNow = true)
         }
-        ImportReport(imported, failed, already)
+        ImportReport(imported, failed, already, empty)
     }
 
     /** The book the library has for a file with this [content], if it has one (see [bookMadeFrom]). */
