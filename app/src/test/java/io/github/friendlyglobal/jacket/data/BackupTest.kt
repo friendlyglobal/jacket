@@ -63,6 +63,25 @@ class BackupTest {
     }
 
     @Test
+    fun restoringOnANewPhoneBringsBackTheReadingTimeAndTheStreak() {
+        val days = mapOf("2026-11-08" to 1_800_000L, "2026-11-09" to 600_000L, "2026-11-10" to 2_400_000L)
+        val restored = Backup.merge(LibraryState(), Backup.read(Backup.write(LibraryState(reading = days))))
+        assertEquals(days, restored.reading)
+        assertEquals(3, readingStreak(restored.reading, java.time.LocalDate.parse("2026-11-10")))
+    }
+
+    @Test
+    fun aDayInBothCountsOnceAtTheLongerOfTheTwo() {
+        val here = LibraryState(reading = mapOf("2026-11-10" to 2_400_000L, "2026-11-11" to 300_000L))
+        // This phone's own backup from yesterday evening, and a day only the backup knows.
+        val saved = LibraryState(reading = mapOf("2026-11-09" to 600_000L, "2026-11-10" to 1_200_000L))
+        val merged = Backup.merge(here, saved).reading
+        assertEquals(mapOf("2026-11-09" to 600_000L, "2026-11-10" to 2_400_000L, "2026-11-11" to 300_000L), merged)
+        // Restoring the same backup twice changes nothing more.
+        assertEquals(merged, Backup.merge(here.copy(reading = merged), saved).reading)
+    }
+
+    @Test
     fun mergeDoesNotDuplicateAnnotations() {
         val state = LibraryState(books = listOf(book("b1", "one.epub")), annotations = listOf(highlight))
         val merged = Backup.merge(state, state)
