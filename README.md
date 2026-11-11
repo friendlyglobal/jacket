@@ -8,7 +8,7 @@ outer screen shows the cover of the book you're reading, like album art.
   <img src="fastlane/metadata/android/en-US/images/tenInchScreenshots/1.png" width="100%" alt="A folded phone showing a book's cover, the sentence being read and the player, next to the same book open as a two-page spread">
 </p>
 
-**[Download for Android](https://github.com/friendlyglobal/jacket/releases/tag/test-12)** ·
+**[Download for Android](https://github.com/friendlyglobal/jacket/releases/latest)** ·
 Google Play: coming soon ·
 [Website](https://usefriendly.app/products/jacket/) ·
 [Privacy policy](https://usefriendly.app/products/jacket/privacy/) ·
@@ -42,15 +42,18 @@ Google Play: coming soon ·
 
 ## Install
 
-- **From GitHub:** open the [latest test build](https://github.com/friendlyglobal/jacket/releases/tag/test-12),
-  download the `.apk` and open it. Your browser asks once to be allowed to install apps. It's
-  about 200 MB, because the voices are inside, and it runs on Android 8 and later.
+- **From GitHub:** open the [latest release](https://github.com/friendlyglobal/jacket/releases/latest),
+  download `Jacket-1.0.0.apk` and open it. Your browser asks once to be allowed to install apps.
+  It's about 200 MB, because the voices are inside, and it runs on Android 8 and later. Later
+  versions install over it the same way, keeping your books and places.
 - **Google Play:** coming soon.
 
-> **Status: 1.0 release candidate.** Test builds are signed for testing only. When 1.0 comes out,
-> moving to it (or to the Play version) means saving a backup (Settings › Backup), uninstalling,
-> installing the new one and restoring. Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr
-> owners are very welcome in [issues](https://github.com/friendlyglobal/jacket/issues).
+> **Coming from a test build?** Test builds were signed for testing, so 1.0.0 can't install over
+> them. In the test build, save a backup (Settings › Backup), then uninstall it, install 1.0.0,
+> restore the backup and add your book files again: each one finds its place and notes.
+
+Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
+[issues](https://github.com/friendlyglobal/jacket/issues).
 
 ## Everything it does
 

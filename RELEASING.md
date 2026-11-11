@@ -22,33 +22,29 @@ Builds before rc.3 used `io.github.friendlyglobal.jacket`, so they install as a 
 testers should save a backup in the old app (Settings › Backup), install the new one, restore it,
 and add their book files again.
 
-## 2. Create an upload key
+## 2. The release key (done)
 
-Create it outside the repository, for example in `~/keys`:
+Created on 11 November 2026 for the GitHub 1.0.0:
 
-```sh
-mkdir -p ~/keys && cd ~/keys
-keytool -genkeypair -v -keystore jacket-upload.jks -keyalg RSA -keysize 4096 -validity 10000 -alias upload
-```
+- Keystore: `~/keys/jacket-release.jks` (PKCS12, RSA 4096, valid until 2054), alias `jacket`.
+- Password: in the macOS Keychain, item *Jacket release signing key*. Show it with
+  `security find-generic-password -a jacket-release -w`. The store and the key share it.
+- Certificate SHA-256:
+  `C3:3C:28:BA:6A:83:0E:A2:BB:5E:7A:AD:89:01:B6:1C:26:4E:48:B6:A7:95:42:CC:48:49:32:A6:E4:7F:D7:06`
+- `keystore.properties` in the repository root points at it, and git ignores it.
 
-- `keytool` comes with the JDK. If it isn't on your PATH, use Android Studio's:
-  `"/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/keytool"`.
-- The keystore is PKCS12, which uses one password for the store and the key. Use the same
-  value for both in step 3.
-- Keep it out of git. Back up the `.jks` file and its password in a password manager, plus one
-  offline copy.
-- Why it matters: the GitHub APK is signed with this key, and Android only installs an update
-  signed with the same key. If you lose it, GitHub users have to uninstall to update. On Play,
-  Google holds the app signing key, and a lost upload key can be reset through Play Console.
+Back up the `.jks` file and its password now: put both in your password manager, and keep one
+offline copy. Android only installs an update signed with the same key. If the key or its
+password is lost, everyone who installed Jacket from GitHub has to uninstall to update.
 
 ## 3. Sign and build
 
-Create `keystore.properties` in the repository root:
+`keystore.properties` in the repository root (already set up on this Mac) looks like this:
 
 ```properties
-storeFile=/Users/you/keys/jacket-upload.jks
+storeFile=/Users/you/keys/jacket-release.jks
 storePassword=...
-keyAlias=upload
+keyAlias=jacket
 keyPassword=...
 ```
 
@@ -77,7 +73,7 @@ keep installing over each other. Play rejects debug-signed bundles, so check the
 before uploading:
 
 ```sh
-keytool -list -v -keystore ~/keys/jacket-upload.jks -alias upload | grep 'SHA256:'
+keytool -list -v -keystore ~/keys/jacket-release.jks -alias jacket | grep 'SHA256:'
 keytool -printcert -jarfile app/build/outputs/bundle/release/app-release.aab | grep 'SHA256:'
 ```
 
@@ -91,8 +87,10 @@ Signatures and existing installs:
   debug-signed. Testers must uninstall them before installing a release-signed APK or the Play
   version, and uninstalling deletes their library: export a backup first (Settings › Backup) and
   restore it after. The 0.x builds have no backup export, so their users re-add their books.
-- Play builds are signed with Google's app signing key, GitHub builds with your upload key. A
-  phone cannot update one with the other; switching means uninstalling (export a backup first).
+- GitHub builds are signed with the release key. On Play, choose to sign with that same key
+  (section 5, step 2), so a phone that installed from GitHub can update from Play and the other
+  way round. If Play signs with a key Google makes instead, switching between the two means
+  uninstalling (export a backup first).
 
 ## 4. Publish the privacy policy
 
@@ -113,8 +111,11 @@ the older standalone copy; you don't need to turn on GitHub Pages for it.
 ## 5. Play Console
 
 1. **Create app:** name from `title.txt`, default language English (United States), App, Free.
-2. **Play App Signing:** accept the Google-generated app signing key when you upload the first
-   bundle. The *App integrity* page then shows both certificates.
+2. **Play App Signing:** when you upload the first bundle, choose to use your own app signing
+   key instead of one Google generates, and upload `~/keys/jacket-release.jks` the way the
+   console explains (it gives you a small encryption tool, PEPK). Then Play and GitHub copies
+   are signed the same and update each other. Google holds a copy as the app signing key, and
+   you can register a separate upload key there if you like.
 3. **Internal testing first:** *Testing → Internal testing → Create new release*. Upload the
    AAB, name the release `1.0.0 (7)`, paste `changelogs/7.txt` as release notes, add your
    testers' email list, roll out, and install through the opt-in link.
