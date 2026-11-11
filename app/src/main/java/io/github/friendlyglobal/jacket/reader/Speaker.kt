@@ -285,6 +285,9 @@ internal fun pieces(text: String, max: Int): List<Pair<Int, String>> {
     return out
 }
 
+/** Whether [text] has anything in it for a voice to say: a letter or a digit. A row of asterisks has not. */
+internal fun hasWords(text: String): Boolean = text.any { it.isLetterOrDigit() }
+
 /**
  * A natural voice (see the voice package) reading plain text. A paragraph goes to it a sentence
  * at a time, each sentence its own [Utterance]; the sound for the next ones is made while one
@@ -357,6 +360,11 @@ class NaturalSpeaker(context: Context, private val voices: Voices, private val r
             val utterance = Utterance(token, paragraph, offset + range.first, first = lines.isEmpty(), last = i == sentences.lastIndex)
             lines += Line(utterance, text.substring(range), paragraph)
         }
+        // A paragraph with nothing in it to say (a row of asterisks between two scenes, a rule of
+        // dashes) has no sentences. It gets a line all the same: with none, the reader never hears
+        // that the paragraph began, which is its cue to send the next one, nor that it ended,
+        // which at the foot of the book is its cue to stop, and the voice falls silent there.
+        if (lines.isEmpty()) lines += Line(Utterance(token, paragraph, offset, first = true, last = true), text, paragraph)
         this.queue.addAll(lines)
         if (current == null) next()
     }
@@ -394,13 +402,20 @@ class NaturalSpeaker(context: Context, private val voices: Voices, private val r
 
     private fun next() {
         val speech = speech ?: return
-        if (current != null) return
-        val line = queue.removeFirstOrNull() ?: return
-        current = line
-        listener?.onStart(line.utterance)
-        // The reader may have answered the start by stopping, or by asking for something else.
-        if (current !== line) return
-        speech.speak(line, line.text, language, endsParagraph = line.utterance.last, upcoming = queue.take(2).map { it.text })
+        while (current == null) {
+            val line = queue.removeFirstOrNull() ?: return
+            current = line
+            listener?.onStart(line.utterance)
+            // The reader may have answered the start by stopping, or by asking for something else.
+            if (current !== line) return
+            if (hasWords(line.text)) {
+                speech.speak(line, line.text, language, endsParagraph = line.utterance.last, upcoming = queue.take(2).map { it.text })
+                return
+            }
+            // Nothing in it for the voice (see speak): it is over as it starts, and the next follows.
+            current = null
+            listener?.onDone(line.utterance)
+        }
     }
 
     private fun fail() {
