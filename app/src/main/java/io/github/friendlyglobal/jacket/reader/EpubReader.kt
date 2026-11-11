@@ -462,10 +462,15 @@ private fun EpubPages(
         // can't be asked for a moment, and counted without it the number would flicker.
         val reflowing = page == null && resize.target != null && !voiceAt.unseen
         val held = voiceAt.savedProgress.takeIf { reflowing && it >= 0.0 && voiceAt.saved?.href == sentence.href }
-        val progress = held ?: spans?.total(file, within) ?: return
-        // A sentence already saved is saved again only when its page has something new to say (the
-        // voice has turned it): not to be counted over again, another way, as the screen goes dark.
-        if (sentence === voiceAt.saved && (page == null || progress == voiceAt.savedProgress)) return
+        // The last page is all of the book to the voice as it is to the reader, and so is the end
+        // of the book once the voice has read to it (see [spokenIsAllOfTheBook]).
+        val ended = sentence === voiceAt.ended
+        val all = spokenIsAllOfTheBook(ended, onPage = page != null, lastPage = current != null && current === voiceAt.lastPage)
+        val progress = held ?: if (all) 1.0 else spans?.total(file, within) ?: return
+        // A sentence already saved is saved again only when there is something new to say of it
+        // (the voice has turned its page, or read the book to its end): not to be counted over
+        // again, another way, as the screen goes dark.
+        if (sentence === voiceAt.saved && ((page == null && !ended) || progress == voiceAt.savedProgress)) return
         // The Readium position it falls in (about a page of text), kept beside every saved place.
         val position = positions.indexOfLast { (it.locations.totalProgression ?: 0.0) <= progress }.coerceAtLeast(0)
         library.updateLocator(book.id, sentence.toJSON().toString(), progress.toFloat(), position, positions.size)
@@ -645,9 +650,13 @@ private fun EpubPages(
             filePage.href == locator.href.toString() && filePage.count > 0 && filePage.index >= filePage.count - 1
         }
         // The last page is all of the book, though it starts a little before the end.
+        voiceAt.lastPage = locator.takeIf { nav.atEnd }
         if (nav.atEnd) {
             if (nav.chapterProgress >= 0f) nav.chapterProgress = 1f
             savePage(locator, 1.0)
+            // That save is the reader's. While the voice is speaking the place is the voice's, and
+            // it has just come onto the last page: its count is told the same.
+            if (voiceHoldsThePlace(nav.listen.active, nav.listen.playing)) saveSpoken()
         }
     }
 
@@ -843,6 +852,12 @@ private fun EpubPages(
         // Often enough that little is heard twice if the app is closed under the voice, and no
         // oftener: every save writes the library and redraws the widgets.
         if (SystemClock.uptimeMillis() - voiceAt.savedAt >= SPOKEN_SAVE_MS) saveSpoken()
+    }
+    // Read to the end of the book: all of it has been heard, and is saved as that there and then
+    // (the page may be shut in a pocket, with nothing on it to say so).
+    listen.onEnded = {
+        voiceAt.ended = voiceAt.sentence
+        saveSpoken()
     }
     // Paused or stopped: the sentence the voice stopped on is saved there and then.
     // And once the book is open on its page: a sentence it was left on is counted from the page
@@ -1062,6 +1077,10 @@ private class SpokenPlace {
     var unseen = false
     /** The page the voice was last seen on (see [spokenWithin]). */
     var seenOn: SeenOn? = null
+    /** The sentence the voice read the book to its end on, until it speaks another. */
+    var ended: Locator? = null
+    /** The page in front of the reader, as Readium reported it, when it is the last of the book. */
+    var lastPage: Locator? = null
 }
 
 /**
@@ -1515,6 +1534,9 @@ private class ReadAloud(
      */
     var onSpoken: (Locator) -> Unit = {}
 
+    /** The voice has read the book's last sentence: there is nothing more of it to hear. */
+    var onEnded: () -> Unit = {}
+
     /** The sentence the voice is on, as Readium's read-aloud names it, and ([lastPlaced]) as the pages are sent to it. */
     private var lastSpoken: Locator? = null
     private var lastPlaced: Locator? = null
@@ -1643,7 +1665,10 @@ private class ReadAloud(
                         if (!now) listen.preparing = false
                     }
                     when (val state = playback.state) {
-                        is TtsNavigator.State.Ended -> stop()
+                        is TtsNavigator.State.Ended -> {
+                            onEnded()
+                            stop()
+                        }
                         is TtsNavigator.State.Failure -> fail(context.getString(R.string.listen_stopped_error, state.error.message))
                         else -> {}
                     }

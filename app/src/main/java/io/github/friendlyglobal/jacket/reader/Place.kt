@@ -179,6 +179,19 @@ internal fun spokenWithin(told: Double, page: Double?, lead: Double?, pages: Int
 internal fun pageLead(page: Double, told: Double, known: Double?, moved: Boolean): Double =
     if (known == null || moved) page - told else maxOf(known, page - told)
 
+/**
+ * Whether the voice's place is all of the book: 100%, as the last page is to someone reading it.
+ * A page counts from where it starts, so by that alone the last one never says 100% (in a book of
+ * three short chapters it says 67%). Read by eye it is counted as the whole book, and it is for
+ * the voice too while its sentence is on that page in front of the listener ([onPage], and that
+ * page the [lastPage] of the book): listening there and reading there give the same number, and
+ * pressing Listen on the last page doesn't take the book back from 100%.
+ *
+ * And a voice that has read the book to its end ([ended]) has read all of it, wherever its last
+ * sentence falls on the pages, and whether or not a page can be seen: the phone may be in a pocket.
+ */
+internal fun spokenIsAllOfTheBook(ended: Boolean, onPage: Boolean, lastPage: Boolean): Boolean = ended || (onPage && lastPage)
+
 /** How a book is opened at the place it was left. */
 internal sealed interface Reopen {
     /** At the saved Readium locator, as it is. */
