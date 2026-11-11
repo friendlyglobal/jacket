@@ -1,42 +1,50 @@
-Jacket ist ein Open-Source-E-Reader für faltbare Smartphones. Während du auf dem inneren Display liest, zeigt das Außendisplay das Cover deines Buchs randlos wie ein Albumcover, damit die Leute um dich herum sehen, was du liest.
+Jacket ist ein kostenloser Open-Source-E-Reader, der dein Foldable das Buch tragen lässt, das du gerade liest. Während du innen liest, zeigt das Außendisplay das Cover randlos wie ein Albumcover. Lieber zuhören? Natürliche Stimmen lesen jedes Buch vor, direkt auf deinem Smartphone. Jacket läuft auf jedem Android-Smartphone; die Cover-Funktionen kommen auf Foldables voll zur Geltung.
 
 DAS COVER, AUSSEN
-• Foldables im Buchformat: Das Cover füllt das Außendisplay, während du innen liest – über den Dual-Screen-Modus von Android.
-• Galaxy Z Flip: ein Cover-Display-Widget für das Flex Window.
-• Jedes Smartphone oder Tablet: dasselbe Widget auf dem Startbildschirm.
-• Das Cover auf dem Außendisplay lässt sich jederzeit in den Einstellungen abschalten.
-
-LESEN
-• EPUB, PDF, CBZ-Comics und reiner Text aus deinen eigenen Dateien. Nutze „Bücher hinzufügen“ oder „Öffnen mit“ bzw. „Teilen“ in einer anderen App.
-• EPUBs werden mit dem Open-Source-Toolkit Readium dargestellt: echte Seiten, aufgeklappt eine Doppelseite oder auf Wunsch durchgehendes Scrollen.
-• Inhaltsverzeichnis mit Unterkapiteln, Anzeige des aktuellen Kapitels beim Lesen, verbleibende Seiten im Kapitel und eine Leiste, die das Kapitel unter deinem Daumen in der Vorschau zeigt.
-• Lesezeichen, Markierungen in mehreren Farben mit Notizen und Volltextsuche in EPUBs.
+• Foldables im Buchformat: Das Cover füllt das Außendisplay, während du innen liest, und zeigt live, wo du stehst: „Neu“, „Ich lese“, „Fast geschafft“, „Ich höre“, „Ausgelesen“ und ein stromsparender Ambient-Zustand.
+• Auf Wunsch zeigt das gedimmte Cover eine deiner Markierungen.
+• „Cover, wenn zugeklappt“: Klapp das Smartphone mit offenem Buch zu, und das Cover bleibt an, mit einem Player unten, um zu pausieren oder zu springen, ohne aufzuklappen.
+• Galaxy Z Flip: ein Cover-Display-Widget. Motorola Razr: Öffne Jacket auf dem Außendisplay.
 
 ZUHÖREN
-• Der Hörbuchmodus liest EPUB- und Textbücher mit der Sprachausgabe deines Smartphones vor und hebt jedes Wort hervor, während es gesprochen wird.
+• Natürliche Stimmen sind in Jacket enthalten und sprechen 31 Sprachen ohne Internet. Den Rest liest die Stimme des Smartphones.
+• Jedes Wort leuchtet auf der Seite auf, während es gesprochen wird, und die Seite blättert mit der Stimme um.
+• Tippe auf einen Satz, um ab dort zu hören. Hörst du auf, geht es nächstes Mal bei dem Satz weiter, bei dem du warst.
 • Läuft bei ausgeschaltetem Display weiter, mit Steuerung auf dem Sperrbildschirm und über Kopfhörer.
-• Sleep-Timer: stoppt nach einer festen Zeit oder am Kapitelende.
+• Tempo von 0,8× bis 2× und ein Sleep-Timer für 15, 30 oder 60 Minuten oder bis zum Kapitelende.
 
-LESEKOMFORT
-• Die Schriften Literata, Atkinson Hyperlegible und OpenDyslexic.
-• Textgröße, Zeilenabstand, Ränder und Blocksatz.
-• Die Seitenfarben Buch, Papier, Dunkel und Schwarz.
+LESEN
+• EPUB, PDF, CBZ-Comics und reiner Text aus deinen eigenen Dateien, über „Bücher hinzufügen“, „Öffnen mit“ oder „Teilen“.
+• Echte EPUB-Seiten, aufgeklappt als Doppelseite, oder Scrollen.
+• Umblättern, das deinem Finger folgt: Papier, Wölben, Karten oder Schieben.
+• Inhalt, Lesezeichen, Markierungen in fünf Farben, Notizen und Suche in EPUBs.
+• Die Schriften Literata, Atkinson Hyperlegible und OpenDyslexic; Textgröße, Zeilenabstand, Ränder und Blocksatz; vier Seitenfarben.
+• PDFs und Comics mit zwei Fingern oder per Doppeltippen zoomen.
+
+DEINE BIBLIOTHEK
+• Kostenlose Bücher: 114 Klassiker in 16 Sprachen, deren Urheberrecht abgelaufen ist, zum Herunterladen über deinen Browser.
+• Sammlungen für einen Buchclub, eine Reise oder ein Genre.
+• Gib jedem Buch ein neues Cover: ein Foto oder selbst gestaltet in deinen Farben.
+• Widgets: das Cover deines Buchs, ein Player, dein Regal und deine Leseserie.
+• Deine heutige Lesezeit und Serie, die Restzeit im Kapitel und ein überwachter Ordner, der neue Bücher hinzufügt.
+
+IM ALLTAG
+• Tischmodus: halb aufgeklappt die Seite über dem Falz, die Bedienelemente darunter.
+• Helligkeit und Wärme per Wischen am Rand, und dunkle Seiten bei Nacht.
 • Blättern mit den Lautstärketasten.
+• Teile eine Markierung als Zitat oder alle Notizen eines Buchs auf einmal.
+• Eine „Zurück“-Taste bringt dich nach einem Sprung zurück zu deiner Seite.
 
-BIBLIOTHEK
-• Bücher durchsuchen und sortieren.
-• Ein Regal für ausgelesene Bücher und ein Abschlussbildschirm auf der letzten Seite.
-• Sicherungsdatei exportieren und später oder auf einem anderen Smartphone wieder importieren.
-
-DESIGN
-• Material 3 Expressive: Farben aus dem Cover des Buchs, das du gerade liest, federnde Animationen und haptisches Feedback.
+IN DEINER SPRACHE
+Deutsch, Englisch, Spanisch, brasilianisches Portugiesisch, Französisch, Italienisch, Niederländisch, Polnisch, Russisch, Ukrainisch, Türkisch, Arabisch, Hindi, Indonesisch, Japanisch, Koreanisch sowie vereinfachtes und traditionelles Chinesisch.
 
 DATENSCHUTZ
-• Keine Internetberechtigung: Weder Jacket noch die Bücher, die du darin öffnest, können sich mit dem Netzwerk verbinden.
+• Keine Internetberechtigung: Weder Jacket noch die Bücher, die du darin öffnest, können ins Netz. Die Stimmen sprechen direkt auf dem Smartphone.
 • Keine Konten, keine Werbung, keine Analysen, kein Tracking.
-• Frei und Open Source unter der Apache License 2.0: https://github.com/friendlyglobal/jacket
+• Sicherung in eine Datei deiner Wahl: Bücherliste, Lesepositionen, Lesezeichen, Markierungen und Einstellungen (nicht die Buchdateien).
+• Kostenlos und Open Source unter der Apache License 2.0: https://github.com/friendlyglobal/jacket
 
 GUT ZU WISSEN
-• Ob das Außendisplay unterstützt wird, hängt vom Smartphone ab. Auf Smartphones ohne Außendisplay sind diese Optionen ausgeblendet.
-• Bücher mit DRM (Kopierschutz) lassen sich nicht öffnen.
-• Das Vorlesen von Textbüchern stoppt, wenn du die App verlässt. EPUBs werden auch im Hintergrund weiter vorgelesen.
+• Das Außendisplay hängt vom Smartphone ab; ohne eines sind diese Optionen ausgeblendet.
+• Bücher mit DRM lassen sich nicht öffnen.
+• PDFs und Comics werden nicht vorgelesen, und das Vorlesen von Textbüchern stoppt, wenn du die App verlässt.

@@ -51,8 +51,23 @@ data class Book(
      * turning its pages; 0 until that's been measured. "Time left" is worked out from it.
      */
     val pace: Float = 0f,
+    /** The language the book says it is written in (a BCP 47 tag), when it says: picks the voice that reads it aloud. */
+    val language: String? = null,
+    /** When the book was pinned to the top of the library; 0 while it isn't. */
+    val pinnedAt: Long = 0L,
+    /** The ids of the [BookCollection]s it's in. */
+    val collections: Set<String> = emptySet(),
+    /**
+     * The reader gave the book a cover of their own (a photo, or one they designed). The one it
+     * came with is kept in [originalCover], with its color in [originalSeed], to go back to.
+     */
+    val coverCustomized: Boolean = false,
+    val originalCover: String? = null,
+    val originalSeed: Int? = null,
 ) {
     val isFinished: Boolean get() = finishedAt > 0L
+
+    val isPinned: Boolean get() = pinnedAt > 0L
 
     val percent: Int get() = (progress * 100).toInt().coerceIn(0, 100)
 
@@ -192,6 +207,17 @@ data class Settings(
     val watchFolder: String? = null,
     /** Files already taken from [watchFolder] ("name|size"): removing a book doesn't bring it back. */
     val watchSeen: Set<String> = emptySet(),
+    /**
+     * The voice that reads aloud: a natural voice ("pack/voice", see the voice package), "system"
+     * for the phone's own, or null while nobody has chosen (then Jacket picks: a natural voice
+     * where the phone can carry one). A natural voice only reads the languages it speaks; the
+     * rest stay with the phone's.
+     */
+    val voice: String? = null,
+    /** A different voice for one language, by language code ("pt" to "pack/voice" or "system"). */
+    val voices: Map<String, String> = emptyMap(),
+    /** The collection the library is showing (a [BookCollection] id), or null for every book. */
+    val collection: String? = null,
 )
 
 data class LibraryState(
@@ -201,6 +227,8 @@ data class LibraryState(
     val annotations: List<Annotation> = emptyList(),
     /** Time spent reading, per day (ISO date to milliseconds): today's total and the streak. */
     val reading: Map<String, Long> = emptyMap(),
+    /** The reader's own collections, in the order they were made. */
+    val collections: List<BookCollection> = emptyList(),
 ) {
     /** The book the covers show: the one picked, else the one opened most recently. */
     val current: Book?
@@ -265,18 +293,39 @@ internal object LibraryJson {
             put("ambientQuote", state.settings.ambientQuote)
             put("watchFolder", state.settings.watchFolder ?: JSONObject.NULL)
             put("watchSeen", JSONArray(state.settings.watchSeen.toList()))
+            put("voice", state.settings.voice ?: JSONObject.NULL)
+            put("voices", JSONObject().apply { state.settings.voices.forEach { (language, voice) -> put(language, voice) } })
+            put("collection", state.settings.collection ?: JSONObject.NULL)
+        })
+        put("collections", JSONArray().apply {
+            state.collections.forEach { put(JSONObject().apply { put("id", it.id); put("name", it.name); put("createdAt", it.createdAt) }) }
         })
         put("reading", JSONObject().apply { state.reading.forEach { (day, millis) -> put(day, millis) } })
         put("books", JSONArray().apply { state.books.forEach { put(it.toJson()) } })
         put("annotations", JSONArray().apply { state.annotations.forEach { put(it.toJson()) } })
     }.toString()
 
-    fun decode(text: String): LibraryState {
+    /** A library as read from its file, and how many entries of the file couldn't be read. */
+    class Read(val state: LibraryState, val unread: Int)
+
+    fun decode(text: String): LibraryState = read(text).state
+
+    /**
+     * Reads a library file, old or new: anything a file doesn't say takes the value it had before
+     * there was a setting for it. An entry that can't be read (a book in a format this version
+     * doesn't know, a damaged one) is left out and counted, so that whoever saves over the file
+     * knows it would lose something. Throws if the text isn't a library at all.
+     */
+    fun read(text: String): Read {
         val root = JSONObject(text)
-        val s = root.optJSONObject("settings") ?: JSONObject()
-        val books = root.optJSONArray("books") ?: JSONArray()
-        return LibraryState(
-            books = (0 until books.length()).mapNotNull { i -> runCatching { books.getJSONObject(i).toBook() }.getOrNull() },
+        var unread = 0
+        // A list that is there but isn't a list is as lost as its entries.
+        fun list(name: String): JSONArray = root.optJSONArray(name) ?: JSONArray().also { if (root.has(name) && !root.isNull(name)) unread++ }
+        fun <T : Any> JSONArray.entries(read: (JSONObject) -> T?): List<T> =
+            (0 until length()).mapNotNull { i -> runCatching { read(getJSONObject(i)) }.getOrNull().also { if (it == null) unread++ } }
+        val s = root.optJSONObject("settings") ?: JSONObject().also { if (root.has("settings") && !root.isNull("settings")) unread++ }
+        val state = LibraryState(
+            books = list("books").entries { it.toBook() },
             currentId = root.optString("currentId").takeIf { it.isNotEmpty() && it != "null" },
             settings = Settings(
                 coverStyle = runCatching { CoverStyle.valueOf(s.optString("coverStyle")) }.getOrDefault(CoverStyle.JACKET),
@@ -309,12 +358,19 @@ internal object LibraryJson {
                 ambientQuote = s.optBoolean("ambientQuote", false),
                 watchFolder = if (s.isNull("watchFolder")) null else s.optString("watchFolder").takeIf { it.isNotEmpty() },
                 watchSeen = s.optJSONArray("watchSeen")?.let { a -> (0 until a.length()).mapTo(HashSet()) { a.optString(it) } }.orEmpty(),
+                // Libraries saved before there were natural voices have neither.
+                voice = if (s.isNull("voice")) null else s.optString("voice").takeIf { it.isNotEmpty() },
+                voices = s.optJSONObject("voices")?.let { v -> v.keys().asSequence().associateWith { v.optString(it) }.filterValues { it.isNotEmpty() } }.orEmpty(),
+                collection = if (s.isNull("collection")) null else s.optString("collection").takeIf { it.isNotEmpty() },
             ),
-            reading = root.optJSONObject("reading")?.let { days -> days.keys().asSequence().associateWith { days.optLong(it) } }.orEmpty(),
-            annotations = (root.optJSONArray("annotations") ?: JSONArray()).let { a ->
-                (0 until a.length()).mapNotNull { i -> runCatching { a.getJSONObject(i).toAnnotation() }.getOrNull() }
+            // Libraries from before collections have none.
+            collections = list("collections").entries { c ->
+                c.optString("id").takeIf { it.isNotEmpty() }?.let { id -> BookCollection(id, c.optString("name"), c.optLong("createdAt")) }
             },
+            reading = root.optJSONObject("reading")?.let { days -> days.keys().asSequence().associateWith { days.optLong(it) } }.orEmpty(),
+            annotations = list("annotations").entries { it.toAnnotation() },
         )
+        return Read(state, unread)
     }
 
     private inline fun <reified E : Enum<E>> enumOr(name: String, default: E): E =
@@ -331,6 +387,12 @@ internal object LibraryJson {
         put("locator", locator ?: JSONObject.NULL)
         put("finishedAt", finishedAt)
         put("pace", pace.toDouble())
+        put("language", language ?: JSONObject.NULL)
+        put("pinnedAt", pinnedAt)
+        put("collections", JSONArray(collections.toList()))
+        put("coverCustomized", coverCustomized)
+        put("originalCover", originalCover ?: JSONObject.NULL)
+        put("originalSeed", originalSeed ?: JSONObject.NULL)
     }
 
     private fun Annotation.toJson() = JSONObject().apply {
@@ -375,5 +437,11 @@ internal object LibraryJson {
         finishedAt = if (has("finishedAt")) optLong("finishedAt")
         else if (optDouble("progress", 0.0) >= 0.99) optLong("lastOpenedAt").coerceAtLeast(1L) else 0L,
         pace = optDouble("pace", 0.0).toFloat().takeIf { it.isFinite() && it > 0f } ?: 0f,
+        language = if (isNull("language")) null else optString("language").takeIf { it.isNotEmpty() },
+        pinnedAt = optLong("pinnedAt"),
+        collections = optJSONArray("collections")?.let { a -> (0 until a.length()).mapNotNullTo(HashSet()) { a.optString(it).takeIf(String::isNotEmpty) } }.orEmpty(),
+        coverCustomized = optBoolean("coverCustomized", false),
+        originalCover = if (isNull("originalCover")) null else optString("originalCover").takeIf { it.isNotEmpty() },
+        originalSeed = if (isNull("originalSeed") || !has("originalSeed")) null else getInt("originalSeed"),
     )
 }

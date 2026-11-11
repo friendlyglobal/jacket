@@ -1,42 +1,50 @@
-O Jacket é um leitor de e-books de código aberto para celulares dobráveis. Enquanto você lê na tela interna, a tela externa mostra a capa do seu livro de ponta a ponta, como a capa de um álbum, para que as pessoas ao seu redor vejam o que você está lendo.
+O Jacket é um leitor de e-books gratuito e de código aberto que veste o seu dobrável com o livro que você está lendo. Enquanto você lê por dentro, a tela externa mostra a capa do livro de ponta a ponta, como a capa de um álbum. Quando preferir ouvir, vozes naturais leem qualquer livro em voz alta, direto no seu celular. Funciona em qualquer celular Android, e os recursos de capa brilham de verdade nos dobráveis.
 
 A CAPA, DO LADO DE FORA
-• Dobráveis tipo livro: a capa ocupa a tela externa enquanto você lê por dentro, usando o modo de tela dupla do Android.
-• Galaxy Z Flip: um widget para a tela externa Flex Window.
-• Qualquer celular ou tablet: o mesmo widget na sua tela inicial.
-• Desative a capa na tela externa quando quiser, nas Configurações.
-
-LEITURA
-• EPUB, PDF, quadrinhos CBZ e texto simples, a partir dos seus próprios arquivos. Use Adicionar livros, ou Abrir com ou Compartilhar em outro app.
-• Os EPUBs são renderizados com o kit de código aberto Readium: páginas de verdade, duas páginas lado a lado com o celular aberto ou rolagem contínua, se preferir.
-• Sumário com subcapítulos, o capítulo atual acompanhado durante a leitura, as páginas que faltam no capítulo e uma barra que mostra uma prévia do capítulo sob o seu polegar.
-• Marcadores, destaques em várias cores com notas e pesquisa no texto completo dos EPUBs.
+• Dobráveis tipo livro: a capa ocupa a tela externa enquanto você lê por dentro e acompanha sua leitura ao vivo: Novo, Lendo, Quase no fim, Ouvindo, Concluído e um estado de repouso de baixo consumo.
+• Se quiser, a capa escurecida mostra um dos seus destaques.
+• Capa quando fechado: feche o celular com um livro aberto e a capa continua na tela, com um player embaixo para pausar ou pular sem abrir o celular.
+• Galaxy Z Flip: um widget para a tela externa. Motorola Razr: abra o Jacket na tela externa.
 
 OUVIR
-• O modo audiolivro lê em voz alta livros EPUB e de texto simples com a voz de conversão de texto em voz do celular, destacando cada palavra enquanto ela é falada.
+• As vozes naturais já vêm com o Jacket e falam 31 idiomas sem internet. A voz do próprio celular lê os outros.
+• Cada palavra se acende na página enquanto é falada, e a página vira junto com a voz.
+• Toque em qualquer frase para ouvir a partir dali. Parou? Da próxima vez, a leitura continua da frase onde você ficou.
 • Continua tocando com a tela desligada, com controles na tela de bloqueio e nos fones de ouvido.
-• Timer para dormir: para depois de um tempo definido ou no fim do capítulo.
+• Velocidade de 0,8× a 2× e timer para dormir de 15, 30 ou 60 minutos ou no fim do capítulo.
 
-CONFORTO DE LEITURA
-• Fontes Literata, Atkinson Hyperlegible e OpenDyslexic.
-• Tamanho do texto, espaçamento entre linhas, margens e justificação.
-• Cores de página Livro, Papel, Escuro e Preto.
+LEITURA
+• EPUB, PDF, quadrinhos CBZ e texto simples dos seus próprios arquivos, por Adicionar livros, Abrir com ou Compartilhar.
+• Páginas de verdade nos EPUBs, duas lado a lado com o celular aberto, ou rolagem.
+• Viradas de página que acompanham o seu dedo: Papel, Dobra, Cartas ou Deslizar.
+• Sumário, marcadores, destaques em cinco cores, notas e pesquisa dentro dos EPUBs.
+• Fontes Literata, Atkinson Hyperlegible e OpenDyslexic; tamanho do texto, espaçamento entre linhas, margens e justificação; quatro cores de página.
+• Use o gesto de pinça ou toque duas vezes para dar zoom em PDFs e quadrinhos.
+
+SUA BIBLIOTECA
+• Livros grátis: 114 clássicos em 16 idiomas cujos direitos autorais já expiraram, prontos para baixar pelo navegador.
+• Coleções para um clube do livro, uma viagem ou um gênero.
+• Dê uma capa nova a qualquer livro: uma foto ou um design com as suas cores.
+• Widgets: a capa do seu livro, um player, sua estante e sua sequência de leitura.
+• Seu tempo de leitura de hoje e sua sequência, o tempo restante no capítulo e uma pasta monitorada que adiciona livros novos.
+
+NO DIA A DIA
+• Modo mesa: meio dobrado, a página fica acima da dobra e os controles abaixo.
+• Brilho e calor deslizando pelas bordas, e páginas escuras à noite.
 • Vire as páginas com as teclas de volume.
+• Compartilhe um destaque como citação, ou todas as notas de um livro de uma vez.
+• Um botão "Voltar" leva você de volta à sua página depois de um salto.
 
-BIBLIOTECA
-• Pesquise e ordene seus livros.
-• Uma estante de concluídos e uma tela de fim de livro quando você chega à última página.
-• Exporte um arquivo de backup e importe-o de novo mais tarde ou em outro celular.
-
-DESIGN
-• Material 3 Expressive: cores tiradas da capa do livro que você está lendo, animações com efeito de mola e resposta tátil.
+NO SEU IDIOMA
+Português do Brasil, inglês, espanhol, francês, italiano, alemão, holandês, polonês, russo, ucraniano, turco, árabe, hindi, indonésio, japonês, coreano, e chinês simplificado e tradicional.
 
 PRIVACIDADE
-• Sem permissão de internet: nem o Jacket nem os livros que você abre nele podem se conectar à rede.
+• Sem permissão de internet: nem o Jacket nem os livros que você abre nele podem se conectar à rede. As vozes falam no próprio celular.
 • Sem contas, sem anúncios, sem análises, sem rastreamento.
+• Backup em um arquivo que você escolhe: lista de livros, posições, marcadores, destaques e configurações (não os arquivos dos livros).
 • Gratuito e de código aberto sob a Apache License 2.0: https://github.com/friendlyglobal/jacket
 
 BOM SABER
-• O suporte à tela externa depende do celular. Em celulares sem tela externa, essas opções ficam ocultas.
-• Livros com DRM (proteção contra cópia) não podem ser abertos.
-• A leitura em voz alta de livros de texto simples para quando você sai do app. A de EPUB continua tocando em segundo plano.
+• O suporte à tela externa depende do celular; sem ela, essas opções ficam ocultas.
+• Livros com DRM não podem ser abertos.
+• PDFs e quadrinhos não são lidos em voz alta, e a leitura em voz alta de livros de texto para quando você sai do app.

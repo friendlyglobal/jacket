@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Natural voices, the welcome pages and the sample book (see values/strings_voices.xml for what each is). -->
+<resources>
+    <string name="settings_group_listening">Прослуховування</string>
+    <string name="voice_title">Голос</string>
+    <string name="voice_phone">Голос телефона</string>
+    <string name="voice_phone_description">Вбудований у телефон. Читає всіма мовами, які знає.</string>
+    <string name="voice_natural">Природний</string>
+    <string name="voice_female">Жіночий голос %1$d</string>
+    <string name="voice_male">Чоловічий голос %1$d</string>
+    <string name="voice_hear">Послухати: %1$s</string>
+    <string name="voice_stop_sample">Зупинити</string>
+    <string name="voice_change">Змінити</string>
+    <string name="voice_book_language">Мова книжки: %1$s</string>
+    <string name="voice_book_language_hint">Не так? Змініть, щоб книжку читав відповідний голос.</string>
+    <string name="voice_language_title">Якою мовою ця книжка?</string>
+    <string name="voice_language_from_book">Як зазначено в книжці</string>
+    <string name="voice_only_language">Лише для книжок цією мовою: %1$s</string>
+    <string name="voice_only_language_description">Книжки іншими мовами зберігають свій голос.</string>
+    <string name="voice_not_in_language">%1$s: природні голоси ще не розмовляють цією мовою, тому читає голос телефона.</string>
+    <string name="voice_private">Природні голоси звучать просто на вашому телефоні. Нічого з того, що ви читаєте, нікуди не надсилається.</string>
+    <string name="voice_about">Про ці голоси</string>
+    <string name="voice_about_text">Природні голоси входять до Jacket і працюють без інтернету. Користуватися ними можна вільно, але не можна використовувати їх, щоб обманювати чи шкодити комусь, наприклад видаючи голос за справжню людину. Повні умови — у Налаштуваннях, у розділі «Ліцензії».</string>
+    <string name="voice_slow">Цей голос заважкий для цього телефона. Торкніться, щоб змінити.</string>
+    <string name="listen_preparing">Голос готується…</string>
+    <string name="voice_stopped">Природний голос зупинився. Спробуйте ще раз або перейдіть на голос телефона.</string>
+    <string name="voice_fell_back">Природний голос не вдалося запустити, тому читає голос телефона.</string>
+    <string name="voice_phone_settings">Налаштування голосу телефона</string>
+    <string name="voice_phone_settings_description">Виберіть, як звучить голос вашого телефона.</string>
+    <string name="voice_settings_hint">Кожна книжка читається своєю мовою. Природні голоси розмовляють багатьма мовами; решту читає голос телефона.</string>
+    <string name="onboarding_cover_body">Поки ви читаєте всередині, зовнішній екран носить обкладинку вашої книжки. Закрийте телефон — обкладинка залишиться; поставте його напіввідкритим — і сторінка опиниться над згином.</string>
+    <string name="onboarding_cover_outside">Обкладинка зовні</string>
+    <string name="onboarding_read_title">Справжні сторінки, що гортаються як папір</string>
+    <string name="onboarding_read_body">Сторінки піднімаються під пальцем і зсуваються, загинаються чи розкладаються. Натисніть і утримуйте слова, щоб виділити їх і додати нотатку.</string>
+    <string name="onboarding_read_listen_body">Сторінки гортаються як папір, по дві поруч, коли телефон розкрито. Або вмостіться зручніше й слухайте: природні голоси прочитають уголос будь-яку книжку.</string>
+    <string name="onboarding_listen_title">Або просто слухайте</string>
+    <string name="onboarding_listen_body">Природні голоси читають уголос будь-яку книжку, і кожне слово підсвічується, коли його вимовляють. Читання триває і з вимкненим екраном.</string>
+    <string name="onboarding_yours_title">Налаштуйте під себе</string>
+    <string name="onboarding_yours_body">Кілька рішень для початку. Їх можна змінити будь-коли.</string>
+    <string name="onboarding_yours_sample">Жила-була книжка, і якось вона знайшла свого читача.</string>
+    <string name="onboarding_start_title">Ваші книжки залишаються вашими</string>
+    <string name="onboarding_widget">Тримайте обкладинку своєї книжки на головному екрані з віджетом Jacket.</string>
+    <string name="library_empty_title_phone">Ваша наступна книжка починається тут</string>
+    <string name="library_empty_message_phone">Додайте EPUB, PDF, комікс CBZ або текстовий файл. Jacket збереже приватну копію, дасть їй справжні сторінки й зможе прочитати її вголос природним голосом.</string>
+    <string name="library_try_sample">Спробувати книжку-зразок</string>
+    <string name="sample_failed">Не вдалося відкрити книжку-зразок.</string>
+</resources>

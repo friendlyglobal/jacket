@@ -255,7 +255,7 @@ private fun AnnotationList(
                 overlineContent = {
                     Text(
                         listOf(item.chapter, stringResource(R.string.percent, (item.progress * 100).toInt()))
-                            .filter { it.isNotBlank() }.joinToString(" · "),
+                            .filter { it.isNotBlank() }.joinToString(stringResource(R.string.separator)),
                         maxLines = 1, overflow = TextOverflow.Ellipsis,
                     )
                 },
@@ -492,7 +492,7 @@ fun FinishedCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        JacketIcons.Sparkle, null, tint = MaterialTheme.colorScheme.onPrimary,
+                        JacketIcons.Check, null, tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.graphicsLayer { rotationZ = -rotation },
                     )
                 }

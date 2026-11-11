@@ -28,13 +28,19 @@ object Backup {
      * Folds a backup into the current library: books already here keep their files and take the
      * backup's place in them if it's further along; books not here come back as entries waiting
      * for their file. Bookmarks and highlights are merged by id; settings come from the backup.
+     * Collections are merged by id or name; a book here keeps its own and joins the backup's, and
+     * stays pinned if it was pinned in either.
      */
     fun merge(current: LibraryState, backup: LibraryState): LibraryState {
         fun sameBook(a: Book, b: Book) = a.id == b.id || (a.sourceName == b.sourceName && a.sizeBytes == b.sizeBytes)
+        val (collections, collectionIds) = mergeCollections(current.collections, backup.collections)
+        // A backup's collection ids, as they are here; ones it never listed are dropped.
+        fun Set<String>.here() = mapNotNullTo(HashSet()) { collectionIds[it] }
         val ids = HashMap<String, String>()
-        val books = current.books.map { here ->
-            val saved = backup.books.firstOrNull { sameBook(it, here) } ?: return@map here
-            ids[saved.id] = here.id
+        val books = current.books.map { book ->
+            val saved = backup.books.firstOrNull { sameBook(it, book) } ?: return@map book
+            ids[saved.id] = book.id
+            val here = book.copy(collections = book.collections + saved.collections.here(), pinnedAt = maxOf(book.pinnedAt, saved.pinnedAt))
             if (saved.lastOpenedAt > here.lastOpenedAt) {
                 here.copy(
                     position = saved.position, positionOffset = saved.positionOffset, progress = saved.progress,
@@ -44,18 +50,20 @@ object Backup {
             } else {
                 here
             }
-        } + backup.books.filter { saved -> current.books.none { sameBook(it, saved) } }.map { it.safe() }
+        } + backup.books.filter { saved -> current.books.none { sameBook(it, saved) } }.map { it.safe().copy(collections = it.collections.here()) }
         val known = current.annotations.mapTo(HashSet()) { it.id }
         val annotations = current.annotations + backup.annotations
             .filter { it.id !in known }
             .map { it.copy(bookId = ids[it.bookId] ?: it.bookId) }
             .filter { a -> books.any { it.id == a.bookId } }
-        return current.copy(books = books, settings = backup.settings, annotations = annotations)
+        val settings = backup.settings.copy(collection = backup.settings.collection?.let { collectionIds[it] })
+        return current.copy(books = books, settings = settings, annotations = annotations, collections = collections)
     }
 
     /** A backup's file names are only names: no folders, so nothing outside the books folder is touched. */
     private fun Book.safe(): Book = copy(
         fileName = java.io.File(fileName).name.takeIf { it.isNotBlank() && it != ".." } ?: "$id.${format.extension}",
         coverFile = coverFile?.let { java.io.File(it).name }?.takeIf { it.isNotBlank() && it != ".." },
+        originalCover = originalCover?.let { java.io.File(it).name }?.takeIf { it.isNotBlank() && it != ".." },
     )
 }

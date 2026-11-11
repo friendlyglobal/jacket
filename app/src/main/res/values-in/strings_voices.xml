@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Natural voices, the welcome pages and the sample book (see values/strings_voices.xml for what each is). -->
+<resources>
+    <string name="settings_group_listening">Mendengarkan</string>
+    <string name="voice_title">Suara</string>
+    <string name="voice_phone">Suara ponsel</string>
+    <string name="voice_phone_description">Bawaan ponsel Anda. Membaca semua bahasa yang dikenalnya.</string>
+    <string name="voice_natural">Alami</string>
+    <string name="voice_female">Suara wanita %1$d</string>
+    <string name="voice_male">Suara pria %1$d</string>
+    <string name="voice_hear">Dengarkan %1$s</string>
+    <string name="voice_stop_sample">Berhenti</string>
+    <string name="voice_change">Ubah</string>
+    <string name="voice_book_language">Bahasa buku: %1$s</string>
+    <string name="voice_book_language_hint">Tidak tepat? Ubah agar suara yang sesuai membacakannya.</string>
+    <string name="voice_language_title">Buku ini berbahasa apa?</string>
+    <string name="voice_language_from_book">Menurut bukunya</string>
+    <string name="voice_only_language">Hanya untuk buku berbahasa ini: %1$s</string>
+    <string name="voice_only_language_description">Buku berbahasa lain tetap memakai suaranya sendiri.</string>
+    <string name="voice_not_in_language">%1$s: suara alami belum bisa bahasa ini, jadi suara ponsel yang membacakan.</string>
+    <string name="voice_private">Suara alami berbicara langsung di ponsel Anda. Apa pun yang Anda baca tidak dikirim ke mana pun.</string>
+    <string name="voice_about">Tentang suara ini</string>
+    <string name="voice_about_text">Suara alami disertakan bersama Jacket dan berfungsi tanpa internet. Bebas digunakan, tetapi tidak boleh dipakai untuk menipu atau merugikan siapa pun, misalnya dengan mengaku-aku suara itu sebagai orang sungguhan. Ketentuan lengkapnya ada di Setelan, pada bagian Lisensi.</string>
+    <string name="voice_slow">Suara ini terlalu berat untuk ponsel ini. Ketuk untuk menggantinya.</string>
+    <string name="listen_preparing">Menyiapkan suara…</string>
+    <string name="voice_stopped">Suara alami berhenti. Coba lagi, atau beralih ke suara ponsel.</string>
+    <string name="voice_fell_back">Suara alami tidak bisa dimulai, jadi suara ponsel yang membacakan.</string>
+    <string name="voice_phone_settings">Setelan suara ponsel</string>
+    <string name="voice_phone_settings_description">Pilih bagaimana suara ponsel Anda terdengar.</string>
+    <string name="voice_settings_hint">Setiap buku dibacakan dalam bahasanya sendiri. Suara alami menguasai banyak bahasa; sisanya dibacakan suara ponsel.</string>
+    <string name="onboarding_cover_body">Selagi Anda membaca di dalam, layar luar memakai sampul buku Anda. Tutup ponsel dan sampulnya tetap tampil; berdirikan setengah terbuka dan halaman berada di atas lipatan.</string>
+    <string name="onboarding_cover_outside">Sampul di luar</string>
+    <string name="onboarding_read_title">Halaman sungguhan, dibalik seperti kertas</string>
+    <string name="onboarding_read_body">Halaman terangkat di bawah jari Anda lalu bergeser, melengkung, atau dibagikan. Tekan lama beberapa kata untuk menyorotnya dan menambahkan catatan.</string>
+    <string name="onboarding_read_listen_body">Halaman dibalik seperti kertas, dua berdampingan saat ponsel terbuka. Atau bersantailah dan dengarkan: suara alami membacakan buku apa pun.</string>
+    <string name="onboarding_listen_title">Atau dengarkan saja</string>
+    <string name="onboarding_listen_body">Suara alami membacakan buku apa pun, dan setiap kata menyala saat diucapkan. Tetap berjalan saat layar mati.</string>
+    <string name="onboarding_yours_title">Sesuaikan dengan selera Anda</string>
+    <string name="onboarding_yours_body">Beberapa pilihan untuk memulai. Anda bisa mengubahnya kapan saja.</string>
+    <string name="onboarding_yours_sample">Pada suatu hari, sebuah buku menemukan pembacanya.</string>
+    <string name="onboarding_start_title">Buku Anda tetap milik Anda</string>
+    <string name="onboarding_widget">Tampilkan sampul buku Anda di layar utama dengan widget Jacket.</string>
+    <string name="library_empty_title_phone">Buku Anda berikutnya dimulai di sini</string>
+    <string name="library_empty_message_phone">Tambahkan file EPUB, PDF, komik CBZ, atau teks. Jacket menyimpan salinan pribadi, memberinya halaman sungguhan untuk dibalik, dan bisa membacakannya dengan suara alami.</string>
+    <string name="library_try_sample">Coba buku contoh</string>
+    <string name="sample_failed">Buku contoh tidak bisa dibuka.</string>
+</resources>

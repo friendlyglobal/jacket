@@ -15,6 +15,12 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v4
+      # The natural voices (about 130 MB) are downloaded by the build and checked against a
+      # pinned checksum; keep them between runs.
+      - uses: actions/cache@v4
+        with:
+          path: .gradle/voices
+          key: voices-${{ hashFiles('app/build.gradle.kts') }}
       - name: Test, build and lint
         run: ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
       # The shrunk (R8) release build, signed with CI's throwaway debug key: catches classes

@@ -24,6 +24,10 @@ desugarJdkLibs = "2.1.5"
 media3 = "1.11.0"
 # Unit tests run on the JVM, where Android's org.json is only a stub.
 orgJson = "20240303"
+# Natural voices: on-device text-to-speech, https://github.com/k2-fsa/sherpa-onnx (Apache-2.0).
+# 2.x has no GPL parts (espeak-ng was removed). The checksum of the release asset is pinned in
+# app/build.gradle.kts; change both together.
+sherpaOnnx = "2.0.1"
 
 [libraries]
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -52,6 +56,7 @@ desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", ver
 media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
 org-json = { group = "org.json", name = "json", version.ref = "orgJson" }
 coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+sherpa-onnx = { group = "com.k2fsa.sherpa.onnx", name = "sherpa-onnx-static-link-onnxruntime", version.ref = "sherpaOnnx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

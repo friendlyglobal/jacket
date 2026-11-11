@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Natural voices, the welcome pages and the sample book: in a file of their own, beside strings.xml. -->
+<resources>
+    <!-- Settings: the group that holds the voice. -->
+    <string name="settings_group_listening">Listening</string>
+
+    <!-- The voice that reads books aloud. Plain words throughout: no "engine", "model" or "TTS". -->
+    <string name="voice_title">Voice</string>
+    <!-- The text-to-speech voice built into the phone, as opposed to Jacket's natural voices. -->
+    <string name="voice_phone">Phone\'s voice</string>
+    <string name="voice_phone_description">Built into your phone. Reads every language it knows.</string>
+    <!-- A short mark on voices that sound like a person rather than a machine. -->
+    <string name="voice_natural">Natural</string>
+    <!-- The natural voices have no names, only numbers: "Female voice 2". -->
+    <string name="voice_female">Female voice %1$d</string>
+    <string name="voice_male">Male voice %1$d</string>
+    <!-- Button that plays a short sample of a voice. %1$s is the voice's name. -->
+    <string name="voice_hear">Hear %1$s</string>
+    <string name="voice_stop_sample">Stop</string>
+    <string name="voice_change">Change</string>
+    <!-- %1$s is a language, e.g. "English". -->
+    <string name="voice_book_language">This book is in %1$s</string>
+    <string name="voice_book_language_hint">Not right? Change it, so the right voice reads it.</string>
+    <string name="voice_language_title">What language is this book in?</string>
+    <!-- Under the language the book itself declares, in the list of languages. -->
+    <string name="voice_language_from_book">What the book says</string>
+    <!-- A switch. %1$s is a language, e.g. "English". -->
+    <string name="voice_only_language">Only for books in %1$s</string>
+    <string name="voice_only_language_description">Books in other languages keep their own voice.</string>
+    <!-- %1$s is a language, e.g. "Chinese". -->
+    <string name="voice_not_in_language">The natural voices don\'t speak %1$s yet, so your phone\'s voice reads this.</string>
+    <string name="voice_private">Natural voices speak on your phone itself. Nothing you read is sent anywhere.</string>
+    <string name="voice_about">About these voices</string>
+    <string name="voice_about_text">The natural voices come with Jacket and work without the internet. They are free to use, but must not be used to deceive or harm anyone, for example by passing a voice off as a real person. The full terms are in Settings, under Licenses.</string>
+    <!-- On the player, when the phone is too slow for the natural voice. Keep it short. -->
+    <string name="voice_slow">This voice is too much for this phone. Tap to change it.</string>
+    <!-- On the player's button while a natural voice loads, before its first word. -->
+    <string name="listen_preparing">Getting the voice ready…</string>
+    <string name="voice_stopped">The natural voice stopped. Try again, or switch to your phone\'s voice.</string>
+    <string name="voice_fell_back">The natural voice couldn\'t start, so your phone\'s voice is reading.</string>
+    <string name="voice_phone_settings">Phone\'s voice settings</string>
+    <string name="voice_phone_settings_description">Choose how your phone\'s own voice sounds.</string>
+    <string name="voice_settings_hint">Each book is read in its own language. Natural voices speak many languages; your phone\'s voice reads the rest.</string>
+
+    <!-- The welcome, shown once before the first book. -->
+    <string name="onboarding_cover_body">While you read inside, the outer screen wears your book\'s cover. Close the phone and the cover stays on; stand it half-open and the page sits above the fold.</string>
+    <string name="onboarding_cover_outside">Cover on the outside</string>
+    <string name="onboarding_read_title">Real pages, turned like paper</string>
+    <string name="onboarding_read_body">Pages lift under your finger and slide, curl or deal away. Press and hold any words to highlight them and add a note.</string>
+    <!-- Foldables get reading and listening on one page. -->
+    <string name="onboarding_read_listen_body">Pages turn like paper, two side by side when the phone is open. Or sit back and listen: natural voices read any book aloud.</string>
+    <string name="onboarding_listen_title">Or just listen</string>
+    <string name="onboarding_listen_body">Natural voices read any book aloud, each word lighting up as it\'s spoken. It keeps going with the screen off.</string>
+    <string name="onboarding_yours_title">Make it yours</string>
+    <string name="onboarding_yours_body">A few choices to start with. You can change them any time.</string>
+    <!-- A line of sample text, shown in the chosen typeface and page colour. -->
+    <string name="onboarding_yours_sample">Once upon a time, a book found its reader.</string>
+    <string name="onboarding_start_title">Your books stay yours</string>
+    <string name="onboarding_widget">Keep your book\'s cover on your home screen with Jacket\'s widget.</string>
+
+    <!-- The empty library on a phone that doesn't fold (the foldable wording is in strings.xml). -->
+    <string name="library_empty_title_phone">Your next book starts here</string>
+    <string name="library_empty_message_phone">Add an EPUB, PDF, CBZ comic or text file. Jacket keeps a private copy, gives it real pages to turn, and can read it aloud in a natural voice.</string>
+
+    <!-- A free classic that comes with the app, to try the reader without having a file. -->
+    <string name="library_try_sample">Try a sample book</string>
+    <string name="sample_failed">The sample book couldn\'t be opened.</string>
+</resources>

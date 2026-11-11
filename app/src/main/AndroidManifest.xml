@@ -94,5 +94,47 @@
                 android:name="com.samsung.android.appwidget.provider"
                 android:resource="@xml/samsung_cover_widget" />
         </receiver>
+
+        <!-- The book with a play button; also on the Flex Window, to pause or resume without opening the phone. -->
+        <receiver
+            android:name=".widget.PlayerWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_player_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/player_widget_info" />
+            <meta-data
+                android:name="com.samsung.android.appwidget.provider"
+                android:resource="@xml/samsung_cover_widget" />
+        </receiver>
+
+        <!-- The books you're reading, side by side. -->
+        <receiver
+            android:name=".widget.ShelfWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_shelf_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/shelf_widget_info" />
+        </receiver>
+
+        <!-- Minutes read today, the streak and the week. -->
+        <receiver
+            android:name=".widget.StreakWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_streak_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/streak_widget_info" />
+        </receiver>
     </application>
 </manifest>

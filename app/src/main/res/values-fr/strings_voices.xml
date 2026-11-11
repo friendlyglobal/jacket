@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Natural voices, the welcome pages and the sample book (see values/strings_voices.xml for what each is). -->
+<resources>
+    <string name="settings_group_listening">Écoute</string>
+    <string name="voice_title">Voix</string>
+    <string name="voice_phone">Voix du téléphone</string>
+    <string name="voice_phone_description">Intégrée à votre téléphone. Lit toutes les langues qu\'elle connaît.</string>
+    <string name="voice_natural">Naturelle</string>
+    <string name="voice_female">Voix féminine %1$d</string>
+    <string name="voice_male">Voix masculine %1$d</string>
+    <string name="voice_hear">Écouter %1$s</string>
+    <string name="voice_stop_sample">Arrêter</string>
+    <string name="voice_change">Modifier</string>
+    <string name="voice_book_language">Langue du livre : %1$s</string>
+    <string name="voice_book_language_hint">Ce n\'est pas la bonne ? Changez-la pour que la bonne voix le lise.</string>
+    <string name="voice_language_title">Dans quelle langue est ce livre ?</string>
+    <string name="voice_language_from_book">Ce qu\'indique le livre</string>
+    <string name="voice_only_language">Seulement pour les livres dans cette langue : %1$s</string>
+    <string name="voice_only_language_description">Les livres dans d\'autres langues gardent leur propre voix.</string>
+    <string name="voice_not_in_language">%1$s : les voix naturelles ne parlent pas encore cette langue, c\'est donc la voix du téléphone qui lit.</string>
+    <string name="voice_private">Les voix naturelles parlent sur votre téléphone même. Rien de ce que vous lisez n\'est envoyé où que ce soit.</string>
+    <string name="voice_about">À propos de ces voix</string>
+    <string name="voice_about_text">Les voix naturelles sont fournies avec Jacket et fonctionnent sans Internet. Leur usage est libre, mais elles ne doivent pas servir à tromper ou à nuire, par exemple en faisant passer une voix pour celle d\'une personne réelle. Les conditions complètes se trouvent dans Paramètres, sous Licences.</string>
+    <string name="voice_slow">Cette voix est trop lourde pour ce téléphone. Touchez pour en changer.</string>
+    <string name="listen_preparing">Préparation de la voix…</string>
+    <string name="voice_stopped">La voix naturelle s\'est arrêtée. Réessayez ou passez à la voix du téléphone.</string>
+    <string name="voice_fell_back">La voix naturelle n\'a pas pu démarrer : la voix du téléphone lit à sa place.</string>
+    <string name="voice_phone_settings">Réglages de la voix du téléphone</string>
+    <string name="voice_phone_settings_description">Choisissez comment sonne la voix de votre téléphone.</string>
+    <string name="voice_settings_hint">Chaque livre est lu dans sa propre langue. Les voix naturelles parlent de nombreuses langues ; la voix du téléphone lit les autres.</string>
+    <string name="onboarding_cover_body">Pendant que vous lisez à l\'intérieur, l\'écran externe porte la couverture de votre livre. Fermez le téléphone et la couverture reste ; posez-le à demi ouvert et la page se place au-dessus de la pliure.</string>
+    <string name="onboarding_cover_outside">Couverture à l\'extérieur</string>
+    <string name="onboarding_read_title">De vraies pages, qui se tournent comme du papier</string>
+    <string name="onboarding_read_body">Les pages se soulèvent sous votre doigt et glissent, s\'enroulent ou se distribuent. Appuyez longuement sur des mots pour les surligner et ajouter une note.</string>
+    <string name="onboarding_read_listen_body">Les pages se tournent comme du papier, deux côte à côte quand le téléphone est ouvert. Ou installez-vous et écoutez : des voix naturelles lisent n\'importe quel livre à voix haute.</string>
+    <string name="onboarding_listen_title">Ou écoutez simplement</string>
+    <string name="onboarding_listen_body">Des voix naturelles lisent n\'importe quel livre à voix haute, chaque mot s\'éclairant quand il est prononcé. La lecture continue écran éteint.</string>
+    <string name="onboarding_yours_title">Faites-en le vôtre</string>
+    <string name="onboarding_yours_body">Quelques choix pour commencer. Vous pourrez les modifier à tout moment.</string>
+    <string name="onboarding_yours_sample">Il était une fois un livre qui trouva son lecteur.</string>
+    <string name="onboarding_start_title">Vos livres restent les vôtres</string>
+    <string name="onboarding_widget">Gardez la couverture de votre livre sur l\'écran d\'accueil avec le widget de Jacket.</string>
+    <string name="library_empty_title_phone">Votre prochain livre commence ici</string>
+    <string name="library_empty_message_phone">Ajoutez un EPUB, un PDF, une BD CBZ ou un fichier texte. Jacket en garde une copie privée, lui donne de vraies pages à tourner et peut le lire à voix haute avec une voix naturelle.</string>
+    <string name="library_try_sample">Essayer un livre d\'exemple</string>
+    <string name="sample_failed">Impossible d\'ouvrir le livre d\'exemple.</string>
+</resources>

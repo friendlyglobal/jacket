@@ -1,42 +1,50 @@
-Jacket es un lector de libros electrónicos de código abierto para teléfonos plegables. Mientras lees en la pantalla interior, la pantalla externa muestra la portada de tu libro de borde a borde, como la carátula de un disco, para que la gente a tu alrededor vea lo que estás leyendo.
+Jacket es un lector de libros electrónicos gratuito y de código abierto que viste tu plegable con el libro que estás leyendo. Mientras lees dentro, la pantalla externa muestra la portada de borde a borde, como la carátula de un disco. Cuando prefieras escuchar, las voces naturales leen cualquier libro en voz alta, en tu propio móvil. Funciona en cualquier móvil Android, y las funciones de portada lucen de verdad en los plegables.
 
 LA PORTADA, POR FUERA
-• Plegables tipo libro: la portada ocupa la pantalla externa mientras lees dentro, gracias al modo de doble pantalla de Android.
-• Galaxy Z Flip: un widget para la pantalla externa Flex Window.
-• Cualquier teléfono o tablet: el mismo widget en tu pantalla de inicio.
-• Desactiva la portada en la pantalla externa cuando quieras desde Ajustes.
-
-LECTURA
-• EPUB, PDF, cómics CBZ y texto plano, desde tus propios archivos. Usa Añadir libros, o Abrir con o Compartir desde otra app.
-• Los EPUB se muestran con Readium, el kit de herramientas de código abierto: páginas reales, dos páginas a la vez al desplegar el teléfono, o desplazamiento continuo si lo prefieres.
-• Índice con subcapítulos, el capítulo actual siempre localizado mientras lees, las páginas que quedan del capítulo y una barra que previsualiza el capítulo bajo tu pulgar.
-• Marcadores, resaltados en varios colores con notas y búsqueda de texto completo en los EPUB.
+• Plegables tipo libro: la portada llena la pantalla externa mientras lees dentro y sigue tu lectura en directo: Nuevo, Leyendo, Casi al final, Escuchando, Terminado y un estado en reposo de bajo consumo.
+• Si quieres, la portada atenuada muestra uno de tus resaltados.
+• Portada al cerrar: pliega el móvil con un libro abierto y la portada sigue ahí, con un reproductor abajo para pausar o saltar sin desplegarlo.
+• Galaxy Z Flip: un widget para la pantalla externa. Motorola Razr: abre Jacket en la pantalla externa.
 
 ESCUCHAR
-• El modo audiolibro lee en voz alta libros EPUB y de texto plano con la voz de texto a voz de tu teléfono, y resalta cada palabra a medida que se pronuncia.
+• Las voces naturales vienen con Jacket y hablan 31 idiomas sin internet. La voz de tu móvil lee el resto.
+• Cada palabra se ilumina en la página mientras suena, y la página pasa al ritmo de la voz.
+• Toca cualquier frase para escuchar desde ahí. Si paras, la próxima vez sigue desde la frase en que lo dejaste.
 • Sigue sonando con la pantalla apagada, con controles en la pantalla de bloqueo y en los auriculares.
-• Temporizador de apagado: se detiene tras el tiempo que elijas o al final del capítulo.
+• Velocidad de 0,8× a 2× y temporizador de apagado de 15, 30 o 60 minutos o al final del capítulo.
 
-COMODIDAD DE LECTURA
-• Fuentes Literata, Atkinson Hyperlegible y OpenDyslexic.
-• Tamaño del texto, interlineado, márgenes y justificación.
-• Colores de página Libro, Papel, Oscuro y Negro.
-• Pasa las páginas con los botones de volumen.
+LECTURA
+• EPUB, PDF, cómics CBZ y texto plano de tus propios archivos, con Añadir libros, Abrir con o Compartir.
+• Páginas EPUB reales, dos a la vez con el móvil desplegado, o desplazamiento continuo.
+• Pasos de página que siguen tu dedo: Papel, Doblar, Cartas o Deslizar.
+• Índice, marcadores, resaltados en cinco colores, notas y búsqueda dentro de los EPUB.
+• Fuentes Literata, Atkinson Hyperlegible y OpenDyslexic; tamaño de texto, interlineado, márgenes y justificado; cuatro colores de página.
+• Pellizca o toca dos veces para hacer zoom en PDF y cómics.
 
-BIBLIOTECA
-• Busca y ordena tus libros.
-• Un estante de terminados y una pantalla de fin de libro al llegar a la última página.
-• Exporta un archivo de copia de seguridad y vuelve a importarlo más tarde o en otro teléfono.
+TU BIBLIOTECA
+• Libros gratis: 114 clásicos en 16 idiomas cuyos derechos de autor ya vencieron, listos para descargar con tu navegador.
+• Colecciones para un club de lectura, un viaje o un género.
+• Dale a cualquier libro una portada nueva: una foto o un diseño con tus colores.
+• Widgets: la portada de tu libro, un reproductor, tu estante y tu racha de lectura.
+• Tu tiempo de lectura de hoy y tu racha, el tiempo restante del capítulo y una carpeta vigilada que añade los libros nuevos.
 
-DISEÑO
-• Material 3 Expressive: colores tomados de la portada del libro que estás leyendo, animaciones elásticas y respuesta háptica.
+PARA EL DÍA A DÍA
+• Modo sobremesa: medio plegado, la página queda encima del pliegue y los controles debajo.
+• Brillo y calidez deslizando por los bordes, y páginas oscuras de noche.
+• Pasa página con los botones de volumen.
+• Comparte un resaltado como cita, o todas las notas de un libro a la vez.
+• Un botón «Volver» te devuelve a tu página después de un salto.
+
+EN TU IDIOMA
+Español, inglés, portugués de Brasil, francés, italiano, alemán, neerlandés, polaco, ruso, ucraniano, turco, árabe, hindi, indonesio, japonés, coreano, y chino simplificado y tradicional.
 
 PRIVACIDAD
-• Sin permiso de internet: ni Jacket ni los libros que abres en él pueden conectarse a la red.
+• Sin permiso de internet: ni Jacket ni los libros que abres en él pueden conectarse a la red. Las voces hablan en el propio móvil.
 • Sin cuentas, sin anuncios, sin analíticas, sin rastreo.
-• Libre y de código abierto bajo la Apache License 2.0: https://github.com/friendlyglobal/jacket
+• Copia de seguridad en el archivo que elijas: tu lista de libros, posiciones, marcadores, resaltados y ajustes (no los archivos de los libros).
+• Gratis y de código abierto con la Apache License 2.0: https://github.com/friendlyglobal/jacket
 
 CONVIENE SABER
-• La compatibilidad con la pantalla externa depende del teléfono. En teléfonos sin pantalla externa, esas opciones se ocultan.
-• Los libros con DRM (protegidos contra copia) no se pueden abrir.
-• La lectura en voz alta de libros de texto plano se detiene al salir de la app. La de los EPUB sigue sonando en segundo plano.
+• La pantalla externa depende del móvil; si no la tiene, esas opciones se ocultan.
+• Los libros con DRM no se pueden abrir.
+• Los PDF y los cómics no se leen en voz alta, y la lectura en voz alta de libros de texto se detiene al salir de la app.

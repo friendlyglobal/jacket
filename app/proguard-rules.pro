@@ -11,6 +11,7 @@
 # Decoration styles are Parcelable and looked up by class name in Readium's HTML templates.
 -keepnames class io.github.friendlyglobal.jacket.reader.UnreadVeil
 -keepnames class io.github.friendlyglobal.jacket.reader.Marker
+-keepnames class io.github.friendlyglobal.jacket.reader.HereMark
 
 # Optional dependencies referenced by libraries but not shipped.
 -dontwarn org.slf4j.**
@@ -28,3 +29,10 @@
 # loading layout for good.
 -keep class * extends androidx.work.InputMerger { <init>(); }
 -keep class * extends androidx.work.ListenableWorker { <init>(android.content.Context, androidx.work.WorkerParameters); }
+
+# sherpa-onnx (natural voices): its native code reads and fills these Kotlin classes by field and
+# method name through JNI, and calls back into Kotlin lambdas.
+-keep class com.k2fsa.sherpa.onnx.** { *; }
+-dontwarn com.k2fsa.sherpa.onnx.**
+# ...and it calls this one's invoke([F)Ljava/lang/Integer; by that exact name and signature.
+-keep class io.github.friendlyglobal.jacket.voice.KeepGoing { *; }

@@ -24,10 +24,18 @@ Android keeps this storage private to Jacket; other apps cannot read it.
 
 ## Read-aloud
 
-Read-aloud uses the text-to-speech engine installed on your phone, such as Google Speech
-Services. That engine is a separate app with its own privacy policy. When you use read-aloud,
-Jacket passes the engine the text being read. How the engine handles that text is covered by
-its own privacy policy.
+Jacket can read aloud with two kinds of voice.
+
+- **Natural voices** are part of Jacket and run inside the app, on your phone. The text they
+  read is turned into sound on the device and is not passed to any other app or sent anywhere.
+  Nothing is downloaded to use them.
+- **Your phone's voice** is the text-to-speech engine installed on your phone, such as Google
+  Speech Services. That engine is a separate app with its own privacy policy. When you read
+  aloud with it, Jacket passes the engine the text being read. How the engine handles that text
+  is covered by its own privacy policy.
+
+You choose the voice in Jacket's Settings or on the player. The natural voices read the
+languages they know; for any other language, the phone's voice is used.
 
 ## Backups
 

@@ -1,1 +1,1 @@
-E-reader for foldables that shows your book's cover on the outer screen
+E-reader for foldables: your book's cover outside, natural voices inside

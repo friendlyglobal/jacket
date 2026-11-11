@@ -4,7 +4,14 @@ import android.os.SystemClock
 import android.widget.Toast
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -100,6 +107,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.Closeable
 import java.io.File
 import java.nio.ByteBuffer
@@ -108,6 +116,9 @@ import java.nio.charset.CodingErrorAction
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipFile
 import kotlin.math.abs
+import kotlin.math.ceil
+import io.github.friendlyglobal.jacket.voice.withPhoneRegion
+import androidx.compose.foundation.interaction.DragInteraction
 
 /**
  * Opens a document off the main thread for as long as the caller is composed. It is closed even
@@ -264,7 +275,7 @@ fun PdfReader(book: Book, page: PageColors, nav: ReaderNav, haptics: Haptics, on
         result.isFailure -> ReaderError(stringResource(R.string.reader_error_pdf))
         else -> {
             val pdf = result.getOrThrow()
-            PagedList(pdf.pageCount, book.position, pdf.firstPageAspect, page, nav, haptics, onProgress, onCenterTap) { index, width ->
+            PagedList(pdf.pageCount, book.position, book.positionOffset, pdf.firstPageAspect, page, nav, haptics, onProgress, onCenterTap) { index, width ->
                 pdf.render(index, width)
             }
         }
@@ -308,7 +319,7 @@ fun ComicReader(book: Book, page: PageColors, nav: ReaderNav, haptics: Haptics, 
         result.isFailure || result.getOrThrow().pages.isEmpty() -> ReaderError(stringResource(R.string.reader_error_comic))
         else -> {
             val comic = result.getOrThrow()
-            PagedList(comic.pages.size, book.position, 0.66f, page, nav, haptics, onProgress, onCenterTap) { index, width ->
+            PagedList(comic.pages.size, book.position, book.positionOffset, 0.66f, page, nav, haptics, onProgress, onCenterTap) { index, width ->
                 comic.render(index, width)
             }
         }
@@ -319,6 +330,8 @@ fun ComicReader(book: Book, page: PageColors, nav: ReaderNav, haptics: Haptics, 
 private fun PagedList(
     count: Int,
     initial: Int,
+    /** How far down the page at [initial] the top of the screen was (0..1). */
+    initialOffset: Float,
     placeholderAspect: Float,
     page: PageColors,
     nav: ReaderNav,
@@ -344,7 +357,7 @@ private fun PagedList(
             if (target in 0 until count) {
                 // Further than the next page: worth a way back.
                 if (abs(target - first) > 1) {
-                    nav.cameFrom = Origin(first * 100 / (count - 1).coerceAtLeast(1)) { scope.launch { listState.scrollToItem(first) } }
+                    nav.cameFrom = Origin(first * 100 / (count - 1).coerceAtLeast(1), page = first + 1) { scope.launch { listState.scrollToItem(first) } }
                 }
                 scope.launch { listState.animateScrollToItem(target) }
             }
@@ -359,7 +372,7 @@ private fun PagedList(
         nav.turnPage = { delta -> nav.jumpTo(first + delta) }
     }
     PageTicks(listState, haptics)
-    TrackProgress(listState, count, onProgress)
+    TrackProgress(listState, count, initial, initialOffset, onProgress)
 
     val zoom = remember(listState) { PageZoom(scope, listState) }
     zoom.spring = MaterialTheme.motionScheme.defaultSpatialSpec()
@@ -497,7 +510,7 @@ fun TextReader(
             scope.launch { listState.animateScrollBy(delta * listState.layoutInfo.viewportSize.height * 0.85f) }
         }
     }
-    TrackProgress(listState, text.size, onProgress)
+    TrackProgress(listState, text.size, book.position, book.positionOffset, onProgress)
 
     // Read aloud: which paragraph is being spoken, and which characters of it so far.
     val listen = nav.listen
@@ -506,10 +519,39 @@ fun TextReader(
     var wordEnd by remember { mutableIntStateOf(0) }
     val token = remember { intArrayOf(0) }
     val context = LocalContext.current
+    // Where the paragraph being spoken is laid out: the controls keep off the line the voice is on.
+    val spokenBox = remember { SpokenBox() }
+    // "You were here": the sentence the voice stopped on stays marked for a moment after listening
+    // ends, on the theme's fades; nothing else on the page changes.
+    var hereParagraph by remember { mutableIntStateOf(-1) }
+    var hereSentence by remember { mutableStateOf(IntRange.EMPTY) }
+    val hereStrength = remember { Animatable(0f) }
+    val hereJob = remember { arrayOfNulls<Job>(1) }
+    val hereAppears = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
+    val hereFades = MaterialTheme.motionScheme.slowEffectsSpec<Float>()
+    fun markHere(paragraph: Int, at: Int) {
+        hereJob[0]?.cancel()
+        hereJob[0] = scope.launch {
+            hereSentence = sentenceAround(text[paragraph], at)
+            hereParagraph = paragraph
+            try {
+                hereStrength.snapTo(HERE_FROM)
+                hereStrength.animateTo(1f, hereAppears)
+                delay(HERE_HOLD_MS)
+                hereStrength.animateTo(0f, hereFades)
+            } finally {
+                hereParagraph = -1
+            }
+        }
+    }
     val controller = remember(book.id, speaker, text) {
         object : ListenController {
             override val previousLabel = R.string.listen_previous_paragraph
             override val nextLabel = R.string.listen_next_paragraph
+
+            /** Where the voice stopped: the paragraph, and the word in it. */
+            var stoppedParagraph = -1
+            var stoppedWord = 0
 
             fun say(index: Int, from: Int, queue: Boolean) {
                 if (index !in text.indices) {
@@ -527,13 +569,18 @@ fun TextReader(
             }
 
             fun play(index: Int, from: Int) {
+                // With the reader's accent: "pt" on a Brazilian phone is read as "pt-BR".
+                speaker.setLanguage(withPhoneRegion(book.language))
                 if (!speaker.acquire()) {
                     listen.active = true
                     listen.playing = false
                     return
                 }
+                // The voice is back: the mark of where it stopped has done its work.
+                hereJob[0]?.cancel()
                 listen.active = true
                 listen.playing = true
+                listen.preparing = speaker.slowToStart
                 token[0]++
                 say(index, from, false)
             }
@@ -544,8 +591,15 @@ fun TextReader(
                     Toast.makeText(context, R.string.listen_no_voice, Toast.LENGTH_LONG).show()
                     return
                 }
-                speaker.setLanguage(null)
-                play(listState.firstVisibleItemIndex, 0)
+                // Starting reads from the paragraph in view: the listener is where the voice is. If the
+                // voice stopped on this screen, it carries on from the sentence it stopped in.
+                listen.offPage = false
+                val shown = listState.layoutInfo.visibleItemsInfo.any { it.index == stoppedParagraph }
+                if (shown && stoppedParagraph in text.indices) {
+                    play(stoppedParagraph, sentenceAround(text[stoppedParagraph], stoppedWord).first)
+                } else {
+                    play(listState.firstVisibleItemIndex, 0)
+                }
             }
 
             override fun toggle() = if (listen.playing) pause() else resume()
@@ -555,6 +609,7 @@ fun TextReader(
                 speaker.stop()
                 speaker.release()
                 listen.playing = false
+                listen.preparing = false
             }
 
             fun resume() {
@@ -573,13 +628,57 @@ fun TextReader(
             }
 
             override fun stop() {
+                val wasListening = listen.active
+                val elsewhere = listen.offPage
+                val paragraph = spokenParagraph
+                val word = wordStart
                 token[0]++
                 speaker.stop()
                 speaker.release()
                 listen.active = false
                 listen.playing = false
+                listen.preparing = false
+                listen.offPage = false
                 listen.phrase = ""
                 spokenParagraph = -1
+                if (paragraph in text.indices) {
+                    stoppedParagraph = paragraph
+                    stoppedWord = word
+                }
+                // The text stays where it is. Following the voice, the sentence it stopped on is in
+                // front of you, and is marked; gone to look elsewhere, you are offered the way back to it.
+                if (!wasListening || paragraph !in text.indices) return
+                if (elsewhere) {
+                    nav.cameFrom = Origin(paragraph * 100 / text.size) {
+                        scope.launch {
+                            listState.scrollToItem(paragraph)
+                            markHere(paragraph, word)
+                        }
+                    }
+                } else {
+                    markHere(paragraph, word)
+                }
+            }
+
+            override fun backToVoice() {
+                listen.offPage = false
+                if (spokenParagraph >= 0) scope.launch { listState.animateScrollToItem(spokenParagraph) }
+            }
+
+            /** "Read from here": the voice goes to the sentence [from] characters into paragraph [index], paused or not before. */
+            fun listenFrom(index: Int, from: Int) {
+                listen.offPage = false
+                speaker.stop()
+                play(index, from)
+            }
+
+            override suspend fun spokenLine(): Rect? {
+                if (!listen.active || listen.offPage || spokenBox.paragraph != spokenParagraph) return null
+                val coordinates = spokenBox.coordinates?.takeIf { it.isAttached } ?: return null
+                val layout = spokenBox.layout ?: return null
+                val line = layout.getLineForOffset(wordStart.coerceIn(0, layout.layoutInput.text.length))
+                val at = coordinates.positionInWindow()
+                return Rect(at.x, at.y + layout.getLineTop(line), at.x + coordinates.size.width, at.y + layout.getLineBottom(line))
             }
         }
     }
@@ -596,6 +695,8 @@ fun TextReader(
 
             override fun onRange(utterance: Utterance, start: Int, end: Int) {
                 if (utterance.token != token[0]) return
+                // Its first word: it's reading now.
+                listen.preparing = false
                 spokenParagraph = utterance.paragraph
                 wordStart = utterance.offset + start
                 wordEnd = utterance.offset + end
@@ -622,17 +723,27 @@ fun TextReader(
             }
         }
         nav.listenController = controller
+        // A new voice was chosen while listening: it takes over from the word the last one reached.
+        if (listen.active && listen.playing && spokenParagraph >= 0) controller.resume()
         onDispose {
             speaker.listener = null
             nav.listenController = null
         }
     }
-    // Keep the spoken paragraph on screen.
+    // A finger on the text while it's read aloud: the listener went to look elsewhere, and the
+    // text stops following the voice until they go back (the app's own scrolling isn't a drag).
+    LaunchedEffect(listState) {
+        listState.interactionSource.interactions.collect { interaction ->
+            if (interaction is DragInteraction.Start && listen.active) listen.offPage = true
+        }
+    }
+    // Keep the spoken paragraph on screen, clear of the footer line the mini player sits in.
+    val footerRoom = with(LocalDensity.current) { SPOKEN_CLEAR_OF_FOOTER.roundToPx() }
     LaunchedEffect(spokenParagraph) {
-        if (spokenParagraph < 0 || !listen.playing) return@LaunchedEffect
+        if (spokenParagraph < 0 || !listen.playing || listen.offPage) return@LaunchedEffect
         val info = listState.layoutInfo
         val item = info.visibleItemsInfo.firstOrNull { it.index == spokenParagraph }
-        if (item == null || item.offset + item.size > info.viewportEndOffset - 120) listState.animateScrollToItem(spokenParagraph)
+        if (item == null || item.offset + item.size > info.viewportEndOffset - footerRoom) listState.animateScrollToItem(spokenParagraph)
     }
 
     val family = rememberReadingFontFamily(settings.font)
@@ -642,6 +753,7 @@ fun TextReader(
     val unread = SpanStyle(color = page.text.copy(alpha = 0.4f))
     val currentWord = SpanStyle(background = page.link.copy(alpha = 0.24f))
     val step = { listState.layoutInfo.viewportSize.height * 0.85f }
+    val besideWords = 24.dp
     Box(
         Modifier.fillMaxSize().tapZones(
             onPrevious = { scope.launch { listState.animateScrollBy(-step()) } },
@@ -658,6 +770,12 @@ fun TextReader(
             itemsIndexed(text) { index, paragraph ->
                 // While listening: read text in full ink, unread text soft, the current word marked.
                 val spoken = when {
+                    !listen.active && index == hereParagraph -> buildAnnotatedString {
+                        append(paragraph)
+                        val from = hereSentence.first.coerceIn(0, paragraph.length)
+                        val to = (hereSentence.last + 1).coerceIn(from, paragraph.length)
+                        if (to > from) addStyle(SpanStyle(background = page.link.copy(alpha = HERE_ALPHA * hereStrength.value)), from, to)
+                    }
                     !listen.active || spokenParagraph < 0 || index < spokenParagraph -> AnnotatedString(paragraph)
                     index > spokenParagraph -> AnnotatedString(paragraph, unread)
                     else -> buildAnnotatedString {
@@ -668,14 +786,68 @@ fun TextReader(
                         if (end > start) addStyle(currentWord, start, end)
                     }
                 }
+                val speaking = listen.active && index == spokenParagraph
+                // How it was laid out, for finding the sentence under a tap.
+                val laid = remember { arrayOfNulls<TextLayoutResult>(1) }
                 Text(
                     spoken, style = style,
-                    modifier = Modifier.widthIn(max = 680.dp).fillMaxWidth().padding(horizontal = 28.dp, vertical = 7.dp),
+                    modifier = Modifier.widthIn(max = 680.dp).fillMaxWidth().padding(horizontal = 28.dp, vertical = 7.dp)
+                        .then(
+                            // While the book is read aloud, a tap on a sentence reads on from there.
+                            // Beside the words (past a short line's end) it's the page's ordinary tap.
+                            if (listen.active) {
+                                Modifier.pointerInput(index, paragraph) {
+                                    detectTapGestures { tap ->
+                                        val layout = laid[0]
+                                        val line = layout?.getLineForVerticalPosition(tap.y)
+                                        if (layout == null || line == null || tap.x > layout.getLineRight(line) + besideWords.toPx()) {
+                                            onCenterTap()
+                                            return@detectTapGestures
+                                        }
+                                        haptics.tick()
+                                        controller.listenFrom(index, sentenceAround(paragraph, layout.getOffsetForPosition(tap)).first)
+                                    }
+                                }
+                            } else {
+                                Modifier
+                            },
+                        )
+                        .then(
+                            if (speaking) {
+                                Modifier.onGloballyPositioned {
+                                    spokenBox.paragraph = index
+                                    spokenBox.coordinates = it
+                                }
+                            } else {
+                                Modifier
+                            },
+                        ),
+                    onTextLayout = {
+                        laid[0] = it
+                        if (speaking) spokenBox.layout = it
+                    },
                 )
             }
         }
     }
 }
+
+/** Where the paragraph being read aloud is laid out, and how its lines fall. */
+private class SpokenBox {
+    var paragraph = -1
+    var coordinates: LayoutCoordinates? = null
+    var layout: TextLayoutResult? = null
+}
+
+/** The foot of the screen the paragraph being read is kept out of: the footer line and the system's bar under it. */
+private val SPOKEN_CLEAR_OF_FOOTER = 96.dp
+
+/** The mark left on the sentence where the voice stopped: its wash at full strength, and the strength it starts from... */
+private const val HERE_ALPHA = 0.3f
+private const val HERE_FROM = 0.6f
+
+/** ...and how long it stays before it fades: about two seconds in all. */
+private const val HERE_HOLD_MS = 1_800L
 
 /**
  * A light tick each time a new page scrolls into first place. A fling through many pages gets a
@@ -699,11 +871,25 @@ private fun PageTicks(listState: LazyListState, haptics: Haptics) {
 
 private const val TICK_GAP_MS = 160L
 
-/** Turns list scrolling into a saved position and an overall 0..1 progress, once scrolling settles. */
+/**
+ * Turns list scrolling into a saved position and an overall 0..1 progress, once scrolling settles.
+ * The place saved is an item (a page, a paragraph) and how far down it the top of the screen was:
+ * the list opens on item [start], and is first put [startOffset] of the way down it, so a tall
+ * page or a long paragraph isn't begun again from its top.
+ */
 @Composable
-private fun TrackProgress(listState: LazyListState, count: Int, onProgress: ProgressSink) {
+private fun TrackProgress(listState: LazyListState, count: Int, start: Int, startOffset: Float, onProgress: ProgressSink) {
     val sink by rememberUpdatedState(onProgress)
     LaunchedEffect(listState, count) {
+        if (startOffset > 0f && startOffset.isFinite()) {
+            // Known once the item has been laid out: its height differs from one screen to another.
+            // (Not waited for long: nothing is saved until this is done.)
+            val index = start.coerceIn(0, (count - 1).coerceAtLeast(0))
+            val item = withTimeoutOrNull(2_000) {
+                snapshotFlow { listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == index } }.first { it != null }
+            }
+            if (item != null) listState.scrollToItem(index, ceil(startOffset.coerceAtMost(1f) * item.size).toInt())
+        }
         snapshotFlow { Triple(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset, listState.canScrollForward) }
             .collectLatest { (index, offset, more) ->
                 delay(300)

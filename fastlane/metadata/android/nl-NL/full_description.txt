@@ -1,42 +1,50 @@
-Jacket is een opensource e-reader voor vouwbare telefoons. Terwijl je op het binnenscherm leest, toont het buitenscherm de omslag van je boek van rand tot rand, als een albumhoes, zodat de mensen om je heen kunnen zien wat je leest.
+Jacket is een gratis opensource-e-reader die je foldable het boek laat dragen dat je aan het lezen bent. Terwijl je binnen leest, toont het buitenscherm de omslag van rand tot rand, als een albumhoes. Liever luisteren? Natuurlijke stemmen lezen elk boek voor, gewoon op je telefoon. Jacket werkt op elke Android-telefoon; de omslagfuncties komen pas echt tot hun recht op foldables.
 
 DE OMSLAG, AAN DE BUITENKANT
-• Boekvormige foldables: de omslag vult het buitenscherm terwijl je binnen leest, via de dual-screenmodus van Android.
-• Galaxy Z Flip: een coverschermwidget voor het Flex Window.
-• Elke telefoon of tablet: dezelfde widget op je startscherm.
-• Zet de omslag op het buitenscherm op elk moment uit in Instellingen.
-
-LEZEN
-• EPUB, PDF, CBZ-strips en platte tekst, uit je eigen bestanden. Gebruik Boeken toevoegen, of Openen met of Delen vanuit een andere app.
-• EPUB's worden weergegeven met de opensource toolkit Readium: echte pagina's, twee pagina's naast elkaar als je telefoon opengevouwen is, of doorlopend scrollen als je dat liever hebt.
-• Inhoudsopgave met subhoofdstukken, het huidige hoofdstuk dat meeloopt terwijl je leest, resterende pagina's in het hoofdstuk en een schuifbalk die het hoofdstuk onder je duim laat zien.
-• Bladwijzers, markeringen in meerdere kleuren met notities, en zoeken in de volledige tekst van EPUB's.
+• Foldables in boekformaat: de omslag vult het buitenscherm terwijl je binnen leest en volgt live hoe ver je bent: Nieuw, Ik lees, Bijna uit, Ik luister, Uitgelezen en een zuinige gedimde stand.
+• Als je wilt, toont de gedimde omslag een van je markeringen.
+• Omslag bij dichtgeklapt: klap de telefoon dicht met een boek open en de omslag blijft aan, met onderaan een speler om te pauzeren of te verspringen zonder open te vouwen.
+• Galaxy Z Flip: een coverschermwidget. Motorola Razr: open Jacket op het externe scherm.
 
 LUISTEREN
-• De luisterboekmodus leest EPUB- en tekstboeken voor met de tekst-naar-spraakstem van je telefoon en markeert elk woord terwijl het wordt uitgesproken.
-• Speelt door met het scherm uit, met bediening op het vergrendelscherm en via je koptelefoon.
-• Slaaptimer: stopt na een ingestelde tijd of aan het einde van het hoofdstuk.
+• Natuurlijke stemmen zitten in Jacket en spreken 31 talen zonder internet. De stem van je telefoon leest de rest.
+• Elk woord licht op de pagina op terwijl het wordt uitgesproken, en de pagina slaat met de stem mee om.
+• Tik op een zin om vanaf daar te luisteren. Stop je, dan gaat het de volgende keer verder bij de zin waar je was.
+• Gaat door met het scherm uit, met bediening op het vergrendelscherm en via je koptelefoon.
+• Snelheid van 0,8× tot 2×, en een slaaptimer voor 15, 30 of 60 minuten of tot het einde van het hoofdstuk.
 
-LEESCOMFORT
-• De lettertypen Literata, Atkinson Hyperlegible en OpenDyslexic.
-• Tekstgrootte, regelafstand, marges en uitvullen.
-• De paginakleuren Boek, Papier, Donker en Zwart.
+LEZEN
+• EPUB, PDF, CBZ-strips en platte tekst uit je eigen bestanden, via Boeken toevoegen, Openen met of Delen.
+• Echte EPUB-pagina's, opengevouwen twee naast elkaar, of scrollen.
+• Bladeren dat je vinger volgt: Papier, Krul, Kaarten of Schuiven.
+• Inhoud, bladwijzers, markeringen in vijf kleuren, notities en zoeken in EPUB's.
+• De lettertypen Literata, Atkinson Hyperlegible en OpenDyslexic; tekstgrootte, regelafstand, marges en uitvullen; vier paginakleuren.
+• Knijp of dubbeltik om in te zoomen op pdf's en strips.
+
+JE BIBLIOTHEEK
+• Gratis boeken: 114 klassiekers in 16 talen waarvan het auteursrecht is verlopen, te downloaden via je browser.
+• Collecties voor een leesclub, een reis of een genre.
+• Geef elk boek een nieuwe omslag: een foto, of een ontwerp in jouw kleuren.
+• Widgets: de omslag van je boek, een speler, je plank en je leesreeks.
+• Je leestijd van vandaag en je reeks, de resterende tijd in het hoofdstuk, en een bewaakte map die nieuwe boeken toevoegt.
+
+ELKE DAG
+• Tafelmodus: half dichtgevouwen staat de pagina boven de vouw en de bediening eronder.
+• Helderheid en warmte met vegen langs de randen, en donkere pagina's 's nachts.
 • Bladeren met de volumeknoppen.
+• Deel een markering als citaat, of alle notities van een boek tegelijk.
+• Een knop "Terug" brengt je na een sprong terug naar je pagina.
 
-BIBLIOTHEEK
-• Doorzoek en sorteer je boeken.
-• Een plank met uitgelezen boeken en een eindscherm als je de laatste pagina bereikt.
-• Exporteer een back-upbestand en importeer het later opnieuw of op een andere telefoon.
-
-ONTWERP
-• Material 3 Expressive: kleuren uit de omslag van het boek dat je leest, verende animaties en haptische feedback.
+IN JOUW TAAL
+Nederlands, Engels, Spaans, Braziliaans-Portugees, Frans, Italiaans, Duits, Pools, Russisch, Oekraïens, Turks, Arabisch, Hindi, Indonesisch, Japans, Koreaans, en vereenvoudigd en traditioneel Chinees.
 
 PRIVACY
-• Geen internettoestemming: Jacket en de boeken die je erin opent, kunnen geen verbinding maken met het netwerk.
+• Geen internettoestemming: Jacket en de boeken die je erin opent kunnen geen verbinding met het netwerk maken. De stemmen spreken op je telefoon zelf.
 • Geen accounts, geen advertenties, geen analyses, geen tracking.
-• Vrij en opensource onder de Apache License 2.0: https://github.com/friendlyglobal/jacket
+• Back-up naar een bestand naar keuze: je boekenlijst, posities, bladwijzers, markeringen en instellingen (niet de boekbestanden zelf).
+• Gratis en opensource onder de Apache License 2.0: https://github.com/friendlyglobal/jacket
 
 GOED OM TE WETEN
-• Ondersteuning voor het buitenscherm hangt af van de telefoon. Op telefoons zonder buitenscherm zijn die opties verborgen.
-• Boeken met DRM (kopieerbeveiliging) kunnen niet worden geopend.
-• Voorlezen van tekstboeken stopt als je de app verlaat. EPUB's worden ook op de achtergrond voorgelezen.
+• Of het buitenscherm werkt, hangt af van de telefoon; zonder buitenscherm zijn die opties verborgen.
+• Boeken met DRM kunnen niet worden geopend.
+• Pdf's en strips worden niet voorgelezen, en voorlezen van tekstboeken stopt als je de app verlaat.

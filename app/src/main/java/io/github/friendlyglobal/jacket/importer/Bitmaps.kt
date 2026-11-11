@@ -36,6 +36,34 @@ object Bitmaps {
         return BitmapFactory.decodeFile(file.path, BitmapFactory.Options().apply { inSampleSize = sample })
     }
 
+    /** The color a cover's book is tinted with: its most vivid, else its most common. */
+    fun seedOf(cover: Bitmap): Int? {
+        val palette = androidx.palette.graphics.Palette.from(cover).maximumColorCount(16).generate()
+        return (palette.vibrantSwatch ?: palette.mutedSwatch ?: palette.dominantSwatch)?.rgb
+    }
+
+    /**
+     * An image the reader picked, upright (as the camera meant it), about [maxHeight] tall and
+     * cropped to a book's 2:3 from its middle.
+     */
+    fun decodeCover(context: android.content.Context, uri: android.net.Uri, maxHeight: Int = 1400): Bitmap? {
+        val full = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            val source = android.graphics.ImageDecoder.createSource(context.contentResolver, uri)
+            android.graphics.ImageDecoder.decodeBitmap(source) { decoder, info, _ ->
+                // Pixels Palette and the JPEG encoder can read.
+                decoder.allocator = android.graphics.ImageDecoder.ALLOCATOR_SOFTWARE
+                val height = info.size.height
+                if (height > maxHeight * 2) decoder.setTargetSampleSize(height / maxHeight)
+            }
+        } else {
+            val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return null
+            decodeSampled(bytes, maxHeight)
+        } ?: return null
+        val width = minOf(full.width, full.height * 2 / 3)
+        val height = minOf(full.height, full.width * 3 / 2)
+        return Bitmap.createBitmap(full, (full.width - width) / 2, (full.height - height) / 2, width.coerceAtLeast(1), height.coerceAtLeast(1))
+    }
+
     fun saveJpeg(bitmap: Bitmap, file: File, maxHeight: Int) {
         val scaled = if (bitmap.height > maxHeight) {
             bitmap.scale((bitmap.width * maxHeight / bitmap.height.toFloat()).toInt().coerceAtLeast(1), maxHeight)

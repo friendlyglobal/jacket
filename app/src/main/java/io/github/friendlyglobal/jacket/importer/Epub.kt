@@ -18,6 +18,8 @@ object Epub {
         val coverPath: String?,
         /** Content documents in reading order, as paths inside the container. */
         val spine: List<String>,
+        /** The language the book declares (dc:language), if any. */
+        val language: String? = null,
     )
 
     private class Item(val href: String, val mediaType: String, val properties: String)
@@ -27,7 +29,7 @@ object Epub {
         val cover = pkg.coverPath?.let { path ->
             zip.getEntry(path)?.let { entry -> zip.getInputStream(entry).use { Bitmaps.decodeSampled(it.readBytes(), 1400) } }
         }
-        BookMeta(pkg.title, pkg.author, cover, pkg.spine.size)
+        BookMeta(pkg.title, pkg.author, cover, pkg.spine.size, pkg.language)
     }
 
     fun readPackage(open: (String) -> InputStream?): Package {
@@ -38,6 +40,7 @@ object Epub {
         var title: String? = null
         var author: String? = null
         var coverId: String? = null
+        var language: String? = null
         val items = LinkedHashMap<String, Item>()
         val spineIds = mutableListOf<String>()
 
@@ -49,6 +52,7 @@ object Epub {
                     when (parser.name) {
                         "title" -> if (title == null && parser.namespace == DC) title = parser.nextText().trim()
                         "creator" -> if (author == null && parser.namespace == DC) author = parser.nextText().trim()
+                        "language" -> if (language == null && parser.namespace == DC) language = parser.nextText().trim().takeIf { it.isNotEmpty() }
                         "meta" -> if (parser.getAttributeValue(null, "name") == "cover") {
                             coverId = parser.getAttributeValue(null, "content")
                         }
@@ -78,7 +82,7 @@ object Epub {
             .filter { it.mediaType.contains("html") || it.mediaType.isEmpty() }
             .map { it.href }
 
-        return Package(title, author, cover?.href, spine)
+        return Package(title, author, cover?.href, spine, language)
     }
 
     private fun newParser(stream: InputStream): XmlPullParser = Xml.newPullParser().apply {

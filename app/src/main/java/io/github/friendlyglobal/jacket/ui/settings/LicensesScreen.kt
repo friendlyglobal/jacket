@@ -120,7 +120,7 @@ private fun Entry(
             colors = ListItemDefaults.colors(
                 containerColor = if (expanded) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
             ),
-            supportingContent = { Text(listOf(license, copyright.lines().firstOrNull().orEmpty()).filter { it.isNotBlank() }.joinToString(" · ")) },
+            supportingContent = { Text(listOf(license, copyright.lines().firstOrNull().orEmpty()).filter { it.isNotBlank() }.joinToString(stringResource(R.string.separator))) },
         ) { Text(name) }
         AnimatedVisibility(expanded, enter = expandVertically() + fadeIn(), exit = shrinkVertically() + fadeOut()) {
             val text by produceState("", file) {

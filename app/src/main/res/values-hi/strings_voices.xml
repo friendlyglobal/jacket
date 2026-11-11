@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Natural voices, the welcome pages and the sample book (see values/strings_voices.xml for what each is). -->
+<resources>
+    <string name="settings_group_listening">सुनना</string>
+    <string name="voice_title">आवाज़</string>
+    <string name="voice_phone">फ़ोन की आवाज़</string>
+    <string name="voice_phone_description">आपके फ़ोन में पहले से मौजूद। जो भी भाषा जानती है, उसमें पढ़ती है।</string>
+    <string name="voice_natural">स्वाभाविक</string>
+    <string name="voice_female">महिला आवाज़ %1$d</string>
+    <string name="voice_male">पुरुष आवाज़ %1$d</string>
+    <string name="voice_hear">%1$s सुनें</string>
+    <string name="voice_stop_sample">रोकें</string>
+    <string name="voice_change">बदलें</string>
+    <string name="voice_book_language">किताब की भाषा: %1$s</string>
+    <string name="voice_book_language_hint">सही नहीं है? इसे बदलें, ताकि सही आवाज़ पढ़े।</string>
+    <string name="voice_language_title">यह किताब किस भाषा में है?</string>
+    <string name="voice_language_from_book">किताब के अनुसार</string>
+    <string name="voice_only_language">सिर्फ़ इस भाषा की किताबों के लिए: %1$s</string>
+    <string name="voice_only_language_description">दूसरी भाषाओं की किताबों की आवाज़ वही रहती है।</string>
+    <string name="voice_not_in_language">%1$s: स्वाभाविक आवाज़ें अभी यह भाषा नहीं बोलतीं, इसलिए फ़ोन की आवाज़ पढ़ती है।</string>
+    <string name="voice_private">स्वाभाविक आवाज़ें आपके फ़ोन पर ही बोलती हैं। आप जो पढ़ते हैं, वह कहीं नहीं भेजा जाता।</string>
+    <string name="voice_about">इन आवाज़ों के बारे में</string>
+    <string name="voice_about_text">स्वाभाविक आवाज़ें Jacket के साथ आती हैं और इंटरनेट के बिना काम करती हैं। इनका इस्तेमाल मुफ़्त है, लेकिन किसी को धोखा देने या नुकसान पहुँचाने के लिए इनका इस्तेमाल नहीं किया जा सकता, जैसे किसी आवाज़ को असली व्यक्ति की आवाज़ बताना। पूरी शर्तें सेटिंग में, लाइसेंस के अंतर्गत हैं।</string>
+    <string name="voice_slow">यह आवाज़ इस फ़ोन के लिए भारी है। बदलने के लिए टैप करें।</string>
+    <string name="listen_preparing">आवाज़ तैयार हो रही है…</string>
+    <string name="voice_stopped">स्वाभाविक आवाज़ रुक गई। दोबारा कोशिश करें या फ़ोन की आवाज़ चुनें।</string>
+    <string name="voice_fell_back">स्वाभाविक आवाज़ शुरू नहीं हो सकी, इसलिए फ़ोन की आवाज़ पढ़ रही है।</string>
+    <string name="voice_phone_settings">फ़ोन की आवाज़ की सेटिंग</string>
+    <string name="voice_phone_settings_description">चुनें कि आपके फ़ोन की आवाज़ कैसी सुनाई दे।</string>
+    <string name="voice_settings_hint">हर किताब अपनी भाषा में पढ़ी जाती है। स्वाभाविक आवाज़ें कई भाषाएँ बोलती हैं; बाकी फ़ोन की आवाज़ पढ़ती है।</string>
+    <string name="onboarding_cover_body">जब आप अंदर पढ़ते हैं, बाहरी स्क्रीन आपकी किताब का कवर पहनती है। फ़ोन बंद करें तो कवर बना रहता है; उसे आधा खोलकर रखें तो पन्ना मोड़ के ऊपर रहता है।</string>
+    <string name="onboarding_cover_outside">बाहर कवर</string>
+    <string name="onboarding_read_title">असली पन्ने, जो काग़ज़ की तरह पलटते हैं</string>
+    <string name="onboarding_read_body">पन्ने आपकी उँगली के नीचे उठते हैं और सरकते, मुड़ते या बँटते हैं। शब्दों को दबाकर रखें, उन्हें हाइलाइट करें और नोट जोड़ें।</string>
+    <string name="onboarding_read_listen_body">पन्ने काग़ज़ की तरह पलटते हैं, फ़ोन खुला हो तो दो साथ-साथ। या आराम से बैठकर सुनें: स्वाभाविक आवाज़ें कोई भी किताब पढ़कर सुनाती हैं।</string>
+    <string name="onboarding_listen_title">या बस सुनें</string>
+    <string name="onboarding_listen_body">स्वाभाविक आवाज़ें कोई भी किताब पढ़कर सुनाती हैं, और हर शब्द बोले जाते ही चमक उठता है। स्क्रीन बंद होने पर भी चलता रहता है।</string>
+    <string name="onboarding_yours_title">इसे अपना बनाएँ</string>
+    <string name="onboarding_yours_body">शुरुआत के लिए कुछ चुनाव। आप इन्हें कभी भी बदल सकते हैं।</string>
+    <string name="onboarding_yours_sample">एक समय की बात है, एक किताब को उसका पाठक मिल गया।</string>
+    <string name="onboarding_start_title">आपकी किताबें आपकी ही रहती हैं</string>
+    <string name="onboarding_widget">Jacket के विजेट से अपनी किताब का कवर होम स्क्रीन पर रखें।</string>
+    <string name="library_empty_title_phone">आपकी अगली किताब यहाँ से शुरू होती है</string>
+    <string name="library_empty_message_phone">कोई EPUB, PDF, CBZ कॉमिक या टेक्स्ट फ़ाइल जोड़ें। Jacket उसकी एक निजी कॉपी रखता है, उसे पलटने के लिए असली पन्ने देता है और उसे स्वाभाविक आवाज़ में पढ़कर सुना सकता है।</string>
+    <string name="library_try_sample">एक नमूना किताब आज़माएँ</string>
+    <string name="sample_failed">नमूना किताब नहीं खुल सकी।</string>
+</resources>

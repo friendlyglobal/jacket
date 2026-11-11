@@ -31,6 +31,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,11 +60,18 @@ import io.github.friendlyglobal.jacket.ui.CoverTransition
 import io.github.friendlyglobal.jacket.ui.KeepScreenOn
 import io.github.friendlyglobal.jacket.ui.LocalCoverSpot
 import io.github.friendlyglobal.jacket.ui.LocalCoverTransition
+import io.github.friendlyglobal.jacket.ui.home.FreeBooksScreen
 import io.github.friendlyglobal.jacket.ui.home.HomeScreen
 import io.github.friendlyglobal.jacket.ui.home.Onboarding
 import io.github.friendlyglobal.jacket.ui.home.heroBook
+import io.github.friendlyglobal.jacket.ui.home.libraryPaneWidth
 import io.github.friendlyglobal.jacket.ui.home.onFinishedShelf
+import io.github.friendlyglobal.jacket.ui.Foldables
+import io.github.friendlyglobal.jacket.ui.rememberFoldable
 import io.github.friendlyglobal.jacket.ui.rememberFoldedShut
+import android.widget.Toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import io.github.friendlyglobal.jacket.ui.settings.LicensesScreen
 import io.github.friendlyglobal.jacket.ui.settings.SettingsScreen
@@ -90,10 +98,12 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.fragmentFactory = ReaderFragments
         super.onCreate(savedInstanceState)
         ReaderFragments.removeRestoredReaders(supportFragmentManager)
-        outer = OuterDisplay(this) { OuterCoverHost() }
+        // It wears the cover of the book that is open, which a finished book opened again isn't
+        // the library's current one.
+        outer = OuterDisplay(this) { OuterCoverHost(bookId = outer.bookId) }
         if (savedInstanceState == null) handle(intent)
         setContent {
-            JacketRoot(outer, openRequests, listenRequests, importing, reports, onImport = { importUris(it) })
+            JacketRoot(outer, openRequests, listenRequests, importing, reports, onImport = { importUris(it) }, onSample = ::openSample)
         }
     }
 
@@ -101,6 +111,15 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         lifecycleScope.launch { library.scanWatchedFolder()?.let(reports::tryEmit) }
+    }
+
+    /**
+     * Leaving the screen: what hasn't been saved yet is saved now. Android can close Jacket from
+     * here without telling it (an update does), and the last page turned is where the reader is.
+     */
+    override fun onStop() {
+        super.onStop()
+        library.flush()
     }
 
     /** Volume keys turn pages while reading, when that's switched on (see [ReaderKeys]). */
@@ -127,6 +146,15 @@ class MainActivity : AppCompatActivity() {
     /** Widget taps open a book; "Open with" and "Share" hand us files to import. */
     private fun handle(intent: Intent?) {
         intent ?: return
+        // Debug builds only: see the welcome as a foldable or as any other phone does, whatever
+        // this device is.  adb shell am start -n <app>/.MainActivity -\-es jacket.device phone|foldable
+        if (Foldables.debuggable(this)) {
+            when (intent.getStringExtra(EXTRA_DEVICE)) {
+                "phone" -> Foldables.override.value = false
+                "foldable" -> Foldables.override.value = true
+                "auto" -> Foldables.override.value = null
+            }
+        }
         intent.getStringExtra(EXTRA_OPEN_BOOK)?.let {
             if (intent.getBooleanExtra(EXTRA_LISTEN, false)) listenRequests.value = it
             openRequests.value = it
@@ -160,6 +188,27 @@ class MainActivity : AppCompatActivity() {
         return Uri.fromFile(file)
     }
 
+    /**
+     * The book that comes with Jacket (The Time Machine, in the public domain), for trying the
+     * reader with nothing of your own to hand: added to the library like any file, and opened.
+     */
+    private fun openSample() {
+        lifecycleScope.launch {
+            val file = runCatching {
+                withContext(Dispatchers.IO) {
+                    File(File(cacheDir, "sample").apply { mkdirs() }, SAMPLE_NAME).also { target ->
+                        assets.open(SAMPLE_ASSET).use { input -> target.outputStream().use { input.copyTo(it) } }
+                    }
+                }
+            }.getOrNull()
+            if (file == null) {
+                Toast.makeText(this@MainActivity, R.string.sample_failed, Toast.LENGTH_LONG).show()
+                return@launch
+            }
+            importUris(listOf(Uri.fromFile(file)), openAfter = true)
+        }
+    }
+
     private fun importUris(uris: List<Uri>, openAfter: Boolean = false) {
         lifecycleScope.launch {
             importing.value = true
@@ -176,12 +225,16 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_OPEN_BOOK = "app.usefriendly.jacket.OPEN_BOOK"
         const val EXTRA_LISTEN = "app.usefriendly.jacket.LISTEN"
+        private const val EXTRA_DEVICE = "jacket.device"
+        private const val SAMPLE_ASSET = "sample/the-time-machine.epub"
+        private const val SAMPLE_NAME = "The Time Machine.epub"
     }
 }
 
 private const val HOME = "home"
 private const val SETTINGS = "settings"
 private const val LICENSES = "licenses"
+private const val FREE_BOOKS = "free-books"
 private const val READ = "read:"
 
 @Composable
@@ -192,6 +245,7 @@ private fun JacketRoot(
     importing: StateFlow<Boolean>,
     reports: SharedFlow<ImportReport>,
     onImport: (List<Uri>) -> Unit,
+    onSample: () -> Unit,
 ) {
     val library = LocalContext.current.library
     val resources = LocalResources.current
@@ -200,12 +254,16 @@ private fun JacketRoot(
     val missing by library.missing.collectAsStateWithLifecycle()
     val busy by importing.collectAsStateWithLifecycle()
     val outerAvailable by outer.available.collectAsStateWithLifecycle()
+    // A phone that folds is welcomed with its outer screen; any other isn't told about one.
+    val foldable by rememberFoldable(outerAvailable)
     val request by openRequests.collectAsStateWithLifecycle()
     val listenFor by listenRequests.collectAsStateWithLifecycle()
     var destination by rememberSaveable { mutableStateOf(HOME) }
     val snackbar = remember { SnackbarHostState() }
     // Kept here so closing a book can bring the place its cover lands into view.
     val libraryGrid = rememberLazyGridState()
+    // Wide enough that the book you're reading has a pane of its own beside the shelves.
+    val libraryTwoPane = libraryPaneWidth() != null
 
     val openBook = state.find(destination.takeIf { it.startsWith(READ) }?.removePrefix(READ))
     // Where the open book's cover took off from in the library, then where it will land.
@@ -252,6 +310,7 @@ private fun JacketRoot(
     // The outer display follows "is a book open", not a particular reader screen, so switching
     // books keeps it on. A manual toggle in the reader sticks until reading stops.
     val reading = openBook != null
+    SideEffect { outer.bookId = openBook?.id }
     LaunchedEffect(reading, outerAvailable, state.settings.autoOuterScreen) {
         if (!reading) outer.stop()
         else if (outerAvailable && state.settings.autoOuterScreen) outer.start()
@@ -293,10 +352,10 @@ private fun JacketRoot(
                         val fromBook = initialState.startsWith(READ)
                         val toBook = targetState.startsWith(READ)
                         when {
-                            targetState == LICENSES || (targetState == SETTINGS && initialState != LICENSES) ->
+                            targetState == LICENSES || targetState == FREE_BOOKS || (targetState == SETTINGS && initialState != LICENSES) ->
                                 (slideInHorizontally(spatial) { it / 3 } + fadeIn(tween(240))) togetherWith
                                     (slideOutHorizontally(spatial) { -it / 10 } + fadeOut(tween(160)))
-                            initialState == LICENSES || initialState == SETTINGS ->
+                            initialState == LICENSES || initialState == SETTINGS || initialState == FREE_BOOKS ->
                                 (slideInHorizontally(spatial) { -it / 10 } + fadeIn(tween(240))) togetherWith
                                     (slideOutHorizontally(spatial) { it / 3 } + fadeOut(tween(160)))
                             // Book to book: a crossfade, and the next book opens its own cover.
@@ -334,6 +393,11 @@ private fun JacketRoot(
                                 onLicenses = { destination = LICENSES },
                             )
                             target == LICENSES -> LicensesScreen(onBack = { destination = SETTINGS })
+                            target == FREE_BOOKS -> FreeBooksScreen(
+                                state = state,
+                                onBack = { destination = HOME },
+                                onOpen = { book -> open(book.id, CoverSpot.TILE) },
+                            )
                             book != null -> JacketTheme(seed = if (bookColors) book.seedColor else null, animated = false) {
                                 CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) {
                                     ReaderScreen(
@@ -353,9 +417,10 @@ private fun JacketRoot(
                                                 libraryGrid.requestScrollToItem(0)
                                             }
                                             // It lands on the hero card when that shows this book and
-                                            // is in view (it heads the grid), else back on its tile.
-                                            val onHero = !state.onFinishedShelf && state.heroBook(missing)?.id == book.id &&
-                                                libraryGrid.firstVisibleItemIndex == 0
+                                            // is in view (it heads the grid, or has a pane of its own
+                                            // on a wide screen), else back on its tile.
+                                            val onHero = state.heroBook(missing)?.id == book.id &&
+                                                (libraryTwoPane || !state.onFinishedShelf && libraryGrid.firstVisibleItemIndex == 0)
                                             coverSpot = if (onHero) CoverSpot.HERO else CoverSpot.TILE
                                         },
                                         onBack = { destination = HOME },
@@ -380,7 +445,11 @@ private fun JacketRoot(
                                 ) { welcoming ->
                                     if (welcoming) {
                                         Onboarding(
+                                            foldable = foldable,
+                                            settings = state.settings,
+                                            onSettings = library::updateSettings,
                                             onImport = onImport,
+                                            onSample = onSample,
                                             onDone = { library.updateSettings { it.copy(onboarded = true) } },
                                         )
                                     } else {
@@ -391,6 +460,8 @@ private fun JacketRoot(
                                             importing = busy,
                                             snackbar = snackbar,
                                             onImport = onImport,
+                                            onSample = onSample,
+                                            foldable = foldable,
                                             onOpen = { book, spot -> open(book.id, spot) },
                                             onShowOnCover = { library.setCurrent(it.id) },
                                             onDelete = { library.delete(it.id) },
@@ -399,6 +470,12 @@ private fun JacketRoot(
                                             missing = missing,
                                             onShelf = { finished -> library.updateSettings { it.copy(showFinished = finished) } },
                                             onFinished = { book, done -> library.setFinished(book.id, done) },
+                                            onListen = { book ->
+                                                listenRequests.value = book.id
+                                                open(book.id, CoverSpot.HERO)
+                                            },
+                                            organizer = library,
+                                            onFreeBooks = { destination = FREE_BOOKS },
                                             grid = libraryGrid,
                                         )
                                     }

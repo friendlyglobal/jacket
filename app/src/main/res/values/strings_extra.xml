@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The widgets and the "Back" button after a jump: in a file of their own, beside strings.xml. -->
+<resources>
+    <!-- Puts away something on offer, such as the "Back" button after a jump (the ✕ beside it). -->
+    <string name="common_dismiss">Dismiss</string>
+    <!-- After jumping elsewhere in a book: return to the chapter you left. %1$s is the chapter's name. -->
+    <string name="jump_back_to">Back to %1$s</string>
+    <!-- After jumping elsewhere in a PDF or comic: return to the page you left. -->
+    <string name="jump_back_to_page">Back to page %1$d</string>
+    <!-- After jumping elsewhere in a book from its very beginning. -->
+    <string name="jump_back_to_start">Back to the start</string>
+    <!-- Widgets, as the launcher's widget picker names and describes them -->
+    <string name="widget_player_name">Jacket player</string>
+    <string name="widget_player_description">Your book with a play button: read aloud, pause or resume from the home screen.</string>
+    <string name="widget_shelf_name">Jacket shelf</string>
+    <string name="widget_shelf_description">The books you\'re reading, side by side. Tap one to open it.</string>
+    <string name="widget_streak_name">Reading streak</string>
+    <string name="widget_streak_description">Minutes read today, your streak and the week.</string>
+    <!-- Under the big number of minutes read today, on the reading streak widget -->
+    <string name="widget_streak_minutes">min today</string>
+    <!-- Buttons on the "Continue reading" pane beside the library on wide screens: open the book, or open it reading aloud -->
+    <string name="library_read">Read</string>
+    <string name="library_listen">Listen</string>
+    <!-- Library: pinning a book to the top of the shelf, and the collections (folders) a reader makes -->
+    <string name="library_pin">Pin to top</string>
+    <string name="library_unpin">Unpin</string>
+    <string name="library_pinned">Pinned</string>
+    <string name="library_add_to_collection">Add to collection</string>
+    <string name="library_collections_title">Collections</string>
+    <string name="library_collections_none">No collections yet. Make one for a book club, a trip or a genre.</string>
+    <string name="library_collection_all">All</string>
+    <string name="library_collection_new">New collection</string>
+    <string name="library_collection_name">Name</string>
+    <string name="library_collection_rename">Rename</string>
+    <string name="library_collection_delete">Delete</string>
+    <!-- %1$s is the collection's name -->
+    <string name="library_collection_delete_title">Delete “%1$s”?</string>
+    <string name="library_collection_delete_message">Its books stay in your library.</string>
+    <string name="library_collection_empty">Nothing in “%1$s” yet. Long-press a book to add it.</string>
+    <string name="library_collection_options">Collection options</string>
+    <!-- The sheet for changing a book's title, author and cover -->
+    <string name="library_edit_book">Edit book</string>
+    <string name="library_edit_title">Title</string>
+    <string name="library_edit_author">Author</string>
+    <string name="common_save">Save</string>
+    <string name="common_create">Create</string>
+    <!-- Where the cover comes from: the one the book came with, a photo, or one designed in Jacket -->
+    <string name="cover_original">Original</string>
+    <string name="cover_original_hint">The cover that came with the book.</string>
+    <string name="cover_photo">Photo</string>
+    <string name="cover_choose_image">Choose an image</string>
+    <string name="cover_image_failed">Couldn\'t open that image.</string>
+    <string name="cover_design">Design</string>
+    <!-- Spoken labels for the cover designer's color and shape choices -->
+    <string name="cover_color">Color %1$d</string>
+    <string name="cover_shape">Shape %1$d</string>
+    <!-- A designed cover in dark tones -->
+    <string name="cover_dark">Dark</string>
+    <!-- The library's + menu: add books from files on the phone, or find free classics (they open in the browser) -->
+    <string name="library_add_from_files">From your files</string>
+    <string name="free_books_find">Find free books</string>
+    <string name="free_books_no_browser">No browser to open the free books with.</string>
+    <!-- In the voice picker, after "Natural": the accent a voice speaks this language with. %1$s is a country, e.g. Portugal -->
+    <string name="voice_accent">%1$s accent</string>
+    <!-- Shown above the read-aloud player after the listener scrolls or turns away from the sentence being read; takes the page back to it -->
+    <string name="listen_back_to_voice">Back to the voice</string>
+    <!-- For screen readers, on the small player in the reader's footer line while a book is read aloud: what a tap on it does (it brings up the full player) -->
+    <string name="listen_show_controls">Show the player\'s controls</string>
+    <!-- Settings › Backup: a backup file the reader chooses once (for example in Google Drive) that Jacket keeps rewriting after changes. Jacket itself never goes online; the app holding the file uploads it -->
+    <string name="settings_backup_auto">Keep a backup up to date</string>
+    <string name="settings_backup_auto_description">In a file you choose, such as one in Google Drive. Jacket updates it after your library changes.</string>
+    <!-- %1$s is a relative time, e.g. "5 minutes ago" -->
+    <string name="settings_backup_auto_updated">Updated %1$s</string>
+    <string name="settings_backup_auto_failed">Couldn\'t update the backup. Tap to choose the file again.</string>
+    <!-- The Free books screen: classics whose copyright has run out, shown inside the app; downloads go through the browser and the book then opens in Jacket -->
+    <string name="free_books_title">Free books</string>
+    <string name="free_books_intro">Classics whose copyright has run out everywhere: free and legal to read and share.</string>
+    <string name="free_books_all">All languages</string>
+    <string name="free_books_download">Download</string>
+    <string name="free_books_download_hint">Your browser downloads it. Then tap Open and choose Jacket.</string>
+    <string name="free_books_in_library">In your library</string>
+    <string name="free_books_see_online">See the collection online</string>
+    <string name="settings_backup_auto_just_now">Updated just now</string>
+    <!-- Between the parts of a short line, e.g. "Almost there · 93%". Keep the spaces (\u0020). -->
+    <string name="separator">\u0020·\u0020</string>
+    <!-- The sample number of minutes in the streak widget's picker preview. -->
+    <string name="widget_preview_minutes" translatable="false">24</string>
+</resources>

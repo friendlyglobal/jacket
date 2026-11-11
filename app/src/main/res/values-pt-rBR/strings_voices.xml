@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Natural voices, the welcome pages and the sample book (see values/strings_voices.xml for what each is). -->
+<resources>
+    <string name="settings_group_listening">Ouvir</string>
+    <string name="voice_title">Voz</string>
+    <string name="voice_phone">Voz do celular</string>
+    <string name="voice_phone_description">Já vem no seu celular. Lê todos os idiomas que conhece.</string>
+    <string name="voice_natural">Natural</string>
+    <string name="voice_female">Voz feminina %1$d</string>
+    <string name="voice_male">Voz masculina %1$d</string>
+    <string name="voice_hear">Ouvir %1$s</string>
+    <string name="voice_stop_sample">Parar</string>
+    <string name="voice_change">Alterar</string>
+    <string name="voice_book_language">Idioma do livro: %1$s</string>
+    <string name="voice_book_language_hint">Não é esse? Altere para que a voz certa leia.</string>
+    <string name="voice_language_title">Em que idioma está este livro?</string>
+    <string name="voice_language_from_book">O que o livro informa</string>
+    <string name="voice_only_language">Só para livros neste idioma: %1$s</string>
+    <string name="voice_only_language_description">Livros em outros idiomas mantêm a própria voz.</string>
+    <string name="voice_not_in_language">%1$s: as vozes naturais ainda não falam este idioma, então a voz do celular lê.</string>
+    <string name="voice_private">As vozes naturais falam no seu próprio celular. Nada do que você lê é enviado a lugar nenhum.</string>
+    <string name="voice_about">Sobre estas vozes</string>
+    <string name="voice_about_text">As vozes naturais vêm com o Jacket e funcionam sem internet. O uso é livre, mas elas não devem ser usadas para enganar ou prejudicar ninguém; por exemplo, fazendo uma voz se passar por uma pessoa real. Os termos completos estão em Configurações, em Licenças.</string>
+    <string name="voice_slow">Esta voz é pesada demais para este celular. Toque para trocar.</string>
+    <string name="listen_preparing">Preparando a voz…</string>
+    <string name="voice_stopped">A voz natural parou. Tente de novo ou troque para a voz do celular.</string>
+    <string name="voice_fell_back">A voz natural não conseguiu iniciar, então a voz do celular está lendo.</string>
+    <string name="voice_phone_settings">Configurações da voz do celular</string>
+    <string name="voice_phone_settings_description">Escolha como soa a voz do seu celular.</string>
+    <string name="voice_settings_hint">Cada livro é lido no próprio idioma. As vozes naturais falam muitos idiomas; a voz do celular lê o resto.</string>
+    <string name="onboarding_cover_body">Enquanto você lê por dentro, a tela externa veste a capa do seu livro. Feche o celular e a capa continua lá; deixe-o entreaberto e a página fica acima da dobra.</string>
+    <string name="onboarding_cover_outside">Capa do lado de fora</string>
+    <string name="onboarding_read_title">Páginas de verdade, viradas como papel</string>
+    <string name="onboarding_read_body">As páginas se levantam sob o seu dedo e deslizam, enrolam ou são distribuídas. Toque e segure algumas palavras para destacá-las e adicionar uma nota.</string>
+    <string name="onboarding_read_listen_body">As páginas viram como papel, duas lado a lado com o celular aberto. Ou relaxe e ouça: uma voz natural lê qualquer livro em voz alta.</string>
+    <string name="onboarding_listen_title">Ou apenas ouça</string>
+    <string name="onboarding_listen_body">Uma voz natural lê qualquer livro em voz alta, e cada palavra se acende ao ser falada. Continua tocando com a tela desligada.</string>
+    <string name="onboarding_yours_title">Deixe do seu jeito</string>
+    <string name="onboarding_yours_body">Algumas escolhas para começar. Você pode mudá-las quando quiser.</string>
+    <string name="onboarding_yours_sample">Era uma vez um livro que encontrou seu leitor.</string>
+    <string name="onboarding_start_title">Seus livros continuam seus</string>
+    <string name="onboarding_widget">Mantenha a capa do seu livro na tela inicial com o widget do Jacket.</string>
+    <string name="library_empty_title_phone">Seu próximo livro começa aqui</string>
+    <string name="library_empty_message_phone">Adicione um EPUB, PDF, quadrinho CBZ ou arquivo de texto. O Jacket guarda uma cópia privada, dá a ele páginas de verdade e pode lê-lo em voz alta com uma voz natural.</string>
+    <string name="library_try_sample">Experimentar um livro de amostra</string>
+    <string name="sample_failed">Não foi possível abrir o livro de amostra.</string>
+</resources>

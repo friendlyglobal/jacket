@@ -14,6 +14,16 @@ import android.speech.tts.UtteranceProgressListener
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import io.github.friendlyglobal.jacket.R
+import io.github.friendlyglobal.jacket.voice.NaturalSpeech
+import io.github.friendlyglobal.jacket.voice.VoiceRef
+import io.github.friendlyglobal.jacket.voice.Voices
+import io.github.friendlyglobal.jacket.voice.localeOf
+import io.github.friendlyglobal.jacket.voice.sentencesOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 /** One spoken piece of a paragraph. Ids look like "token:paragraph:offset:flags". */
@@ -35,14 +45,15 @@ data class Utterance(val token: Int, val paragraph: Int, val offset: Int, val fi
 }
 
 /**
- * The phone's text-to-speech engine, with audio focus and "headphones unplugged" handling.
- * All callbacks arrive on the main thread.
+ * A voice that reads plain-text books aloud, a paragraph at a time, with audio focus and
+ * "headphones unplugged" handling. Either the phone's own text-to-speech ([SystemSpeaker]) or a
+ * natural voice ([NaturalSpeaker]). All callbacks arrive on the main thread.
  */
-class Speaker(context: Context) {
+abstract class Speaker(context: Context) {
     interface Listener {
         fun onStart(utterance: Utterance) {}
 
-        /** The engine is about to speak characters [start, end) of [utterance]: the current word. */
+        /** The voice is about to speak characters [start, end) of [utterance]: the current word. */
         fun onRange(utterance: Utterance, start: Int, end: Int) {}
 
         fun onDone(utterance: Utterance) {}
@@ -56,108 +67,36 @@ class Speaker(context: Context) {
 
     var listener: Listener? = null
 
-    private val app = context.applicationContext
-    private val main = Handler(Looper.getMainLooper())
-    private val attributes = AudioAttributes.Builder()
+    protected val app: Context = context.applicationContext
+    protected val main = Handler(Looper.getMainLooper())
+    protected val attributes: AudioAttributes = AudioAttributes.Builder()
         .setUsage(AudioAttributes.USAGE_MEDIA)
         .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
         .build()
 
-    /** 0 = starting, 1 = ready, -1 = no usable engine. */
-    private var state = 0
-    private val waiting = ArrayDeque<() -> Unit>()
+    /** True once it's clear this voice can't speak. */
+    abstract val unavailable: Boolean
 
-    private val tts: TextToSpeech = TextToSpeech(app) { status ->
-        main.post {
-            state = if (status == TextToSpeech.SUCCESS) 1 else -1
-            if (state == 1) {
-                tts.setAudioAttributes(attributes)
-                while (waiting.isNotEmpty()) waiting.removeFirst().invoke()
-            } else {
-                val wasWaiting = waiting.isNotEmpty()
-                waiting.clear()
-                if (wasWaiting) fail()
-            }
-        }
-    }
-
-    init {
-        tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
-            override fun onStart(id: String) {
-                main.post { Utterance.parse(id)?.let { listener?.onStart(it) } }
-            }
-
-            override fun onDone(id: String) {
-                main.post { Utterance.parse(id)?.let { listener?.onDone(it) } }
-            }
-
-            @Deprecated("Deprecated in Java")
-            override fun onError(id: String) {
-                main.post { fail() }
-            }
-
-            override fun onError(id: String, errorCode: Int) {
-                main.post { fail() }
-            }
-
-            override fun onRangeStart(id: String, start: Int, end: Int, frame: Int) {
-                main.post { Utterance.parse(id)?.let { listener?.onRange(it, start, end) } }
-            }
-        })
-    }
-
-    /** True once it's clear the phone has no working text-to-speech engine. */
-    val unavailable: Boolean get() = state == -1
+    /** The voice takes a moment before its first word (it has a model to load): the player shows it getting ready. */
+    open val slowToStart: Boolean get() = false
 
     /**
-     * Speaks a paragraph (from character [offset] on). Engines reject long input, so long
-     * paragraphs go out as several utterances, cut at sentence or word boundaries.
+     * Speaks a paragraph (from character [offset] on): at once, or with [queue] after what is
+     * already being spoken.
      */
-    fun speak(token: Int, paragraph: Int, offset: Int, text: String, queue: Boolean) = whenReady {
-        val pieces = pieces(text, MAX_INPUT)
-        pieces.forEachIndexed { index, (start, piece) ->
-            val flags = (if (index == 0) 1 else 0) or (if (index == pieces.lastIndex) 2 else 0)
-            val result = tts.speak(
-                piece,
-                if (queue || index > 0) TextToSpeech.QUEUE_ADD else TextToSpeech.QUEUE_FLUSH,
-                null,
-                "$token:$paragraph:${offset + start}:$flags",
-            )
-            if (result != TextToSpeech.SUCCESS) {
-                fail()
-                return@whenReady
-            }
-        }
-    }
+    abstract fun speak(token: Int, paragraph: Int, offset: Int, text: String, queue: Boolean)
 
-    fun stop() {
-        waiting.clear() // anything asked for before the engine was ready is cancelled too
-        if (state == 1) tts.stop()
-    }
+    abstract fun stop()
 
-    fun setRate(rate: Float) = whenReady { tts.setSpeechRate(rate) }
+    abstract fun setRate(rate: Float)
 
-    /** Uses the book's language when a voice for it is installed, otherwise the phone's. */
-    fun setLanguage(tag: String?) = whenReady {
-        val wanted = tag?.takeIf { it.isNotBlank() }?.let(Locale::forLanguageTag)
-        val locale = wanted?.takeIf { tts.isLanguageAvailable(it) >= TextToSpeech.LANG_AVAILABLE } ?: Locale.getDefault()
-        if (tts.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) tts.language = locale
-    }
+    /** Reads in the language [tag] when the voice can, otherwise the phone's. */
+    abstract fun setLanguage(tag: String?)
 
-    private fun whenReady(action: () -> Unit) {
-        when (state) {
-            1 -> action()
-            0 -> waiting.addLast(action)
-            else -> fail()
-        }
-    }
-
-    private fun fail() {
-        if (listener == null) return // the reader is gone; nothing to tell
-        if (state == 1) tts.stop()
+    /** Lets go of the voice for good. */
+    open fun shutdown() {
         release()
-        Toast.makeText(app, R.string.listen_voice_stopped, Toast.LENGTH_SHORT).show()
-        listener?.onFailed()
+        listener = null
     }
 
     // --- Being a good audio citizen -------------------------------------------------------------
@@ -203,10 +142,109 @@ class Speaker(context: Context) {
         audio.abandonAudioFocusRequest(focus)
         runCatching { app.unregisterReceiver(noisy) }
     }
+}
 
-    fun shutdown() {
+/** The phone's text-to-speech engine. */
+class SystemSpeaker(context: Context) : Speaker(context) {
+    /** 0 = starting, 1 = ready, -1 = no usable engine. */
+    private var state = 0
+    private val waiting = ArrayDeque<() -> Unit>()
+
+    private val tts: TextToSpeech = TextToSpeech(app) { status ->
+        main.post {
+            state = if (status == TextToSpeech.SUCCESS) 1 else -1
+            if (state == 1) {
+                tts.setAudioAttributes(attributes)
+                while (waiting.isNotEmpty()) waiting.removeFirst().invoke()
+            } else {
+                val wasWaiting = waiting.isNotEmpty()
+                waiting.clear()
+                if (wasWaiting) fail()
+            }
+        }
+    }
+
+    init {
+        tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+            override fun onStart(id: String) {
+                main.post { Utterance.parse(id)?.let { listener?.onStart(it) } }
+            }
+
+            override fun onDone(id: String) {
+                main.post { Utterance.parse(id)?.let { listener?.onDone(it) } }
+            }
+
+            @Deprecated("Deprecated in Java")
+            override fun onError(id: String) {
+                main.post { fail() }
+            }
+
+            override fun onError(id: String, errorCode: Int) {
+                main.post { fail() }
+            }
+
+            override fun onRangeStart(id: String, start: Int, end: Int, frame: Int) {
+                main.post { Utterance.parse(id)?.let { listener?.onRange(it, start, end) } }
+            }
+        })
+    }
+
+    /** True once it's clear the phone has no working text-to-speech engine. */
+    override val unavailable: Boolean get() = state == -1
+
+    /**
+     * Speaks a paragraph (from character [offset] on). Engines reject long input, so long
+     * paragraphs go out as several utterances, cut at sentence or word boundaries.
+     */
+    override fun speak(token: Int, paragraph: Int, offset: Int, text: String, queue: Boolean) = whenReady {
+        val pieces = pieces(text, MAX_INPUT)
+        pieces.forEachIndexed { index, (start, piece) ->
+            val flags = (if (index == 0) 1 else 0) or (if (index == pieces.lastIndex) 2 else 0)
+            val result = tts.speak(
+                piece,
+                if (queue || index > 0) TextToSpeech.QUEUE_ADD else TextToSpeech.QUEUE_FLUSH,
+                null,
+                "$token:$paragraph:${offset + start}:$flags",
+            )
+            if (result != TextToSpeech.SUCCESS) {
+                fail()
+                return@whenReady
+            }
+        }
+    }
+
+    override fun stop() {
+        waiting.clear() // anything asked for before the engine was ready is cancelled too
+        if (state == 1) tts.stop()
+    }
+
+    override fun setRate(rate: Float) = whenReady { tts.setSpeechRate(rate) }
+
+    /** Uses the book's language when a voice for it is installed, otherwise the phone's. */
+    override fun setLanguage(tag: String?) = whenReady {
+        val wanted = tag?.takeIf { it.isNotBlank() }?.let(Locale::forLanguageTag)
+        val locale = wanted?.takeIf { tts.isLanguageAvailable(it) >= TextToSpeech.LANG_AVAILABLE } ?: Locale.getDefault()
+        if (tts.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) tts.language = locale
+    }
+
+    private fun whenReady(action: () -> Unit) {
+        when (state) {
+            1 -> action()
+            0 -> waiting.addLast(action)
+            else -> fail()
+        }
+    }
+
+    private fun fail() {
+        if (listener == null) return // the reader is gone; nothing to tell
+        if (state == 1) tts.stop()
         release()
-        listener = null
+        Toast.makeText(app, R.string.listen_voice_stopped, Toast.LENGTH_SHORT).show()
+        listener?.onFailed()
+    }
+
+    override fun shutdown() {
+        super.shutdown()
         waiting.clear()
         runCatching {
             tts.stop()
@@ -245,4 +283,133 @@ internal fun pieces(text: String, max: Int): List<Pair<Int, String>> {
         start = end
     }
     return out
+}
+
+/**
+ * A natural voice (see the voice package) reading plain text. A paragraph goes to it a sentence
+ * at a time, each sentence its own [Utterance]; the sound for the next ones is made while one
+ * plays, and a paragraph asked for again from inside the sentence it was stopped in (a pause, a
+ * change of pace) carries on from that very place.
+ */
+class NaturalSpeaker(context: Context, private val voices: Voices, private val ref: VoiceRef) : Speaker(context) {
+    private class Line(val utterance: Utterance, val text: String, val paragraph: Int)
+
+    /** The sentence that was being spoken when the voice was stopped. */
+    private class Stopped(val paragraph: Int, val offset: Int, val text: String)
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val queue = ArrayDeque<Line>()
+    private var speech: NaturalSpeech? = null
+    private var current: Line? = null
+    private var stopped: Stopped? = null
+    private var language = ""
+    private var rate = 1f
+    private var failed = false
+
+    override val unavailable: Boolean get() = failed || voices.pack(ref.pack) == null
+    override val slowToStart: Boolean get() = true
+
+    init {
+        // The model takes a moment to load: whatever is asked for meanwhile waits in the queue.
+        scope.launch {
+            val opened = voices.open(ref)
+            if (opened == null) {
+                failed = true
+                if (queue.isNotEmpty() || current != null) fail()
+                return@launch
+            }
+            opened.speed = rate
+            opened.listener = object : NaturalSpeech.Listener {
+                override fun onRange(id: Any, range: IntRange) {
+                    (id as? Line)?.takeIf { it === current }?.let { listener?.onRange(it.utterance, range.first, range.last + 1) }
+                }
+
+                override fun onDone(id: Any) {
+                    val line = (id as? Line)?.takeIf { it === current } ?: return
+                    current = null
+                    listener?.onDone(line.utterance)
+                    next()
+                }
+
+                override fun onError(id: Any) = fail()
+            }
+            speech = opened
+            next()
+        }
+    }
+
+    override fun speak(token: Int, paragraph: Int, offset: Int, text: String, queue: Boolean) {
+        if (failed) return fail()
+        if (!queue) {
+            halt()
+            this.queue.clear()
+        }
+        val locale = localeOf(language)
+        val was = stopped?.takeIf { !queue && it.paragraph == paragraph && offset >= it.offset && offset < it.offset + it.text.length }
+        stopped = null
+        // Asked to go on from inside the sentence that was stopped: that whole sentence again, as
+        // the voice knows it, and the voice finds its own place in it.
+        val lead = was?.let { it.offset + it.text.length - offset }?.coerceIn(0, text.length) ?: 0
+        val sentences = sentencesOf(text.substring(lead), locale).map { (it.first + lead)..(it.last + lead) }
+        val lines = ArrayList<Line>()
+        if (was != null) lines += Line(Utterance(token, paragraph, was.offset, first = true, last = sentences.isEmpty()), was.text, paragraph)
+        sentences.forEachIndexed { i, range ->
+            val utterance = Utterance(token, paragraph, offset + range.first, first = lines.isEmpty(), last = i == sentences.lastIndex)
+            lines += Line(utterance, text.substring(range), paragraph)
+        }
+        this.queue.addAll(lines)
+        if (current == null) next()
+    }
+
+    override fun stop() {
+        halt()
+        queue.clear()
+    }
+
+    override fun setRate(rate: Float) {
+        this.rate = rate
+        speech?.speed = rate
+    }
+
+    override fun setLanguage(tag: String?) {
+        val pack = voices.pack(ref.pack)
+        language = pack?.let { voices.languageFor(it, tag) }.orEmpty()
+    }
+
+    override fun shutdown() {
+        super.shutdown()
+        scope.cancel()
+        queue.clear()
+        current = null
+        speech?.close()
+        speech = null
+    }
+
+    /** Cuts the voice, remembering the sentence it was in. */
+    private fun halt() {
+        current?.let { stopped = Stopped(it.paragraph, it.utterance.offset, it.text) }
+        current = null
+        speech?.stop()
+    }
+
+    private fun next() {
+        val speech = speech ?: return
+        if (current != null) return
+        val line = queue.removeFirstOrNull() ?: return
+        current = line
+        listener?.onStart(line.utterance)
+        // The reader may have answered the start by stopping, or by asking for something else.
+        if (current !== line) return
+        speech.speak(line, line.text, language, endsParagraph = line.utterance.last, upcoming = queue.take(2).map { it.text })
+    }
+
+    private fun fail() {
+        if (listener == null) return
+        queue.clear()
+        current = null
+        speech?.stop()
+        release()
+        Toast.makeText(app, R.string.voice_stopped, Toast.LENGTH_SHORT).show()
+        listener?.onFailed()
+    }
 }

@@ -1,7 +1,23 @@
 package io.github.friendlyglobal.jacket.reader
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.DropdownMenuGroup
+import androidx.compose.material3.SelectableDropdownMenuItem
+import androidx.compose.material3.DropdownMenuPopup
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -95,35 +111,7 @@ fun ReadingControls(
         )
 
         Label(stringResource(R.string.reading_typeface))
-        Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
-            val fonts = ReadingFont.entries
-            fonts.forEachIndexed { index, font ->
-                val selected = settings.font == font
-                SegmentedListItem(
-                    selected = selected,
-                    onClick = {
-                        if (!selected) {
-                            haptics.tick()
-                            onSettings { it.copy(font = font) }
-                        }
-                    },
-                    shapes = ListItemDefaults.segmentedShapes(index, fonts.size),
-                    leadingContent = {
-                        // Each option previews itself in its own typeface.
-                        Text(
-                            stringResource(R.string.reading_typeface_sample), fontFamily = rememberReadingFontFamily(font), fontSize = 24.sp,
-                            modifier = Modifier.widthIn(min = 40.dp),
-                        )
-                    },
-                    supportingContent = { Text(stringResource(font.description)) },
-                    trailingContent = if (selected) {
-                        { Icon(JacketIcons.Check, stringResource(R.string.reading_selected)) }
-                    } else null,
-                ) {
-                    Text(stringResource(font.label))
-                }
-            }
-        }
+        FontChoice(settings.font) { font -> onSettings { it.copy(font = font) } }
 
         Label(stringResource(R.string.reading_page))
         val bookSurface = MaterialTheme.colorScheme.surface
@@ -251,6 +239,74 @@ fun ReadingControls(
         }
         Spacer(Modifier.height(8.dp))
     }
+}
+
+/**
+ * The typeface, in the room of one line: the one in use, previewed in itself. A tap opens the
+ * others over the sheet, each previewed in its own typeface too, and picking one closes them.
+ */
+@Composable
+private fun FontChoice(selected: ReadingFont, onSelect: (ReadingFont) -> Unit) {
+    val haptics = rememberHaptics()
+    var open by remember { mutableStateOf(false) }
+    var width by remember { mutableIntStateOf(0) }
+    val turn by animateFloatAsState(if (open) 180f else 0f, MaterialTheme.motionScheme.fastSpatialSpec(), label = "font-chevron")
+    val current = stringResource(selected.label)
+    Box {
+        SegmentedListItem(
+            onClick = {
+                haptics.tick()
+                open = true
+            },
+            shapes = ListItemDefaults.segmentedShapes(0, 1),
+            modifier = Modifier
+                .onSizeChanged { width = it.width }
+                .semantics {
+                    role = Role.DropdownList
+                    stateDescription = current
+                },
+            leadingContent = { FontSample(selected) },
+            supportingContent = { Text(stringResource(selected.description)) },
+            trailingContent = { Icon(JacketIcons.ExpandMore, null, Modifier.graphicsLayer { rotationZ = turn }) },
+        ) {
+            Text(current)
+        }
+        DropdownMenuPopup(expanded = open, onDismissRequest = { open = false }) {
+            val fonts = ReadingFont.entries
+            DropdownMenuGroup(
+                shapes = MenuDefaults.groupShape(0, 1),
+                modifier = Modifier.width(with(LocalDensity.current) { width.toDp() }),
+            ) {
+                fonts.forEachIndexed { index, font ->
+                    val chosen = font == selected
+                    SelectableDropdownMenuItem(
+                        selected = chosen,
+                        onClick = {
+                            if (!chosen) {
+                                haptics.tick()
+                                onSelect(font)
+                            }
+                            open = false
+                        },
+                        text = { Text(stringResource(font.label)) },
+                        shapes = MenuDefaults.itemShape(index, fonts.size),
+                        leadingIcon = { FontSample(font) },
+                        trailingContent = { if (chosen) Icon(JacketIcons.Check, stringResource(R.string.reading_selected)) },
+                        supportingText = { Text(stringResource(font.description)) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** "Aa" in [font]: each typeface previews itself. */
+@Composable
+private fun FontSample(font: ReadingFont) {
+    Text(
+        stringResource(R.string.reading_typeface_sample), fontFamily = rememberReadingFontFamily(font), fontSize = 24.sp,
+        modifier = Modifier.widthIn(min = 40.dp),
+    )
 }
 
 /** A reading comfort to switch on or off: its name, a line on what it does, and the switch. */
