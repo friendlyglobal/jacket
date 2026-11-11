@@ -82,6 +82,22 @@ class BackupTest {
     }
 
     @Test
+    fun theWatchedFolderIsThisPhonesNotTheBackups() {
+        val backup = LibraryState(settings = Settings(font = ReadingFont.SANS, watchFolder = "content://tree/old-phone", watchSeen = setOf("a.epub|10")))
+        // A new phone watches nothing until it is given a folder of its own.
+        val fresh = Backup.merge(LibraryState(), backup).settings
+        assertEquals(null, fresh.watchFolder)
+        assertTrue(fresh.watchSeen.isEmpty())
+        // A phone that watches a folder goes on watching it, and remembers what it took from it.
+        val here = LibraryState(settings = Settings(watchFolder = "content://tree/here", watchSeen = setOf("b.epub|20")))
+        val kept = Backup.merge(here, backup).settings
+        assertEquals("content://tree/here", kept.watchFolder)
+        assertEquals(setOf("b.epub|20"), kept.watchSeen)
+        // The rest of the settings still come from the backup.
+        assertEquals(ReadingFont.SANS, kept.font)
+    }
+
+    @Test
     fun mergeDoesNotDuplicateAnnotations() {
         val state = LibraryState(books = listOf(book("b1", "one.epub")), annotations = listOf(highlight))
         val merged = Backup.merge(state, state)

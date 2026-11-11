@@ -27,7 +27,8 @@ object Backup {
     /**
      * Folds a backup into the current library: books already here keep their files and take the
      * backup's place in them if it's further along; books not here come back as entries waiting
-     * for their file. Bookmarks and highlights are merged by id; settings come from the backup.
+     * for their file. Bookmarks and highlights are merged by id; settings come from the backup,
+     * all but the folder this phone watches.
      * Collections are merged by id or name; a book here keeps its own and joins the backup's, and
      * stays pinned if it was pinned in either. Reading time comes back with them (see [mergeReading]).
      */
@@ -56,7 +57,13 @@ object Backup {
             .filter { it.id !in known }
             .map { it.copy(bookId = ids[it.bookId] ?: it.bookId) }
             .filter { a -> books.any { it.id == a.bookId } }
-        val settings = backup.settings.copy(collection = backup.settings.collection?.let { collectionIds[it] })
+        val settings = backup.settings.copy(
+            collection = backup.settings.collection?.let { collectionIds[it] },
+            // The folder watched for new books stays this phone's own: the permission to read it
+            // was given here, and the backup's (another phone's, or an older choice) has none.
+            watchFolder = current.settings.watchFolder,
+            watchSeen = current.settings.watchSeen,
+        )
         return current.copy(
             books = books, settings = settings, annotations = annotations, collections = collections,
             reading = mergeReading(current.reading, backup.reading),
