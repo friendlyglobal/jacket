@@ -443,8 +443,9 @@ class Library(private val context: Context) : LibraryOrganizer {
     /** Writes a backup of the library (not the book files) to [uri]. */
     suspend fun exportBackup(uri: Uri) = withContext(Dispatchers.IO) {
         val text = Backup.write(_state.value)
-        val out = context.contentResolver.openOutputStream(uri, "wt") ?: error(context.getString(R.string.settings_backup_cant_write))
-        out.use { it.write(text.toByteArray(Charsets.UTF_8)) }
+        // Some apps holding files won't empty one as it is opened: see [WholeFile].
+        val written = context.contentResolver.writeWhole(uri, text.toByteArray(Charsets.UTF_8))
+        if (written == null) error(context.getString(R.string.settings_backup_cant_write))
     }
 
     /**
