@@ -1,6 +1,8 @@
 package io.github.friendlyglobal.jacket.reader
 
 import android.os.SystemClock
+import android.view.View
+import android.view.ViewTreeObserver
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -40,6 +42,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.viewinterop.AndroidView
 import io.github.friendlyglobal.jacket.data.PageColor
 import io.github.friendlyglobal.jacket.ui.rememberTabletopFold
 import kotlin.math.ceil
@@ -643,6 +647,7 @@ fun ReaderScreen(
 
     val motion = MaterialTheme.motionScheme
     Box(Modifier.fillMaxSize().background(page.background).onSizeChanged { windowHeight = it.height }) {
+        FocusHolder()
         // The page and its controls. They grow with the window the backdrop opens on them: a page
         // the size of the book under the cover, the whole screen once it is open.
         Box(
@@ -880,6 +885,45 @@ fun ReaderScreen(
                     leave { shown.goTo() }
                 },
             )
+        }
+    }
+}
+
+/**
+ * Keeps the keys coming while a book is open. A window with nothing in focus doesn't get the next
+ * key press: Android spends it on choosing something to focus. And nothing is in focus after a
+ * touch on a screen of buttons (a button can't hold the focus while fingers are in use), so the
+ * first press of a page-turner after every touch would be lost. This is something for the window
+ * to keep in focus whenever nothing else has it: a view of one pixel, unseen, that TalkBack passes
+ * over. The keys themselves are taken by the activity (see [ReaderKeys]).
+ */
+@Composable
+private fun FocusHolder() {
+    val holder = remember { arrayOfNulls<View>(1) }
+    AndroidView(
+        factory = { context ->
+            View(context).apply {
+                isFocusable = true
+                isFocusableInTouchMode = true
+                defaultFocusHighlightEnabled = false
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                holder[0] = this
+            }
+        },
+        modifier = Modifier.size(1.dp),
+    )
+    val window = LocalView.current
+    DisposableEffect(window) {
+        val hold = Runnable { if (window.rootView.findFocus() == null) holder[0]?.requestFocus() }
+        // Whenever the focus is let go of (a touch, a page rebuilt after a fold), not just once.
+        val listener = ViewTreeObserver.OnGlobalFocusChangeListener { _, now -> if (now == null) window.post(hold) }
+        val observer = window.viewTreeObserver
+        observer.addOnGlobalFocusChangeListener(listener)
+        // Once the view above is there to take it.
+        window.postDelayed(hold, 100)
+        onDispose {
+            window.removeCallbacks(hold)
+            if (observer.isAlive) observer.removeOnGlobalFocusChangeListener(listener)
         }
     }
 }
