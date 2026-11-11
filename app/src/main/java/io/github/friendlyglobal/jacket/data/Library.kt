@@ -121,6 +121,8 @@ class Library(private val context: Context) : LibraryOrganizer {
     private suspend fun importNow(uris: List<Uri>): ImportReport = withContext(Dispatchers.IO) {
         val imported = mutableListOf<Book>()
         val failed = mutableListOf<String>()
+        // Imports come one at a time (see [import]), so any half-copied file here is an old one.
+        BookImporter.clearUnfinished(booksDir)
         for (uri in uris) {
             val name = BookImporter.displayName(context, uri) ?: uri.lastPathSegment ?: "file"
             val size = BookImporter.size(context, uri)
