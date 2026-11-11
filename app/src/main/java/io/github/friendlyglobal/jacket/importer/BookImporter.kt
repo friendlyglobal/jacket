@@ -11,6 +11,9 @@ import io.github.friendlyglobal.jacket.data.BookFormat
 import io.github.friendlyglobal.jacket.data.Library
 import io.github.friendlyglobal.jacket.voice.guessLanguage
 import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
+import java.security.MessageDigest
 import java.util.UUID
 import java.util.zip.ZipFile
 
@@ -23,6 +26,12 @@ class BookMeta(
     /** The language the book is in, when the file says (EPUB) or it can be told from the text. */
     val language: String? = null,
 )
+
+/** What tells one file from any other: how many bytes it has, and their SHA-256 (as hex). */
+data class FileContent(val size: Long, val sha256: String)
+
+/** The file being added is one the library already has: [book] was made from the very same bytes. */
+class AlreadyInLibrary(val book: Book) : Exception("Already in the library")
 
 object BookImporter {
     /** Offered to the system file picker. Generic types are included because many providers report EPUB/CBZ as zip or octet-stream. */
@@ -60,6 +69,24 @@ object BookImporter {
         booksDir.listFiles { file -> file.isFile && file.name.endsWith(PARTIAL) }?.forEach { it.delete() }
     }
 
+    /** Reads [input] to its end, copying it to [out] if there is one, and says what was in it. */
+    internal fun read(input: InputStream, out: OutputStream? = null): FileContent {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val buffer = ByteArray(1 shl 16)
+        var size = 0L
+        while (true) {
+            val n = input.read(buffer)
+            if (n < 0) break
+            out?.write(buffer, 0, n)
+            digest.update(buffer, 0, n)
+            size += n
+        }
+        return FileContent(size, digest.digest().joinToString("") { "%02x".format(it) })
+    }
+
+    /** What is in [file]; null when it can't be read (a book whose file isn't on this phone). */
+    fun contentOf(file: File): FileContent? = runCatching { file.inputStream().use { read(it) } }.getOrNull()
+
     /** Copies [uri] to [dest] (via a temporary file, so a failed copy leaves nothing behind). */
     fun copyInto(context: Context, uri: Uri, dest: File) {
         val partial = File(dest.parentFile, dest.name + PARTIAL)
@@ -88,8 +115,17 @@ object BookImporter {
         Bitmaps.saveJpeg(cover, File(library.coversDir, coverName), maxHeight = 1400)
     }
 
-    /** Copies the file into app storage, reads its metadata and cover, and returns the new [Book]. */
-    fun import(context: Context, uri: Uri, name: String, library: Library): Book {
+    /**
+     * Copies the file into app storage, reads its metadata and cover, and returns the new [Book].
+     *
+     * Unless it is a file the library already has, which only the copy can tell: a file is the
+     * same file by its bytes, not by its name ("book (1).epub" is "book.epub" downloaded again)
+     * or by the size the app handing it over gives, which some don't. [known] is asked for the
+     * book made from a file with that content. If there is one, nothing is added: its own file is
+     * put back from this copy if it was missing (a book restored from a backup) and that book is
+     * returned, and otherwise [AlreadyInLibrary] is thrown.
+     */
+    fun import(context: Context, uri: Uri, name: String, library: Library, known: (FileContent) -> Book? = { null }): Book {
         val id = UUID.randomUUID().toString()
         val partial = File(library.booksDir, "$id$PARTIAL")
         var stored: File? = null
@@ -97,7 +133,14 @@ object BookImporter {
             // Inside the try: a copy cut short (the phone ran out of room, the download behind the
             // file failed) must not leave what it had written behind, least of all on a full phone.
             val input = context.contentResolver.openInputStream(uri) ?: error("Can't open $uri")
-            input.use { i -> partial.outputStream().use { i.copyTo(it) } }
+            val content = input.use { i -> partial.outputStream().use { read(i, it) } }
+            known(content)?.let { same ->
+                val file = library.fileOf(same)
+                if (file.exists()) throw AlreadyInLibrary(same)
+                check(partial.renameTo(file)) { "Couldn't store $name" }
+                if (library.coverOf(same) == null) runCatching { restoreCover(same, library) }
+                return same
+            }
 
             val format = detectFormat(name, context.contentResolver.getType(uri), partial)
                 ?: error("Unsupported file: $name")
@@ -130,6 +173,7 @@ object BookImporter {
                 addedAt = System.currentTimeMillis(),
                 sectionCount = meta.sections,
                 language = meta.language,
+                sha256 = content.sha256,
             )
         } catch (t: Throwable) {
             partial.delete()

@@ -54,6 +54,11 @@
     </plurals>
     <string name="import_failed">%1$s को पढ़ा नहीं जा सका</string>
     <string name="import_added_and_failed">%1$s। %2$s</string>
+    <string name="import_already_one">“%1$s” पहले से आपकी लाइब्रेरी में है</string>
+    <plurals name="import_already_books">
+        <item quantity="one">%1$d किताब पहले से आपकी लाइब्रेरी में है</item>
+        <item quantity="other">%1$d किताबें पहले से आपकी लाइब्रेरी में हैं</item>
+    </plurals>
 
     <string name="library_profile_and_settings">प्रोफ़ाइल और सेटिंग</string>
     <string name="library_add_books">किताबें जोड़ें</string>

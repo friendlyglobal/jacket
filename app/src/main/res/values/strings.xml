@@ -74,6 +74,12 @@
     <string name="import_failed">Couldn\'t read %1$s</string>
     <!-- %1$s: what was added; %2$s: what couldn't be read. -->
     <string name="import_added_and_failed">%1$s. %2$s</string>
+    <!-- The file added is one the library has already (the same file, whatever it is called). %1$s: the book's title. -->
+    <string name="import_already_one">“%1$s” is already in your library</string>
+    <plurals name="import_already_books">
+        <item quantity="one">%1$d book is already in your library</item>
+        <item quantity="other">%1$d books are already in your library</item>
+    </plurals>
 
     <!-- Library (home screen) -->
     <string name="library_profile_and_settings">Profile and settings</string>

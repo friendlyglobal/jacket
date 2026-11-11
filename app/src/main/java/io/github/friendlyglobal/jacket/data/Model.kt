@@ -64,6 +64,12 @@ data class Book(
     val coverCustomized: Boolean = false,
     val originalCover: String? = null,
     val originalSeed: Int? = null,
+    /**
+     * The SHA-256 of the file the book was made from, as hex: with [sizeBytes], what tells the same
+     * file when it is added again, whatever it is called by then. Null for a book added before
+     * Jacket kept it; its file is read for it when it is needed.
+     */
+    val sha256: String? = null,
 ) {
     val isFinished: Boolean get() = finishedAt > 0L
 
@@ -397,6 +403,7 @@ internal object LibraryJson {
         put("coverCustomized", coverCustomized)
         put("originalCover", originalCover ?: JSONObject.NULL)
         put("originalSeed", originalSeed ?: JSONObject.NULL)
+        put("sha256", sha256 ?: JSONObject.NULL)
     }
 
     private fun Annotation.toJson() = JSONObject().apply {
@@ -447,5 +454,7 @@ internal object LibraryJson {
         coverCustomized = optBoolean("coverCustomized", false),
         originalCover = if (isNull("originalCover")) null else optString("originalCover").takeIf { it.isNotEmpty() },
         originalSeed = if (isNull("originalSeed") || !has("originalSeed")) null else getInt("originalSeed"),
+        // Libraries and backups made before Jacket kept it have none.
+        sha256 = if (isNull("sha256")) null else optString("sha256").takeIf { it.isNotEmpty() },
     )
 }

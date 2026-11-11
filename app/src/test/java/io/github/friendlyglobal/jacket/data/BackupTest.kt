@@ -49,6 +49,37 @@ class BackupTest {
     }
 
     @Test
+    fun mergeKnowsTheSameFileUnderAnotherName() {
+        // Downloaded again on the new phone as "one (1).epub": the same bytes, so the same book.
+        val here = LibraryState(books = listOf(book("new", "one (1).epub", opened = 5, progress = 0.1f).copy(sha256 = "abc123")))
+        val saved = LibraryState(
+            books = listOf(
+                book("b1", "one.epub", opened = 50, progress = 0.6f).copy(sha256 = "abc123"),
+                // Another book that happens to be the same size isn't.
+                book("b2", "two.epub").copy(sha256 = "def456"),
+            ),
+            annotations = listOf(highlight),
+        )
+        val merged = Backup.merge(here, saved)
+        assertEquals(listOf("new", "b2"), merged.books.map { it.id })
+        assertEquals(0.6f, merged.books[0].progress)
+        assertEquals("new", merged.annotations.single().bookId)
+    }
+
+    @Test
+    fun aBooksSha256IsKeptInBackupsAndOlderOnesHaveNone() {
+        val state = LibraryState(books = listOf(book("b1", "one.epub").copy(sha256 = "abc123"), book("b2", "two.epub")))
+        val text = Backup.write(state)
+        assertEquals(listOf("abc123", null), Backup.read(text).books.map { it.sha256 })
+        // A backup from before it was kept has no such field at all.
+        val older = org.json.JSONObject(text).apply {
+            val books = getJSONArray("books")
+            for (i in 0 until books.length()) books.getJSONObject(i).remove("sha256")
+        }.toString()
+        assertEquals(listOf(null, null), Backup.read(older).books.map { it.sha256 })
+    }
+
+    @Test
     fun backupFileNamesCannotLeaveTheBooksFolder() {
         val evil = book("x", "evil.epub").copy(fileName = "../library.json", coverFile = "../../shared_prefs/a.xml")
         val merged = Backup.merge(LibraryState(), LibraryState(books = listOf(evil)))

@@ -55,6 +55,13 @@
     </plurals>
     <string name="import_failed">Не вдалося прочитати: %1$s</string>
     <string name="import_added_and_failed">%1$s. %2$s</string>
+    <string name="import_already_one">«%1$s» вже є у вашій бібліотеці</string>
+    <plurals name="import_already_books">
+        <item quantity="one">%1$d книга вже є у вашій бібліотеці</item>
+        <item quantity="few">%1$d книги вже є у вашій бібліотеці</item>
+        <item quantity="many">%1$d книг вже є у вашій бібліотеці</item>
+        <item quantity="other">%1$d книги вже є у вашій бібліотеці</item>
+    </plurals>
 
     <string name="library_profile_and_settings">Профіль і налаштування</string>
     <string name="library_add_books">Додати книги</string>

@@ -54,6 +54,12 @@
     </plurals>
     <string name="import_failed">No se pudo leer %1$s</string>
     <string name="import_added_and_failed">%1$s. %2$s</string>
+    <string name="import_already_one">“%1$s” ya está en tu biblioteca</string>
+    <plurals name="import_already_books">
+        <item quantity="one">%1$d libro ya está en tu biblioteca</item>
+        <item quantity="many">%1$d libros ya están en tu biblioteca</item>
+        <item quantity="other">%1$d libros ya están en tu biblioteca</item>
+    </plurals>
 
     <string name="library_profile_and_settings">Perfil y ajustes</string>
     <string name="library_add_books">Añadir libros</string>

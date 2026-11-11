@@ -53,6 +53,10 @@
     </plurals>
     <string name="import_failed">Tidak dapat membaca %1$s</string>
     <string name="import_added_and_failed">%1$s. %2$s</string>
+    <string name="import_already_one">“%1$s” sudah ada di perpustakaan Anda</string>
+    <plurals name="import_already_books">
+        <item quantity="other">%1$d buku sudah ada di perpustakaan Anda</item>
+    </plurals>
 
     <string name="library_profile_and_settings">Profil dan setelan</string>
     <string name="library_add_books">Tambah buku</string>

@@ -33,7 +33,10 @@ object Backup {
      * stays pinned if it was pinned in either. Reading time comes back with them (see [mergeReading]).
      */
     fun merge(current: LibraryState, backup: LibraryState): LibraryState {
-        fun sameBook(a: Book, b: Book) = a.id == b.id || (a.sourceName == b.sourceName && a.sizeBytes == b.sizeBytes)
+        // The same book: the same entry, or one made from the same file (by its name and size, or
+        // by its bytes when both kept their SHA-256, which is how "book (1).epub" is known).
+        fun sameBook(a: Book, b: Book) = a.id == b.id || (a.sourceName == b.sourceName && a.sizeBytes == b.sizeBytes) ||
+            (a.sha256 != null && a.sha256 == b.sha256 && a.sizeBytes == b.sizeBytes)
         val (collections, collectionIds) = mergeCollections(current.collections, backup.collections)
         // A backup's collection ids, as they are here; ones it never listed are dropped.
         fun Set<String>.here() = mapNotNullTo(HashSet()) { collectionIds[it] }
