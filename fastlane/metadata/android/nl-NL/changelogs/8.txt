@@ -1,0 +1,5 @@
+Jacket 1.0.1 onthoudt waar je bent in het boek.
+• Luisteren zet je plek niet meer terug, en lezen en luisteren tonen hetzelfde percentage
+• Na luisteren op de achtergrond opent het boek waar de stem stopte
+• Luisteren begint op de pagina waar je bent, niet een paar pagina's eerder
+• Een plek die 1.0.0 verkeerd opsloeg, wordt hersteld als je het boek weer opent

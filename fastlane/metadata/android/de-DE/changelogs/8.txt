@@ -1,0 +1,5 @@
+Jacket 1.0.1 behält deine Stelle im Buch.
+• Beim Zuhören springt deine Stelle nicht mehr zurück, und Lesen und Zuhören zeigen denselben Prozentwert
+• Nach dem Zuhören im Hintergrund öffnet sich das Buch dort, wo die Stimme aufgehört hat
+• Das Vorlesen beginnt auf deiner Seite, nicht ein paar Seiten davor
+• Eine Stelle, die 1.0.0 falsch gespeichert hat, wird beim nächsten Öffnen des Buchs korrigiert

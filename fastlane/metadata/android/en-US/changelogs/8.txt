@@ -1,0 +1,5 @@
+Jacket 1.0.1 keeps your place in the book.
+• Listening no longer moves your place back, and reading and listening show the same percent
+• After listening in the background, the book opens where the voice stopped
+• Listening starts on the page you're on, not a few pages back
+• A place that 1.0.0 saved wrong is fixed the next time you open the book

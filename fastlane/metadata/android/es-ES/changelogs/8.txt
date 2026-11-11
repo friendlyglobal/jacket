@@ -1,0 +1,5 @@
+Jacket 1.0.1 guarda tu sitio en el libro.
+• Escuchar ya no hace retroceder tu sitio, y la lectura y la escucha muestran el mismo porcentaje
+• Después de escuchar en segundo plano, el libro se abre donde se paró la voz
+• La escucha empieza en la página en la que estás, no unas páginas antes
+• Un sitio que la 1.0.0 guardó mal se corrige la próxima vez que abras el libro

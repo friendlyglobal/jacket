@@ -1,0 +1,5 @@
+Jacket 1.0.1 kitapta kaldığınız yeri korur.
+• Dinlemek artık kaldığınız yeri geri almıyor; okuma ve dinleme aynı yüzdeyi gösteriyor
+• Arka planda dinledikten sonra kitap, sesin durduğu yerde açılır
+• Dinleme, birkaç sayfa önceden değil, bulunduğunuz sayfadan başlar
+• 1.0.0'ın yanlış kaydettiği yer, kitabı bir sonraki açışınızda düzelir
