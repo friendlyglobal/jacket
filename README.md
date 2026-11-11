@@ -249,12 +249,26 @@ docs/concept.html            The interactive design concept the app started from
 
 ## Roadmap
 
-- Read-aloud for PDFs (Android 15's PdfRenderer text API), and in the background for plain text
-- A natural voice for Chinese, and listening to a book in another language (translation on the phone)
-- Collections and reading stats
-- "Currently reading" sync from Hardcover and Open Library, for books you read in other apps
+The details, the reasons and the size of each item are in [docs/roadmap.md](docs/roadmap.md).
+
+**Coming in 1.1**
+- Turn pages with a keyboard, Bluetooth page-turner or mouse; Space pauses the voice
+- Footnotes open in a pop-up instead of jumping away
+- Listening speeds from 0.5× to 3×, and a sleep timer of any length
+- Save highlights and notes as a file, for one book or all of them
+
+**Later**
+- Plain and shared text work like full books: listening with the screen off, highlights, search
+- Fix how a name is pronounced, and skip note numbers when reading aloud
+- Skip and sleep buttons on the Galaxy Z Flip cover-screen player
+- A "your reading" page: week, month, year, books finished and a calendar
+- Book posture: read half-open like a paperback, with the fold as the spine
+- Resume listening from your headphones without opening the book, then Android Auto
+- Read-aloud for PDFs (Android 15's PdfRenderer text API)
+- Keep your place across two devices through a shared backup file
+- A natural voice for Chinese, and listening to a book in another language (translated on the phone)
 - ISBN barcode scanning to set a cover for a paper book
-- More formats (FB2, CBR), password-protected PDFs
+- More formats (FB2), password-protected PDFs
 
 Kindle, Google Play Books and other stores don't expose what you're reading, and DRM-protected
 files can't be opened. Jacket won't try to work around either.
