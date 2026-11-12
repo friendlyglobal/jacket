@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="list_separator">，</string>
+    <string name="reader_show_controls">显示控件</string>
+    <string name="reader_hide_controls">隐藏控件</string>
+    <string name="reader_place_in_book">书中位置</string>
     <string name="reading_text_smaller">缩小文字</string>
     <string name="reading_text_larger">放大文字</string>
     <string name="reading_brightness">亮度</string>

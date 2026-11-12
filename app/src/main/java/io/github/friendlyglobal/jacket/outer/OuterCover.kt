@@ -82,6 +82,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -164,6 +166,7 @@ fun OuterCover(
 ) {
     var wakeCount by remember { mutableIntStateOf(0) }
     var dimmed by remember { mutableStateOf(false) }
+    val showControls = stringResource(R.string.reader_show_controls)
     val status = book?.let { CoverStatus.of(it, moment) }
     val tapped by rememberUpdatedState(onTap)
     // A tap wakes it. So does a new stage (starting to listen, finishing), which is worth showing;
@@ -188,7 +191,22 @@ fun OuterCover(
                     }
                 }
             }
-            .pointerInput(Unit) { detectTapGestures { tapped?.invoke() } },
+            .pointerInput(Unit) { detectTapGestures { tapped?.invoke() } }
+            // Where a tap on the cover does something (the cover of a phone folded shut), a screen
+            // reader or a switch can do it too: said as what it brings up.
+            .then(
+                if (onTap != null) {
+                    Modifier.semantics {
+                        onClick(label = showControls) {
+                            wakeCount++
+                            tapped?.invoke()
+                            true
+                        }
+                    }
+                } else {
+                    Modifier
+                },
+            ),
     ) {
         if (book == null || status == null) {
             val brightness by animateFloatAsState(if (dimmed) AMBIENT_BRIGHTNESS else 1f, tween(AMBIENT_FADE_MS), label = "ambient")

@@ -13,6 +13,15 @@ enum class ReaderCommand {
     /** Pause the voice, or have it read on. */
     PLAY_PAUSE,
 
+    /** Bring the controls up, if they aren't, and put the keyboard's focus on the first of them. */
+    FOCUS_CONTROLS,
+
+    /** What a tap on the middle of the page does: the controls come up, or go. */
+    TOGGLE_CONTROLS,
+
+    /** Send the controls away, and give the keys back to the page. */
+    LEAVE_CONTROLS,
+
     /** The key is the book's, and does nothing just now: its page is out of sight. */
     NOTHING,
 }
@@ -29,24 +38,48 @@ data class KeyContext(
     val pages: Boolean = true,
     /** The book is laid out in pages, which a mouse wheel turns; a scrolling one it scrolls, as ever. */
     val paged: Boolean = false,
+    /** The keyboard's focus is on one of the reader's controls (a button, a slider), not on the page. */
+    val onControl: Boolean = false,
 )
 
 /**
  * What the key [keyCode] does while a book is open; null for a key that isn't the book's.
  *
- * The arrows across go by the book's direction (in a right-to-left book the left arrow is the
- * next page); the arrows up and down, Page Up and Page Down, and Space with or without Shift, by
- * reading order. These are what a keyboard, a remote and a Bluetooth page-turner send. While the
- * book is read aloud, Space pauses the voice and has it read on. The volume keys turn pages when
- * that is switched on, and not while listening, when they are for the volume.
+ * The keys are the page's while the keyboard's focus is on the page, or on nothing. The arrows
+ * across go by the book's direction (in a right-to-left book the left arrow is the next page); the
+ * arrows up and down, Page Up and Page Down, and Space with or without Shift, by reading order.
+ * These are what a keyboard, a remote and a Bluetooth page-turner send. While the book is read
+ * aloud, Space pauses the voice and has it read on. The volume keys turn pages when that is
+ * switched on, and not while listening, when they are for the volume.
+ *
+ * Tab goes from the page to its controls, bringing them up if they have tucked away, and Enter
+ * does what a tap on the page does: with nothing but a keyboard or a remote, the controls are
+ * always in reach. Once the focus is [KeyContext.onControl], the arrows and Space are that
+ * control's, as they are in every app: Space presses a button, the arrows go from one control to
+ * the next and move a slider. Escape gives the keys back to the page. Page Up, Page Down and the
+ * volume keys are no control's keys, and go on turning pages wherever the focus is.
  */
 internal fun readerCommand(keyCode: Int, shift: Boolean, context: KeyContext): ReaderCommand? {
+    when (keyCode) {
+        // Under the cover of a folded phone these are the cover's own (its panel has buttons too).
+        KeyEvent.KEYCODE_TAB -> return if (context.pages && !context.onControl) ReaderCommand.FOCUS_CONTROLS else null
+        KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER, KeyEvent.KEYCODE_DPAD_CENTER ->
+            return if (context.pages && !context.onControl) ReaderCommand.TOGGLE_CONTROLS else null
+        // Anywhere else Escape is the phone's Back, as ever.
+        KeyEvent.KEYCODE_ESCAPE -> return if (context.onControl) ReaderCommand.LEAVE_CONTROLS else null
+    }
     val forward = when (keyCode) {
-        KeyEvent.KEYCODE_DPAD_RIGHT -> !context.rightToLeft
-        KeyEvent.KEYCODE_DPAD_LEFT -> context.rightToLeft
-        KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_PAGE_DOWN -> true
-        KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_PAGE_UP -> false
-        KeyEvent.KEYCODE_SPACE -> if (context.listening) return ReaderCommand.PLAY_PAUSE else !shift
+        KeyEvent.KEYCODE_DPAD_RIGHT -> if (context.onControl) return null else !context.rightToLeft
+        KeyEvent.KEYCODE_DPAD_LEFT -> if (context.onControl) return null else context.rightToLeft
+        KeyEvent.KEYCODE_DPAD_DOWN -> if (context.onControl) return null else true
+        KeyEvent.KEYCODE_DPAD_UP -> if (context.onControl) return null else false
+        KeyEvent.KEYCODE_PAGE_DOWN -> true
+        KeyEvent.KEYCODE_PAGE_UP -> false
+        KeyEvent.KEYCODE_SPACE -> when {
+            context.onControl -> return null
+            context.listening -> return ReaderCommand.PLAY_PAUSE
+            else -> !shift
+        }
         KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_VOLUME_UP -> {
             // Left to the phone unless they are the book's: its volume panel shows as ever.
             if (!context.volumeKeys || context.listening || !context.pages) return null
@@ -69,7 +102,7 @@ internal class KeyRepeats {
     /** Whether [command] is carried out for a key press that is the [repeat]th repeat (0 for the press itself) at [at] milliseconds. */
     fun accepts(command: ReaderCommand, repeat: Int, at: Long): Boolean = when (command) {
         ReaderCommand.NOTHING -> false
-        ReaderCommand.PLAY_PAUSE -> repeat == 0
+        ReaderCommand.PLAY_PAUSE, ReaderCommand.FOCUS_CONTROLS, ReaderCommand.TOGGLE_CONTROLS, ReaderCommand.LEAVE_CONTROLS -> repeat == 0
         ReaderCommand.NEXT_PAGE, ReaderCommand.PREVIOUS_PAGE -> (repeat == 0 || at - turnedAt >= HELD_PAGE_MS).also { if (it) turnedAt = at }
     }
 
@@ -123,8 +156,9 @@ internal class WheelPages {
 /**
  * Where the activity sends key presses and turns of the mouse wheel while a book is open. Keys
  * reach the activity whatever has the focus (the page, a button, nothing), so a page-turner works
- * without the page being tapped first. A sheet over the reader (search, a note being written) is a
- * window of its own, with its own keys.
+ * without the page being tapped first; the ones a button with the focus needs are handed on to it
+ * (see [readerCommand]). A sheet over the reader (search, a note being written) is a window of its
+ * own, with its own keys.
  */
 object ReaderKeys {
     /** The open book: what its keys do just now ([context]), and the doing of it ([perform]). */

@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- What a screen reader, a switch or a keyboard needs said or offered: names and actions for things that are otherwise only seen or swiped. In a file of their own, beside strings.xml. -->
 <resources>
+    <!-- Between things said one after another by a screen reader, e.g. "The Time Machine, H. G. Wells, 42% read". Keep the space (\u0020) where the language uses one. -->
+    <string name="list_separator">,\u0020</string>
+    <!-- For screen readers and switches, on the line under the page and on the cover of a folded phone: brings up the reader's buttons (what a tap on the page does). Then the opposite. -->
+    <string name="reader_show_controls">Show controls</string>
+    <string name="reader_hide_controls">Hide controls</string>
+    <!-- What a screen reader calls the slider that moves through the whole book. It then says how far along, e.g. "42% read, Chapter 3". -->
+    <string name="reader_place_in_book">Place in the book</string>
     <!-- What a screen reader calls the two "A" buttons beside the text size slider. -->
     <string name="reading_text_smaller">Smaller text</string>
     <string name="reading_text_larger">Larger text</string>

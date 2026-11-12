@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="list_separator">、</string>
+    <string name="reader_show_controls">操作を表示</string>
+    <string name="reader_hide_controls">操作を隠す</string>
+    <string name="reader_place_in_book">本の中の位置</string>
     <string name="reading_text_smaller">文字を小さく</string>
     <string name="reading_text_larger">文字を大きく</string>
     <string name="reading_brightness">明るさ</string>

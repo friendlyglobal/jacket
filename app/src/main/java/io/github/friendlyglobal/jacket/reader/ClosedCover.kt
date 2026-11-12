@@ -94,13 +94,14 @@ internal fun BoxScope.ClosedCover(
     haptics: Haptics,
     onReadHere: () -> Unit,
     onLeave: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val motion = MaterialTheme.motionScheme
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(motion.slowEffectsSpec()),
         exit = fadeOut(motion.defaultEffectsSpec()),
-        modifier = Modifier.matchParentSize(),
+        modifier = modifier.matchParentSize(),
     ) {
         val controller = nav.listenController
         val listening = nav.listen.active && controller != null

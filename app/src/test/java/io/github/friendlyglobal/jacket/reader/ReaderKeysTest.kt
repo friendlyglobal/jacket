@@ -68,9 +68,89 @@ class ReaderKeysTest {
 
     @Test
     fun `other keys are left alone`() {
-        for (code in listOf(KeyEvent.KEYCODE_TAB, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_ESCAPE, KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_A, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)) {
+        for (code in listOf(KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_A, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, KeyEvent.KEYCODE_ESCAPE)) {
             assertNull(key(code))
             assertNull(key(code, KeyContext(listening = true, volumeKeys = true)))
+        }
+    }
+
+    @Test
+    fun `tab reaches the controls from the page, and enter does what a tap on the page does`() {
+        assertEquals(ReaderCommand.FOCUS_CONTROLS, key(KeyEvent.KEYCODE_TAB))
+        assertEquals(ReaderCommand.FOCUS_CONTROLS, key(KeyEvent.KEYCODE_TAB, shift = true))
+        assertEquals(ReaderCommand.FOCUS_CONTROLS, key(KeyEvent.KEYCODE_TAB, KeyContext(listening = true)))
+        for (code in listOf(KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER, KeyEvent.KEYCODE_DPAD_CENTER)) {
+            assertEquals(ReaderCommand.TOGGLE_CONTROLS, key(code))
+        }
+    }
+
+    @Test
+    fun `with the focus on a control, tab and enter are the control's own`() {
+        val onButton = KeyContext(onControl = true)
+        // Left to the focus system: Tab goes on to the next control, Enter presses this one.
+        assertNull(key(KeyEvent.KEYCODE_TAB, onButton))
+        assertNull(key(KeyEvent.KEYCODE_ENTER, onButton))
+        assertNull(key(KeyEvent.KEYCODE_NUMPAD_ENTER, onButton))
+        assertNull(key(KeyEvent.KEYCODE_DPAD_CENTER, onButton))
+    }
+
+    @Test
+    fun `with the focus on a control, space and the arrows are that control's and turn no pages`() {
+        val onButton = KeyContext(onControl = true)
+        for (code in listOf(KeyEvent.KEYCODE_SPACE, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN)) {
+            assertNull(key(code, onButton))
+            assertNull(key(code, onButton.copy(rightToLeft = true)))
+        }
+        assertNull(key(KeyEvent.KEYCODE_SPACE, onButton, shift = true))
+        // Space presses the button that has the focus, not the player's play button.
+        assertNull(key(KeyEvent.KEYCODE_SPACE, onButton.copy(listening = true)))
+    }
+
+    @Test
+    fun `page keys and volume keys turn pages wherever the focus is`() {
+        val onButton = KeyContext(onControl = true, volumeKeys = true)
+        assertEquals(ReaderCommand.NEXT_PAGE, key(KeyEvent.KEYCODE_PAGE_DOWN, onButton))
+        assertEquals(ReaderCommand.PREVIOUS_PAGE, key(KeyEvent.KEYCODE_PAGE_UP, onButton))
+        assertEquals(ReaderCommand.NEXT_PAGE, key(KeyEvent.KEYCODE_VOLUME_DOWN, onButton))
+        assertEquals(ReaderCommand.PREVIOUS_PAGE, key(KeyEvent.KEYCODE_VOLUME_UP, onButton))
+    }
+
+    @Test
+    fun `escape gives the keys back to the page, and is the phone's back otherwise`() {
+        assertEquals(ReaderCommand.LEAVE_CONTROLS, key(KeyEvent.KEYCODE_ESCAPE, KeyContext(onControl = true)))
+        assertNull(key(KeyEvent.KEYCODE_ESCAPE))
+    }
+
+    @Test
+    fun `under the cover of a folded phone tab and enter are the cover's, and its buttons have their keys`() {
+        val covered = KeyContext(pages = false)
+        assertNull(key(KeyEvent.KEYCODE_TAB, covered))
+        assertNull(key(KeyEvent.KEYCODE_ENTER, covered))
+        // A button of the cover's panel with the focus: Space presses it, the arrows move on from it.
+        val onPanel = covered.copy(onControl = true)
+        assertNull(key(KeyEvent.KEYCODE_SPACE, onPanel))
+        assertNull(key(KeyEvent.KEYCODE_DPAD_RIGHT, onPanel))
+        // With the focus nowhere, the arrows are still kept from the page underneath.
+        assertEquals(ReaderCommand.NOTHING, key(KeyEvent.KEYCODE_DPAD_RIGHT, covered))
+    }
+
+    @Test
+    fun `no key ever takes tab or enter away from a control`() {
+        // Whatever else is going on, a keyboard can always get to a control and press it.
+        for (listening in listOf(false, true)) for (rtl in listOf(false, true)) for (volume in listOf(false, true)) for (pages in listOf(false, true)) {
+            val context = KeyContext(rightToLeft = rtl, listening = listening, volumeKeys = volume, pages = pages, onControl = true)
+            assertNull(key(KeyEvent.KEYCODE_TAB, context))
+            assertNull(key(KeyEvent.KEYCODE_ENTER, context))
+            assertNull(key(KeyEvent.KEYCODE_SPACE, context))
+        }
+    }
+
+    @Test
+    fun `a held key shows or hides the controls once`() {
+        val repeats = KeyRepeats()
+        for (command in listOf(ReaderCommand.FOCUS_CONTROLS, ReaderCommand.TOGGLE_CONTROLS, ReaderCommand.LEAVE_CONTROLS)) {
+            assertTrue(repeats.accepts(command, repeat = 0, at = 0))
+            assertFalse(repeats.accepts(command, repeat = 1, at = 400))
         }
     }
 
