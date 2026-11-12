@@ -767,6 +767,9 @@ fun ReaderScreen(
         Box(
             Modifier
                 .fillMaxSize()
+                // Under the cover of a phone folded shut the page and its controls are out of
+                // sight, and out of a screen reader's reach with it: the cover is all there is.
+                .then(if (coverUp) Modifier.clearAndSetSemantics {} else Modifier)
                 .padding(bottom = belowFold)
                 .openingPage(opening)
                 .pointerInput(levels) {
