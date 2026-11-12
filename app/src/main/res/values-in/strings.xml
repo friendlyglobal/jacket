@@ -80,6 +80,9 @@
     <string name="library_finished_badge">Selesai</string>
     <string name="library_new_badge">Baru</string>
     <string name="library_on_cover_screen">Di layar depan Anda</string>
+    <string name="library_being_read_aloud">Sedang dibacakan</string>
+    <string name="library_read_aloud_paused">Pembacaan dijeda</string>
+    <string name="library_resume">Lanjutkan</string>
     <string name="library_menu_open">Buka</string>
     <string name="library_menu_show_on_cover">Tampilkan di layar depan</string>
     <string name="library_menu_mark_finished">Tandai selesai</string>
@@ -191,6 +194,13 @@
     <string name="reader_back_to_library">Kembali ke pustaka</string>
     <string name="reader_search">Telusuri di buku</string>
     <string name="reader_bookmark_add">Bookmark halaman ini</string>
+    <string name="reader_highlight_or_note">Sorot atau tambahkan catatan</string>
+    <string name="reader_highlight_sentence">Sorot kalimat yang sedang dibacakan</string>
+    <string name="reader_note_sentence">Tambahkan catatan ke kalimat yang sedang dibacakan</string>
+    <string name="reader_highlight_paragraph">Sorot paragraf pertama di halaman ini</string>
+    <string name="reader_note_paragraph">Tambahkan catatan ke paragraf pertama di halaman ini</string>
+    <string name="reader_highlighted">Disorot</string>
+    <string name="reader_nothing_to_highlight">Tidak ada teks di halaman ini untuk disorot.</string>
     <string name="reader_bookmark_remove">Hapus bookmark</string>
     <string name="reader_text_settings">Setelan teks dan halaman</string>
     <string name="reader_contents_and_notes">Daftar isi, bookmark, dan sorotan</string>
@@ -282,6 +292,7 @@
     <string name="listen_sleep_other_start">Mulai timer</string>
     <string name="listen_no_voice">Ponsel ini tidak memiliki suara teks ke ucapan yang terinstal.</string>
     <string name="listen_no_readable_text">Buku ini tidak memiliki teks yang dapat dibacakan.</string>
+    <string name="listen_nothing_to_read">Tidak ada buku di sini yang bisa dibacakan. Jacket tidak bisa membacakan PDF atau komik.</string>
     <string name="listen_stopped_error">Pembacaan berhenti: %1$s</string>
 
     <string name="widget_reading">Sedang dibaca</string>

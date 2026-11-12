@@ -205,6 +205,125 @@ internal fun pageLead(page: Double, told: Double, known: Double?, moved: Boolean
  */
 internal fun spokenIsAllOfTheBook(ended: Boolean, onPage: Boolean, lastPage: Boolean): Boolean = ended || (onPage && lastPage)
 
+/**
+ * A page as Readium reports it: the chapter [file] it is in (its number in the book), how far down
+ * the file it [starts], and how many [pages] the file is laid out in (null scrolling, or before
+ * Readium has said).
+ */
+internal data class PageSeen(val file: Int, val starts: Double, val pages: Int?) {
+    /**
+     * Whether this page comes before [other] in the book. Pages of one file say so only when they
+     * are of the same laying-out of it: where a page starts moves with every fold and text size,
+     * so a page of 13 says nothing of a page of 26.
+     */
+    fun isBefore(other: PageSeen): Boolean = when {
+        file < 0 || other.file < 0 -> false
+        file != other.file -> file < other.file
+        pages != other.pages -> false
+        // (Readium tells a page's start to within a few pixels: half a page apart is another page.)
+        pages != null && pages > 0 -> (other.starts - starts) * pages > 0.5
+        else -> other.starts - starts > Pages.NEAR
+    }
+
+    /** Whether this is [other] over again: the same page of the same laying-out. */
+    fun isSameAs(other: PageSeen): Boolean = file == other.file && pages == other.pages && !isBefore(other) && !other.isBefore(this)
+}
+
+/**
+ * Whether the reader has gone back through the book: the one thing that lets its progress fall.
+ *
+ * One place is counted more than one way. A page counts from where it starts, and where a page
+ * starts depends on how the pages fall: folded or not, the size of the text. The voice, out of
+ * sight of any page, counts from its sentence's own place in the file. The counts of one place are
+ * up to a page apart. So a place counted again (the book reopened, its pages laid out anew, the
+ * voice handed to a reader or back) took the number down as often as up, though nobody had gone
+ * anywhere: 43% on the widget while the voice read with the book shut, 42% once the book was open.
+ * A reader who once watched a book fall from 42% to 20% can't tell that from the place being
+ * lost. So the library never takes a book's progress down unless it is told the reader went back
+ * (see Book.leftAt), and this is what tells it.
+ *
+ * The pages say. [on] is the page the book's place was last counted on, as Readium reported it. A
+ * page taken as the reader's place that comes before it is the reader turning back, or jumping
+ * back. But only pages of the same laying-out can be told apart that way, and only pages the
+ * reader went to: pages laid out anew (a fold, a text size) and a page Jacket itself put in front
+ * of the reader (the book opening at its place, the page sent after the voice) are the same place
+ * shown again. So the first page seen after either is where the place is now, not somewhere the
+ * reader went ([unsettled]).
+ *
+ * Two things the pages can't tell are said outright. A jump the reader asked for, in case it
+ * lands before the pages are known ([jumped]). And the listener having left the voice's page to
+ * look elsewhere, when the voice stops with them there ([choseAPage]): the page they chose is
+ * their place then, wherever the voice had got to.
+ */
+internal class PagePlace {
+    /** The page the book's place was last counted on; null when it isn't known in the pages as they now fall. */
+    var on: PageSeen? = null
+        private set
+    private var jumpedAt = Long.MIN_VALUE
+    private var chose = false
+
+    /** The pages are being laid out anew, or put somewhere by Jacket itself: the next page seen is the place, shown again. */
+    fun unsettled() {
+        on = null
+    }
+
+    /** The book's place is on [page]: it opened there, was put back there, or the voice's sentence is seen there. */
+    fun at(page: PageSeen) {
+        on = page
+    }
+
+    /** The reader asked for a jump at [now] (uptime millis): the contents, the scrubber, a bookmark, the way back. */
+    fun jumped(now: Long) {
+        jumpedAt = now
+    }
+
+    /** The listener is on a page of their own choosing, and the voice has stopped: that page is their place. */
+    fun choseAPage() {
+        chose = true
+    }
+
+    /** Whether [page] is the one the book's place was last counted on. */
+    fun isOn(page: PageSeen): Boolean = on?.isSameAs(page) == true
+
+    /** Whether a jump was asked for a moment before [now], and hasn't been seen to land yet. */
+    fun jumping(now: Long): Boolean = jumpedAt != Long.MIN_VALUE && now - jumpedAt in 0..JUMP_LANDS_MS
+
+    /** [page] is taken as the reader's place at [now]: whether they went back through the book to get to it. */
+    fun wentBackTo(page: PageSeen, now: Long): Boolean {
+        val from = on
+        val back = chose || jumping(now) || (from != null && page.isBefore(from))
+        chose = false
+        jumpedAt = Long.MIN_VALUE
+        // The same page reported again a hair off (scrolling, a line up) is no move: the page the
+        // count was made on stands, so that many small steps back add up to one.
+        on = if (!back && from != null && from.isSameAs(page)) from else page
+        return back
+    }
+
+    private companion object {
+        /** A jump lands within this long: to another chapter file, Readium is sent twice (see the reader's jumpTo). */
+        const val JUMP_LANDS_MS = 6_000L
+    }
+}
+
+/**
+ * Whether a sentence of the voice's comes before another: each is told by the chapter file it is
+ * in (its number in the book) and the letters before it in that file (see [TextPlaces]), so one
+ * is before the other by exactly that. It is how a listener sending the voice back (the previous
+ * sentence, an earlier one tapped, the chapter before) is told from sending it on.
+ */
+internal fun comesBefore(file: Int, told: Double, otherFile: Int, otherTold: Double): Boolean =
+    file >= 0 && otherFile >= 0 && (file < otherFile || (file == otherFile && told < otherTold))
+
+/**
+ * Whether a sentence the book was left on was saved by Jacket 1.0.0, which told it by a count of
+ * its own, far from the pages' (see [TextPlaces]): [saved] is how far down its file it was saved
+ * as, [placed] how far down it is. Such a place is counted over once, and the number goes to the
+ * true one, up or down. That is the one count that may take it down without the reader going back.
+ */
+internal fun savedTheOldWay(saved: Double?, placed: Double?): Boolean =
+    saved != null && placed != null && abs(saved - placed) > 1e-6
+
 /** How a book is opened at the place it was left. */
 internal sealed interface Reopen {
     /** At the saved Readium locator, as it is. */
@@ -293,6 +412,32 @@ internal fun blockShowing(texts: List<String>, top: String?): Int? {
     // The block the words begin in: the last one that starts at or before them and isn't empty.
     return texts.indices.lastOrNull { starts[it] <= at && bare(texts[it]).isNotEmpty() }
 }
+
+/**
+ * Which of a chapter file's blocks of text is "the first paragraph on this page": what a
+ * highlight made without selecting anything marks, while nothing is being read aloud (a screen
+ * reader and a keyboard can't press and hold on the page). [top] is what the page shows from its
+ * first word on, running on into the blocks after it; the block that word is in is found by
+ * those words, as a tap on them would find it (see [tappedAt] and [blockShowing]), and failing
+ * that by how far down the file the page is ([around], with [progressions] where each block
+ * starts). A heading ([heading]) is no paragraph: the first block after it that isn't one is.
+ *
+ * Null when the page shows no words (a picture, a blank page), or the file has none.
+ */
+internal fun firstParagraphOn(
+    texts: List<String>,
+    progressions: List<Double>,
+    top: String?,
+    around: Double?,
+    heading: (Int) -> Boolean = { false },
+): Int? {
+    val words = top?.takeIf { it.isNotBlank() } ?: return null
+    val first = tappedAt(texts, "", words)?.block ?: blockShowing(texts, words) ?: startBlock(texts, progressions, words, around) ?: return null
+    return (first until texts.size).firstOrNull { !heading(it) && bare(texts[it]).isNotEmpty() }
+}
+
+/** A highlight's words as they are kept and shown: every run of spaces and line breaks as one space. */
+internal fun highlightWords(text: String): String = squeezed(text)
 
 /** Where a tap fell in a chapter file's text: which of its blocks, and how many letters into it (spaces aside). */
 internal data class TextSpot(val block: Int, val offset: Int)

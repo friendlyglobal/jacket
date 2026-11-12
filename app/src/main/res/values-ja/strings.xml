@@ -80,6 +80,9 @@
     <string name="library_finished_badge">読了</string>
     <string name="library_new_badge">NEW</string>
     <string name="library_on_cover_screen">カバー画面に表示されています</string>
+    <string name="library_being_read_aloud">読み上げ中</string>
+    <string name="library_read_aloud_paused">読み上げを一時停止中</string>
+    <string name="library_resume">再開</string>
     <string name="library_menu_open">開く</string>
     <string name="library_menu_show_on_cover">カバー画面に表示</string>
     <string name="library_menu_mark_finished">読了にする</string>
@@ -191,6 +194,13 @@
     <string name="reader_back_to_library">ライブラリに戻る</string>
     <string name="reader_search">本の中を検索</string>
     <string name="reader_bookmark_add">このページをブックマーク</string>
+    <string name="reader_highlight_or_note">ハイライトまたはメモを追加</string>
+    <string name="reader_highlight_sentence">読み上げ中の文をハイライト</string>
+    <string name="reader_note_sentence">読み上げ中の文にメモを追加</string>
+    <string name="reader_highlight_paragraph">このページの最初の段落をハイライト</string>
+    <string name="reader_note_paragraph">このページの最初の段落にメモを追加</string>
+    <string name="reader_highlighted">ハイライトしました</string>
+    <string name="reader_nothing_to_highlight">このページにはハイライトできる文字がありません。</string>
     <string name="reader_bookmark_remove">ブックマークを削除</string>
     <string name="reader_text_settings">文字とページの設定</string>
     <string name="reader_contents_and_notes">目次、ブックマーク、ハイライト</string>
@@ -282,6 +292,7 @@
     <string name="listen_sleep_other_start">タイマーを開始</string>
     <string name="listen_no_voice">このスマートフォンにはテキスト読み上げの音声がインストールされていません。</string>
     <string name="listen_no_readable_text">この本には読み上げられるテキストがありません。</string>
+    <string name="listen_nothing_to_read">読み上げできる本がありません。PDFとコミックは読み上げできません。</string>
     <string name="listen_stopped_error">読み上げが停止しました：%1$s</string>
 
     <string name="widget_reading">読書中</string>

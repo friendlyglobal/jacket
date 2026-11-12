@@ -80,6 +80,9 @@
     <string name="library_finished_badge">완독</string>
     <string name="library_new_badge">새 책</string>
     <string name="library_on_cover_screen">커버 화면에 표시됨</string>
+    <string name="library_being_read_aloud">소리 내어 읽는 중</string>
+    <string name="library_read_aloud_paused">소리 내어 읽기 일시중지됨</string>
+    <string name="library_resume">이어 듣기</string>
     <string name="library_menu_open">열기</string>
     <string name="library_menu_show_on_cover">커버 화면에 표시</string>
     <string name="library_menu_mark_finished">완독으로 표시</string>
@@ -191,6 +194,13 @@
     <string name="reader_back_to_library">서재로 돌아가기</string>
     <string name="reader_search">책에서 검색</string>
     <string name="reader_bookmark_add">이 페이지 북마크</string>
+    <string name="reader_highlight_or_note">하이라이트 또는 메모 추가</string>
+    <string name="reader_highlight_sentence">지금 읽고 있는 문장 하이라이트</string>
+    <string name="reader_note_sentence">지금 읽고 있는 문장에 메모 추가</string>
+    <string name="reader_highlight_paragraph">이 페이지의 첫 문단 하이라이트</string>
+    <string name="reader_note_paragraph">이 페이지의 첫 문단에 메모 추가</string>
+    <string name="reader_highlighted">하이라이트했습니다</string>
+    <string name="reader_nothing_to_highlight">이 페이지에는 하이라이트할 글이 없습니다.</string>
     <string name="reader_bookmark_remove">북마크 삭제</string>
     <string name="reader_text_settings">텍스트 및 페이지 설정</string>
     <string name="reader_contents_and_notes">목차, 북마크, 하이라이트</string>
@@ -282,6 +292,7 @@
     <string name="listen_sleep_other_start">타이머 시작</string>
     <string name="listen_no_voice">이 휴대전화에는 텍스트 음성 변환(TTS) 음성이 설치되어 있지 않습니다.</string>
     <string name="listen_no_readable_text">이 책에는 소리 내어 읽을 수 있는 텍스트가 없습니다.</string>
+    <string name="listen_nothing_to_read">소리 내어 읽을 수 있는 책이 없습니다. Jacket은 PDF와 만화를 소리 내어 읽을 수 없습니다.</string>
     <string name="listen_stopped_error">소리 내어 읽기가 중지되었습니다: %1$s</string>
 
     <string name="widget_reading">읽는 중</string>

@@ -88,6 +88,9 @@
     <string name="library_finished_badge">Прочитано</string>
     <string name="library_new_badge">Нова</string>
     <string name="library_on_cover_screen">На зовнішньому екрані</string>
+    <string name="library_being_read_aloud">Читається вголос</string>
+    <string name="library_read_aloud_paused">Читання вголос на паузі</string>
+    <string name="library_resume">Продовжити</string>
     <string name="library_menu_open">Відкрити</string>
     <string name="library_menu_show_on_cover">Показати на зовнішньому екрані</string>
     <string name="library_menu_mark_finished">Позначити як прочитану</string>
@@ -211,6 +214,13 @@
     <string name="reader_back_to_library">До бібліотеки</string>
     <string name="reader_search">Пошук у книзі</string>
     <string name="reader_bookmark_add">Додати закладку</string>
+    <string name="reader_highlight_or_note">Виділити або додати нотатку</string>
+    <string name="reader_highlight_sentence">Виділити речення, яке зараз читається</string>
+    <string name="reader_note_sentence">Додати нотатку до речення, яке зараз читається</string>
+    <string name="reader_highlight_paragraph">Виділити перший абзац на цій сторінці</string>
+    <string name="reader_note_paragraph">Додати нотатку до першого абзацу на цій сторінці</string>
+    <string name="reader_highlighted">Виділено</string>
+    <string name="reader_nothing_to_highlight">На цій сторінці немає тексту, який можна виділити.</string>
     <string name="reader_bookmark_remove">Видалити закладку</string>
     <string name="reader_text_settings">Налаштування тексту й сторінки</string>
     <string name="reader_contents_and_notes">Зміст, закладки й виділення</string>
@@ -311,6 +321,7 @@
     <string name="listen_sleep_other_start">Запустити таймер</string>
     <string name="listen_no_voice">На цьому телефоні не встановлено голос для синтезу мовлення.</string>
     <string name="listen_no_readable_text">У цій книзі немає тексту, який можна прочитати вголос.</string>
+    <string name="listen_nothing_to_read">Тут немає книжки, яку можна прочитати вголос. Jacket не читає вголос PDF і комікси.</string>
     <string name="listen_stopped_error">Читання вголос зупинено: %1$s</string>
 
     <string name="widget_reading">Читаю</string>

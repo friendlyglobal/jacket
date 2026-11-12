@@ -88,6 +88,9 @@
     <string name="library_finished_badge">Przeczytana</string>
     <string name="library_new_badge">Nowa</string>
     <string name="library_on_cover_screen">Na ekranie zewnętrznym</string>
+    <string name="library_being_read_aloud">Czytana na głos</string>
+    <string name="library_read_aloud_paused">Czytanie na głos wstrzymane</string>
+    <string name="library_resume">Wznów</string>
     <string name="library_menu_open">Otwórz</string>
     <string name="library_menu_show_on_cover">Pokaż na ekranie zewnętrznym</string>
     <string name="library_menu_mark_finished">Oznacz jako przeczytaną</string>
@@ -211,6 +214,13 @@
     <string name="reader_back_to_library">Wróć do biblioteki</string>
     <string name="reader_search">Szukaj w książce</string>
     <string name="reader_bookmark_add">Dodaj zakładkę</string>
+    <string name="reader_highlight_or_note">Zaznacz lub dodaj notatkę</string>
+    <string name="reader_highlight_sentence">Zaznacz czytane zdanie</string>
+    <string name="reader_note_sentence">Dodaj notatkę do czytanego zdania</string>
+    <string name="reader_highlight_paragraph">Zaznacz pierwszy akapit na tej stronie</string>
+    <string name="reader_note_paragraph">Dodaj notatkę do pierwszego akapitu na tej stronie</string>
+    <string name="reader_highlighted">Zaznaczono</string>
+    <string name="reader_nothing_to_highlight">Na tej stronie nie ma tekstu do zaznaczenia.</string>
     <string name="reader_bookmark_remove">Usuń zakładkę</string>
     <string name="reader_text_settings">Ustawienia tekstu i strony</string>
     <string name="reader_contents_and_notes">Spis treści, zakładki i zaznaczenia</string>
@@ -311,6 +321,7 @@
     <string name="listen_sleep_other_start">Włącz</string>
     <string name="listen_no_voice">Na tym telefonie nie zainstalowano głosu syntezatora mowy.</string>
     <string name="listen_no_readable_text">Ta książka nie zawiera tekstu, który można przeczytać na głos.</string>
+    <string name="listen_nothing_to_read">Nie ma tu książki, którą można przeczytać na głos. Jacket nie czyta na głos plików PDF ani komiksów.</string>
     <string name="listen_stopped_error">Czytanie na głos zatrzymane: %1$s</string>
 
     <string name="widget_reading">Czytam</string>

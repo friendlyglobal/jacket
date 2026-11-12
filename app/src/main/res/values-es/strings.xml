@@ -85,6 +85,9 @@
     <string name="library_finished_badge">Terminado</string>
     <string name="library_new_badge">Nuevo</string>
     <string name="library_on_cover_screen">En tu pantalla externa</string>
+    <string name="library_being_read_aloud">Se está leyendo en voz alta</string>
+    <string name="library_read_aloud_paused">Lectura en voz alta en pausa</string>
+    <string name="library_resume">Reanudar</string>
     <string name="library_menu_open">Abrir</string>
     <string name="library_menu_show_on_cover">Mostrar en la pantalla externa</string>
     <string name="library_menu_mark_finished">Marcar como terminado</string>
@@ -204,6 +207,13 @@
     <string name="reader_back_to_library">Volver a la biblioteca</string>
     <string name="reader_search">Buscar en el libro</string>
     <string name="reader_bookmark_add">Marcar esta página</string>
+    <string name="reader_highlight_or_note">Resaltar o añadir una nota</string>
+    <string name="reader_highlight_sentence">Resaltar la frase que se está leyendo</string>
+    <string name="reader_note_sentence">Añadir una nota a la frase que se está leyendo</string>
+    <string name="reader_highlight_paragraph">Resaltar el primer párrafo de esta página</string>
+    <string name="reader_note_paragraph">Añadir una nota al primer párrafo de esta página</string>
+    <string name="reader_highlighted">Resaltado</string>
+    <string name="reader_nothing_to_highlight">En esta página no hay texto para resaltar.</string>
     <string name="reader_bookmark_remove">Quitar marcador</string>
     <string name="reader_text_settings">Ajustes de texto y página</string>
     <string name="reader_contents_and_notes">Índice, marcadores y resaltados</string>
@@ -301,6 +311,7 @@
     <string name="listen_sleep_other_start">Iniciar temporizador</string>
     <string name="listen_no_voice">Este teléfono no tiene instalada ninguna voz de texto a voz.</string>
     <string name="listen_no_readable_text">Este libro no tiene texto que se pueda leer en voz alta.</string>
+    <string name="listen_nothing_to_read">Aquí no hay ningún libro que se pueda leer en voz alta. Jacket no puede leer en voz alta archivos PDF ni cómics.</string>
     <string name="listen_stopped_error">Lectura en voz alta detenida: %1$s</string>
 
     <string name="widget_reading">Leyendo</string>

@@ -83,6 +83,9 @@
     <string name="library_finished_badge">Bitti</string>
     <string name="library_new_badge">Yeni</string>
     <string name="library_on_cover_screen">Kapak ekranınızda</string>
+    <string name="library_being_read_aloud">Sesli okunuyor</string>
+    <string name="library_read_aloud_paused">Sesli okuma duraklatıldı</string>
+    <string name="library_resume">Devam et</string>
     <string name="library_menu_open">Aç</string>
     <string name="library_menu_show_on_cover">Kapak ekranında göster</string>
     <string name="library_menu_mark_finished">Bitti olarak işaretle</string>
@@ -198,6 +201,13 @@
     <string name="reader_back_to_library">Kitaplığa dön</string>
     <string name="reader_search">Kitapta ara</string>
     <string name="reader_bookmark_add">Bu sayfaya yer işareti koy</string>
+    <string name="reader_highlight_or_note">Vurgula veya not ekle</string>
+    <string name="reader_highlight_sentence">Okunan cümleyi vurgula</string>
+    <string name="reader_note_sentence">Okunan cümleye not ekle</string>
+    <string name="reader_highlight_paragraph">Bu sayfadaki ilk paragrafı vurgula</string>
+    <string name="reader_note_paragraph">Bu sayfadaki ilk paragrafa not ekle</string>
+    <string name="reader_highlighted">Vurgulandı</string>
+    <string name="reader_nothing_to_highlight">Bu sayfada vurgulanacak metin yok.</string>
     <string name="reader_bookmark_remove">Yer işaretini kaldır</string>
     <string name="reader_text_settings">Metin ve sayfa ayarları</string>
     <string name="reader_contents_and_notes">İçindekiler, yer işaretleri ve vurgular</string>
@@ -292,6 +302,7 @@
     <string name="listen_sleep_other_start">Zamanlayıcıyı başlat</string>
     <string name="listen_no_voice">Bu telefonda yüklü bir metin okuma sesi yok.</string>
     <string name="listen_no_readable_text">Bu kitapta sesli okunabilecek metin yok.</string>
+    <string name="listen_nothing_to_read">Burada sesli okunabilecek bir kitap yok. Jacket, PDF\'leri ve çizgi romanları sesli okuyamaz.</string>
     <string name="listen_stopped_error">Sesli okuma durdu: %1$s</string>
 
     <string name="widget_reading">Okunuyor</string>

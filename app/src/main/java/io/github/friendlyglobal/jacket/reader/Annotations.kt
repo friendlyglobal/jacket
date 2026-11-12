@@ -64,10 +64,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalDensity
@@ -393,11 +404,29 @@ fun HighlightEditor(
                 }
             }
         }
+        val done = {
+            haptics.confirm()
+            if (note != annotation.note) onChange(annotation.copy(note = note.trim()))
+            onDone()
+        }
+        val focus = LocalFocusManager.current
         OutlinedTextField(
             value = note,
             onValueChange = { note = it },
             label = { Text(stringResource(R.string.notes_note)) },
-            modifier = Modifier.fillMaxWidth().heightIn(min = 96.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 96.dp)
+                // With a keyboard alone (a highlight can be made without touching the page: see
+                // ReaderNav.highlightHere), a note of several lines kept the keys to itself, and
+                // there was no way on to Done. Tab goes on to the buttons, Shift and Tab back to
+                // the colours, and Escape is Done: the note is kept.
+                .onPreviewKeyEvent { event ->
+                    val leaves = (event.key == Key.Tab || event.key == Key.Escape) && !event.isCtrlPressed && !event.isAltPressed && !event.isMetaPressed
+                    if (leaves && event.type == KeyEventType.KeyDown) {
+                        if (event.key == Key.Escape) done() else focus.moveFocus(if (event.isShiftPressed) FocusDirection.Previous else FocusDirection.Next)
+                    }
+                    // (The release is taken too: nothing else acts on half a key press.)
+                    leaves
+                },
         )
         Row(Modifier.fillMaxWidth().padding(bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = { haptics.confirm(); onDelete() }) {
@@ -406,11 +435,7 @@ fun HighlightEditor(
                 Text(stringResource(R.string.notes_delete))
             }
             Spacer(Modifier.weight(1f))
-            Button(onClick = {
-                haptics.confirm()
-                if (note != annotation.note) onChange(annotation.copy(note = note.trim()))
-                onDone()
-            }) { Text(stringResource(R.string.notes_done)) }
+            Button(onClick = done) { Text(stringResource(R.string.notes_done)) }
         }
     }
 }

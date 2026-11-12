@@ -95,6 +95,9 @@
     <string name="library_finished_badge">مكتمل</string>
     <string name="library_new_badge">جديد</string>
     <string name="library_on_cover_screen">على شاشة الغطاء</string>
+    <string name="library_being_read_aloud">يُقرأ بصوت عالٍ الآن</string>
+    <string name="library_read_aloud_paused">القراءة بصوت عالٍ متوقفة مؤقتًا</string>
+    <string name="library_resume">متابعة</string>
     <string name="library_menu_open">فتح</string>
     <string name="library_menu_show_on_cover">عرض على شاشة الغطاء</string>
     <string name="library_menu_mark_finished">تحديد كمكتمل</string>
@@ -226,6 +229,13 @@
     <string name="reader_back_to_library">العودة إلى المكتبة</string>
     <string name="reader_search">البحث في الكتاب</string>
     <string name="reader_bookmark_add">إضافة إشارة مرجعية لهذه الصفحة</string>
+    <string name="reader_highlight_or_note">تمييز أو إضافة ملاحظة</string>
+    <string name="reader_highlight_sentence">تمييز الجملة التي تُقرأ الآن</string>
+    <string name="reader_note_sentence">إضافة ملاحظة إلى الجملة التي تُقرأ الآن</string>
+    <string name="reader_highlight_paragraph">تمييز أول فقرة في هذه الصفحة</string>
+    <string name="reader_note_paragraph">إضافة ملاحظة إلى أول فقرة في هذه الصفحة</string>
+    <string name="reader_highlighted">تم التمييز</string>
+    <string name="reader_nothing_to_highlight">لا توجد كلمات في هذه الصفحة لتمييزها.</string>
     <string name="reader_bookmark_remove">إزالة الإشارة المرجعية</string>
     <string name="reader_text_settings">إعدادات النص والصفحة</string>
     <string name="reader_contents_and_notes">المحتويات والإشارات المرجعية والتمييزات</string>
@@ -332,6 +342,7 @@
     <string name="listen_sleep_other_start">بدء المؤقت</string>
     <string name="listen_no_voice">لا يوجد صوت مثبَّت لتحويل النص إلى كلام على هذا الهاتف.</string>
     <string name="listen_no_readable_text">لا يحتوي هذا الكتاب على نص يمكن قراءته بصوت عالٍ.</string>
+    <string name="listen_nothing_to_read">لا يوجد هنا كتاب يمكن قراءته بصوت عالٍ. لا يستطيع Jacket قراءة ملفات PDF أو القصص المصوّرة بصوت عالٍ.</string>
     <string name="listen_stopped_error">توقفت القراءة بصوت عالٍ: %1$s</string>
 
     <string name="widget_reading">قيد القراءة</string>

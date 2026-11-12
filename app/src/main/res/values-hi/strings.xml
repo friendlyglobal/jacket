@@ -83,6 +83,9 @@
     <string name="library_finished_badge">पूरी हुई</string>
     <string name="library_new_badge">नई</string>
     <string name="library_on_cover_screen">आपकी कवर स्क्रीन पर</string>
+    <string name="library_being_read_aloud">पढ़कर सुनाई जा रही है</string>
+    <string name="library_read_aloud_paused">पढ़कर सुनाना रुका हुआ है</string>
+    <string name="library_resume">फिर शुरू करें</string>
     <string name="library_menu_open">खोलें</string>
     <string name="library_menu_show_on_cover">कवर स्क्रीन पर दिखाएँ</string>
     <string name="library_menu_mark_finished">पूरी हुई मार्क करें</string>
@@ -198,6 +201,13 @@
     <string name="reader_back_to_library">लाइब्रेरी पर वापस जाएँ</string>
     <string name="reader_search">किताब में खोजें</string>
     <string name="reader_bookmark_add">इस पेज को बुकमार्क करें</string>
+    <string name="reader_highlight_or_note">हाइलाइट करें या नोट जोड़ें</string>
+    <string name="reader_highlight_sentence">जो वाक्य पढ़ा जा रहा है उसे हाइलाइट करें</string>
+    <string name="reader_note_sentence">जो वाक्य पढ़ा जा रहा है उस पर नोट जोड़ें</string>
+    <string name="reader_highlight_paragraph">इस पेज का पहला पैराग्राफ़ हाइलाइट करें</string>
+    <string name="reader_note_paragraph">इस पेज के पहले पैराग्राफ़ पर नोट जोड़ें</string>
+    <string name="reader_highlighted">हाइलाइट हो गया</string>
+    <string name="reader_nothing_to_highlight">इस पेज पर हाइलाइट करने के लिए कोई शब्द नहीं हैं।</string>
     <string name="reader_bookmark_remove">बुकमार्क हटाएँ</string>
     <string name="reader_text_settings">टेक्स्ट और पेज की सेटिंग</string>
     <string name="reader_contents_and_notes">विषय-सूची, बुकमार्क और हाइलाइट</string>
@@ -292,6 +302,7 @@
     <string name="listen_sleep_other_start">टाइमर शुरू करें</string>
     <string name="listen_no_voice">इस फ़ोन में कोई टेक्स्ट-टू-स्पीच आवाज़ इंस्टॉल नहीं है।</string>
     <string name="listen_no_readable_text">इस किताब में ऐसा कोई टेक्स्ट नहीं है जिसे पढ़कर सुनाया जा सके।</string>
+    <string name="listen_nothing_to_read">यहाँ ऐसी कोई किताब नहीं है जिसे पढ़कर सुनाया जा सके। Jacket PDF और कॉमिक पढ़कर नहीं सुना सकता।</string>
     <string name="listen_stopped_error">पढ़कर सुनाना रुक गया: %1$s</string>
 
     <string name="widget_reading">पढ़ी जा रही</string>

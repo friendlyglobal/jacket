@@ -82,6 +82,9 @@
     <string name="library_finished_badge">Ausgelesen</string>
     <string name="library_new_badge">Neu</string>
     <string name="library_on_cover_screen">Auf dem Cover-Display</string>
+    <string name="library_being_read_aloud">Wird vorgelesen</string>
+    <string name="library_read_aloud_paused">Vorlesen pausiert</string>
+    <string name="library_resume">Fortsetzen</string>
     <string name="library_menu_open">Öffnen</string>
     <string name="library_menu_show_on_cover">Auf Cover-Display zeigen</string>
     <string name="library_menu_mark_finished">Als ausgelesen markieren</string>
@@ -197,6 +200,13 @@
     <string name="reader_back_to_library">Zurück zur Bibliothek</string>
     <string name="reader_search">Im Buch suchen</string>
     <string name="reader_bookmark_add">Lesezeichen setzen</string>
+    <string name="reader_highlight_or_note">Markieren oder Notiz hinzufügen</string>
+    <string name="reader_highlight_sentence">Den Satz markieren, der gerade vorgelesen wird</string>
+    <string name="reader_note_sentence">Notiz zum Satz hinzufügen, der gerade vorgelesen wird</string>
+    <string name="reader_highlight_paragraph">Den ersten Absatz auf dieser Seite markieren</string>
+    <string name="reader_note_paragraph">Notiz zum ersten Absatz auf dieser Seite hinzufügen</string>
+    <string name="reader_highlighted">Markiert</string>
+    <string name="reader_nothing_to_highlight">Auf dieser Seite gibt es keinen Text zum Markieren.</string>
     <string name="reader_bookmark_remove">Lesezeichen entfernen</string>
     <string name="reader_text_settings">Text- und Seiteneinstellungen</string>
     <string name="reader_contents_and_notes">Inhalt, Lesezeichen und Markierungen</string>
@@ -291,6 +301,7 @@
     <string name="listen_sleep_other_start">Timer starten</string>
     <string name="listen_no_voice">Auf diesem Smartphone ist keine Sprachausgabe-Stimme installiert.</string>
     <string name="listen_no_readable_text">Dieses Buch hat keinen Text, der vorgelesen werden kann.</string>
+    <string name="listen_nothing_to_read">Hier gibt es kein Buch, das vorgelesen werden kann. PDFs und Comics kann Jacket nicht vorlesen.</string>
     <string name="listen_stopped_error">Vorlesen gestoppt: %1$s</string>
 
     <string name="widget_reading">Ich lese</string>

@@ -8,6 +8,10 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.core.Animatable
@@ -57,6 +61,7 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -97,6 +102,7 @@ import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.LibrarySort
 import io.github.friendlyglobal.jacket.data.LibraryState
 import io.github.friendlyglobal.jacket.data.readingStreak
+import io.github.friendlyglobal.jacket.reader.Aloud
 import io.github.friendlyglobal.jacket.importer.BookImporter
 import io.github.friendlyglobal.jacket.ui.ConnectedChoice
 import io.github.friendlyglobal.jacket.ui.CoverImage
@@ -176,6 +182,10 @@ fun HomeScreen(
     onFreeBooks: () -> Unit = {},
     /** Opens "Your reading" from the line of today's reading; without it, the line is only a line. */
     onReading: (() -> Unit)? = null,
+    /** The book being read aloud with no reader open, and whether the voice is reading or paused: its cover says so. */
+    aloud: Aloud? = null,
+    /** Pauses the voice (false) or has it read on (true), from the "Continue reading" pane. */
+    onAloud: (Boolean) -> Unit = {},
 ) {
     val haptics = rememberHaptics()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
@@ -300,7 +310,10 @@ fun HomeScreen(
                 if (inlineHero && hero != null && !onFinishedShelf) {
                     item(key = "hero", span = { GridItemSpan(maxLineSpan) }) {
                         // The shelves change under it: it moves over rather than jumping.
-                        ContinueCard(hero, outerAvailable, onOpen = { onOpen(it, CoverSpot.HERO) }, modifier = Modifier.animateItem())
+                        ContinueCard(
+                            hero, outerAvailable, onOpen = { onOpen(it, CoverSpot.HERO) }, modifier = Modifier.animateItem(),
+                            aloud = aloud?.takeIf { it.bookId == hero.id }?.playing,
+                        )
                     }
                 }
                 item(key = "header", span = { GridItemSpan(maxLineSpan) }) {
@@ -359,6 +372,7 @@ fun HomeScreen(
                         haptics = haptics,
                         actions = actions,
                         modifier = Modifier.animateItem(),
+                        aloud = aloud?.takeIf { it.bookId == book.id }?.playing,
                     )
                 }
             }
@@ -382,6 +396,8 @@ fun HomeScreen(
                         haptics = haptics,
                         onOpen = { onOpen(it, CoverSpot.HERO) },
                         onListen = onListen,
+                        aloud = aloud?.takeIf { it.bookId == hero.id }?.playing,
+                        onAloud = onAloud,
                         // Side by side, each is read through before the other: not a line of one,
                         // then whatever of the other happens to be level with it.
                         modifier = Modifier
@@ -541,7 +557,14 @@ private const val GEAR_TURN = 90f
 
 /** The book on your cover screen, one tap from where you left off. */
 @Composable
-private fun ContinueCard(book: Book, outerAvailable: Boolean, onOpen: (Book) -> Unit, modifier: Modifier = Modifier) {
+private fun ContinueCard(
+    book: Book,
+    outerAvailable: Boolean,
+    onOpen: (Book) -> Unit,
+    modifier: Modifier = Modifier,
+    /** The book is being read aloud: true while the voice reads, false while it is paused; null when it isn't. */
+    aloud: Boolean? = null,
+) {
     val interaction = remember { MutableInteractionSource() }
     // Back from reading, the line runs on to where you got to.
     val progress = animateFloatAsState(book.progress, WavyProgressIndicatorDefaults.ProgressAnimationSpec, label = "progress")
@@ -570,7 +593,10 @@ private fun ContinueCard(book: Book, outerAvailable: Boolean, onOpen: (Book) -> 
                     style = MaterialTheme.typography.labelMedium, letterSpacing = 1.4.sp, fontWeight = FontWeight.SemiBold,
                 )
                 Spacer(Modifier.height(4.dp))
-                Text(book.title, style = MaterialTheme.typography.titleLargeEmphasized, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(
+                    book.title, style = MaterialTheme.typography.titleLargeEmphasized, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.saidAloud(book.title, aloud),
+                )
                 if (book.author.isNotEmpty()) {
                     Text(book.author, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
@@ -584,6 +610,7 @@ private fun ContinueCard(book: Book, outerAvailable: Boolean, onOpen: (Book) -> 
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    HeroListeningMark(aloud)
                     Text(book.statusLabel(LocalResources.current), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
                     AnimatedVisibility(outerAvailable) {
                         Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary) {
@@ -596,6 +623,45 @@ private fun ContinueCard(book: Book, outerAvailable: Boolean, onOpen: (Book) -> 
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * What a screen reader says of a book's [title] where it stands on the "Continue reading" card:
+ * the title, and that the book is being read aloud ("Moby Dick, being read aloud"), or that
+ * read-aloud is paused in it. The small mark beside the book's progress says the same to the eye.
+ */
+@Composable
+private fun Modifier.saidAloud(title: String, aloud: Boolean?): Modifier {
+    if (aloud == null) return this
+    val said = spoken(stringResource(R.string.list_separator), title, aloudLabel(aloud))
+    return semantics { contentDescription = said }
+}
+
+/** "Being read aloud", or that read-aloud is paused. */
+@Composable
+private fun aloudLabel(playing: Boolean): String =
+    if (playing) stringResource(R.string.library_being_read_aloud) else stringResource(R.string.library_read_aloud_paused)
+
+/**
+ * The listening mark on the "Continue reading" card, ahead of how far through the book is: it
+ * unfolds into the line when the voice starts in the book, and folds away when it stops.
+ */
+@Composable
+private fun HeroListeningMark(aloud: Boolean?) {
+    val motion = MaterialTheme.motionScheme
+    // (It keeps its last look while it folds away.)
+    val playing = remember { booleanArrayOf(false) }
+    if (aloud != null) playing[0] = aloud
+    AnimatedVisibility(
+        visible = aloud != null,
+        enter = expandHorizontally(motion.fastSpatialSpec()) + fadeIn(motion.fastEffectsSpec()),
+        exit = shrinkHorizontally(motion.fastSpatialSpec()) + fadeOut(motion.fastEffectsSpec()),
+    ) {
+        Row {
+            ListeningMark(playing[0], LocalContentColor.current, Modifier.size(14.dp))
+            Spacer(Modifier.width(8.dp))
         }
     }
 }
@@ -628,6 +694,10 @@ private fun NowReadingPane(
     onOpen: (Book) -> Unit,
     onListen: ((Book) -> Unit)?,
     modifier: Modifier = Modifier,
+    /** The book is being read aloud: true while the voice reads, false while it is paused; null when it isn't. */
+    aloud: Boolean? = null,
+    /** Pauses the voice (false) or has it read on (true). */
+    onAloud: (Boolean) -> Unit = {},
 ) {
     val interaction = remember { MutableInteractionSource() }
     // Back from reading, the line runs on to where you got to.
@@ -667,6 +737,7 @@ private fun NowReadingPane(
                     Text(
                         book.title, style = MaterialTheme.typography.headlineSmallEmphasized, textAlign = TextAlign.Center,
                         maxLines = 3, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.saidAloud(book.title, aloud),
                     )
                     if (book.author.isNotEmpty()) {
                         Spacer(Modifier.height(4.dp))
@@ -684,6 +755,7 @@ private fun NowReadingPane(
                     )
                     Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        HeroListeningMark(aloud)
                         Text(book.statusLabel(LocalResources.current), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
                         AnimatedVisibility(outerAvailable) {
                             Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primary) {
@@ -708,14 +780,35 @@ private fun NowReadingPane(
                         }
                         // Formats that can be read aloud.
                         if (onListen != null && (book.format == BookFormat.EPUB || book.format == BookFormat.TXT)) {
+                            // While the book is being read aloud (the voice was started with it
+                            // shut), the same button pauses the voice and takes it up again.
                             FilledTonalButton(
-                                onClick = { haptics.tick(); onListen(book) },
+                                onClick = {
+                                    when (aloud) {
+                                        null -> { haptics.tick(); onListen(book) }
+                                        else -> { haptics.toggle(!aloud); onAloud(!aloud) }
+                                    }
+                                },
                                 shapes = ButtonDefaults.shapes(),
                                 modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                             ) {
-                                Icon(JacketIcons.Headphones, null, Modifier.size(ButtonDefaults.IconSize))
-                                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                                Text(stringResource(R.string.library_listen), maxLines = 1, autoSize = fitOnOneLine(MaterialTheme.typography.labelLarge))
+                                val motion = MaterialTheme.motionScheme
+                                AnimatedContent(
+                                    targetState = aloud,
+                                    transitionSpec = { fadeIn(motion.fastEffectsSpec()) togetherWith fadeOut(motion.fastEffectsSpec()) },
+                                    label = "listen-button",
+                                ) { reading ->
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        val (icon, label) = when (reading) {
+                                            null -> JacketIcons.Headphones to R.string.library_listen
+                                            true -> JacketIcons.Pause to R.string.listen_pause
+                                            false -> JacketIcons.Play to R.string.library_resume
+                                        }
+                                        Icon(icon, null, Modifier.size(ButtonDefaults.IconSize))
+                                        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                                        Text(stringResource(label), maxLines = 1, autoSize = fitOnOneLine(MaterialTheme.typography.labelLarge))
+                                    }
+                                }
                             }
                         }
                     }
@@ -832,6 +925,8 @@ private fun BookTile(
     haptics: Haptics,
     actions: BookActions,
     modifier: Modifier,
+    /** The book is being read aloud: true while the voice reads, false while it is paused; null when it isn't. */
+    aloud: Boolean? = null,
 ) {
     var menu by remember { mutableStateOf(false) }
     val interaction = remember { MutableInteractionSource() }
@@ -843,6 +938,8 @@ private fun BookTile(
     val said = spoken(
         separator,
         book.title,
+        // "Moby Dick, being read aloud": what the mark on its cover says to the eye.
+        aloud?.let { aloudLabel(it) },
         book.author,
         if (missing) stringResource(R.string.library_add_file_again) else book.statusLabel(resources),
         stringResource(R.string.library_pinned).takeIf { book.isPinned },
@@ -917,6 +1014,16 @@ private fun BookTile(
                 }
             }
             Row(Modifier.align(Alignment.TopEnd).padding(8.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                // Being read aloud: a small mark that comes and goes with the voice.
+                // (It keeps its last look while it leaves.)
+                val motion = MaterialTheme.motionScheme
+                val playing = remember { booleanArrayOf(false) }
+                if (aloud != null) playing[0] = aloud
+                AnimatedVisibility(
+                    visible = aloud != null,
+                    enter = scaleIn(motion.fastSpatialSpec()) + fadeIn(motion.fastEffectsSpec()),
+                    exit = scaleOut(motion.fastSpatialSpec()) + fadeOut(motion.fastEffectsSpec()),
+                ) { ListeningBadge(playing[0]) }
                 if (book.isPinned) PinBadge()
                 if (onCover) {
                     Box(

@@ -80,6 +80,9 @@
     <string name="library_finished_badge">已讀完</string>
     <string name="library_new_badge">新書</string>
     <string name="library_on_cover_screen">正在外螢幕上顯示</string>
+    <string name="library_being_read_aloud">正在朗讀</string>
+    <string name="library_read_aloud_paused">朗讀已暫停</string>
+    <string name="library_resume">繼續</string>
     <string name="library_menu_open">開啟</string>
     <string name="library_menu_show_on_cover">在外螢幕顯示</string>
     <string name="library_menu_mark_finished">標示為已讀完</string>
@@ -191,6 +194,13 @@
     <string name="reader_back_to_library">返回書庫</string>
     <string name="reader_search">在書中搜尋</string>
     <string name="reader_bookmark_add">將此頁加入書籤</string>
+    <string name="reader_highlight_or_note">畫線或加入筆記</string>
+    <string name="reader_highlight_sentence">為正在朗讀的句子畫線</string>
+    <string name="reader_note_sentence">為正在朗讀的句子加入筆記</string>
+    <string name="reader_highlight_paragraph">為本頁第一段畫線</string>
+    <string name="reader_note_paragraph">為本頁第一段加入筆記</string>
+    <string name="reader_highlighted">已畫線</string>
+    <string name="reader_nothing_to_highlight">本頁沒有可畫線的文字。</string>
     <string name="reader_bookmark_remove">移除書籤</string>
     <string name="reader_text_settings">文字和頁面設定</string>
     <string name="reader_contents_and_notes">目錄、書籤和畫線</string>
@@ -282,6 +292,7 @@
     <string name="listen_sleep_other_start">開始定時</string>
     <string name="listen_no_voice">這支手機尚未安裝文字轉語音的語音。</string>
     <string name="listen_no_readable_text">這本書沒有可朗讀的文字。</string>
+    <string name="listen_nothing_to_read">這裡沒有可以朗讀的書。Jacket 無法朗讀 PDF 和漫畫。</string>
     <string name="listen_stopped_error">朗讀已停止：%1$s</string>
 
     <string name="widget_reading">閱讀中</string>

@@ -85,6 +85,9 @@
     <string name="library_finished_badge">Terminato</string>
     <string name="library_new_badge">Nuovo</string>
     <string name="library_on_cover_screen">Sul tuo schermo esterno</string>
+    <string name="library_being_read_aloud">Lettura ad alta voce in corso</string>
+    <string name="library_read_aloud_paused">Lettura ad alta voce in pausa</string>
+    <string name="library_resume">Riprendi</string>
     <string name="library_menu_open">Apri</string>
     <string name="library_menu_show_on_cover">Mostra sullo schermo esterno</string>
     <string name="library_menu_mark_finished">Segna come terminato</string>
@@ -204,6 +207,13 @@
     <string name="reader_back_to_library">Torna alla libreria</string>
     <string name="reader_search">Cerca nel libro</string>
     <string name="reader_bookmark_add">Aggiungi un segnalibro a questa pagina</string>
+    <string name="reader_highlight_or_note">Evidenzia o aggiungi una nota</string>
+    <string name="reader_highlight_sentence">Evidenzia la frase che viene letta</string>
+    <string name="reader_note_sentence">Aggiungi una nota alla frase che viene letta</string>
+    <string name="reader_highlight_paragraph">Evidenzia il primo paragrafo di questa pagina</string>
+    <string name="reader_note_paragraph">Aggiungi una nota al primo paragrafo di questa pagina</string>
+    <string name="reader_highlighted">Evidenziato</string>
+    <string name="reader_nothing_to_highlight">In questa pagina non c\'è testo da evidenziare.</string>
     <string name="reader_bookmark_remove">Rimuovi segnalibro</string>
     <string name="reader_text_settings">Impostazioni di testo e pagina</string>
     <string name="reader_contents_and_notes">Indice, segnalibri ed evidenziazioni</string>
@@ -301,6 +311,7 @@
     <string name="listen_sleep_other_start">Avvia timer</string>
     <string name="listen_no_voice">Su questo telefono non è installata nessuna voce di sintesi vocale.</string>
     <string name="listen_no_readable_text">Questo libro non contiene testo che si possa leggere ad alta voce.</string>
+    <string name="listen_nothing_to_read">Qui non c\'è nessun libro che si possa leggere ad alta voce. Jacket non può leggere ad alta voce PDF e fumetti.</string>
     <string name="listen_stopped_error">Lettura ad alta voce interrotta: %1$s</string>
 
     <string name="widget_reading">In lettura</string>

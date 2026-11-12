@@ -106,6 +106,11 @@
     <string name="library_finished_badge">Finished</string>
     <string name="library_new_badge">New</string>
     <string name="library_on_cover_screen">On your cover screen</string>
+    <!-- A book in the library that is being read aloud (started from a headphone button, the notification or the widget, with the book shut). Said by a screen reader after the book's title: "Moby Dick, being read aloud". -->
+    <string name="library_being_read_aloud">Being read aloud</string>
+    <string name="library_read_aloud_paused">Read aloud paused</string>
+    <!-- The "Continue reading" card's Listen button while read-aloud is paused in that book: has the voice read on. (While it reads, the button is "Pause".) -->
+    <string name="library_resume">Resume</string>
     <string name="library_menu_open">Open</string>
     <string name="library_menu_show_on_cover">Show on cover screen</string>
     <string name="library_menu_mark_finished">Mark as finished</string>
@@ -231,7 +236,15 @@
     <!-- Reader -->
     <string name="reader_back_to_library">Back to library</string>
     <string name="reader_search">Search in book</string>
-    <string name="reader_bookmark_add">Bookmark this page</string>
+<!-- Highlighting without selecting text (a screen reader and a keyboard can't press and hold on the page). The button, and what its two choices are called: while the book is read aloud they mark the sentence the voice is on, otherwise the first paragraph on the page. -->
+    <string name="reader_highlight_or_note">Highlight or add a note</string>
+    <string name="reader_highlight_sentence">Highlight the sentence being read</string>
+    <string name="reader_note_sentence">Add a note to the sentence being read</string>
+    <string name="reader_highlight_paragraph">Highlight the first paragraph on this page</string>
+    <string name="reader_note_paragraph">Add a note to the first paragraph on this page</string>
+    <string name="reader_highlighted">Highlighted</string>
+    <string name="reader_nothing_to_highlight">There are no words on this page to highlight.</string>
+        <string name="reader_bookmark_add">Bookmark this page</string>
     <string name="reader_bookmark_remove">Remove bookmark</string>
     <string name="reader_text_settings">Text and page settings</string>
     <string name="reader_contents_and_notes">Contents, bookmarks and highlights</string>
@@ -339,6 +352,8 @@
     <string name="listen_sleep_other_start">Start timer</string>
     <string name="listen_no_voice">This phone has no text-to-speech voice installed.</string>
     <string name="listen_no_readable_text">This book has no text that can be read aloud.</string>
+    <!-- Play was pressed on a headset, the widget or the notification, and the library has nothing Jacket can read aloud (no books, or only PDFs and comics). -->
+    <string name="listen_nothing_to_read">There is no book here that can be read aloud. Jacket can\'t read PDFs or comics aloud.</string>
     <!-- %1$s: the reason, from the speech engine. -->
     <string name="listen_stopped_error">Read aloud stopped: %1$s</string>
 

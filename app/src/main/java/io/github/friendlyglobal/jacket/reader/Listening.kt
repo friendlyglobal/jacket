@@ -4,6 +4,7 @@ import android.app.Application
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
@@ -15,6 +16,8 @@ import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.Library
 import io.github.friendlyglobal.jacket.data.ReadingMoment
+import io.github.friendlyglobal.jacket.data.Saying
+import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.importer.Bitmaps
 import io.github.friendlyglobal.jacket.importer.NothingToRead
 import io.github.friendlyglobal.jacket.library
@@ -28,7 +31,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.readium.r2.shared.publication.Locator
@@ -153,6 +158,19 @@ class Listening(private val app: Application) {
                 art = if (book == null) null else book.id to withContext(Dispatchers.IO) { coverBytes(book) }
             }
         }
+        // A voice reading with no reader open is set up as a reader sets it up (see ReadAloud.tune),
+        // and goes on being: a word given another way to be said, the notes' numbers switched
+        // off, another speed or another voice chosen while it reads take effect as they do with
+        // the book open, where the reader's screen sees to it. (With no screen, nothing did: the
+        // voice kept what it started with until it was next started.)
+        scope.launch {
+            library.state.map { state -> Tuned(state.sayings, state.settings, hand.reading?.let { state.find(it.bookId)?.language }) }
+                .distinctUntilChanged().drop(1).collect {
+                    val reading = hand.reading?.takeIf { !it.attached } ?: return@collect
+                    reading.tune(library.state.value, app.resources.configuration.locales[0]?.toLanguageTag())
+                    reading.retune()
+                }
+        }
         // A book removed from the library can't go on being read.
         scope.launch {
             library.state.collect { state ->
@@ -180,6 +198,9 @@ class Listening(private val app: Application) {
             wanted = wanted,
         )
     }
+
+    /** The book being read aloud and whether the voice is reading or paused, for the library to show (see [Aloud]); null when nothing is. */
+    fun aloud(): Aloud? = aloud(face())
 
     /** The cover to show for [bookId], once it has been read from its file. */
     internal fun artOf(bookId: String): ByteArray? = art?.takeIf { it.first == bookId }?.second
@@ -218,9 +239,25 @@ class Listening(private val app: Application) {
         val state = library.state.value
         val book = chosen?.let(state::find)?.takeIf { it.canListen && it.id !in library.missing.value } ?: toResume()
         asked = null
-        if (book == null || starting?.id == book.id) return
+        if (book == null) {
+            // Nothing here can be read aloud: no book at all, or only PDFs and comics. Said in
+            // words, rather than leave a Play that does nothing.
+            if (starting == null) nothingToRead()
+            return
+        }
+        if (starting?.id == book.id) return
         start(book)
     }
+
+    /** Play was pressed (a headphone button, the widget, the notification) and no book can be read aloud: says so, once for a press. */
+    internal fun nothingToRead() {
+        val now = SystemClock.uptimeMillis()
+        if (now - saidNothingAt < SAID_NOTHING_MS) return
+        saidNothingAt = now
+        Toast.makeText(app, R.string.listen_nothing_to_read, Toast.LENGTH_LONG).show()
+    }
+
+    private var saidNothingAt = -SAID_NOTHING_MS
 
     private fun start(book: Book) {
         startJob?.cancel()
@@ -372,8 +409,14 @@ class Listening(private val app: Application) {
         ByteArrayOutputStream().also { cover.compress(Bitmap.CompressFormat.JPEG, 85, it) }.toByteArray()
     }.getOrNull()
 
+    /** What a voice reading with no reader open is set up from: the words to say another way, the settings, and its book's language. */
+    private data class Tuned(val sayings: List<Saying>, val settings: Settings, val language: String?)
+
     private companion object {
         const val TAG = "Listening"
+
+        /** A press of a button comes as a press and a release, and a held one repeats: "nothing to read aloud" is said once for them all. */
+        const val SAID_NOTHING_MS = 3_000L
 
         /** How long the voice is taken at its word that it is about to read, before what it is doing is believed instead. */
         const val WANTED_MS = 3_000L

@@ -90,6 +90,29 @@ data class Book(
     }
 }
 
+/**
+ * [this] book with a new reading place: the Readium [locator], how far through the book it is
+ * counted ([progress]), and what is kept beside it (see [Library.updateLocator]).
+ *
+ * The progress is what the library, the widgets, the cover and the reader all show, and it never
+ * goes down by itself. The same place is counted a little differently each time it is counted
+ * over (when the book is reopened, when its pages are laid out anew by a fold, when the voice
+ * hands it to a reader or takes it back), and every saved place comes through here. So a count
+ * lower than the one the book has is only taken when the reader went [back] through the book
+ * themselves: a page turned back, a jump, an earlier sentence tapped. The place itself is always
+ * the one given.
+ */
+internal fun Book.leftAt(locator: String, progress: Float, position: Int, positions: Int, offset: Float?, back: Boolean): Book {
+    val counted = progress.coerceIn(0f, 1f)
+    return copy(
+        locator = locator,
+        progress = if (back || !this.progress.isFinite()) counted else maxOf(this.progress, counted),
+        position = position.coerceAtLeast(0),
+        positionOffset = offset?.takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: positionOffset,
+        sectionCount = positions.coerceAtLeast(0),
+    )
+}
+
 enum class ReadingFont(@StringRes val label: Int, @StringRes val description: Int) {
     LITERATA(R.string.font_literata, R.string.font_literata_description),
     HYPERLEGIBLE(R.string.font_hyperlegible, R.string.font_hyperlegible_description),

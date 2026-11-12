@@ -64,10 +64,22 @@ internal class OpenBook(
      * file's blocks it is in, not where on the pages: it is told the pages' way first. (One saved
      * since comes out as it went in.)
      */
-    suspend fun leftAt(book: Book): Locator? {
+    suspend fun leftAt(book: Book): Locator? = left(book).place
+
+    /** The same, and whether it was one of Jacket 1.0.0's sentences (see [Left.oldCount]). */
+    suspend fun left(book: Book): Left {
         val saved = savedLocator(book, publication, file, text)
-        return if (saved?.isSpoken == true) spoken.placed(saved) else saved
+        if (saved?.isSpoken != true) return Left(saved, oldCount = false)
+        val placed = spoken.placed(saved)
+        return Left(placed, savedTheOldWay(saved.locations.progression, placed.locations.progression))
     }
+
+    /**
+     * Where a book was left ([place]; null for the first page), and whether that is a sentence
+     * Jacket 1.0.0 saved by its own count ([oldCount]): the book's progress was counted wrongly
+     * with it, and is counted over the first time the place is seen, up or down.
+     */
+    class Left(val place: Locator?, val oldCount: Boolean)
 }
 
 /**

@@ -56,8 +56,10 @@ Go through the reader with TalkBack and
 they find. Text size stops at 200% (`reader/ReadingControls.kt:67`). Allowing larger text is a
 suggestion, not something users have been seen asking for.
 
-Shipped: TalkBack, keyboard-only use, large text up to 300% and AA contrast. Still open: making a
-highlight or note without press-and-hold, PDF and comic zoom without pinching, and reading the
+Shipped: TalkBack, keyboard-only use, large text up to 300% and AA contrast. A highlight or a note
+can be made without press-and-hold: a button on the reader's top bar, and TalkBack actions, mark
+the sentence being read aloud or the first paragraph on the page. Still open: choosing any other
+words to highlight without touching the page, PDF and comic zoom without pinching, and reading the
 page's own text with TalkBack inside the paginated view (Listen is the dependable route).
 
 ## Shipped in 1.2 (12 November 2026)
@@ -183,10 +185,15 @@ Jacket. Opening the book finds the same voice at the sentence it is on, reading 
   Previous on a headset, the notification and the lock screen move a sentence (they did nothing).
 - Closing a book still stops its voice, and so does opening another book or swiping Jacket away
   from Recents.
-- Still open: with no reader open the voice's place is counted from the text alone, so opening
-  the book can correct the percent by up to a page; the library itself doesn't show that a book
-  is being read aloud (the notification and the widget do); and it has only been on the emulator,
-  with `cmd media_session` standing in for a headset.
+- The percent never goes down by itself: a place counted again (the book opened after listening
+  with it shut, its pages laid out anew by a fold) keeps the number it had, and only going back
+  through the book lowers it. The library marks the book being read aloud, and the "Continue
+  reading" pane's Listen button pauses it and takes it up again.
+- Play with nothing that can be read aloud says so while Jacket is on screen. From the
+  background it can't: Android only shows such a message for an app allowed to post
+  notifications, and Jacket doesn't ask to be.
+- Still open: it has only been on the emulator, with `cmd media_session` standing in for a
+  headset.
 
 ## Next
 
