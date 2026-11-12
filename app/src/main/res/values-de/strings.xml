@@ -204,8 +204,6 @@
     <string name="reader_listen">Anhören: vorlesen lassen</string>
     <string name="reader_previous_chapter">Vorheriges Kapitel</string>
     <string name="reader_next_chapter">Nächstes Kapitel</string>
-    <string name="reader_previous_paragraph">Vorheriger Absatz</string>
-    <string name="reader_next_paragraph">Nächster Absatz</string>
     <string name="reader_previous_page">Vorherige Seite</string>
     <string name="reader_next_page">Nächste Seite</string>
     <string name="reader_page_number">Seite %1$d</string>
@@ -273,8 +271,6 @@
     <string name="listen_pause">Pause</string>
     <string name="listen_previous_sentence">Vorheriger Satz</string>
     <string name="listen_next_sentence">Nächster Satz</string>
-    <string name="listen_previous_paragraph">Vorheriger Absatz</string>
-    <string name="listen_next_paragraph">Nächster Absatz</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">Vorlesen beenden</string>
     <string name="listen_sleep_timer">Sleep-Timer</string>

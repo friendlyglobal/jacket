@@ -2,6 +2,7 @@ package io.github.friendlyglobal.jacket.importer
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Test
 import java.nio.charset.Charset
 
@@ -16,11 +17,6 @@ class TextDecodingTest {
         assertEquals(words, TextDecoding.decode(marked))
         assertEquals("plain", TextDecoding.decode("plain".toByteArray(Charsets.US_ASCII)))
         assertEquals("", TextDecoding.decode(ByteArray(0)))
-    }
-
-    @Test
-    fun `nobody is asked about a file that reads as UTF-8`() {
-        TextDecoding.decode("日本語のテキスト".toByteArray(Charsets.UTF_8)) { error("not to be asked") }
     }
 
     @Test
@@ -53,21 +49,45 @@ class TextDecodingTest {
         assertFalse(String(bytes, Charsets.ISO_8859_1) == words)
     }
 
+    private val russian = "Все счастливые семьи похожи друг на друга, каждая несчастливая семья несчастлива по-своему.\n\n" +
+        "Всё смешалось в доме Облонских. Жена узнала, что муж был в связи с бывшею в их доме француженкою-гувернанткой."
+    private val ukrainian = "Садок вишневий коло хати, хрущі над вишнями гудуть. Плугатарі з плугами йдуть, співають ідучи дівчата, а матері вечерять ждуть."
+    private val japanese = "吾輩は猫である。名前はまだ無い。\n\nどこで生れたかとんと見当がつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。"
+    private val simplified = "我们在这里，他们也来了。这是一个很大的国家，人们都说中国有很多地方可以去看一看。\n\n你要是有时间，就到我家来。"
+    private val traditional = "我們在這裡，他們也來了。這是一個很大的國家，人們都說中國有很多地方可以去看一看。\n\n你要是有時間，就到我家來。"
+    private val korean = "나는 고양이로소이다. 이름은 아직 없다.\n\n어디서 태어났는지 도무지 짐작이 가지 않는다. 어둡고 축축한 곳에서 울고 있었던 것만은 기억한다."
+
     @Test
-    fun `another alphabet's own encoding is read by the name the phone gives it`() {
-        val russian = "Все счастливые семьи похожи друг на друга."
-        val cyrillic = Charset.forName("windows-1251")
-        assertEquals(russian, TextDecoding.decode(russian.toByteArray(cyrillic)) { cyrillic })
-        val japanese = "吾輩は猫である。名前はまだ無い。"
-        val shiftJis = Charset.forName("Shift_JIS")
-        assertEquals(japanese, TextDecoding.decode(japanese.toByteArray(shiftJis)) { shiftJis })
+    fun `a novel saved the way its language used to be is read in that`() {
+        val saved = listOf(
+            russian to "windows-1251", russian to "KOI8-R", ukrainian to "windows-1251",
+            japanese to "Shift_JIS", japanese to "EUC-JP", simplified to "GBK", traditional to "Big5", korean to "EUC-KR",
+        )
+        for ((text, name) in saved) assertEquals(name, text, TextDecoding.decode(text.toByteArray(Charset.forName(name))))
     }
 
     @Test
-    fun `a guess that fails leaves the file readable`() {
-        val bytes = "café".toByteArray(Charsets.ISO_8859_1)
-        assertEquals("café", TextDecoding.decode(bytes) { error("no idea") })
-        assertEquals("café", TextDecoding.decode(bytes) { null })
+    fun `a Western file is not taken for any of them`() {
+        val western = listOf(
+            words,
+            "Où est la bibliothèque ? Elle est là-bas, près de l'église, à côté du café où l'on a déjeuné hier.",
+            "Die Straße führt über die Brücke. Später hören wir Musik, während draußen der Regen fällt und die Bäume rauschen.",
+            "El niño comió piña y después durmió. Mañana irá al colegio con su compañero más pequeño.",
+            "ÀÉÎÕÜ ÇÑ ÆØÅ — ALL CAPITALS, AND ACCENTS: ÉTÉ, ÀGE, NOËL, FAÇADE, DÉJÀ VU.",
+        )
+        for (text in western) {
+            val bytes = text.toByteArray(Charset.forName("windows-1252"))
+            assertNull(text, TextDecoding.older(bytes))
+            assertEquals(text, TextDecoding.decode(bytes))
+        }
+        // Nothing above ASCII, nothing to tell.
+        assertNull(TextDecoding.older("plain".toByteArray()))
+    }
+
+    @Test
+    fun `only the first pages of a long file are looked at, and no character is cut in two`() {
+        val long = (1..3_000).joinToString("\n") { japanese }
+        assertEquals(long, TextDecoding.decode(long.toByteArray(Charset.forName("Shift_JIS"))))
     }
 
     @Test

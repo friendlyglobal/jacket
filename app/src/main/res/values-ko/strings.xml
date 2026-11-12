@@ -198,8 +198,6 @@
     <string name="reader_listen">듣기: 소리 내어 읽기</string>
     <string name="reader_previous_chapter">이전 장</string>
     <string name="reader_next_chapter">다음 장</string>
-    <string name="reader_previous_paragraph">이전 단락</string>
-    <string name="reader_next_paragraph">다음 단락</string>
     <string name="reader_previous_page">이전 페이지</string>
     <string name="reader_next_page">다음 페이지</string>
     <string name="reader_page_number">%1$d페이지</string>
@@ -265,8 +263,6 @@
     <string name="listen_pause">일시중지</string>
     <string name="listen_previous_sentence">이전 문장</string>
     <string name="listen_next_sentence">다음 문장</string>
-    <string name="listen_previous_paragraph">이전 단락</string>
-    <string name="listen_next_paragraph">다음 단락</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">듣기 중지</string>
     <string name="listen_sleep_timer">수면 타이머</string>

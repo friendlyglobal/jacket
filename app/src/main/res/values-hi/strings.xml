@@ -205,8 +205,6 @@
     <string name="reader_listen">सुनें: पढ़कर सुनाएँ</string>
     <string name="reader_previous_chapter">पिछला अध्याय</string>
     <string name="reader_next_chapter">अगला अध्याय</string>
-    <string name="reader_previous_paragraph">पिछला पैराग्राफ़</string>
-    <string name="reader_next_paragraph">अगला पैराग्राफ़</string>
     <string name="reader_previous_page">पिछला पेज</string>
     <string name="reader_next_page">अगला पेज</string>
     <string name="reader_page_number">पेज %1$d</string>
@@ -274,8 +272,6 @@
     <string name="listen_pause">रोकें</string>
     <string name="listen_previous_sentence">पिछला वाक्य</string>
     <string name="listen_next_sentence">अगला वाक्य</string>
-    <string name="listen_previous_paragraph">पिछला पैराग्राफ़</string>
-    <string name="listen_next_paragraph">अगला पैराग्राफ़</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">सुनना बंद करें</string>
     <string name="listen_sleep_timer">स्लीप टाइमर</string>

@@ -54,29 +54,3 @@ internal const val VERY_LONG_PAUSE_MS = 30 * 60_000L
 
 /** A book opened again on the sentence it was left at has been away for nobody knows how long: taken for a long while. */
 internal const val UNKNOWN_PAUSE_MS = VERY_LONG_PAUSE_MS
-
-/**
- * Where plain text is read from, [sentences] sentences before the one holding the letter [at] of
- * the paragraph [paragraph] of [text]: a paragraph, and the letter in it a sentence starts at.
- * With none to go back, it is the start of the sentence itself. It goes back into the paragraph
- * before when it must, and no further than the start of the text.
- */
-internal fun sentencesBack(text: List<String>, paragraph: Int, at: Int, sentences: Int): Pair<Int, Int> {
-    if (paragraph !in text.indices) return paragraph to at
-    var p = paragraph
-    var start = sentenceAround(text[p], at).first.coerceAtLeast(0)
-    repeat(sentences) {
-        // The last letter before this sentence: the close of the one before it.
-        var before = start - 1
-        while (before >= 0 && text[p][before].isWhitespace()) before--
-        if (before >= 0) {
-            start = sentenceAround(text[p], before).first
-        } else {
-            // The paragraph's first sentence: on to the last of the paragraph before, if there is one with words in it.
-            val earlier = (p - 1 downTo 0).firstOrNull { text[it].isNotBlank() } ?: return p to start
-            p = earlier
-            start = sentenceAround(text[p], text[p].indexOfLast { !it.isWhitespace() }).first.coerceAtLeast(0)
-        }
-    }
-    return p to start
-}

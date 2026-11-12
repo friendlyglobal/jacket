@@ -218,8 +218,6 @@
     <string name="reader_listen">Słuchaj: czytanie na głos</string>
     <string name="reader_previous_chapter">Poprzedni rozdział</string>
     <string name="reader_next_chapter">Następny rozdział</string>
-    <string name="reader_previous_paragraph">Poprzedni akapit</string>
-    <string name="reader_next_paragraph">Następny akapit</string>
     <string name="reader_previous_page">Poprzednia strona</string>
     <string name="reader_next_page">Następna strona</string>
     <string name="reader_page_number">Strona %1$d</string>
@@ -291,8 +289,6 @@
     <string name="listen_pause">Wstrzymaj</string>
     <string name="listen_previous_sentence">Poprzednie zdanie</string>
     <string name="listen_next_sentence">Następne zdanie</string>
-    <string name="listen_previous_paragraph">Poprzedni akapit</string>
-    <string name="listen_next_paragraph">Następny akapit</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">Zakończ słuchanie</string>
     <string name="listen_sleep_timer">Wyłącznik czasowy</string>

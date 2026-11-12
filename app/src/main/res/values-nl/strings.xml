@@ -204,8 +204,6 @@
     <string name="reader_listen">Luisteren: voorlezen</string>
     <string name="reader_previous_chapter">Vorig hoofdstuk</string>
     <string name="reader_next_chapter">Volgend hoofdstuk</string>
-    <string name="reader_previous_paragraph">Vorige alinea</string>
-    <string name="reader_next_paragraph">Volgende alinea</string>
     <string name="reader_previous_page">Vorige pagina</string>
     <string name="reader_next_page">Volgende pagina</string>
     <string name="reader_page_number">Pagina %1$d</string>
@@ -273,8 +271,6 @@
     <string name="listen_pause">Pauzeren</string>
     <string name="listen_previous_sentence">Vorige zin</string>
     <string name="listen_next_sentence">Volgende zin</string>
-    <string name="listen_previous_paragraph">Vorige alinea</string>
-    <string name="listen_next_paragraph">Volgende alinea</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">Stoppen met luisteren</string>
     <string name="listen_sleep_timer">Slaaptimer</string>

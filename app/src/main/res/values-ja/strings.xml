@@ -198,8 +198,6 @@
     <string name="reader_listen">聴く：読み上げ</string>
     <string name="reader_previous_chapter">前の章</string>
     <string name="reader_next_chapter">次の章</string>
-    <string name="reader_previous_paragraph">前の段落</string>
-    <string name="reader_next_paragraph">次の段落</string>
     <string name="reader_previous_page">前のページ</string>
     <string name="reader_next_page">次のページ</string>
     <string name="reader_page_number">%1$d ページ</string>
@@ -265,8 +263,6 @@
     <string name="listen_pause">一時停止</string>
     <string name="listen_previous_sentence">前の文</string>
     <string name="listen_next_sentence">次の文</string>
-    <string name="listen_previous_paragraph">前の段落</string>
-    <string name="listen_next_paragraph">次の段落</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">読み上げを停止</string>
     <string name="listen_sleep_timer">スリープタイマー</string>

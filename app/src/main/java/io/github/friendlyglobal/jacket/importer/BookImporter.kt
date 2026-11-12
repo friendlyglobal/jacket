@@ -157,8 +157,7 @@ object BookImporter {
                 BookFormat.EPUB -> Epub.readMeta(stored)
                 BookFormat.PDF -> Pdf.readMeta(stored)
                 BookFormat.CBZ -> Comic.readMeta(stored)
-                // A text file doesn't say what language it is in: its first pages do.
-                BookFormat.TXT -> BookMeta(null, null, null, 0, runCatching { guessLanguage(readStart(stored)) }.getOrNull())
+                BookFormat.TXT -> readTextMeta(stored)
             }
             val title = meta.title?.trim()?.takeIf { it.isNotEmpty() } ?: prettifyFileName(context, name)
             val author = meta.author?.trim().orEmpty()
@@ -206,13 +205,34 @@ object BookImporter {
 
     private const val BYTE_ORDER_MARK = 0xFEFF
 
+    /**
+     * What a text file can tell of itself. It doesn't say what language it is in: its first pages
+     * do. And a few (Project Gutenberg's) name their book and its author in their first lines.
+     */
+    private fun readTextMeta(file: File): BookMeta {
+        val start = runCatching { paragraphsOf(readStart(file)) }.getOrDefault(emptyList())
+        val credits = creditsOf(start)
+        return BookMeta(credits.title, credits.author, null, 0, runCatching { guessLanguage(start.joinToString("\n")) }.getOrNull())
+    }
+
     /** The first few pages of a text file, read as the reader will read it. */
     private fun readStart(file: File): String {
-        val bytes = file.inputStream().use { input -> ByteArray(24_000).let { it.copyOf(input.read(it).coerceAtLeast(0)) } }
-        return runCatching {
-            Charsets.UTF_8.newDecoder().onMalformedInput(java.nio.charset.CodingErrorAction.REPORT).decode(java.nio.ByteBuffer.wrap(bytes)).toString()
-        }.getOrElse { String(bytes, Charsets.ISO_8859_1) }
+        var bytes = file.inputStream().use { input ->
+            val buffer = ByteArray(START_BYTES)
+            var read = 0
+            while (read < buffer.size) {
+                val n = input.read(buffer, read, buffer.size - read)
+                if (n < 0) break
+                read += n
+            }
+            buffer.copyOf(read)
+        }
+        // Not half a line, nor half a letter: up to the last line break, when the file goes on past here.
+        if (bytes.size == START_BYTES) bytes.lastIndexOf('\n'.code.toByte()).takeIf { it > 0 }?.let { bytes = bytes.copyOf(it + 1) }
+        return TextDecoding.decode(bytes)
     }
+
+    private const val START_BYTES = 64_000
 
     private fun detectFormat(name: String, mime: String?, file: File): BookFormat? {
         when (name.substringAfterLast('.', "").lowercase()) {

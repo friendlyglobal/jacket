@@ -32,19 +32,88 @@ internal object TextDecoding {
 
     /**
      * [bytes] as text. A file that says how it was saved (a mark at its very start) is read that
-     * way; one that reads as UTF-8 is UTF-8; one with a nought in every other byte is UTF-16.
-     * Anything else was saved the way some older program or other alphabet does: [guess] names it
-     * (see [BookImporter.guessCharset]), and without a name it is read as Western European, which
-     * loses nothing of any byte.
+     * way; one with a nought in every other byte is UTF-16; one that reads as UTF-8 is UTF-8.
+     * Anything else was saved the way some older program or other alphabet does: it is told by
+     * what it reads as (see [older]), and failing that read as Western European, which loses
+     * nothing of any byte.
      */
-    fun decode(bytes: ByteArray, guess: (ByteArray) -> Charset? = { null }): String {
+    fun decode(bytes: ByteArray): String {
         marked(bytes)?.let { (charset, mark) -> return String(bytes, mark, bytes.size - mark, charset) }
         // Before UTF-8: a nought is a character there too, so plain UTF-16 would pass for it.
         unmarkedUtf16(bytes)?.let { return String(bytes, it) }
         strictly(bytes, Charsets.UTF_8)?.let { return it }
-        val charset = runCatching { guess(bytes) }.getOrNull() ?: WINDOWS_1252
-        return String(bytes, charset)
+        return String(bytes, older(bytes) ?: WINDOWS_1252)
     }
+
+    /**
+     * Which of the encodings from before UTF-8 a file was saved in, where its bytes make that
+     * plain: the ones still met in novels passed around as text files, in Japanese (Shift-JIS,
+     * EUC-JP), Chinese (GBK, Big5), Korean (EUC-KR) and Russian or Ukrainian (Windows-1251,
+     * KOI8-R). Each is tried, and taken only if what comes out reads like that language: kana
+     * among the characters, the commonest Hangul syllables or Chinese characters, the commonest
+     * Cyrillic letters in small type. Null for anything else, a Western European file among them.
+     */
+    internal fun older(bytes: ByteArray): Charset? {
+        // The first pages say as much as the whole; up to a line's end, so no character is cut in two.
+        var sample = if (bytes.size > SAMPLE) bytes.copyOf(SAMPLE) else bytes
+        if (bytes.size > SAMPLE) sample.lastIndexOf('\n'.code.toByte()).takeIf { it > 0 }?.let { sample = sample.copyOf(it + 1) }
+        val high = sample.count { it < 0 }
+        if (high == 0) return null
+        fun named(name: String) = runCatching { Charset.forName(name) }.getOrNull()
+        val eastAsian = EAST_ASIAN.mapNotNull { (name, reads) ->
+            val charset = named(name) ?: return@mapNotNull null
+            val text = strictly(sample, charset) ?: return@mapNotNull null
+            (charset to reads(text)).takeIf { it.second > 0.0 }
+        }
+        eastAsian.maxByOrNull { it.second }?.let { return it.first }
+        // An alphabet of its own in one byte a letter: most of the letters are above ASCII.
+        val latin = sample.count { it in 'a'.code.toByte()..'z'.code.toByte() || it in 'A'.code.toByte()..'Z'.code.toByte() }
+        if (high * 10 < (high + latin) * 4) return null
+        return CYRILLIC.mapNotNull { name -> named(name)?.let { it to cyrillic(String(sample, it), high) } }
+            .filter { it.second >= 0.35 }.maxByOrNull { it.second }?.first
+    }
+
+    private const val SAMPLE = 48_000
+
+    /** How much like Japanese, Korean or Chinese a text reads (0 for not at all), for each encoding of them. */
+    private val EAST_ASIAN: List<Pair<String, (String) -> Double>> = listOf(
+        "Shift_JIS" to ::japanese, "EUC-JP" to ::japanese, "EUC-KR" to ::korean,
+        "GBK" to { text -> chinese(text, COMMON_SIMPLIFIED) }, "Big5" to { text -> chinese(text, COMMON_TRADITIONAL) },
+    )
+    private val CYRILLIC = listOf("windows-1251", "KOI8-R")
+
+    /** Japanese is written with kana among its characters: a fair share of them, or it isn't Japanese. */
+    private fun japanese(text: String): Double {
+        val wide = text.count { it.code >= 0x3000 }
+        val kana = text.count { it.code in 0x3040..0x30FF }
+        return if (wide >= 10 && kana * 5 >= wide) 1.0 + kana.toDouble() / wide else 0.0
+    }
+
+    /** Chinese bytes read as Korean give Hangul too, but not the syllables Korean is full of. */
+    private fun korean(text: String): Double {
+        val hangul = text.count { it.code in 0xAC00..0xD7AF }
+        val hits = text.count { it in COMMON_HANGUL }
+        return if (hangul >= 10 && hits * 8 >= hangul) 1.0 + hits.toDouble() / hangul else 0.0
+    }
+
+    /** Chinese has a few characters on every line: bytes read the wrong way give rare ones instead. */
+    private fun chinese(text: String, common: String): Double {
+        val han = text.count { it.code in 0x4E00..0x9FFF }
+        val hits = text.count { it in common }
+        return if (han >= 10 && hits * 12 >= han) hits.toDouble() / han else 0.0
+    }
+
+    /** The share of the commonest letters among a text's Cyrillic ones; 0 unless it is mostly Cyrillic, and mostly in small letters. */
+    private fun cyrillic(text: String, high: Int): Double {
+        val letters = text.count { it.code in 0x0400..0x04FF }
+        val small = text.count { it.code in 0x0430..0x045F || it == 'ґ' }
+        val common = text.count { it in "оеаинтсрвлі" }
+        return if (letters * 2 >= high && small * 2 > letters) common.toDouble() / letters else 0.0
+    }
+
+    private const val COMMON_HANGUL = "이다는에을의가고지한하로서도기은를있나사리니어그아자라대시수것들인으와게해만일정여"
+    private const val COMMON_SIMPLIFIED = "的一是不了人我在有他这中大来上国个到说们为子和你地出道也时年得就那要下以生会自着去之过家学对可她里后小么心多天而能好都然没日于起还发成事只作当想看文无开手十用主行方又如前所本见经头面公同三已老从动两长"
+    private const val COMMON_TRADITIONAL = "的一是不了人我在有他這中大來上國個到說們為子和你地出道也時年得就那要下以生會自著去之過家學對可她裡後小麼心多天而能好都然沒日於起還發成事只作當想看文無開手十用主行方又如前所本見經頭面公同三已老從動兩長"
 
     /** The encoding a mark at the start of [bytes] names, and how many bytes the mark takes. */
     private fun marked(bytes: ByteArray): Pair<Charset, Int>? {

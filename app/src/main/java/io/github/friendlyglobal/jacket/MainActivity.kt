@@ -51,6 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import io.github.friendlyglobal.jacket.data.ImportReport
 import io.github.friendlyglobal.jacket.data.LibrarySort
+import io.github.friendlyglobal.jacket.importer.titleOfSharedText
 import io.github.friendlyglobal.jacket.outer.OuterCoverHost
 import io.github.friendlyglobal.jacket.outer.OuterDisplay
 import io.github.friendlyglobal.jacket.reader.ReaderFragments
@@ -181,8 +182,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sharedTextFile(text: String, subject: String?): Uri {
-        val name = subject?.takeIf { it.isNotBlank() }
-            ?.replace(Regex("[\\\\/:*?\"<>|\\n]"), " ")?.take(80)?.trim()
+        // Named as the other app named it; else by its own first line or first words; else, plainly, "Shared text".
+        val name = (subject?.takeIf { it.isNotBlank() } ?: titleOfSharedText(text))
+            ?.replace(Regex("[\\\\/:*?\"<>|\\n]"), " ")?.take(80)?.trim()?.takeIf { it.isNotEmpty() }
             ?: getString(R.string.shared_text_title)
         val file = File(File(cacheDir, "shared").apply { mkdirs() }, "$name.txt")
         file.writeText(text)

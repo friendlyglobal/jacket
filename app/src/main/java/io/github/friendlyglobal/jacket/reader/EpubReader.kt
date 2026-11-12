@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
@@ -63,6 +64,7 @@ import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Annotation
 import io.github.friendlyglobal.jacket.data.AnnotationKind
 import io.github.friendlyglobal.jacket.data.Book
+import io.github.friendlyglobal.jacket.data.BookFormat
 import io.github.friendlyglobal.jacket.data.HighlightColor
 import io.github.friendlyglobal.jacket.data.PageLayout
 import io.github.friendlyglobal.jacket.data.PageTurn
@@ -73,6 +75,9 @@ import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.PageColors
 import io.github.friendlyglobal.jacket.ui.readableVeil
 import io.github.friendlyglobal.jacket.importer.Epub
+import io.github.friendlyglobal.jacket.importer.NothingToRead
+import io.github.friendlyglobal.jacket.importer.TextLayout
+import io.github.friendlyglobal.jacket.data.TextPages
 import io.github.friendlyglobal.jacket.voice.NaturalTtsEngineProvider
 import io.github.friendlyglobal.jacket.voice.NaturalTtsPreferences
 import io.github.friendlyglobal.jacket.voice.regionOf
@@ -98,6 +103,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import org.readium.navigator.media.common.MediaMetadataProvider
 import org.readium.navigator.media.tts.AndroidTtsNavigatorFactory
 import org.readium.navigator.media.tts.TtsNavigator
 import org.readium.navigator.media.tts.TtsNavigatorFactory
@@ -155,6 +161,9 @@ private const val PUT_BACK_TRIES = 3
 /** Scrolling, how long Readium takes to report where a move has left it. */
 private const val SCROLL_SETTLE_MS = 300L
 
+/** How long a page jumped to is given to be drawn before its veil lifts. */
+private const val JUMP_DRAWN_MS = 60L
+
 /** How long a navigator just made is waited on for its first report of a page. */
 private const val FIRST_PAGE_MS = 10_000L
 
@@ -164,6 +173,9 @@ private const val SPOKEN_SAVE_MS = 20_000L
 /**
  * EPUB, rendered by Readium: real pagination (or continuous scroll), publisher styles, spreads
  * when unfolded, and read-aloud. Jacket supplies the chrome around it.
+ *
+ * A text file is read here too, through the pages made of it (see TextBook.kt): it is laid out,
+ * read aloud, highlighted and searched like any other book.
  */
 @Composable
 fun EpubReader(
@@ -180,33 +192,36 @@ fun EpubReader(
         val result = runCatching {
             // Not cancellable: backing out mid-open must still hand the book over to be closed.
             withContext(Dispatchers.IO + NonCancellable) {
-                val file = context.library.fileOf(book)
+                val text = if (book.format == BookFormat.TXT) context.library.textPages(book) else null
+                if (text != null && text.layout.paragraphs == 0) throw NothingToRead(book.sourceName)
+                val file = text?.file ?: context.library.fileOf(book)
                 val publication = context.readium.open(file)
                 val spoken = SpokenFiles(publication)
-                val saved = savedLocator(book, publication, file)
+                val saved = savedLocator(book, publication, file, text)
                 // A sentence the voice stopped on, as Jacket 1.0.0 saved it, says which of its file's
                 // blocks it is in, not where on the pages: told the pages' way before the book is
                 // opened at it. (One saved since comes out as it went in.)
                 val start = if (saved?.isSpoken == true) spoken.placed(saved) else saved
-                Opened(publication, start, spoken)
+                Opened(publication, start, spoken, text?.layout)
             }
         }
         value = result
         awaitDispose { result.getOrNull()?.publication?.let(::closeSoon) }
     }
     val result = opened ?: return ReaderLoading()
-    val (publication, start, spoken) = result.getOrElse {
-        return ReaderError(stringResource(R.string.reader_error_open_book, it.message.orEmpty()))
+    val (publication, start, spoken, text) = result.getOrElse {
+        // A text file with nothing in it (one added before Jacket turned those away) says so.
+        return ReaderError(if (it is NothingToRead) stringResource(R.string.reader_error_text) else stringResource(R.string.reader_error_open_book, it.message.orEmpty()))
     }
     // A copy-protected book (Adobe's DRM, Readium LCP: a shop's or a library's) opens, but locked,
     // and Readium's pages refuse a locked book by throwing: Jacket would close under the reader.
     if (publication.isRestricted) return ReaderError(stringResource(R.string.reader_error_protected))
     if (publication.readingOrder.isEmpty()) return ReaderError(stringResource(R.string.reader_error_no_pages))
-    EpubPages(book, publication, start, spoken, settings, page, nav, haptics, annotations, onCenterTap)
+    EpubPages(book, publication, start, spoken, text, settings, page, nav, haptics, annotations, onCenterTap)
 }
 
-/** A book opened: where to start it, and its files as read-aloud reads them. */
-private data class Opened(val publication: Publication, val start: Locator?, val spoken: SpokenFiles)
+/** A book opened: where to start it, its files as read-aloud reads them, and, for a text file, where its paragraphs are in its pages. */
+private data class Opened(val publication: Publication, val start: Locator?, val spoken: SpokenFiles, val text: TextLayout?)
 
 /** Closes the book once its pages have been torn down (the fragment goes after composition). */
 private fun closeSoon(publication: Publication) {
@@ -220,6 +235,8 @@ private fun EpubPages(
     start: Locator?,
     /** The book's files as read-aloud reads them: the voice's place is told in the pages' terms through these. */
     spokenFiles: SpokenFiles,
+    /** For a text file: where its paragraphs are in these pages. Its place is kept as a paragraph too (see [Library.updateLocator]). */
+    textFile: TextLayout?,
     settings: Settings,
     page: PageColors,
     nav: ReaderNav,
@@ -378,6 +395,8 @@ private fun EpubPages(
     val veilOn = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
     val veilOff = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
     var located by remember { mutableStateOf<Located?>(null) }
+    // In a text book: the paragraphs that start on the page in view (asked only when a bookmark needs to know).
+    var shownParagraphs by remember { mutableStateOf(IntRange.EMPTY) }
     // Sub-chapter anchors of the file on screen, kept while you stay in it (for scrubber previews).
     var anchors by remember { mutableStateOf<Located?>(null) }
     val spans = remember(positions) { if (positions.isEmpty()) null else Spans(positions, contents) }
@@ -404,12 +423,19 @@ private fun EpubPages(
         // Saved with the first words on the page, as a bookmark is. How far down the file a page
         // starts shifts with every layout (folded or not, a text size, a blank page Readium adds
         // at the end): by that alone the book reopens a page out. The words are where they are.
-        val place = navigator?.let { locator.byFirstWords(it) } ?: locator
+        val n = navigator
+        val top = n?.let { topOf(it) }
+        val place = if (n != null) locator.byFirstWords(top) else locator
         // Asking the page took a moment, and the pages may have started to re-flow in it.
         if (notTheReaders()) return
         resize.known = locator to place
         val position = ((locator.locations.position ?: 1) - 1).coerceAtLeast(0)
-        library.updateLocator(book.id, place.toJSON().toString(), progress.toFloat(), position, positions.size)
+        if (textFile != null) {
+            val paragraph = textFile.pagePlace(top, locator)
+            library.updateLocator(book.id, place.toJSON().toString(), progress.toFloat(), paragraph.paragraph, textFile.paragraphs, paragraph.within)
+        } else {
+            library.updateLocator(book.id, place.toJSON().toString(), progress.toFloat(), position, positions.size)
+        }
         // The reader has moved on from where the voice last was.
         voiceAt.sentence = null
         voiceAt.unseen = false
@@ -474,7 +500,12 @@ private fun EpubPages(
         if (sentence === voiceAt.saved && ((page == null && !ended) || progress == voiceAt.savedProgress)) return
         // The Readium position it falls in (about a page of text), kept beside every saved place.
         val position = positions.indexOfLast { (it.locations.totalProgression ?: 0.0) <= progress }.coerceAtLeast(0)
-        library.updateLocator(book.id, sentence.toJSON().toString(), progress.toFloat(), position, positions.size)
+        if (textFile != null) {
+            val paragraph = textFile.sentencePlace(sentence)
+            library.updateLocator(book.id, sentence.toJSON().toString(), progress.toFloat(), paragraph.paragraph, textFile.paragraphs, paragraph.within)
+        } else {
+            library.updateLocator(book.id, sentence.toJSON().toString(), progress.toFloat(), position, positions.size)
+        }
         voiceAt.saved = sentence
         voiceAt.savedProgress = progress
         voiceAt.savedAt = SystemClock.uptimeMillis()
@@ -639,7 +670,12 @@ private fun EpubPages(
     // Readium reports the page count after the location, so the footer follows both.
     LaunchedEffect(current, located, filePage, scroll, nav.title) {
         val locator = current ?: return@LaunchedEffect
-        nav.footer = footerFor(resources, scroll, nav.title, filePage, locator, located)
+        // A text file with no chapters has no "pages left in chapter" to tell: the files it was cut into are not chapters.
+        nav.footer = if (textFile != null && !textFile.hasContents) "" else footerFor(resources, scroll, nav.title, filePage, locator, located)
+        // A bookmark kept as a paragraph is on this page if its paragraph starts here: the page says which do.
+        if (textFile != null && annotations.any { it.kind == AnnotationKind.BOOKMARK && it.locator == null }) {
+            shownParagraphs = navigator?.let { paragraphsOn(it) } ?: IntRange.EMPTY
+        }
         nav.pageKey++
         // The last page of the last file (or the bottom of it, scrolling): the end of the book.
         val lastFile = contents.resourceOf(locator.href) == contents.fileCount - 1
@@ -701,6 +737,7 @@ private fun EpubPages(
                         bookId = book.id,
                         kind = AnnotationKind.HIGHLIGHT,
                         locator = selection.locator.toJSON().toString(),
+                        section = textFile?.pagePlace(null, selection.locator)?.paragraph ?: 0,
                         progress = (spans?.total(resource, selection.locator.locations.progression ?: 0.0) ?: 0.0).toFloat(),
                         chapter = nav.title,
                         text = text,
@@ -742,24 +779,27 @@ private fun EpubPages(
     nav.place = place@{
         val n = navigator ?: return@place null
         val locator = current ?: return@place null
-        val top = runCatching { n.evaluateJavascript(TOP_TEXT_SCRIPT)?.let(::JSONObject) }.getOrNull()
-        val quote = top?.optString("quote").orEmpty()
+        val top = topOf(n)
+        val quote = top?.quote.orEmpty()
         val marked = if (quote.isNotBlank()) {
-            locator.copy(text = Locator.Text(before = top?.optString("before"), highlight = quote))
+            locator.copy(text = Locator.Text(before = top?.before, highlight = quote))
         } else {
             locator.byProgression()
         }
         val resource = contents.resourceOf(locator.href)
         Place(
             locator = marked.toJSON().toString(),
-            section = ((locator.locations.position ?: 1) - 1).coerceAtLeast(0),
+            // In a text file, the paragraph the page starts in: what a bookmark there has always kept.
+            section = textFile?.pagePlace(top, locator)?.paragraph ?: ((locator.locations.position ?: 1) - 1).coerceAtLeast(0),
             progress = (spans?.total(resource, locator.locations.progression ?: 0.0) ?: 0.0).toFloat(),
             chapter = nav.title,
-            snippet = top?.optString("text").orEmpty(),
+            snippet = top?.text.orEmpty(),
         )
     }
     nav.onScreen = onScreen@{ mark ->
         val here = current ?: return@onScreen false
+        // A text book's bookmark from before it had pages names a paragraph, not a page.
+        if (textFile != null && mark.locator == null) return@onScreen textFile.marked(mark.section, mark.progress) in shownParagraphs
         val at = mark.locator?.let { runCatching { Locator.fromJSON(JSONObject(it)) }.getOrNull() } ?: return@onScreen false
         if (contents.resourceOf(at.href) != contents.resourceOf(here.href)) return@onScreen false
         val p = at.locations.progression ?: return@onScreen false
@@ -770,6 +810,41 @@ private fun EpubPages(
             kotlin.math.abs(p - (here.locations.progression ?: 0.0)) < 0.03
         }
     }
+    // The jump being seen to its place (see jumpTo).
+    val jump = remember { arrayOfNulls<Job>(1) }
+
+    /**
+     * Takes the pages to [place]: a jump the reader asked for (the contents, a bookmark, a search
+     * result, the way back from one).
+     *
+     * Sent to a place in a chapter file other than the one in view, Readium can stop short of it.
+     * It keeps the files either side of the open one laid out, and one of those, on becoming the
+     * open one, is put at its first page or its last (as a page turned into it would find it),
+     * whatever place in it was asked for. So the place is sent again once that file is the one in
+     * view, and the page waits under its veil meanwhile, as it does while pages re-flow.
+     */
+    fun jumpTo(place: Locator) {
+        val n = navigator ?: return
+        val from = n.currentLocator.value
+        n.go(place, animated = false)
+        if (from.href.removeFragment().isEquivalent(place.href.removeFragment())) return
+        jump[0]?.cancel()
+        jump[0] = scope.launch {
+            launch { reflowVeil.animateTo(1f, veilOn) }
+            try {
+                // Readium says where it is a moment after it gets there.
+                withTimeoutOrNull(ARRIVAL_MS) { n.currentLocator.first { it !== from } }
+                delay(SCROLL_SETTLE_MS)
+                if (navigator === n) n.go(place, animated = false)
+                // A moment for the page gone to to be drawn.
+                delay(JUMP_DRAWN_MS)
+            } finally {
+                // Cut short by another jump, the veil stays for that one to lift.
+                if (isActive) launch { reflowVeil.animateTo(0f, veilOff) }
+            }
+        }
+    }
+
     // A jump remembers the page it left from, so the reader can offer the way back.
     val markOrigin = {
         nav.movedAt = SystemClock.uptimeMillis()
@@ -781,22 +856,27 @@ private fun EpubPages(
             nav.cameFrom = Origin(
                 percent = nav.section * 100 / (nav.sectionCount - 1).coerceAtLeast(1),
                 chapter = nav.title.trim(),
-            ) { navigator?.go(place, animated = false) }
+            ) { jumpTo(place) }
         }
     }
     notes.onNote = { note, link ->
         haptics.tick()
         nav.note = ShownNote(note) {
             markOrigin()
-            navigator?.go(link, animated = false)
+            publication.locatorFromLink(link)?.let(::jumpTo) ?: navigator?.go(link, animated = false)
         }
     }
     nav.goTo = { mark ->
-        mark.locator?.let { runCatching { Locator.fromJSON(JSONObject(it)) }.getOrNull() }
-            ?.let {
-                markOrigin()
-                navigator?.go(it, animated = false)
-            }
+        val to = if (textFile != null && mark.locator == null) {
+            // Kept as a paragraph: to the top of that paragraph.
+            publication.locatorOfParagraph(textFile, textFile.marked(mark.section, mark.progress))
+        } else {
+            mark.locator?.let { runCatching { Locator.fromJSON(JSONObject(it)) }.getOrNull() }
+        }
+        to?.let {
+            markOrigin()
+            jumpTo(it)
+        }
     }
     nav.turnPage = { delta ->
         nav.movedAt = SystemClock.uptimeMillis()
@@ -816,6 +896,7 @@ private fun EpubPages(
     }
     search?.tint = page.link.toArgb()
     search?.beforeShow = markOrigin
+    search?.go = ::jumpTo
     nav.search = search
 
     // Chapter starts as marks on the scrubber.
@@ -834,7 +915,10 @@ private fun EpubPages(
     val listen = remember(publication) {
         ReadAloud(
             context, publication, spokenFiles, book.id, { navigator }, nav.listen, scope,
-            fileOf = { href -> contents.resourceOf(href) },
+            // (A long chapter of a text file is cut into several files: together they are one chapter.)
+            fileOf = { href -> contents.resourceOf(href).let { file -> textFile?.groupOf(file) ?: file } },
+            // A text file's pages carry no cover: the player shows the library's, and the book as it is named there.
+            metadata = if (textFile != null) textBookMetadata(book, library.coverOf(book)) else null,
             resizing = { resize.job?.isActive == true || SystemClock.uptimeMillis() - resize.restoredAt < RESIZE_SETTLE_MS },
             movedAt = { nav.movedAt },
         ).apply {
@@ -894,9 +978,12 @@ private fun EpubPages(
     val said = publication.metadata.language?.code
     nav.bookLanguage = said
     LaunchedEffect(book.id, said) { if (book.language == null && said != null) library.setLanguage(book.id, said) }
-    val readIn = book.language ?: said
+    // A text file whose language couldn't be told from its words is read in the phone's, as it always was.
+    val phoneLanguage = LocalConfiguration.current.locales[0]?.toLanguageTag()
+    val readIn = book.language ?: said ?: phoneLanguage.takeIf { textFile != null }
     val voice = remember(settings.voice, settings.voices, readIn) { voices.choose(readIn, settings) }
-    val chosenLanguage = readIn?.takeIf { said != null && languageKey(it) != languageKey(said) }
+    // A language the book doesn't give is the listener's choice (or the phone's), and is read as chosen.
+    val chosenLanguage = readIn?.takeIf { said == null || languageKey(it) != languageKey(said) }
     listen.voice = voice
     listen.language = chosenLanguage
     // The phone's own voice is asked for the reader's accent: "pt" read on a Brazilian phone is "pt-BR".
@@ -915,7 +1002,7 @@ private fun EpubPages(
             percent = progress?.let { (it * 100).toInt().coerceIn(0, 100) } ?: (nav.section * 100 / (nav.sectionCount - 1).coerceAtLeast(1)),
             chapter = contents.titleOf(contents.chapterAt(resource)).orEmpty(),
         ) {
-            navigator?.go(spoken, animated = false)
+            jumpTo(spoken)
             listen.markHere(spoken)
         }
     }
@@ -931,7 +1018,7 @@ private fun EpubPages(
         nav.openToc = { item ->
             contents.entries.getOrNull(item.index)?.let {
                 markOrigin()
-                navigator?.go(it.link, animated = false)
+                publication.locatorFromLink(it.link)?.let(::jumpTo) ?: navigator?.go(it.link, animated = false)
             }
         }
         nav.sectionName = { step -> contents.titleOf(chapterAt(step)).orEmpty() }
@@ -949,7 +1036,7 @@ private fun EpubPages(
                     listen.readChapter(it)
                 } else {
                     markOrigin()
-                    navigator?.go(it, animated = false)
+                    publication.locatorFromLink(it)?.let(::jumpTo) ?: navigator?.go(it, animated = false)
                 }
             }
         }
@@ -1122,12 +1209,17 @@ private fun Locator.byProgression(): Locator =
  * way back to the same page however the pages fall next time. Too few words to tell one place
  * from another (a chapter's number at the top of a page), and it stays a place in the file only.
  */
-private suspend fun Locator.byFirstWords(navigator: EpubNavigatorFragment): Locator {
-    val top = runCatching { navigator.evaluateJavascript(TOP_TEXT_SCRIPT)?.let(::JSONObject) }.getOrNull()
-    val words = top?.optString("quote").orEmpty()
+private fun Locator.byFirstWords(top: TopText?): Locator {
+    val words = top?.quote.orEmpty()
     if (words.trim().length < FIRST_WORDS_ENOUGH) return byProgression()
-    return byProgression().copy(text = Locator.Text(before = top?.optString("before"), highlight = words))
+    return byProgression().copy(text = Locator.Text(before = top?.before, highlight = words))
 }
+
+/** The first words on the page [navigator] shows (see [TOP_TEXT_SCRIPT]); null if the page has none, or can't say. */
+private suspend fun topOf(navigator: EpubNavigatorFragment): TopText? =
+    runCatching { navigator.evaluateJavascript(TOP_TEXT_SCRIPT)?.let(::JSONObject) }.getOrNull()?.let { top ->
+        TopText(top.optString("before"), top.optString("quote"), top.optString("text"), top.optString("id").takeIf { it.isNotEmpty() }, top.optInt("at", 0))
+    }
 
 /** How many letters of a page's first words are enough to find it by. */
 private const val FIRST_WORDS_ENOUGH = 24
@@ -1189,10 +1281,13 @@ private fun footerFor(resources: Resources, scroll: Boolean, chapter: String, fi
  * read, or that names a file the book doesn't have, falls back on what was saved beside it rather
  * than on page one (see [reopen]).
  */
-private suspend fun savedLocator(book: Book, publication: Publication, file: File): Locator? {
+private suspend fun savedLocator(book: Book, publication: Publication, file: File, text: TextPages? = null): Locator? {
     val saved = book.locator?.let { json -> runCatching { Locator.fromJSON(JSONObject(json)) }.getOrNull() }
     val files = publication.readingOrder
     val usable = saved != null && files.any { it.url().removeFragment().isEquivalent(saved.href.removeFragment()) }
+    // A text file's place is kept as a paragraph as well. That is all Jacket 1.1 and earlier kept
+    // of it, and it is what there is to go by when a place names pages this book no longer has.
+    if (text != null && !usable) return text.saved?.let(publication::locatorOf)
     // Only asked for when the saved place can't be used: counting them reads the whole book.
     val positions = if (usable || book.locator == null) emptyList() else runCatching { publication.positions() }.getOrDefault(emptyList())
     return when (val plan = reopen(book.locator != null, usable, book.position, positions.size, book.progress, book.positionOffset)) {
@@ -1404,7 +1499,9 @@ private const val SEARCH = "search"
 
 /**
  * The first words on the page: where they start (the word under the top-left of the text), a
- * short exact quote to find them again, and a tidy snippet for the bookmark list.
+ * short exact quote to find them again, and a tidy snippet for the bookmark list. And the name of
+ * the element they are in, with how far into its text they start: in a text file's pages that is
+ * the paragraph (see [pagePlace]).
  */
 private val TOP_TEXT_SCRIPT = """
     (function() {
@@ -1423,7 +1520,8 @@ private val TOP_TEXT_SCRIPT = """
       walker.currentNode = node;
       var text = t.slice(off), n = walker.nextNode();
       while (n && text.length < 200) { text += ' ' + n.textContent; n = walker.nextNode(); }
-      return { before: t.slice(Math.max(0, off - 40), off), quote: quote, text: text.replace(/\s+/g, ' ').trim().slice(0, 160) };
+      var held = node.parentElement && node.parentElement.closest('[id]');
+      return { before: t.slice(Math.max(0, off - 40), off), quote: quote, text: text.replace(/\s+/g, ' ').trim().slice(0, 160), id: held ? held.id : '', at: off };
     })()
 """.trimIndent()
 
@@ -1437,6 +1535,8 @@ private class EpubSearch(
     var tint: Int = 0
     /** Called just before the page jumps to a result. */
     var beforeShow: () -> Unit = {}
+    /** Takes the pages to a result (see the reader's own way of jumping). */
+    var go: (Locator) -> Unit = { navigator()?.go(it, animated = false) }
     private val found = mutableListOf<Locator>()
 
     override suspend fun search(query: String, onHits: (List<SearchHit>) -> Unit) {
@@ -1467,7 +1567,7 @@ private class EpubSearch(
         val locator = found.getOrNull(hit.index) ?: return
         val n = navigator() ?: return
         beforeShow()
-        n.go(locator, animated = false)
+        go(locator)
         scope.launch { n.applyDecorations(listOf(Decoration("hit", locator, Marker(tint))), SEARCH) }
     }
 
@@ -1515,6 +1615,8 @@ private class ReadAloud(
     private val resizing: () -> Boolean = { false },
     /** When the reader last moved through the book themselves (see [ReaderNav.movedAt]). */
     private val movedAt: () -> Long = { 0L },
+    /** What the lock screen and the notification show of the book, where it isn't what the book's own file says. */
+    private val metadata: MediaMetadataProvider? = null,
 ) : ListenController {
     /** When the page last moved to follow the voice: moves just after are the voice's, not the listener's. */
     private var followedAt = 0L
@@ -1574,7 +1676,10 @@ private class ReadAloud(
 
     override val previousLabel = R.string.listen_previous_sentence
     override val nextLabel = R.string.listen_next_sentence
-    private val systemFactory by lazy { AndroidTtsNavigatorFactory(context.applicationContext as Application, publication) }
+    private val systemFactory by lazy {
+        val app = context.applicationContext as Application
+        if (metadata != null) AndroidTtsNavigatorFactory(app, publication, metadataProvider = metadata) else AndroidTtsNavigatorFactory(app, publication)
+    }
 
     /** Readium's read-aloud navigator, whichever voice is behind it. */
     private var tts: TtsNavigator<*, *, *, *>? = null
@@ -1858,6 +1963,14 @@ private class ReadAloud(
                 withTimeoutOrNull(ARRIVAL_MS) { n.currentLocator.first { it !== before } }
                 // A moment for the chapter's first page to be laid out where the page has landed.
                 delay(CHAPTER_SETTLE_MS)
+                // A chapter that begins part of the way down the file next to the one that was in
+                // view: Readium has shown that file's first or last page instead. Asked again now
+                // that the file is the one in view, it goes to the chapter.
+                if (link.url().fragment?.isNotEmpty() == true && !n.currentLocator.value.href.isEquivalent(before.href)) {
+                    followedAt = SystemClock.uptimeMillis()
+                    n.go(link, animated = false)
+                    delay(CHAPTER_SETTLE_MS)
+                }
                 followedAt = SystemClock.uptimeMillis()
                 val page = n.currentLocator.value
                 val blocks = files.of(page.href, page.mediaType).blocks
@@ -1992,10 +2105,13 @@ private class ReadAloud(
         val forced = language?.let(::Language)
         voice?.let { ref ->
             val lookahead = SentenceLookahead()
-            val natural = TtsNavigatorFactory(
-                app, publication, NaturalTtsEngineProvider(context.voices, ref, lookahead, language),
-                tokenizerFactory = lookahead::tokenizer,
-            )?.createNavigator(listener, from, NaturalTtsPreferences(language = forced, speed = speed.toDouble()))?.getOrNull()
+            val engine = NaturalTtsEngineProvider(context.voices, ref, lookahead, language)
+            val factory = if (metadata != null) {
+                TtsNavigatorFactory(app, publication, engine, tokenizerFactory = lookahead::tokenizer, metadataProvider = metadata)
+            } else {
+                TtsNavigatorFactory(app, publication, engine, tokenizerFactory = lookahead::tokenizer)
+            }
+            val natural = factory?.createNavigator(listener, from, NaturalTtsPreferences(language = forced, speed = speed.toDouble()))?.getOrNull()
             if (natural != null) {
                 submitRate = { rate -> natural.submitPreferences(NaturalTtsPreferences(language = forced, speed = rate.toDouble())) }
                 return natural

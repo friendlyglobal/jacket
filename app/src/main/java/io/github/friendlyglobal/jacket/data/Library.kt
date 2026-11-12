@@ -11,6 +11,11 @@ import io.github.friendlyglobal.jacket.importer.AlreadyInLibrary
 import io.github.friendlyglobal.jacket.importer.BookImporter
 import io.github.friendlyglobal.jacket.importer.FileContent
 import io.github.friendlyglobal.jacket.importer.NothingToRead
+import io.github.friendlyglobal.jacket.importer.TextBook
+import io.github.friendlyglobal.jacket.importer.TextDecoding
+import io.github.friendlyglobal.jacket.importer.TextLayout
+import io.github.friendlyglobal.jacket.importer.TextSpot
+import io.github.friendlyglobal.jacket.voice.guessLanguage
 import io.github.friendlyglobal.jacket.widget.WidgetSync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -81,6 +86,13 @@ internal fun bookMadeFrom(books: List<Book>, content: FileContent, read: (Book) 
     books.firstOrNull { book -> book.sizeBytes == content.size && (book.sha256 ?: read(book)?.sha256) == content.sha256 }
 
 /**
+ * A text book ready to be read: the pages made of its file ([file], an EPUB; see TextBook.kt),
+ * where its paragraphs are in them ([layout]), and where in them the place kept as a paragraph is
+ * ([saved]; null for a book never opened).
+ */
+internal class TextPages(val file: File, val layout: TextLayout, val saved: TextSpot?)
+
+/**
  * The on-device library: imported files live in app storage, metadata in one JSON file.
  * Nothing leaves the device.
  */
@@ -101,6 +113,13 @@ class Library(private val context: Context) : LibraryOrganizer {
 
     val booksDir = File(context.filesDir, "books").apply { mkdirs() }
     val coversDir = File(context.filesDir, "covers").apply { mkdirs() }
+
+    /**
+     * The pages made of text books. They can always be made again from the text files, so they
+     * are kept out of backups and are no part of the library.
+     */
+    private val textPagesDir = File(context.noBackupFilesDir, "text-books")
+    private val textPagesLock = Mutex()
 
     private val _state = MutableStateFlow(readState())
     val state: StateFlow<LibraryState> = _state.asStateFlow()
@@ -140,6 +159,14 @@ class Library(private val context: Context) : LibraryOrganizer {
         // Jacket 0.2 unpacked EPUBs to disk; Readium reads the files directly, so free that space.
         scope.launch(disk) { File(context.filesDir, "unpacked").deleteRecursively() }
         scope.launch(disk) { _missing.value = scanMissing(_state.value) }
+        // Pages left behind by text books that are gone, or by a making of them that was cut short.
+        scope.launch(disk) {
+            // (Not while pages are being made: theirs is a file here that isn't a book's yet.)
+            textPagesLock.withLock {
+                val kept = _state.value.books.mapTo(HashSet()) { textPagesOf(it.id).name }
+                textPagesDir.listFiles()?.filter { it.name !in kept }?.forEach { it.delete() }
+            }
+        }
         // Widgets placed before this process started (after an update, a restart) redraw now, rather
         // than sit on their loading layout until the next page is turned.
         WidgetSync.request(context)
@@ -153,6 +180,37 @@ class Library(private val context: Context) : LibraryOrganizer {
 
     /** Where the cover lives, without touching the disk (safe to call during composition). */
     fun coverPathOf(book: Book): File? = book.coverFile?.let { File(coversDir, it) }
+
+    private fun textPagesOf(id: String) = File(textPagesDir, "$id.epub")
+
+    /**
+     * The pages of [book], a text file: made now if they aren't there, were made by an older
+     * Jacket, or are older than the file (it came back after a restore). The file itself is never
+     * touched. Throws if it can't be read; a file with nothing in it gives a layout of no paragraphs.
+     */
+    internal suspend fun textPages(book: Book): TextPages = withContext(Dispatchers.IO) {
+        textPagesLock.withLock {
+            val source = fileOf(book)
+            val text = TextBook.of(TextDecoding.decode(source.readBytes()), TextBook.isMarkdown(book.sourceName))
+            val pages = textPagesOf(book.id)
+            // As it is now: the title may have been put right since the book was handed over.
+            val now = _state.value.find(book.id) ?: book
+            if (text.parts.isNotEmpty() && (pages.lastModified() < source.lastModified() || !TextBook.isCurrent(pages))) {
+                textPagesDir.mkdirs()
+                // Whole or not at all: pages cut short would open as a damaged book.
+                val partial = File(textPagesDir, "${pages.name}.part")
+                try {
+                    val language = now.language ?: runCatching { guessLanguage(text.paragraphs.asSequence().take(200).joinToString("\n")) }.getOrNull()
+                    partial.outputStream().buffered().use { text.write(it, TextBook.About(now.id, now.title, now.author, language)) }
+                    check(partial.renameTo(pages)) { "Couldn't store the pages of ${book.sourceName}" }
+                } finally {
+                    partial.delete()
+                }
+            }
+            val layout = text.layout()
+            TextPages(pages, layout, layout.saved(now.position, now.positionOffset, now.sectionCount)?.let(text::spotOf))
+        }
+    }
 
     /** Serialized, so a picker import and a share arriving together can't both add the same file. */
     suspend fun import(uris: List<Uri>): ImportReport = importLock.withLock { importNow(uris) }
@@ -244,8 +302,15 @@ class Library(private val context: Context) : LibraryOrganizer {
         changed()
     }
 
-    /** Saves an EPUB reading location: Readium [locator] JSON, overall [progress] and its position of [positions]. */
-    fun updateLocator(id: String, locator: String, progress: Float, position: Int, positions: Int) {
+    /**
+     * Saves an EPUB reading location: Readium [locator] JSON, overall [progress] and its position of [positions].
+     *
+     * A text book is read through pages too, and its place is kept the same way. Beside it, as
+     * ever, goes the paragraph it is in: [position] of [positions] paragraphs, and [offset] of the
+     * way into it. A Jacket from before text books had pages reads that, and so does this one
+     * when the pages a locator names are no longer the book's.
+     */
+    fun updateLocator(id: String, locator: String, progress: Float, position: Int, positions: Int, offset: Float? = null) {
         if (!progress.isFinite()) return
         _state.update { s ->
             s.copy(books = s.books.map {
@@ -253,6 +318,7 @@ class Library(private val context: Context) : LibraryOrganizer {
                     locator = locator,
                     progress = progress.coerceIn(0f, 1f),
                     position = position.coerceAtLeast(0),
+                    positionOffset = offset?.takeIf { o -> o.isFinite() }?.coerceIn(0f, 1f) ?: it.positionOffset,
                     sectionCount = positions.coerceAtLeast(0),
                 ) else it
             })
@@ -479,6 +545,7 @@ class Library(private val context: Context) : LibraryOrganizer {
         changed(saveNow = true)
         scope.launch(disk) {
             fileOf(book).delete()
+            textPagesOf(book.id).delete()
             coverOf(book)?.delete()
             book.originalCover?.let { File(coversDir, it).delete() }
         }
