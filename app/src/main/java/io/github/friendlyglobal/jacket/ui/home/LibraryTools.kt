@@ -70,6 +70,10 @@ import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.pressScale
 import io.github.friendlyglobal.jacket.ui.sharedCover
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
+import io.github.friendlyglobal.jacket.ui.asHeading
 
 /** The library's own icons, as path data like [JacketIcons]. */
 internal object LibraryIcons {
@@ -132,6 +136,30 @@ internal fun BookMenuItems(book: Book, onCover: Boolean, haptics: Haptics, actio
         text = { Text(stringResource(R.string.library_menu_remove)) }, leadingIcon = { Icon(JacketIcons.Delete, null) },
         onClick = { close(); actions.onRemove(book) },
     )
+}
+
+/**
+ * The same things [BookMenuItems] offers, as actions of the book itself: a screen reader or a
+ * switch reaches them from the book, without the long press that opens the menu.
+ */
+@Composable
+internal fun bookActionsFor(book: Book, onCover: Boolean, haptics: Haptics, actions: BookActions): List<CustomAccessibilityAction> {
+    val pin = stringResource(if (book.isPinned) R.string.library_unpin else R.string.library_pin)
+    val collections = stringResource(R.string.library_add_to_collection)
+    val edit = stringResource(R.string.library_edit_book)
+    val cover = stringResource(R.string.library_menu_show_on_cover)
+    val finished = stringResource(if (book.isFinished) R.string.library_menu_mark_unfinished else R.string.library_menu_mark_finished)
+    val remove = stringResource(R.string.library_menu_remove)
+    return buildList {
+        if (actions.organize) {
+            add(CustomAccessibilityAction(pin) { haptics.toggle(!book.isPinned); actions.onPin(book, !book.isPinned); true })
+            add(CustomAccessibilityAction(collections) { actions.onCollections(book); true })
+            add(CustomAccessibilityAction(edit) { actions.onEdit(book); true })
+        }
+        if (!onCover) add(CustomAccessibilityAction(cover) { haptics.confirm(); actions.onShowOnCover(book); true })
+        add(CustomAccessibilityAction(finished) { haptics.confirm(); actions.onFinished(book, !book.isFinished); true })
+        add(CustomAccessibilityAction(remove) { actions.onRemove(book); true })
+    }
 }
 
 /** A pin in a cookie, on a pinned book's cover. */
@@ -212,7 +240,10 @@ internal fun CollectionsSheet(
     var naming by remember { mutableStateOf(false) }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(Modifier.navigationBarsPadding().padding(bottom = 16.dp)) {
-            Text(stringResource(R.string.library_collections_title), style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(horizontal = 24.dp))
+            Text(
+                stringResource(R.string.library_collections_title), style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(horizontal = 24.dp).asHeading(),
+            )
             Text(
                 book.title, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 24.dp),
@@ -231,9 +262,10 @@ internal fun CollectionsSheet(
                     leadingContent = { Icon(LibraryIcons.Folder, null) },
                     trailingContent = { Checkbox(checked = inIt, onCheckedChange = null) },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                    modifier = Modifier.clickable {
-                        haptics.toggle(!inIt)
-                        onChange(if (inIt) book.collections - collection.id else book.collections + collection.id)
+                    // A tick box, ticked or not: as a plain row it never said whether the book was in.
+                    modifier = Modifier.toggleable(inIt, role = Role.Checkbox) { on ->
+                        haptics.toggle(on)
+                        onChange(if (on) book.collections + collection.id else book.collections - collection.id)
                     }.padding(horizontal = 8.dp),
                 )
             }

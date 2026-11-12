@@ -11,6 +11,12 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import io.github.friendlyglobal.jacket.ui.spoken
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -266,7 +272,22 @@ private fun download(context: Context, url: String) {
 @Composable
 private fun FreeBookTile(book: FreeBook, added: Boolean, haptics: Haptics, modifier: Modifier, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
-    Column(modifier) {
+    // One thing to a screen reader, as a book in the library is: its title, its author, and
+    // whether it is in the library already.
+    val said = spoken(
+        stringResource(R.string.list_separator), book.title, book.author,
+        stringResource(R.string.free_books_in_library).takeIf { added },
+    )
+    Column(
+        modifier.clearAndSetSemantics {
+            contentDescription = said
+            role = Role.Button
+            onClick {
+                onClick()
+                true
+            }
+        },
+    ) {
         Box(
             Modifier.fillMaxWidth().aspectRatio(2f / 3f)
                 .pressScale(interaction)

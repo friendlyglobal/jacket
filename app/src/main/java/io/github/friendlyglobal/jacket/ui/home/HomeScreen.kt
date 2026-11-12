@@ -128,6 +128,19 @@ import androidx.compose.material3.ToggleFloatingActionButtonDefaults
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.collapse
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.expand
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.onLongClick
+import androidx.compose.ui.semantics.role
+import io.github.friendlyglobal.jacket.ui.asHeading
+import io.github.friendlyglobal.jacket.ui.decorative
+import io.github.friendlyglobal.jacket.ui.spoken
 
 @Composable
 fun HomeScreen(
@@ -216,7 +229,27 @@ fun HomeScreen(
                         ToggleFloatingActionButton(
                             checked = fabMenu,
                             onCheckedChange = { haptics.tick(); fabMenu = it },
-                            modifier = Modifier.semantics { contentDescription = label },
+                            // A button that opens a menu, to a screen reader: "Add books, collapsed",
+                            // not a tick box that is "not checked".
+                            modifier = Modifier.clearAndSetSemantics {
+                                contentDescription = label
+                                role = Role.Button
+                                onClick {
+                                    fabMenu = !fabMenu
+                                    true
+                                }
+                                if (fabMenu) {
+                                    collapse {
+                                        fabMenu = false
+                                        true
+                                    }
+                                } else {
+                                    expand {
+                                        fabMenu = true
+                                        true
+                                    }
+                                }
+                            },
                         ) {
                             val icon by remember { derivedStateOf { if (checkedProgress > 0.5f) JacketIcons.Close else JacketIcons.Add } }
                             Icon(icon, null, with(ToggleFloatingActionButtonDefaults) { Modifier.animateIcon({ checkedProgress }) })
@@ -337,12 +370,15 @@ fun HomeScreen(
                         haptics = haptics,
                         onOpen = { onOpen(it, CoverSpot.HERO) },
                         onListen = onListen,
+                        // Side by side, each is read through before the other: not a line of one,
+                        // then whatever of the other happens to be level with it.
                         modifier = Modifier
                             .width(paneWidth)
                             .fillMaxHeight()
+                            .semantics { isTraversalGroup = true }
                             .padding(start = 16.dp, top = padding.calculateTopPadding() + 4.dp, bottom = padding.calculateBottomPadding() + 16.dp),
                     )
-                    shelves(Modifier.weight(1f).fillMaxHeight(), false)
+                    shelves(Modifier.weight(1f).fillMaxHeight().semantics { isTraversalGroup = true }, false)
                 }
             } else {
                 shelves(Modifier.fillMaxSize(), true)
@@ -511,7 +547,8 @@ private fun ContinueCard(book: Book, outerAvailable: Boolean, onOpen: (Book) -> 
             CoverImage(
                 book,
                 // The clip stays outside the shared cover: in flight it is drawn scaled, corners and all.
-                Modifier.width(96.dp).aspectRatio(2f / 3f).clip(RoundedCornerShape(10.dp)).sharedCover(book.id, CoverSpot.HERO),
+                // (The card says the title in words: "Cover of" the same title isn't said as well.)
+                Modifier.width(96.dp).aspectRatio(2f / 3f).clip(RoundedCornerShape(10.dp)).sharedCover(book.id, CoverSpot.HERO).decorative(),
                 maxHeight = 600,
             )
             Spacer(Modifier.width(18.dp))
@@ -526,9 +563,10 @@ private fun ContinueCard(book: Book, outerAvailable: Boolean, onOpen: (Book) -> 
                     Text(book.author, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 Spacer(Modifier.height(12.dp))
+                // The line is the words under it ("42% read") for the eye: it isn't read out too.
                 LinearWavyProgressIndicator(
                     progress = { progress.value },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().decorative(),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.18f),
                 )
@@ -603,9 +641,11 @@ private fun NowReadingPane(
                     CoverImage(
                         book,
                         // The clip stays outside the shared cover: in flight it is drawn scaled, corners and all.
+                        // (To a screen reader the title and the Read button below are this cover, in words.)
                         Modifier.width(coverWidth).aspectRatio(2f / 3f)
                             .pressScale(interaction, pressed = 0.96f)
                             .clip(RoundedCornerShape(14.dp))
+                            .decorative()
                             .clickable(interactionSource = interaction, indication = ripple(), onClickLabel = stringResource(R.string.library_read)) { onOpen(book) }
                             .sharedCover(book.id, CoverSpot.HERO),
                         maxHeight = 900,
@@ -625,7 +665,7 @@ private fun NowReadingPane(
                     Spacer(Modifier.height(18.dp))
                     LinearWavyProgressIndicator(
                         progress = { progress.value },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().decorative(),
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.18f),
                     )
@@ -715,6 +755,7 @@ private fun LibraryHeader(
                 Text(
                     if (done) stringResource(R.string.library_title_finished) else stringResource(R.string.library_title),
                     style = MaterialTheme.typography.headlineSmallEmphasized,
+                    modifier = Modifier.asHeading(),
                 )
             }
             Text(
@@ -793,7 +834,36 @@ private fun BookTile(
 ) {
     var menu by remember { mutableStateOf(false) }
     val interaction = remember { MutableInteractionSource() }
-    Column(modifier) {
+    // To a screen reader a book is one thing with one name: its title, who wrote it, how far
+    // through it you are, and what its badges say; not a "Cover of" the title, the title again
+    // and the author, each a stop of its own. What its menu offers is offered as its actions.
+    val resources = LocalResources.current
+    val separator = stringResource(R.string.list_separator)
+    val said = spoken(
+        separator,
+        book.title,
+        book.author,
+        if (missing) stringResource(R.string.library_add_file_again) else book.statusLabel(resources),
+        stringResource(R.string.library_pinned).takeIf { book.isPinned },
+        stringResource(R.string.library_on_cover_screen).takeIf { onCover },
+    )
+    val openLabel = stringResource(R.string.library_menu_open)
+    val menuLabel = stringResource(R.string.library_more_options)
+    val doing = bookActionsFor(book, onCover, haptics, actions)
+    Column(
+        modifier.clearAndSetSemantics {
+            contentDescription = said
+            onClick(label = openLabel) {
+                actions.onOpen(book)
+                true
+            }
+            onLongClick(label = menuLabel) {
+                menu = true
+                true
+            }
+            customActions = doing
+        },
+    ) {
         Box(
             Modifier
                 .fillMaxWidth()
