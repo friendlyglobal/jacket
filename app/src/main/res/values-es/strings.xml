@@ -211,8 +211,6 @@
     <string name="reader_listen">Escuchar: leer en voz alta</string>
     <string name="reader_previous_chapter">Capítulo anterior</string>
     <string name="reader_next_chapter">Capítulo siguiente</string>
-    <string name="reader_previous_paragraph">Párrafo anterior</string>
-    <string name="reader_next_paragraph">Párrafo siguiente</string>
     <string name="reader_previous_page">Página anterior</string>
     <string name="reader_next_page">Página siguiente</string>
     <string name="reader_page_number">Página %1$d</string>
@@ -282,8 +280,6 @@
     <string name="listen_pause">Pausar</string>
     <string name="listen_previous_sentence">Frase anterior</string>
     <string name="listen_next_sentence">Frase siguiente</string>
-    <string name="listen_previous_paragraph">Párrafo anterior</string>
-    <string name="listen_next_paragraph">Párrafo siguiente</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">Dejar de escuchar</string>
     <string name="listen_sleep_timer">Temporizador de apagado</string>
@@ -306,7 +302,6 @@
     <string name="listen_no_voice">Este teléfono no tiene instalada ninguna voz de texto a voz.</string>
     <string name="listen_no_readable_text">Este libro no tiene texto que se pueda leer en voz alta.</string>
     <string name="listen_stopped_error">Lectura en voz alta detenida: %1$s</string>
-    <string name="listen_voice_stopped">La voz se ha detenido. Revisa los ajustes de texto a voz.</string>
 
     <string name="widget_reading">Leyendo</string>
     <string name="widget_empty">Añade un libro para lucir su portada</string>

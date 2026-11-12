@@ -204,8 +204,6 @@
     <string name="reader_listen">Anhören: vorlesen lassen</string>
     <string name="reader_previous_chapter">Vorheriges Kapitel</string>
     <string name="reader_next_chapter">Nächstes Kapitel</string>
-    <string name="reader_previous_paragraph">Vorheriger Absatz</string>
-    <string name="reader_next_paragraph">Nächster Absatz</string>
     <string name="reader_previous_page">Vorherige Seite</string>
     <string name="reader_next_page">Nächste Seite</string>
     <string name="reader_page_number">Seite %1$d</string>
@@ -273,8 +271,6 @@
     <string name="listen_pause">Pause</string>
     <string name="listen_previous_sentence">Vorheriger Satz</string>
     <string name="listen_next_sentence">Nächster Satz</string>
-    <string name="listen_previous_paragraph">Vorheriger Absatz</string>
-    <string name="listen_next_paragraph">Nächster Absatz</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">Vorlesen beenden</string>
     <string name="listen_sleep_timer">Sleep-Timer</string>
@@ -296,7 +292,6 @@
     <string name="listen_no_voice">Auf diesem Smartphone ist keine Sprachausgabe-Stimme installiert.</string>
     <string name="listen_no_readable_text">Dieses Buch hat keinen Text, der vorgelesen werden kann.</string>
     <string name="listen_stopped_error">Vorlesen gestoppt: %1$s</string>
-    <string name="listen_voice_stopped">Die Stimme ist verstummt. Prüfe deine Einstellungen für die Sprachausgabe.</string>
 
     <string name="widget_reading">Ich lese</string>
     <string name="widget_empty">Füge ein Buch hinzu, um sein Cover zu tragen</string>

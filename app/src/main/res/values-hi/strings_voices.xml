@@ -23,7 +23,6 @@
     <string name="voice_about_text">स्वाभाविक आवाज़ें Jacket के साथ आती हैं और इंटरनेट के बिना काम करती हैं। इनका इस्तेमाल मुफ़्त है, लेकिन किसी को धोखा देने या नुकसान पहुँचाने के लिए इनका इस्तेमाल नहीं किया जा सकता, जैसे किसी आवाज़ को असली व्यक्ति की आवाज़ बताना। पूरी शर्तें सेटिंग में, लाइसेंस के अंतर्गत हैं।</string>
     <string name="voice_slow">यह आवाज़ इस फ़ोन के लिए भारी है। बदलने के लिए टैप करें।</string>
     <string name="listen_preparing">आवाज़ तैयार हो रही है…</string>
-    <string name="voice_stopped">स्वाभाविक आवाज़ रुक गई। दोबारा कोशिश करें या फ़ोन की आवाज़ चुनें।</string>
     <string name="voice_fell_back">स्वाभाविक आवाज़ शुरू नहीं हो सकी, इसलिए फ़ोन की आवाज़ पढ़ रही है।</string>
     <string name="voice_phone_settings">फ़ोन की आवाज़ की सेटिंग</string>
     <string name="voice_phone_settings_description">चुनें कि आपके फ़ोन की आवाज़ कैसी सुनाई दे।</string>

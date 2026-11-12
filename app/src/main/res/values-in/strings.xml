@@ -198,8 +198,6 @@
     <string name="reader_listen">Dengarkan: bacakan</string>
     <string name="reader_previous_chapter">Bab sebelumnya</string>
     <string name="reader_next_chapter">Bab berikutnya</string>
-    <string name="reader_previous_paragraph">Paragraf sebelumnya</string>
-    <string name="reader_next_paragraph">Paragraf berikutnya</string>
     <string name="reader_previous_page">Halaman sebelumnya</string>
     <string name="reader_next_page">Halaman berikutnya</string>
     <string name="reader_page_number">Halaman %1$d</string>
@@ -265,8 +263,6 @@
     <string name="listen_pause">Jeda</string>
     <string name="listen_previous_sentence">Kalimat sebelumnya</string>
     <string name="listen_next_sentence">Kalimat berikutnya</string>
-    <string name="listen_previous_paragraph">Paragraf sebelumnya</string>
-    <string name="listen_next_paragraph">Paragraf berikutnya</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">Berhenti mendengarkan</string>
     <string name="listen_sleep_timer">Timer tidur</string>
@@ -287,7 +283,6 @@
     <string name="listen_no_voice">Ponsel ini tidak memiliki suara teks ke ucapan yang terinstal.</string>
     <string name="listen_no_readable_text">Buku ini tidak memiliki teks yang dapat dibacakan.</string>
     <string name="listen_stopped_error">Pembacaan berhenti: %1$s</string>
-    <string name="listen_voice_stopped">Suara berhenti. Periksa setelan teks ke ucapan Anda.</string>
 
     <string name="widget_reading">Sedang dibaca</string>
     <string name="widget_empty">Tambahkan buku untuk memakai sampulnya</string>

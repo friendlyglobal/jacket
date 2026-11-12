@@ -23,7 +23,6 @@
     <string name="voice_about_text">As vozes naturais vêm com o Jacket e funcionam sem internet. O uso é livre, mas elas não devem ser usadas para enganar ou prejudicar ninguém; por exemplo, fazendo uma voz se passar por uma pessoa real. Os termos completos estão em Configurações, em Licenças.</string>
     <string name="voice_slow">Esta voz é pesada demais para este celular. Toque para trocar.</string>
     <string name="listen_preparing">Preparando a voz…</string>
-    <string name="voice_stopped">A voz natural parou. Tente de novo ou troque para a voz do celular.</string>
     <string name="voice_fell_back">A voz natural não conseguiu iniciar, então a voz do celular está lendo.</string>
     <string name="voice_phone_settings">Configurações da voz do celular</string>
     <string name="voice_phone_settings_description">Escolha como soa a voz do seu celular.</string>

@@ -218,8 +218,6 @@
     <string name="reader_listen">Слушать: чтение вслух</string>
     <string name="reader_previous_chapter">Предыдущая глава</string>
     <string name="reader_next_chapter">Следующая глава</string>
-    <string name="reader_previous_paragraph">Предыдущий абзац</string>
-    <string name="reader_next_paragraph">Следующий абзац</string>
     <string name="reader_previous_page">Предыдущая страница</string>
     <string name="reader_next_page">Следующая страница</string>
     <string name="reader_page_number">Страница %1$d</string>
@@ -291,8 +289,6 @@
     <string name="listen_pause">Пауза</string>
     <string name="listen_previous_sentence">Предыдущее предложение</string>
     <string name="listen_next_sentence">Следующее предложение</string>
-    <string name="listen_previous_paragraph">Предыдущий абзац</string>
-    <string name="listen_next_paragraph">Следующий абзац</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">Остановить чтение</string>
     <string name="listen_sleep_timer">Таймер сна</string>
@@ -316,7 +312,6 @@
     <string name="listen_no_voice">На этом телефоне не установлен голос для синтеза речи.</string>
     <string name="listen_no_readable_text">В этой книге нет текста, который можно прочитать вслух.</string>
     <string name="listen_stopped_error">Чтение вслух остановлено: %1$s</string>
-    <string name="listen_voice_stopped">Голос перестал читать. Проверьте настройки синтеза речи.</string>
 
     <string name="widget_reading">Читаю</string>
     <string name="widget_empty">Добавьте книгу, чтобы надеть её обложку</string>

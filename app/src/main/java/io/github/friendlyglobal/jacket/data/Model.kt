@@ -34,15 +34,15 @@ data class Book(
     val sourceName: String,
     val sizeBytes: Long,
     val addedAt: Long,
-    /** Readium position for EPUB, page index for PDF/CBZ, paragraph index for TXT. */
+    /** Readium position for EPUB, page index for PDF/CBZ, paragraph index for TXT (kept beside [locator]: see Library.updateLocator). */
     val position: Int = 0,
-    /** Scroll fraction within the current chapter (EPUB only). */
+    /** How far into that page or paragraph the place is (0..1): PDF/CBZ and TXT. (Jacket 0.2 kept a chapter's scroll fraction here for EPUB.) */
     val positionOffset: Float = 0f,
-    /** Positions (EPUB) or pages (PDF/CBZ); 0 when unknown until first opened. */
+    /** Positions (EPUB), pages (PDF/CBZ) or paragraphs (TXT); 0 when unknown until first opened. */
     val sectionCount: Int = 0,
     val progress: Float = 0f,
     val lastOpenedAt: Long = 0L,
-    /** Exact reading location as a Readium locator (JSON), for EPUB. */
+    /** Exact reading location as a Readium locator (JSON), for EPUB, and for TXT, which is read through pages made of it. */
     val locator: String? = null,
     /** When the book was marked finished; 0 while unread or in progress. */
     val finishedAt: Long = 0L,
@@ -148,8 +148,9 @@ enum class HighlightColor(val argb: Int) {
 enum class AnnotationKind { BOOKMARK, HIGHLIGHT }
 
 /**
- * A bookmark or highlight. EPUB places are Readium locators (JSON); other formats use a page or
- * paragraph [section].
+ * A bookmark or highlight. EPUB and text places are Readium locators (JSON); PDF and comics use a
+ * page [section]. A text book's also keep the paragraph they are in as [section], which is all a
+ * bookmark made before text books had pages has.
  */
 data class Annotation(
     val id: String,

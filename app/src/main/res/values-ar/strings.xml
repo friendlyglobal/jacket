@@ -233,8 +233,6 @@
     <string name="reader_listen">استماع: القراءة بصوت عالٍ</string>
     <string name="reader_previous_chapter">الفصل السابق</string>
     <string name="reader_next_chapter">الفصل التالي</string>
-    <string name="reader_previous_paragraph">الفقرة السابقة</string>
-    <string name="reader_next_paragraph">الفقرة التالية</string>
     <string name="reader_previous_page">الصفحة السابقة</string>
     <string name="reader_next_page">الصفحة التالية</string>
     <string name="reader_page_number">صفحة %1$d</string>
@@ -310,8 +308,6 @@
     <string name="listen_pause">إيقاف مؤقت</string>
     <string name="listen_previous_sentence">الجملة السابقة</string>
     <string name="listen_next_sentence">الجملة التالية</string>
-    <string name="listen_previous_paragraph">الفقرة السابقة</string>
-    <string name="listen_next_paragraph">الفقرة التالية</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">إيقاف الاستماع</string>
     <string name="listen_sleep_timer">مؤقت النوم</string>
@@ -337,7 +333,6 @@
     <string name="listen_no_voice">لا يوجد صوت مثبَّت لتحويل النص إلى كلام على هذا الهاتف.</string>
     <string name="listen_no_readable_text">لا يحتوي هذا الكتاب على نص يمكن قراءته بصوت عالٍ.</string>
     <string name="listen_stopped_error">توقفت القراءة بصوت عالٍ: %1$s</string>
-    <string name="listen_voice_stopped">توقف الصوت. تحقّق من إعدادات تحويل النص إلى كلام.</string>
 
     <string name="widget_reading">قيد القراءة</string>
     <string name="widget_empty">أضف كتابًا ليظهر غلافه هنا</string>

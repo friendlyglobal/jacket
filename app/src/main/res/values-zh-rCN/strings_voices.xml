@@ -23,7 +23,6 @@
     <string name="voice_about_text">自然语音随 Jacket 提供，无需联网即可使用。可以免费使用，但不得用于欺骗或伤害他人，例如把语音冒充成真人。完整条款见“设置”中的“许可”。</string>
     <string name="voice_slow">这部手机带不动这个语音。点按即可更换。</string>
     <string name="listen_preparing">正在准备语音…</string>
-    <string name="voice_stopped">自然语音停止了。请重试，或改用手机语音。</string>
     <string name="voice_fell_back">自然语音无法启动，现在由手机语音朗读。</string>
     <string name="voice_phone_settings">手机语音设置</string>
     <string name="voice_phone_settings_description">选择手机自带语音的声音。</string>

@@ -198,8 +198,6 @@
     <string name="reader_listen">听书：朗读</string>
     <string name="reader_previous_chapter">上一章</string>
     <string name="reader_next_chapter">下一章</string>
-    <string name="reader_previous_paragraph">上一段</string>
-    <string name="reader_next_paragraph">下一段</string>
     <string name="reader_previous_page">上一页</string>
     <string name="reader_next_page">下一页</string>
     <string name="reader_page_number">第 %1$d 页</string>
@@ -265,8 +263,6 @@
     <string name="listen_pause">暂停</string>
     <string name="listen_previous_sentence">上一句</string>
     <string name="listen_next_sentence">下一句</string>
-    <string name="listen_previous_paragraph">上一段</string>
-    <string name="listen_next_paragraph">下一段</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">停止听书</string>
     <string name="listen_sleep_timer">睡眠定时</string>
@@ -287,7 +283,6 @@
     <string name="listen_no_voice">此手机未安装文字转语音的语音。</string>
     <string name="listen_no_readable_text">这本书没有可朗读的文字。</string>
     <string name="listen_stopped_error">朗读已停止：%1$s</string>
-    <string name="listen_voice_stopped">语音已停止。请检查文字转语音设置。</string>
 
     <string name="widget_reading">在读</string>
     <string name="widget_empty">添加一本书，穿上它的封面</string>

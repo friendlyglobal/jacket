@@ -205,8 +205,6 @@
     <string name="reader_listen">Dinle: sesli oku</string>
     <string name="reader_previous_chapter">Önceki bölüm</string>
     <string name="reader_next_chapter">Sonraki bölüm</string>
-    <string name="reader_previous_paragraph">Önceki paragraf</string>
-    <string name="reader_next_paragraph">Sonraki paragraf</string>
     <string name="reader_previous_page">Önceki sayfa</string>
     <string name="reader_next_page">Sonraki sayfa</string>
     <string name="reader_page_number">Sayfa %1$d</string>
@@ -274,8 +272,6 @@
     <string name="listen_pause">Duraklat</string>
     <string name="listen_previous_sentence">Önceki cümle</string>
     <string name="listen_next_sentence">Sonraki cümle</string>
-    <string name="listen_previous_paragraph">Önceki paragraf</string>
-    <string name="listen_next_paragraph">Sonraki paragraf</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">Dinlemeyi durdur</string>
     <string name="listen_sleep_timer">Uyku zamanlayıcısı</string>
@@ -297,7 +293,6 @@
     <string name="listen_no_voice">Bu telefonda yüklü bir metin okuma sesi yok.</string>
     <string name="listen_no_readable_text">Bu kitapta sesli okunabilecek metin yok.</string>
     <string name="listen_stopped_error">Sesli okuma durdu: %1$s</string>
-    <string name="listen_voice_stopped">Ses durdu. Metin okuma ayarlarınızı kontrol edin.</string>
 
     <string name="widget_reading">Okunuyor</string>
     <string name="widget_empty">Kapağını giymek için bir kitap ekleyin</string>

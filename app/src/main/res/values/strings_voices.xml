@@ -36,7 +36,6 @@
     <string name="voice_slow">This voice is too much for this phone. Tap to change it.</string>
     <!-- On the player's button while a natural voice loads, before its first word. -->
     <string name="listen_preparing">Getting the voice ready…</string>
-    <string name="voice_stopped">The natural voice stopped. Try again, or switch to your phone\'s voice.</string>
     <string name="voice_fell_back">The natural voice couldn\'t start, so your phone\'s voice is reading.</string>
     <string name="voice_phone_settings">Phone\'s voice settings</string>
     <string name="voice_phone_settings_description">Choose how your phone\'s own voice sounds.</string>

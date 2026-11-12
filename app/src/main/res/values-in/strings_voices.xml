@@ -23,7 +23,6 @@
     <string name="voice_about_text">Suara alami disertakan bersama Jacket dan berfungsi tanpa internet. Bebas digunakan, tetapi tidak boleh dipakai untuk menipu atau merugikan siapa pun, misalnya dengan mengaku-aku suara itu sebagai orang sungguhan. Ketentuan lengkapnya ada di Setelan, pada bagian Lisensi.</string>
     <string name="voice_slow">Suara ini terlalu berat untuk ponsel ini. Ketuk untuk menggantinya.</string>
     <string name="listen_preparing">Menyiapkan suara…</string>
-    <string name="voice_stopped">Suara alami berhenti. Coba lagi, atau beralih ke suara ponsel.</string>
     <string name="voice_fell_back">Suara alami tidak bisa dimulai, jadi suara ponsel yang membacakan.</string>
     <string name="voice_phone_settings">Setelan suara ponsel</string>
     <string name="voice_phone_settings_description">Pilih bagaimana suara ponsel Anda terdengar.</string>

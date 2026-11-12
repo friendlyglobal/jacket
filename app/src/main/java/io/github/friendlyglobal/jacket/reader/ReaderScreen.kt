@@ -27,10 +27,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -174,7 +171,7 @@ data class TocItem(val title: String, val level: Int, val index: Int)
 
 /**
  * What the reader chrome shows and can ask for. Each format view fills it in: sections are
- * positions (about a page each) for EPUB, pages for PDF and comics, paragraphs for text.
+ * steps through the whole book for EPUB and text, pages for PDF and comics.
  */
 @Stable
 class ReaderNav {
@@ -199,7 +196,7 @@ class ReaderNav {
     var sectionGroup: (Int) -> Int = { it }
     var jumpTo: (Int) -> Unit = {}
     var openToc: (TocItem) -> Unit = {}
-    /** Previous/next buttons: by chapter for EPUB, by page or paragraph otherwise. */
+    /** Previous/next buttons: by chapter for EPUB and text, by page otherwise. */
     var step: (Int) -> Unit = { jumpTo(section + it) }
     var canStep: (Int) -> Boolean = { section + it in 0 until sectionCount }
 
@@ -301,19 +298,9 @@ fun ReaderScreen(
     val phoneLanguage = LocalConfiguration.current.locales[0]?.toLanguageTag()
     val readIn = book.language ?: if (book.format == BookFormat.TXT) phoneLanguage else null
     val voice = remember(settings.voice, settings.voices, readIn) { voices.choose(readIn, settings) }
-    // Plain text is read aloud with Jacket's own speakers; EPUB goes through Readium.
-    val speaker = remember(book.id, voice) {
-        when {
-            book.format != BookFormat.TXT -> null
-            voice != null -> NaturalSpeaker(context, voices, voice)
-            else -> SystemSpeaker(context)
-        }
-    }
-    DisposableEffect(speaker) { onDispose { speaker?.shutdown() } }
     // On the player: who is reading, and whether the phone is keeping up with them.
     val health by voices.health.collectAsStateWithLifecycle()
     val voiceLabel = voiceLabel(readIn, settings)
-    LaunchedEffect(speaker, settings.listenRate) { speaker?.setRate(settings.listenRate) }
     val outerAvailable by outer.available.collectAsStateWithLifecycle()
     val outerActive by outer.active.collectAsStateWithLifecycle()
     val nav = remember(book.id) { ReaderNav() }
@@ -741,9 +728,8 @@ fun ReaderScreen(
     val nextPageLabel = stringResource(R.string.reader_next_page)
     val previousPageLabel = stringResource(R.string.reader_previous_page)
     val hideControlsLabel = stringResource(R.string.reader_hide_controls)
-    // A text file scrolls like any list, which a screen reader moves by itself.
-    val pageTurns = remember(nav, book.format, nextPageLabel, previousPageLabel) {
-        if (book.format == BookFormat.TXT) emptyList() else listOf(
+    val pageTurns = remember(nav, nextPageLabel, previousPageLabel) {
+        listOf(
             CustomAccessibilityAction(nextPageLabel) { nav.turnPage(1); true },
             CustomAccessibilityAction(previousPageLabel) { nav.turnPage(-1); true },
         )
@@ -787,10 +773,10 @@ fun ReaderScreen(
             if (staged) {
                 CompositionLocalProvider(LocalReaderNav provides nav) {
                     when (book.format) {
-                        BookFormat.EPUB -> EpubReader(book, settings, page, nav, haptics, annotations, toggleChrome)
+                        // A text file is read through pages made of it, the same way as an EPUB.
+                        BookFormat.EPUB, BookFormat.TXT -> EpubReader(book, settings, page, nav, haptics, annotations, toggleChrome)
                         BookFormat.PDF -> PdfReader(book, page, nav, haptics, onProgress, toggleChrome)
                         BookFormat.CBZ -> ComicReader(book, page, nav, haptics, onProgress, toggleChrome)
-                        BookFormat.TXT -> TextReader(book, settings, page, nav, haptics, requireNotNull(speaker), onProgress, toggleChrome)
                     }
                 }
             }
@@ -983,7 +969,7 @@ fun ReaderScreen(
             ReadingControls(
                 settings, onSettings,
                 Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
-                forEpub = book.format == BookFormat.EPUB,
+                forEpub = book.format == BookFormat.EPUB || book.format == BookFormat.TXT,
                 lightLevels = true,
             )
         }
@@ -1433,7 +1419,6 @@ private fun ReaderBottomBar(
             )
             val (previousLabel, nextLabel) = when {
                 nav.toc.isNotEmpty() -> R.string.reader_previous_chapter to R.string.reader_next_chapter
-                book.format == BookFormat.TXT -> R.string.reader_previous_paragraph to R.string.reader_next_paragraph
                 else -> R.string.reader_previous_page to R.string.reader_next_page
             }
             ReaderToolbar(
@@ -1573,30 +1558,12 @@ private fun ReaderFooter(
     // brings the controls back (what a tap on the page does), and turns the page.
     val showAll = stringResource(R.string.reader_show_controls)
     val spoken = listOf(footerText(nav, book, settings), percentRead).filter { it.isNotBlank() }.joinToString(stringResource(R.string.list_separator))
-    // Plain text runs to the bottom of the screen, under this line (an EPUB page stops above it).
-    val runsUnder = book.format == BookFormat.TXT
     val insets = WindowInsets.navigationBarsIgnoringVisibility.union(WindowInsets.displayCutout)
     Row(
         Modifier
             .fillMaxWidth()
             // Clear of a cutout at the top: above everything the line answers for.
             .windowInsetsPadding(insets.only(WindowInsetsSides.Top))
-            .then(
-                if (runsUnder) {
-                    // The page's own colour behind the line, fading in from just above it: the
-                    // words, and the mini player, are read on paper rather than across the text.
-                    Modifier.drawBehind {
-                        val rise = 20.dp.toPx()
-                        drawRect(
-                            Brush.verticalGradient(0f to page.background.copy(alpha = 0f), 1f to page.background, startY = -rise, endY = rise / 2),
-                            topLeft = Offset(0f, -rise),
-                            size = Size(size.width, size.height + rise),
-                        )
-                    }
-                } else {
-                    Modifier
-                },
-            )
             .then(
                 if (listening) {
                     // A tap anywhere on the line brings the controls up. A screen reader isn't told

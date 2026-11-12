@@ -1,17 +1,9 @@
 package io.github.friendlyglobal.jacket.reader
 
 import android.os.SystemClock
-import android.widget.Toast
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -36,25 +28,21 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,8 +58,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.graphics.toArgb
-import io.github.friendlyglobal.jacket.ui.readableVeil
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -82,25 +68,16 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
-import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.importer.Comic
 import io.github.friendlyglobal.jacket.importer.DocumentCloser
 import io.github.friendlyglobal.jacket.importer.PdfDocument
 import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.PageColors
-import io.github.friendlyglobal.jacket.ui.rememberReadingFontFamily
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -115,15 +92,10 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.Closeable
 import java.io.File
-import java.nio.ByteBuffer
-import java.nio.charset.CharacterCodingException
-import java.nio.charset.CodingErrorAction
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipFile
 import kotlin.math.abs
 import kotlin.math.ceil
-import io.github.friendlyglobal.jacket.voice.withPhoneRegion
-import androidx.compose.foundation.interaction.DragInteraction
 
 /**
  * Opens a document off the main thread for as long as the caller is composed. It is closed even
@@ -469,436 +441,6 @@ private fun PageImage(
     }
 }
 
-@Composable
-fun TextReader(
-    book: Book,
-    settings: Settings,
-    page: PageColors,
-    nav: ReaderNav,
-    haptics: Haptics,
-    speaker: Speaker,
-    onProgress: ProgressSink,
-    onCenterTap: () -> Unit,
-) {
-    val library = LocalContext.current.library
-    val paragraphs by produceState<List<String>?>(null, book.id) {
-        value = withContext(Dispatchers.IO) { runCatching { readParagraphs(library.fileOf(book)) }.getOrDefault(emptyList()) }
-    }
-    val text = paragraphs ?: return ReaderLoading()
-    if (text.isEmpty()) return ReaderError(stringResource(R.string.reader_error_text))
-
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = book.position.coerceIn(0, text.lastIndex))
-    // The opening cover lifts once the first paragraphs are laid out.
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.layoutInfo.visibleItemsInfo.isNotEmpty() }.first { it }
-        nav.contentReady = true
-    }
-    val scope = rememberCoroutineScope()
-    val first by remember { derivedStateOf { listState.firstVisibleItemIndex } }
-    LaunchedEffect(listState, nav) { snapshotFlow { listState.atEnd() }.collect { nav.atEnd = it } }
-    val percent = book.percent
-    val resources = LocalResources.current
-    SideEffect {
-        nav.sectionCount = text.size
-        nav.section = first
-        nav.title = resources.getString(R.string.reader_percent_read, percent)
-        nav.footer = ""
-        nav.sectionName = { resources.getString(R.string.percent, it * 100 / text.size) }
-        nav.jumpTo = { target ->
-            if (target in text.indices) {
-                if (abs(target - first) > 1) {
-                    nav.cameFrom = Origin(first * 100 / text.size) { scope.launch { listState.scrollToItem(first) } }
-                }
-                scope.launch { listState.scrollToItem(target) }
-            }
-        }
-        nav.pageKey = first
-        nav.place = { Place(null, first, first / text.size.toFloat(), "", text[first].take(160)) }
-        nav.onScreen = { mark -> mark.section == first }
-        nav.goTo = { mark -> nav.jumpTo(mark.section) }
-        nav.turnPage = { delta ->
-            scope.launch { listState.animateScrollBy(delta * listState.layoutInfo.viewportSize.height * 0.85f) }
-        }
-    }
-    TrackProgress(listState, text.size, book.position, book.positionOffset, onProgress)
-
-    // Read aloud: which paragraph is being spoken, and which characters of it so far.
-    val listen = nav.listen
-    // The place saved is the paragraph at the top of the screen, which keeps up with the voice
-    // while it can be seen. With the screen off or another app in front it can't: the text stays
-    // where it was left while the voice reads on. Once the voice is past what that screen showed,
-    // the paragraph it has reached is saved as the place itself, and the text is taken to it when
-    // it is seen again (whether or not the voice is still speaking). -1 while the text is keeping up.
-    val owner = LocalLifecycleOwner.current
-    val savePlace by rememberUpdatedState(onProgress)
-    val unseenAt = remember { intArrayOf(-1) }
-    LifecycleEventEffect(Lifecycle.Event.ON_START) {
-        val reached = unseenAt[0]
-        unseenAt[0] = -1
-        if (reached in text.indices) scope.launch { listState.scrollToItem(reached) }
-    }
-    var spokenParagraph by remember { mutableIntStateOf(-1) }
-    var wordStart by remember { mutableIntStateOf(0) }
-    var wordEnd by remember { mutableIntStateOf(0) }
-    val token = remember { intArrayOf(0) }
-    val context = LocalContext.current
-    // Where the paragraph being spoken is laid out: the controls keep off the line the voice is on.
-    val spokenBox = remember { SpokenBox() }
-    // "You were here": the sentence the voice stopped on stays marked for a moment after listening
-    // ends, on the theme's fades; nothing else on the page changes.
-    var hereParagraph by remember { mutableIntStateOf(-1) }
-    var hereSentence by remember { mutableStateOf(IntRange.EMPTY) }
-    val hereStrength = remember { Animatable(0f) }
-    val hereJob = remember { arrayOfNulls<Job>(1) }
-    val hereAppears = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
-    val hereFades = MaterialTheme.motionScheme.slowEffectsSpec<Float>()
-    fun markHere(paragraph: Int, at: Int) {
-        hereJob[0]?.cancel()
-        hereJob[0] = scope.launch {
-            hereSentence = sentenceAround(text[paragraph], at)
-            hereParagraph = paragraph
-            try {
-                hereStrength.snapTo(HERE_FROM)
-                hereStrength.animateTo(1f, hereAppears)
-                delay(HERE_HOLD_MS)
-                hereStrength.animateTo(0f, hereFades)
-            } finally {
-                hereParagraph = -1
-            }
-        }
-    }
-    val controller = remember(book.id, speaker, text) {
-        object : ListenController {
-            override val previousLabel = R.string.listen_previous_paragraph
-            override val nextLabel = R.string.listen_next_paragraph
-
-            /** Where the voice stopped: the paragraph, and the word in it; and when (elapsed-time millis). */
-            var stoppedParagraph = -1
-            var stoppedWord = 0
-            var stoppedAt = 0L
-
-            /** When it was last paused (elapsed-time millis); 0 while it speaks. */
-            var pausedAt = 0L
-
-            fun say(index: Int, from: Int, queue: Boolean) {
-                if (index !in text.indices) {
-                    if (!queue) stop()
-                    return
-                }
-                if (!queue) {
-                    // Remember where we asked to start, so pause/resume works before the first word.
-                    spokenParagraph = index
-                    wordStart = from
-                    wordEnd = from
-                }
-                val start = from.coerceIn(0, text[index].length)
-                speaker.speak(token[0], index, start, text[index].substring(start), queue)
-            }
-
-            fun play(index: Int, from: Int) {
-                // With the reader's accent: "pt" on a Brazilian phone is read as "pt-BR".
-                speaker.setLanguage(withPhoneRegion(book.language))
-                if (!speaker.acquire()) {
-                    listen.active = true
-                    listen.playing = false
-                    return
-                }
-                // The voice is back: the mark of where it stopped has done its work.
-                hereJob[0]?.cancel()
-                pausedAt = 0L
-                listen.active = true
-                listen.playing = true
-                listen.preparing = speaker.slowToStart
-                token[0]++
-                say(index, from, false)
-            }
-
-            override fun start() {
-                if (speaker.unavailable) {
-                    haptics.reject()
-                    Toast.makeText(context, R.string.listen_no_voice, Toast.LENGTH_LONG).show()
-                    return
-                }
-                // Starting reads from the paragraph in view: the listener is where the voice is. If the
-                // voice stopped on this screen, it carries on from the sentence it stopped in.
-                listen.offPage = false
-                val shown = listState.layoutInfo.visibleItemsInfo.any { it.index == stoppedParagraph }
-                if (shown && stoppedParagraph in text.indices) {
-                    // After a long while, from a sentence or two before it: the listener finds the thread.
-                    val back = sentencesToRewind(SystemClock.elapsedRealtime() - stoppedAt)
-                    val (paragraph, from) = sentencesBack(text, stoppedParagraph, stoppedWord, back)
-                    play(paragraph, from)
-                } else {
-                    play(listState.firstVisibleItemIndex, 0)
-                }
-            }
-
-            override fun toggle() = if (listen.playing) pause() else resume()
-
-            fun pause() {
-                token[0]++
-                speaker.stop()
-                speaker.release()
-                if (listen.playing) pausedAt = SystemClock.elapsedRealtime()
-                listen.playing = false
-                listen.preparing = false
-            }
-
-            fun resume() {
-                if (spokenParagraph < 0) return start()
-                // From the word it stopped on; after a long pause, from a sentence or two before.
-                val back = if (pausedAt > 0L) sentencesToRewind(SystemClock.elapsedRealtime() - pausedAt) else 0
-                if (back == 0) {
-                    play(spokenParagraph, wordStart)
-                } else {
-                    val (paragraph, from) = sentencesBack(text, spokenParagraph, wordStart, back)
-                    play(paragraph, from)
-                }
-            }
-
-            override fun skip(delta: Int) {
-                speaker.stop()
-                play((spokenParagraph.coerceAtLeast(listState.firstVisibleItemIndex) + delta).coerceAtLeast(0), 0)
-            }
-
-            override fun setRate(rate: Float) {
-                speaker.setRate(rate)
-                // Re-speak from the current word at the new pace.
-                if (listen.playing) resume()
-            }
-
-            override fun stop() {
-                val wasListening = listen.active
-                val elsewhere = listen.offPage
-                val paragraph = spokenParagraph
-                val word = wordStart
-                token[0]++
-                speaker.stop()
-                speaker.release()
-                listen.active = false
-                listen.playing = false
-                listen.preparing = false
-                listen.offPage = false
-                listen.phrase = ""
-                spokenParagraph = -1
-                pausedAt = 0L
-                if (paragraph in text.indices) {
-                    stoppedParagraph = paragraph
-                    stoppedWord = word
-                    stoppedAt = SystemClock.elapsedRealtime()
-                }
-                // The text stays where it is. Following the voice, the sentence it stopped on is in
-                // front of you, and is marked; gone to look elsewhere, you are offered the way back to it.
-                if (!wasListening || paragraph !in text.indices) return
-                if (elsewhere) {
-                    nav.cameFrom = Origin(paragraph * 100 / text.size) {
-                        scope.launch {
-                            listState.scrollToItem(paragraph)
-                            markHere(paragraph, word)
-                        }
-                    }
-                } else {
-                    markHere(paragraph, word)
-                }
-            }
-
-            override fun backToVoice() {
-                listen.offPage = false
-                if (spokenParagraph >= 0) scope.launch { listState.animateScrollToItem(spokenParagraph) }
-            }
-
-            /** "Read from here": the voice goes to the sentence [from] characters into paragraph [index], paused or not before. */
-            fun listenFrom(index: Int, from: Int) {
-                listen.offPage = false
-                speaker.stop()
-                play(index, from)
-            }
-
-            override suspend fun spokenLine(): Rect? {
-                if (!listen.active || listen.offPage || spokenBox.paragraph != spokenParagraph) return null
-                val coordinates = spokenBox.coordinates?.takeIf { it.isAttached } ?: return null
-                val layout = spokenBox.layout ?: return null
-                val line = layout.getLineForOffset(wordStart.coerceIn(0, layout.layoutInput.text.length))
-                val at = coordinates.positionInWindow()
-                return Rect(at.x, at.y + layout.getLineTop(line), at.x + coordinates.size.width, at.y + layout.getLineBottom(line))
-            }
-        }
-    }
-    DisposableEffect(speaker, controller) {
-        speaker.listener = object : Speaker.Listener {
-            override fun onStart(utterance: Utterance) {
-                if (utterance.token != token[0]) return
-                spokenParagraph = utterance.paragraph
-                wordStart = utterance.offset
-                wordEnd = utterance.offset
-                // Out of sight, the text can't follow (unless the listener had left it to look elsewhere).
-                val unseen = !owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) && !listen.offPage
-                val leftBehind = unseen && listState.layoutInfo.visibleItemsInfo.none { it.index == utterance.paragraph }
-                if (leftBehind && utterance.paragraph != unseenAt[0] && utterance.paragraph in text.indices) {
-                    unseenAt[0] = utterance.paragraph
-                    savePlace(utterance.paragraph, 0f, utterance.paragraph / text.size.toFloat(), text.size)
-                }
-                // The first piece of a paragraph queues the next one: no gap between paragraphs.
-                if (utterance.first) controller.say(utterance.paragraph + 1, 0, true)
-            }
-
-            override fun onRange(utterance: Utterance, start: Int, end: Int) {
-                if (utterance.token != token[0]) return
-                // Its first word: it's reading now.
-                listen.preparing = false
-                spokenParagraph = utterance.paragraph
-                wordStart = utterance.offset + start
-                wordEnd = utterance.offset + end
-                // The sentence around the word, for the cover of a phone folded shut.
-                val paragraph = text.getOrNull(utterance.paragraph) ?: return
-                val sentence = sentenceAround(paragraph, wordStart)
-                listen.phrase = paragraph.substring(sentence.first, sentence.last + 1)
-                listen.spoken = (wordEnd - sentence.first).coerceIn(0, listen.phrase.length)
-            }
-
-            override fun onDone(utterance: Utterance) {
-                if (utterance.token == token[0] && utterance.last && utterance.paragraph >= text.lastIndex) {
-                    haptics.confirm()
-                    controller.stop()
-                }
-            }
-
-            override fun onFailed() {
-                if (listen.playing) controller.toggle()
-            }
-
-            override fun onInterrupted() {
-                if (listen.playing) controller.toggle()
-            }
-        }
-        nav.listenController = controller
-        // A new voice was chosen while listening: it takes over from the word the last one reached.
-        if (listen.active && listen.playing && spokenParagraph >= 0) controller.resume()
-        onDispose {
-            speaker.listener = null
-            nav.listenController = null
-        }
-    }
-    // A finger on the text while it's read aloud: the listener went to look elsewhere, and the
-    // text stops following the voice until they go back (the app's own scrolling isn't a drag).
-    LaunchedEffect(listState) {
-        listState.interactionSource.interactions.collect { interaction ->
-            if (interaction is DragInteraction.Start && listen.active) listen.offPage = true
-        }
-    }
-    // Keep the spoken paragraph on screen, clear of the footer line the mini player sits in.
-    val footerRoom = with(LocalDensity.current) { SPOKEN_CLEAR_OF_FOOTER.roundToPx() }
-    LaunchedEffect(spokenParagraph) {
-        if (spokenParagraph < 0 || !listen.playing || listen.offPage) return@LaunchedEffect
-        val info = listState.layoutInfo
-        val item = info.visibleItemsInfo.firstOrNull { it.index == spokenParagraph }
-        if (item == null || item.offset + item.size > info.viewportEndOffset - footerRoom) listState.animateScrollToItem(spokenParagraph)
-    }
-
-    val family = rememberReadingFontFamily(settings.font)
-    val style = MaterialTheme.typography.bodyLarge.copy(
-        fontFamily = family, fontSize = 18.sp * settings.textScale, lineHeight = 29.sp * settings.textScale, color = page.text,
-    )
-    // The words still to come are paler, and still readable (see readableVeil).
-    val unread = SpanStyle(color = page.text.copy(alpha = 1f - readableVeil(page.text.toArgb(), page.background.toArgb())))
-    val currentWord = SpanStyle(background = page.link.copy(alpha = 0.24f))
-    val step = { listState.layoutInfo.viewportSize.height * 0.85f }
-    val besideWords = 24.dp
-    Box(
-        Modifier.fillMaxSize().tapZones(
-            onPrevious = { scope.launch { listState.animateScrollBy(-step()) } },
-            onNext = { scope.launch { listState.animateScrollBy(step()) } },
-            onCenter = onCenterTap,
-        ),
-    ) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = PaddingValues(top = 40.dp, bottom = 72.dp),
-        ) {
-            itemsIndexed(text) { index, paragraph ->
-                // While listening: read text in full ink, unread text soft, the current word marked.
-                val spoken = when {
-                    !listen.active && index == hereParagraph -> buildAnnotatedString {
-                        append(paragraph)
-                        val from = hereSentence.first.coerceIn(0, paragraph.length)
-                        val to = (hereSentence.last + 1).coerceIn(from, paragraph.length)
-                        if (to > from) addStyle(SpanStyle(background = page.link.copy(alpha = HERE_ALPHA * hereStrength.value)), from, to)
-                    }
-                    !listen.active || spokenParagraph < 0 || index < spokenParagraph -> AnnotatedString(paragraph)
-                    index > spokenParagraph -> AnnotatedString(paragraph, unread)
-                    else -> buildAnnotatedString {
-                        append(paragraph)
-                        val end = wordEnd.coerceIn(0, paragraph.length)
-                        addStyle(unread, end, paragraph.length)
-                        val start = wordStart.coerceIn(0, end)
-                        if (end > start) addStyle(currentWord, start, end)
-                    }
-                }
-                val speaking = listen.active && index == spokenParagraph
-                // How it was laid out, for finding the sentence under a tap.
-                val laid = remember { arrayOfNulls<TextLayoutResult>(1) }
-                Text(
-                    spoken, style = style,
-                    modifier = Modifier.widthIn(max = 680.dp).fillMaxWidth().padding(horizontal = 28.dp, vertical = 7.dp)
-                        .then(
-                            // While the book is read aloud, a tap on a sentence reads on from there.
-                            // Beside the words (past a short line's end) it's the page's ordinary tap.
-                            if (listen.active) {
-                                Modifier.pointerInput(index, paragraph) {
-                                    detectTapGestures { tap ->
-                                        val layout = laid[0]
-                                        val line = layout?.getLineForVerticalPosition(tap.y)
-                                        if (layout == null || line == null || tap.x > layout.getLineRight(line) + besideWords.toPx()) {
-                                            onCenterTap()
-                                            return@detectTapGestures
-                                        }
-                                        haptics.tick()
-                                        controller.listenFrom(index, sentenceAround(paragraph, layout.getOffsetForPosition(tap)).first)
-                                    }
-                                }
-                            } else {
-                                Modifier
-                            },
-                        )
-                        .then(
-                            if (speaking) {
-                                Modifier.onGloballyPositioned {
-                                    spokenBox.paragraph = index
-                                    spokenBox.coordinates = it
-                                }
-                            } else {
-                                Modifier
-                            },
-                        ),
-                    onTextLayout = {
-                        laid[0] = it
-                        if (speaking) spokenBox.layout = it
-                    },
-                )
-            }
-        }
-    }
-}
-
-/** Where the paragraph being read aloud is laid out, and how its lines fall. */
-private class SpokenBox {
-    var paragraph = -1
-    var coordinates: LayoutCoordinates? = null
-    var layout: TextLayoutResult? = null
-}
-
-/** The foot of the screen the paragraph being read is kept out of: the footer line and the system's bar under it. */
-private val SPOKEN_CLEAR_OF_FOOTER = 96.dp
-
-/** The mark left on the sentence where the voice stopped: its wash at full strength, and the strength it starts from... */
-private const val HERE_ALPHA = 0.3f
-private const val HERE_FROM = 0.6f
-
-/** ...and how long it stays before it fades: about two seconds in all. */
-private const val HERE_HOLD_MS = 1_800L
-
 /**
  * A light tick each time a new page scrolls into first place. A fling through many pages gets a
  * few, spaced out, rather than a buzz.
@@ -949,32 +491,4 @@ private fun TrackProgress(listState: LazyListState, count: Int, start: Int, star
                 sink(index, fraction, progress, count)
             }
     }
-}
-
-/** The sentence of [paragraph] that holds the character at [at]: from after the last full stop to the next. */
-internal fun sentenceAround(paragraph: String, at: Int): IntRange {
-    if (paragraph.isEmpty()) return IntRange.EMPTY
-    val here = at.coerceIn(0, paragraph.lastIndex)
-    fun ends(index: Int) = paragraph[index] in ".!?…" && (index == paragraph.lastIndex || paragraph[index + 1].isWhitespace())
-    var start = here
-    while (start > 0 && !ends(start - 1)) start--
-    while (start < here && paragraph[start].isWhitespace()) start++
-    var end = here
-    while (end < paragraph.lastIndex && !ends(end)) end++
-    return start..end
-}
-
-private fun readParagraphs(file: File): List<String> {
-    val bytes = file.readBytes()
-    val text = try {
-        Charsets.UTF_8.newDecoder()
-            .onMalformedInput(CodingErrorAction.REPORT)
-            .decode(ByteBuffer.wrap(bytes)).toString()
-    } catch (_: CharacterCodingException) {
-        String(bytes, Charsets.ISO_8859_1)
-    }.removePrefix("\uFEFF").replace("\r\n", "\n")
-    val blocks = text.split(Regex("\n\\s*\n")).map { it.trim() }.filter { it.isNotEmpty() }
-    // Files without blank lines between paragraphs: fall back to one paragraph per line.
-    val paragraphs = if (blocks.size <= 1) text.lines().map { it.trim() }.filter { it.isNotEmpty() } else blocks
-    return paragraphs.map { it.replace(Regex("\\s*\n\\s*"), " ") }
 }

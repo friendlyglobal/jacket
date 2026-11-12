@@ -23,7 +23,6 @@
     <string name="voice_about_text">Doğal sesler Jacket ile birlikte gelir ve internet olmadan çalışır. Kullanımı serbesttir, ancak kimseyi kandırmak veya kimseye zarar vermek için, örneğin bir sesi gerçek bir kişininmiş gibi göstererek kullanılamaz. Koşulların tamamı Ayarlar\'da, Lisanslar bölümündedir.</string>
     <string name="voice_slow">Bu ses bu telefon için fazla ağır. Değiştirmek için dokunun.</string>
     <string name="listen_preparing">Ses hazırlanıyor…</string>
-    <string name="voice_stopped">Doğal ses durdu. Yeniden deneyin veya telefonun sesine geçin.</string>
     <string name="voice_fell_back">Doğal ses başlatılamadı, bu yüzden telefonun sesi okuyor.</string>
     <string name="voice_phone_settings">Telefon sesi ayarları</string>
     <string name="voice_phone_settings_description">Telefonunuzun kendi sesinin nasıl duyulacağını seçin.</string>

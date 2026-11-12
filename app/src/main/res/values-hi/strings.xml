@@ -205,8 +205,6 @@
     <string name="reader_listen">सुनें: पढ़कर सुनाएँ</string>
     <string name="reader_previous_chapter">पिछला अध्याय</string>
     <string name="reader_next_chapter">अगला अध्याय</string>
-    <string name="reader_previous_paragraph">पिछला पैराग्राफ़</string>
-    <string name="reader_next_paragraph">अगला पैराग्राफ़</string>
     <string name="reader_previous_page">पिछला पेज</string>
     <string name="reader_next_page">अगला पेज</string>
     <string name="reader_page_number">पेज %1$d</string>
@@ -274,8 +272,6 @@
     <string name="listen_pause">रोकें</string>
     <string name="listen_previous_sentence">पिछला वाक्य</string>
     <string name="listen_next_sentence">अगला वाक्य</string>
-    <string name="listen_previous_paragraph">पिछला पैराग्राफ़</string>
-    <string name="listen_next_paragraph">अगला पैराग्राफ़</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">सुनना बंद करें</string>
     <string name="listen_sleep_timer">स्लीप टाइमर</string>
@@ -297,7 +293,6 @@
     <string name="listen_no_voice">इस फ़ोन में कोई टेक्स्ट-टू-स्पीच आवाज़ इंस्टॉल नहीं है।</string>
     <string name="listen_no_readable_text">इस किताब में ऐसा कोई टेक्स्ट नहीं है जिसे पढ़कर सुनाया जा सके।</string>
     <string name="listen_stopped_error">पढ़कर सुनाना रुक गया: %1$s</string>
-    <string name="listen_voice_stopped">आवाज़ रुक गई। अपनी टेक्स्ट-टू-स्पीच सेटिंग देखें।</string>
 
     <string name="widget_reading">पढ़ी जा रही</string>
     <string name="widget_empty">कवर पहनाने के लिए कोई किताब जोड़ें</string>

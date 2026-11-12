@@ -211,8 +211,6 @@
     <string name="reader_listen">Ascolta: lettura ad alta voce</string>
     <string name="reader_previous_chapter">Capitolo precedente</string>
     <string name="reader_next_chapter">Capitolo successivo</string>
-    <string name="reader_previous_paragraph">Paragrafo precedente</string>
-    <string name="reader_next_paragraph">Paragrafo successivo</string>
     <string name="reader_previous_page">Pagina precedente</string>
     <string name="reader_next_page">Pagina successiva</string>
     <string name="reader_page_number">Pagina %1$d</string>
@@ -282,8 +280,6 @@
     <string name="listen_pause">Pausa</string>
     <string name="listen_previous_sentence">Frase precedente</string>
     <string name="listen_next_sentence">Frase successiva</string>
-    <string name="listen_previous_paragraph">Paragrafo precedente</string>
-    <string name="listen_next_paragraph">Paragrafo successivo</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">Interrompi l\'ascolto</string>
     <string name="listen_sleep_timer">Timer di spegnimento</string>
@@ -306,7 +302,6 @@
     <string name="listen_no_voice">Su questo telefono non è installata nessuna voce di sintesi vocale.</string>
     <string name="listen_no_readable_text">Questo libro non contiene testo che si possa leggere ad alta voce.</string>
     <string name="listen_stopped_error">Lettura ad alta voce interrotta: %1$s</string>
-    <string name="listen_voice_stopped">La voce si è interrotta. Controlla le impostazioni di sintesi vocale.</string>
 
     <string name="widget_reading">In lettura</string>
     <string name="widget_empty">Aggiungi un libro per indossarne la copertina</string>

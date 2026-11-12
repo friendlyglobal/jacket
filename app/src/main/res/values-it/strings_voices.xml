@@ -23,7 +23,6 @@
     <string name="voice_about_text">Le voci naturali sono incluse in Jacket e funzionano senza internet. Sono libere da usare, ma non devono servire a ingannare o danneggiare nessuno, ad esempio facendo passare una voce per quella di una persona reale. Le condizioni complete sono in Impostazioni, alla voce Licenze.</string>
     <string name="voice_slow">Questa voce è troppo pesante per questo telefono. Tocca per cambiarla.</string>
     <string name="listen_preparing">Preparazione della voce…</string>
-    <string name="voice_stopped">La voce naturale si è interrotta. Riprova o passa alla voce del telefono.</string>
     <string name="voice_fell_back">La voce naturale non è riuscita ad avviarsi, quindi legge la voce del telefono.</string>
     <string name="voice_phone_settings">Impostazioni della voce del telefono</string>
     <string name="voice_phone_settings_description">Scegli come suona la voce del tuo telefono.</string>

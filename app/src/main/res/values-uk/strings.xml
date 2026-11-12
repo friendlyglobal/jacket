@@ -218,8 +218,6 @@
     <string name="reader_listen">Слухати: читання вголос</string>
     <string name="reader_previous_chapter">Попередній розділ</string>
     <string name="reader_next_chapter">Наступний розділ</string>
-    <string name="reader_previous_paragraph">Попередній абзац</string>
-    <string name="reader_next_paragraph">Наступний абзац</string>
     <string name="reader_previous_page">Попередня сторінка</string>
     <string name="reader_next_page">Наступна сторінка</string>
     <string name="reader_page_number">Сторінка %1$d</string>
@@ -291,8 +289,6 @@
     <string name="listen_pause">Пауза</string>
     <string name="listen_previous_sentence">Попереднє речення</string>
     <string name="listen_next_sentence">Наступне речення</string>
-    <string name="listen_previous_paragraph">Попередній абзац</string>
-    <string name="listen_next_paragraph">Наступний абзац</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">Зупинити читання</string>
     <string name="listen_sleep_timer">Таймер сну</string>
@@ -316,7 +312,6 @@
     <string name="listen_no_voice">На цьому телефоні не встановлено голос для синтезу мовлення.</string>
     <string name="listen_no_readable_text">У цій книзі немає тексту, який можна прочитати вголос.</string>
     <string name="listen_stopped_error">Читання вголос зупинено: %1$s</string>
-    <string name="listen_voice_stopped">Голос перестав читати. Перевірте налаштування синтезу мовлення.</string>
 
     <string name="widget_reading">Читаю</string>
     <string name="widget_empty">Додайте книгу, щоб одягнути її обкладинку</string>

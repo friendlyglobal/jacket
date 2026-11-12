@@ -23,7 +23,6 @@
     <string name="voice_about_text">De natuurlijke stemmen horen bij Jacket en werken zonder internet. Je mag ze vrij gebruiken, maar niet om iemand te misleiden of te schaden, bijvoorbeeld door een stem voor een echt persoon te laten doorgaan. De volledige voorwaarden staan in Instellingen, onder Licenties.</string>
     <string name="voice_slow">Deze stem is te zwaar voor deze telefoon. Tik om te wijzigen.</string>
     <string name="listen_preparing">Stem wordt voorbereid…</string>
-    <string name="voice_stopped">De natuurlijke stem is gestopt. Probeer het opnieuw of schakel over naar de stem van je telefoon.</string>
     <string name="voice_fell_back">De natuurlijke stem kon niet starten, dus leest de stem van je telefoon voor.</string>
     <string name="voice_phone_settings">Instellingen voor de stem van de telefoon</string>
     <string name="voice_phone_settings_description">Kies hoe de stem van je telefoon klinkt.</string>

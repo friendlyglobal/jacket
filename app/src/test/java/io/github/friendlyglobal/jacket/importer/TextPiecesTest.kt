@@ -1,10 +1,11 @@
-package io.github.friendlyglobal.jacket.reader
+package io.github.friendlyglobal.jacket.importer
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class SpeechPiecesTest {
+/** A paragraph too long to lay out whole is cut into pieces (see [TextBook.LONGEST_BLOCK]). */
+class TextPiecesTest {
     @Test
     fun shortTextIsOnePiece() {
         assertEquals(listOf(0 to "Hello there."), pieces("Hello there.", 100))
@@ -37,5 +38,14 @@ class SpeechPiecesTest {
         val text = "y".repeat(1050)
         val result = pieces(text, 400)
         assertEquals(listOf(400, 400, 250), result.map { it.second.length })
+    }
+
+    @Test
+    fun aCharacterOfTwoHalvesIsNeverCutInTwo() {
+        // Each of these is two UTF-16 units: a cut at an odd count would leave half of one.
+        val text = "\uD83D\uDCD6".repeat(300)
+        val result = pieces(text, 101)
+        assertEquals(text, result.joinToString("") { it.second })
+        assertTrue(result.all { (_, piece) -> !piece.last().isHighSurrogate() && !piece.first().isLowSurrogate() })
     }
 }

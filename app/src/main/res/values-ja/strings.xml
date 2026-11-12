@@ -198,8 +198,6 @@
     <string name="reader_listen">聴く：読み上げ</string>
     <string name="reader_previous_chapter">前の章</string>
     <string name="reader_next_chapter">次の章</string>
-    <string name="reader_previous_paragraph">前の段落</string>
-    <string name="reader_next_paragraph">次の段落</string>
     <string name="reader_previous_page">前のページ</string>
     <string name="reader_next_page">次のページ</string>
     <string name="reader_page_number">%1$d ページ</string>
@@ -265,8 +263,6 @@
     <string name="listen_pause">一時停止</string>
     <string name="listen_previous_sentence">前の文</string>
     <string name="listen_next_sentence">次の文</string>
-    <string name="listen_previous_paragraph">前の段落</string>
-    <string name="listen_next_paragraph">次の段落</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">読み上げを停止</string>
     <string name="listen_sleep_timer">スリープタイマー</string>
@@ -287,7 +283,6 @@
     <string name="listen_no_voice">このスマートフォンにはテキスト読み上げの音声がインストールされていません。</string>
     <string name="listen_no_readable_text">この本には読み上げられるテキストがありません。</string>
     <string name="listen_stopped_error">読み上げが停止しました：%1$s</string>
-    <string name="listen_voice_stopped">音声が停止しました。テキスト読み上げの設定を確認してください。</string>
 
     <string name="widget_reading">読書中</string>
     <string name="widget_empty">本を追加すると、その表紙をまといます</string>

@@ -198,8 +198,6 @@
     <string name="reader_listen">聆聽：朗讀</string>
     <string name="reader_previous_chapter">上一章</string>
     <string name="reader_next_chapter">下一章</string>
-    <string name="reader_previous_paragraph">上一段</string>
-    <string name="reader_next_paragraph">下一段</string>
     <string name="reader_previous_page">上一頁</string>
     <string name="reader_next_page">下一頁</string>
     <string name="reader_page_number">第 %1$d 頁</string>
@@ -265,8 +263,6 @@
     <string name="listen_pause">暫停</string>
     <string name="listen_previous_sentence">上一句</string>
     <string name="listen_next_sentence">下一句</string>
-    <string name="listen_previous_paragraph">上一段</string>
-    <string name="listen_next_paragraph">下一段</string>
     <string name="listen_rate">%1$s×</string>
     <string name="listen_stop">停止聆聽</string>
     <string name="listen_sleep_timer">睡眠定時器</string>
@@ -287,7 +283,6 @@
     <string name="listen_no_voice">這支手機尚未安裝文字轉語音的語音。</string>
     <string name="listen_no_readable_text">這本書沒有可朗讀的文字。</string>
     <string name="listen_stopped_error">朗讀已停止：%1$s</string>
-    <string name="listen_voice_stopped">語音已停止，請檢查文字轉語音設定。</string>
 
     <string name="widget_reading">閱讀中</string>
     <string name="widget_empty">新增一本書，穿上它的封面</string>

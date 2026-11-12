@@ -23,7 +23,6 @@
     <string name="voice_about_text">الأصوات الطبيعية تأتي مع Jacket وتعمل بدون إنترنت. استخدامها مجاني، لكن لا يجوز استخدامها لخداع أحد أو إيذائه، مثل تقديم صوت على أنه صوت شخص حقيقي. الشروط الكاملة موجودة في الإعدادات، ضمن التراخيص.</string>
     <string name="voice_slow">هذا الصوت ثقيل على هذا الهاتف. انقر لتغييره.</string>
     <string name="listen_preparing">جارٍ تجهيز الصوت…</string>
-    <string name="voice_stopped">توقف الصوت الطبيعي. حاول مرة أخرى أو انتقل إلى صوت الهاتف.</string>
     <string name="voice_fell_back">تعذّر تشغيل الصوت الطبيعي، لذا يقرأ صوت الهاتف.</string>
     <string name="voice_phone_settings">إعدادات صوت الهاتف</string>
     <string name="voice_phone_settings_description">اختر كيف يبدو صوت هاتفك.</string>

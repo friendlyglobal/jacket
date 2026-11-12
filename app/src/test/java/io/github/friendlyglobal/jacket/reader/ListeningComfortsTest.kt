@@ -100,41 +100,6 @@ class ListeningComfortsTest {
         assertEquals(0, sentencesToRewind(-5_000))
     }
 
-    private val text = listOf(
-        "It was a dark night. The wind blew hard! Nobody was out.",
-        "   ",
-        "Morning came at last. The sea was calm.",
-    )
-
-    private fun from(paragraph: Int, word: String, sentences: Int): String {
-        val (p, at) = sentencesBack(text, paragraph, text[paragraph].indexOf(word), sentences)
-        return "$p:" + text[p].substring(at)
-    }
-
-    @Test
-    fun `plain text is taken up from the start of a sentence`() {
-        assertEquals("0:Nobody was out.", from(0, "out", 0))
-        assertEquals("0:The wind blew hard! Nobody was out.", from(0, "out", 1))
-        assertEquals("0:It was a dark night. The wind blew hard! Nobody was out.", from(0, "out", 2))
-        // No further back than the text goes.
-        assertEquals("0:It was a dark night. The wind blew hard! Nobody was out.", from(0, "out", 9))
-        assertEquals("0:It was a dark night. The wind blew hard! Nobody was out.", from(0, "dark", 2))
-    }
-
-    @Test
-    fun `going back passes into the paragraph before, over one with nothing in it`() {
-        assertEquals("2:Morning came at last. The sea was calm.", from(2, "calm", 1))
-        assertEquals("0:Nobody was out.", from(2, "calm", 2))
-        assertEquals("0:Nobody was out.", from(2, "Morning", 1))
-        assertEquals("0:The wind blew hard! Nobody was out.", from(2, "Morning", 2))
-    }
-
-    @Test
-    fun `a place that isn't in the text is left as it is`() {
-        assertEquals(7 to 3, sentencesBack(text, 7, 3, 2))
-        assertEquals(-1 to 0, sentencesBack(text, -1, 0, 1))
-    }
-
     // ---- A fast reader and a slow phone ----
 
     @Test
