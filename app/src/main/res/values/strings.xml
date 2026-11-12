@@ -354,6 +354,9 @@
     <string name="listen_no_readable_text">This book has no text that can be read aloud.</string>
     <!-- Play was pressed on a headset, the widget or the notification, and the library has nothing Jacket can read aloud (no books, or only PDFs and comics). -->
     <string name="listen_nothing_to_read">There is no book here that can be read aloud. Jacket can\'t read PDFs or comics aloud.</string>
+    <string name="listen_nothing_to_read_comics">There is no book here that can be read aloud. Jacket can\'t read comics aloud.</string>
+    <string name="pdf_listen_unavailable">This phone can\'t read PDFs aloud. That takes Android 15, or Android 12 to 14 with the latest Google Play system update.</string>
+    <string name="pdf_listen_no_text">This PDF has no text to read aloud. Its pages are pictures, like a scan.</string>
     <!-- %1$s: the reason, from the speech engine. -->
     <string name="listen_stopped_error">Read aloud stopped: %1$s</string>
 

@@ -93,6 +93,10 @@ internal class TextPlaces(private val texts: List<String>) {
         return (starts[block] + into).toDouble() / letters
     }
 
+    /** How far down the file the letter [into] letters into [block] is (spaces aside): the middle of it, so that it is found again as itself. */
+    fun at(block: Int, into: Int): Double =
+        if (letters == 0 || block !in texts.indices) 0.0 else ((starts[block] + into.coerceAtLeast(0) + 0.5) / letters).coerceIn(0.0, 1.0)
+
     /** Whether [sentence] is one of [block]'s: voices cut and space sentences their own way, so it is known by its opening. */
     fun holds(block: Int, sentence: String?): Boolean {
         val opening = opening(sentence)

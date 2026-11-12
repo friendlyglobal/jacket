@@ -58,6 +58,7 @@ import io.github.friendlyglobal.jacket.MainActivity
 import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.BookFormat
+import io.github.friendlyglobal.jacket.importer.PdfWords
 import io.github.friendlyglobal.jacket.data.CoverPhase
 import io.github.friendlyglobal.jacket.data.CoverStatus
 import io.github.friendlyglobal.jacket.data.Library
@@ -122,8 +123,12 @@ internal fun mediaButtonIntent(context: Context, keyCode: Int) = Intent(context,
     putExtra(Intent.EXTRA_KEY_EVENT, KeyEvent(KeyEvent.ACTION_DOWN, keyCode))
 }
 
-/** Formats Jacket reads aloud. */
-internal val Book.canListen: Boolean get() = format == BookFormat.EPUB || format == BookFormat.TXT
+/**
+ * Formats Jacket reads aloud. A PDF is one where the phone's Android can hand over its words (see
+ * [PdfWords]); whether a given PDF has any is only known once it has been read through.
+ */
+internal val Book.canListen: Boolean
+    get() = format == BookFormat.EPUB || format == BookFormat.TXT || (format == BookFormat.PDF && PdfWords.available)
 
 /** The books you're reading, most recent first, with the current one leading; none finished or missing. */
 internal fun readingNow(state: LibraryState, missing: Set<String>): List<Book> {

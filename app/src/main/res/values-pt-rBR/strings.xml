@@ -312,6 +312,9 @@
     <string name="listen_no_voice">Este celular não tem nenhuma voz de conversão de texto em voz instalada.</string>
     <string name="listen_no_readable_text">Este livro não tem texto que possa ser lido em voz alta.</string>
     <string name="listen_nothing_to_read">Não há nenhum livro aqui que possa ser lido em voz alta. O Jacket não lê PDFs nem quadrinhos em voz alta.</string>
+    <string name="listen_nothing_to_read_comics">Não há nenhum livro aqui que possa ser lido em voz alta. O Jacket não lê quadrinhos em voz alta.</string>
+    <string name="pdf_listen_unavailable">Este celular não consegue ler PDFs em voz alta. Para isso é preciso o Android 15, ou o Android 12 a 14 com a atualização mais recente do sistema do Google Play.</string>
+    <string name="pdf_listen_no_text">Este PDF não tem texto para ler em voz alta. As páginas são imagens, como em um documento escaneado.</string>
     <string name="listen_stopped_error">A leitura em voz alta parou: %1$s</string>
 
     <string name="widget_reading">Lendo</string>

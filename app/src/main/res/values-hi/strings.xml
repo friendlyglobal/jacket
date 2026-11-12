@@ -303,6 +303,9 @@
     <string name="listen_no_voice">इस फ़ोन में कोई टेक्स्ट-टू-स्पीच आवाज़ इंस्टॉल नहीं है।</string>
     <string name="listen_no_readable_text">इस किताब में ऐसा कोई टेक्स्ट नहीं है जिसे पढ़कर सुनाया जा सके।</string>
     <string name="listen_nothing_to_read">यहाँ ऐसी कोई किताब नहीं है जिसे पढ़कर सुनाया जा सके। Jacket PDF और कॉमिक पढ़कर नहीं सुना सकता।</string>
+    <string name="listen_nothing_to_read_comics">यहाँ ऐसी कोई किताब नहीं है जिसे पढ़कर सुनाया जा सके। Jacket कॉमिक पढ़कर नहीं सुना सकता।</string>
+    <string name="pdf_listen_unavailable">यह फ़ोन PDF पढ़कर नहीं सुना सकता। इसके लिए Android 15 चाहिए, या Android 12 से 14 जिसमें Google Play का नया सिस्टम अपडेट हो।</string>
+    <string name="pdf_listen_no_text">इस PDF में पढ़कर सुनाने लायक़ कोई टेक्स्ट नहीं है। इसके पन्ने तस्वीरें हैं, जैसे स्कैन में होते हैं।</string>
     <string name="listen_stopped_error">पढ़कर सुनाना रुक गया: %1$s</string>
 
     <string name="widget_reading">पढ़ी जा रही</string>

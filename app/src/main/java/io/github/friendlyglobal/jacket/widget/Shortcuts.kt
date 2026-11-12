@@ -45,7 +45,7 @@ object AppShortcuts {
                 )
             }
             // Formats that can be read aloud.
-            current?.takeIf { it.format == BookFormat.EPUB || it.format == BookFormat.TXT }?.let { book ->
+            current?.takeIf { it.canListen }?.let { book ->
                 add(
                     ShortcutInfoCompat.Builder(app, "listen")
                         .setShortLabel(app.getString(R.string.reader_listen))

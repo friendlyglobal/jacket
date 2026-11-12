@@ -122,6 +122,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import io.github.friendlyglobal.jacket.data.BookFormat
+import io.github.friendlyglobal.jacket.widget.canListen
 import androidx.compose.runtime.rememberCoroutineScope
 import io.github.friendlyglobal.jacket.data.BookCollection
 import io.github.friendlyglobal.jacket.data.LibraryOrganizer
@@ -779,7 +780,7 @@ private fun NowReadingPane(
                             Text(stringResource(R.string.library_read), maxLines = 1, autoSize = fitOnOneLine(MaterialTheme.typography.labelLarge))
                         }
                         // Formats that can be read aloud.
-                        if (onListen != null && (book.format == BookFormat.EPUB || book.format == BookFormat.TXT)) {
+                        if (onListen != null && book.canListen) {
                             // While the book is being read aloud (the voice was started with it
                             // shut), the same button pauses the voice and takes it up again.
                             FilledTonalButton(

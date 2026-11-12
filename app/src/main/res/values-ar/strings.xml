@@ -343,6 +343,9 @@
     <string name="listen_no_voice">لا يوجد صوت مثبَّت لتحويل النص إلى كلام على هذا الهاتف.</string>
     <string name="listen_no_readable_text">لا يحتوي هذا الكتاب على نص يمكن قراءته بصوت عالٍ.</string>
     <string name="listen_nothing_to_read">لا يوجد هنا كتاب يمكن قراءته بصوت عالٍ. لا يستطيع Jacket قراءة ملفات PDF أو القصص المصوّرة بصوت عالٍ.</string>
+    <string name="listen_nothing_to_read_comics">لا يوجد هنا كتاب يمكن قراءته بصوت عالٍ. لا يستطيع Jacket قراءة القصص المصوّرة بصوت عالٍ.</string>
+    <string name="pdf_listen_unavailable">لا يستطيع هذا الهاتف قراءة ملفات PDF بصوت عالٍ. يتطلّب ذلك Android 15، أو Android 12 إلى 14 مع آخر تحديث لنظام Google Play.</string>
+    <string name="pdf_listen_no_text">لا يحتوي هذا الملف على نص يمكن قراءته بصوت عالٍ. صفحاته صور، كالصفحات الممسوحة ضوئيًا.</string>
     <string name="listen_stopped_error">توقفت القراءة بصوت عالٍ: %1$s</string>
 
     <string name="widget_reading">قيد القراءة</string>

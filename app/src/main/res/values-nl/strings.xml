@@ -302,6 +302,9 @@
     <string name="listen_no_voice">Op deze telefoon is geen stem voor tekst-naar-spraak geïnstalleerd.</string>
     <string name="listen_no_readable_text">Dit boek heeft geen tekst die kan worden voorgelezen.</string>
     <string name="listen_nothing_to_read">Er is hier geen boek dat kan worden voorgelezen. Jacket kan geen pdf\'s of strips voorlezen.</string>
+    <string name="listen_nothing_to_read_comics">Er is hier geen boek dat kan worden voorgelezen. Jacket kan geen strips voorlezen.</string>
+    <string name="pdf_listen_unavailable">Deze telefoon kan geen pdf\'s voorlezen. Daarvoor is Android 15 nodig, of Android 12 tot en met 14 met de nieuwste Google Play-systeemupdate.</string>
+    <string name="pdf_listen_no_text">Deze pdf bevat geen tekst om voor te lezen. De pagina\'s zijn afbeeldingen, zoals bij een scan.</string>
     <string name="listen_stopped_error">Voorlezen gestopt: %1$s</string>
 
     <string name="widget_reading">Ik lees</string>
