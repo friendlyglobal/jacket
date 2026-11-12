@@ -1,0 +1,5 @@
+Jacket 1.4
+• Evidenziazioni e note nei PDF: tieni premuto e scegli un colore
+• Le evidenziazioni seguono zoom e scorrimento, un tocco le modifica
+• Evidenzia la frase letta, o il primo paragrafo, dalla barra in alto
+• Le evidenziazioni dei PDF finiscono nei backup, in "Salva come file" e in Riprendi tra dispositivi

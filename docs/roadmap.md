@@ -346,7 +346,7 @@ the match where it is drawn (`reader/PdfSearch.kt`, `reader/TextSearch.kt`).
   - On phones that can't get at a PDF's words (Android 8 to 11) there is no search, and no
     Search button, as before.
 
-## Done since 1.3 (not yet released)
+## Shipped in 1.4 (12 November 2026)
 
 ### Highlights and notes on PDFs (M)
 Where Android hands over a PDF's words (Android 15, or Android 12 to 14 with SDK extension 13),

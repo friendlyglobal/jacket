@@ -1,0 +1,5 @@
+Jacket 1.4
+• Sorot dan beri catatan di PDF: tekan lama, lalu pilih warna
+• Sorotan mengikuti zoom dan gulir, ketuk untuk mengubahnya
+• Sorot kalimat yang dibacakan, atau paragraf pertama, dari bilah atas
+• Sorotan PDF ikut masuk cadangan, "Simpan sebagai file", dan Lanjutkan antarperangkat

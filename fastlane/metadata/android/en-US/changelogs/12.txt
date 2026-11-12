@@ -1,0 +1,5 @@
+Jacket 1.4
+• Highlight and add notes on PDFs: press and hold, then pick a colour
+• Marks follow zoom and scroll, and a tap edits them
+• Highlight the sentence being read, or the first paragraph, from the top bar
+• PDF highlights go into backups, "Save as a file" and catch-up between devices

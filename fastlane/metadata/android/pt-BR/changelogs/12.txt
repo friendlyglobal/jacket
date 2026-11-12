@@ -1,0 +1,5 @@
+Jacket 1.4
+• Destaques e notas em PDFs: toque e segure, depois escolha uma cor
+• Os destaques acompanham o zoom e a rolagem, e um toque os edita
+• Destaque a frase sendo lida, ou o primeiro parágrafo, pela barra de cima
+• Os destaques de PDF vão para os backups, para "Salvar como arquivo" e para Continuar entre dispositivos

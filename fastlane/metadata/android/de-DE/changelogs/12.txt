@@ -1,0 +1,5 @@
+Jacket 1.4
+• Markierungen und Notizen in PDFs: lange drücken, dann eine Farbe wählen
+• Markierungen folgen Zoom und Scrollen, ein Tippen bearbeitet sie
+• Den vorgelesenen Satz oder den ersten Absatz über die obere Leiste markieren
+• PDF-Markierungen landen in Backups, „Als Datei speichern“ und Zwischen Geräten weiterlesen

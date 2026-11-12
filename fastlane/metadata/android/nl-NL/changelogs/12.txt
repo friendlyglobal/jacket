@@ -1,0 +1,5 @@
+Jacket 1.4
+• Markeren en notities in pdf's: lang indrukken en een kleur kiezen
+• Markeringen volgen zoomen en scrollen, een tik bewerkt ze
+• Markeer de zin die wordt voorgelezen, of de eerste alinea, vanuit de bovenbalk
+• Pdf-markeringen gaan mee in back-ups, "Opslaan als bestand" en Verder lezen tussen apparaten
