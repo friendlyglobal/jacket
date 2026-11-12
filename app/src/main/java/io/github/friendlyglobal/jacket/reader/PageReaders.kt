@@ -10,6 +10,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateCentroid
@@ -48,6 +49,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -70,8 +78,13 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
+import androidx.core.graphics.get
 import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
+import io.github.friendlyglobal.jacket.data.Settings
+import io.github.friendlyglobal.jacket.importer.PdfPlace
+import io.github.friendlyglobal.jacket.ui.motionRemoved
+import io.github.friendlyglobal.jacket.voice.Respelling
 import io.github.friendlyglobal.jacket.importer.Comic
 import io.github.friendlyglobal.jacket.importer.DocumentCloser
 import io.github.friendlyglobal.jacket.importer.PdfDocument
@@ -84,6 +97,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -125,17 +139,21 @@ private fun Modifier.tapZones(
     onNext: () -> Unit,
     onCenter: () -> Unit,
     onDoubleTap: ((Offset) -> Unit)? = null,
+    /** Asked first: a tap that was on something of the page's own (a sentence, while it is read aloud) is that, and nothing else. */
+    onPage: (Offset) -> Boolean = { false },
 ): Modifier {
     val previous by rememberUpdatedState(onPrevious)
     val next by rememberUpdatedState(onNext)
     val center by rememberUpdatedState(onCenter)
     val double by rememberUpdatedState(onDoubleTap)
+    val taken by rememberUpdatedState(onPage)
     return pointerInput(onDoubleTap != null) {
         detectTapGestures(
             onDoubleTap = if (onDoubleTap != null) { at -> double?.invoke(at) } else null,
             onTap = { offset ->
                 val x = offset.x / size.width
                 when {
+                    taken(offset) -> {}
                     x < 0.28f -> previous()
                     x > 0.72f -> next()
                     else -> center()
@@ -244,7 +262,17 @@ private suspend fun PointerInputScope.zoomGestures(zoom: PageZoom) = awaitEachGe
 }
 
 @Composable
-fun PdfReader(book: Book, page: PageColors, nav: ReaderNav, haptics: Haptics, onProgress: ProgressSink, onCenterTap: () -> Unit) {
+fun PdfReader(
+    book: Book,
+    settings: Settings,
+    page: PageColors,
+    nav: ReaderNav,
+    haptics: Haptics,
+    /** "Say it this way": how the voice is to say words, in this book and in every book. */
+    respellings: List<Respelling>,
+    onProgress: ProgressSink,
+    onCenterTap: () -> Unit,
+) {
     val library = LocalContext.current.library
     val result = rememberDocument(book.id) { PdfDocument(library.fileOf(book)) }
     when {
@@ -252,7 +280,15 @@ fun PdfReader(book: Book, page: PageColors, nav: ReaderNav, haptics: Haptics, on
         result.isFailure -> ReaderError(stringResource(R.string.reader_error_pdf))
         else -> {
             val pdf = result.getOrThrow()
-            PagedList(pdf.pageCount, book.position, book.positionOffset, pdf.firstPageAspect, page, nav, haptics, onProgress, onCenterTap) { index, width ->
+            // Read aloud by the app's voice, like any other book (see PdfAloud): the pages turn
+            // with it and mark the sentence it is on.
+            val aloud = rememberPdfAloud(book, settings, page, nav, respellings)
+            // While the voice speaks, the book's place is the sentence it is on, which the voice
+            // saves: the page that happens to be in view (moved there to follow it) isn't saved over it.
+            val saved: ProgressSink = { position, offset, progress, sections ->
+                if (!aloud.holdsThePlace && SystemClock.uptimeMillis() - aloud.followedAt > FOLLOW_SETTLE_MS) onProgress(position, offset, progress, sections)
+            }
+            PagedList(pdf.pageCount, book.position, book.positionOffset, pdf.firstPageAspect, page, nav, haptics, saved, onCenterTap, aloud) { index, width ->
                 pdf.render(index, width)
             }
         }
@@ -315,6 +351,8 @@ private fun PagedList(
     haptics: Haptics,
     onProgress: ProgressSink,
     onCenterTap: () -> Unit,
+    /** A PDF's read-aloud: the pages follow the voice and mark its sentence. Null for pages that are never read aloud (a comic's). */
+    aloud: PdfAloud? = null,
     render: suspend (index: Int, width: Int) -> Bitmap?,
 ) {
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = initial.coerceIn(0, (count - 1).coerceAtLeast(0)))
@@ -352,6 +390,12 @@ private fun PagedList(
 
     val zoom = remember(listState) { PageZoom(scope, listState) }
     zoom.spring = MaterialTheme.motionScheme.defaultSpatialSpec()
+    // Where each page in view is in the window, and where the pages' own box is: for what is
+    // asked in the window's terms (a tap on a line, where the line being read is). Not state:
+    // nothing is laid out again for it.
+    val frames = remember(listState) { HashMap<Int, Rect>() }
+    val origin = remember(listState) { arrayOf(Offset.Zero) }
+    if (aloud != null) FollowVoice(listState, aloud, nav, frames) { zoom.scale }
     // A screenful of what's showing: less of the list, zoomed in.
     val step = { listState.layoutInfo.viewportSize.height * 0.85f / zoom.scale }
     // A tap waits to see if it's a double tap; a little less long than the system's own patience,
@@ -368,6 +412,7 @@ private fun PagedList(
             .fillMaxSize()
             .clipToBounds()
             .onSizeChanged { zoom.width = it.width.toFloat().coerceAtLeast(1f) }
+            .onGloballyPositioned { origin[0] = it.positionInWindow() }
             .pointerInput(zoom) { zoomGestures(zoom) }
             .tapZones(
                 onPrevious = { scope.launch { listState.animateScrollBy(-step()) } },
@@ -376,6 +421,19 @@ private fun PagedList(
                 onDoubleTap = { at ->
                     haptics.tick()
                     zoom.toggle(at)
+                },
+                // While the PDF is read aloud, a tap on a line has the voice read on from there.
+                onPage = { at ->
+                    val layout = aloud?.layout
+                    val inWindow = at + origin[0]
+                    val tapped = if (layout == null) null else listState.layoutInfo.visibleItemsInfo.firstOrNull { frames[it.index]?.contains(inWindow) == true }?.index
+                    val frame = tapped?.let(frames::get)
+                    if (aloud == null || layout == null || tapped == null || frame == null || frame.width <= 0f) {
+                        false
+                    } else {
+                        val scale = layout.widthOf(tapped) / frame.width
+                        aloud.onTap(tapped, (inWindow.x - frame.left) * scale, (inWindow.y - frame.top) * scale).also { if (it) haptics.tick() }
+                    }
                 },
             ),
     ) {
@@ -393,7 +451,7 @@ private fun PagedList(
             contentPadding = PaddingValues(top = 16.dp, bottom = 64.dp),
         ) {
             // The first page to render lets the opening cover lift.
-            items(count) { index -> PageImage(index, widthPx, placeholderAspect, page, render) { nav.contentReady = true } }
+            items(count) { index -> PageImage(index, widthPx, placeholderAspect, page, render, aloud, frames) { nav.contentReady = true } }
         }
     }
     }
@@ -413,12 +471,17 @@ private fun PageImage(
     placeholderAspect: Float,
     page: PageColors,
     render: suspend (Int, Int) -> Bitmap?,
+    aloud: PdfAloud?,
+    frames: HashMap<Int, Rect>,
     onRendered: () -> Unit,
 ) {
     val bitmap by produceState<ImageBitmap?>(null, index, widthPx) {
         value = runCatching { render(index, widthPx) }.getOrNull()?.asImageBitmap()
         onRendered()
     }
+    // A page that is white behind its words takes the veil over the words still to be read
+    // aloud; on any other it would show as pale patches, and is left off.
+    val paper = remember(bitmap) { bitmap?.let(::looksLikePaper) == true }
     val aspect = bitmap?.let { it.width / it.height.toFloat() } ?: placeholderAspect
     // The page develops on its placeholder rather than popping onto it.
     val developed = animateFloatAsState(if (bitmap != null) 1f else 0f, MaterialTheme.motionScheme.defaultEffectsSpec(), label = "page")
@@ -435,11 +498,136 @@ private fun PageImage(
         bitmap?.let {
             Image(
                 it, stringResource(R.string.reader_page_number, index + 1),
-                Modifier.fillMaxSize().graphicsLayer { alpha = developed.value }, contentScale = ContentScale.Fit,
+                Modifier
+                    .fillMaxSize()
+                    .then(if (aloud == null) Modifier else Modifier.onGloballyPositioned { at -> frames[index] = at.boundsInWindow() })
+                    .graphicsLayer { alpha = developed.value }
+                    // The sentence being read aloud, marked where it is drawn (only what is drawn changes as it is read).
+                    .drawWithContent {
+                        drawContent()
+                        aloud?.run { layout?.widthOf(index)?.let { width -> drawMarks(index, width, paper) } }
+                    },
+                contentScale = ContentScale.Fit,
             )
         }
     }
 }
+
+/** Whether a page's picture is white (or near it) around its edges: a printed page, not a slide on a colour or a dark scan. */
+private fun looksLikePaper(image: ImageBitmap): Boolean = runCatching {
+    val bitmap = image.asAndroidBitmap()
+    val w = bitmap.width
+    val h = bitmap.height
+    if (w < 8 || h < 8) return false
+    val spots = listOf(2 to 2, w / 2 to 2, w - 3 to 2, 2 to h / 2, w - 3 to h / 2, 2 to h - 3, w / 2 to h - 3, w - 3 to h - 3)
+    spots.count { (x, y) -> Color(bitmap[x, y]).luminance() > 0.85f } >= spots.size - 2
+}.getOrDefault(false)
+
+/**
+ * The pages follow the voice. The line holding the next word to be spoken is kept in the upper
+ * part of the screen: the pages move when it is about to leave it (so, from one page to the
+ * next, with the voice), on the theme's own spring, or at once with animations removed.
+ *
+ * A listener who moves the pages themselves has gone to look at something: the pages stop
+ * following, and the player offers the way back to the voice.
+ */
+@Composable
+private fun FollowVoice(listState: LazyListState, aloud: PdfAloud, nav: ReaderNav, frames: Map<Int, Rect>, zoomed: () -> Float) {
+    val spring = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+    val scope = rememberCoroutineScope()
+    SideEffect {
+        aloud.top = {
+            // (The page the list counts as its first, which is not always the first it has laid
+            // out: the foot of the page before can show in the room kept clear above it.)
+            val index = listState.firstVisibleItemIndex
+            val size = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }?.size ?: 0
+            PdfPlace(index, if (size > 0) (listState.firstVisibleItemScrollOffset.toFloat() / size).coerceIn(0f, 1f) else 0f)
+        }
+        // To a place on a page (a chapter that opens part of the way down one), as a jump from the contents goes.
+        aloud.goTo = { place ->
+            scope.launch {
+                val size = listState.layoutInfo.visibleItemsInfo.maxOfOrNull { it.size } ?: 0
+                listState.animateScrollToItem(place.page, (place.within * size).toInt())
+            }
+        }
+        aloud.inView = { place ->
+            val info = listState.layoutInfo
+            val item = info.visibleItemsInfo.firstOrNull { it.index == place.page }
+            if (item == null) {
+                false
+            } else {
+                val y = item.offset + place.within * item.size
+                y >= info.viewportStartOffset && y < info.viewportStartOffset + info.viewportSize.height / zoomed()
+            }
+        }
+        aloud.lineInWindow = { line ->
+            val width = aloud.layout?.widthOf(line.page) ?: 0f
+            val frame = frames[line.page]?.takeIf { listState.layoutInfo.visibleItemsInfo.any { item -> item.index == line.page } }
+            if (frame == null || width <= 0f) {
+                null
+            } else {
+                val scale = frame.width / width
+                Rect(frame.left + line.left * scale, frame.top + line.top * scale, frame.left + line.right * scale, frame.top + line.bottom * scale)
+            }
+        }
+    }
+    LaunchedEffect(listState, aloud) {
+        // (A reader that opens on a voice already reading is put at the book's place first: that is not the listener moving.)
+        aloud.followedAt = SystemClock.uptimeMillis()
+        snapshotFlow { Triple(aloud.line(), aloud.listen.offPage, aloud.calls) }.collectLatest { (line, elsewhere, _) ->
+            if (line == null || elsewhere || !aloud.listen.active) return@collectLatest
+            val height = aloud.layout?.heightOf(line.page)?.takeIf { it > 0f } ?: return@collectLatest
+            val still = motionRemoved()
+            aloud.following = true
+            try {
+                // A page that isn't on screen is gone to first; then the line is put in its place.
+                for (attempt in 0 until 3) {
+                    val info = listState.layoutInfo
+                    val seen = info.viewportSize.height / zoomed()
+                    val item = info.visibleItemsInfo.firstOrNull { it.index == line.page }
+                    aloud.followedAt = SystemClock.uptimeMillis()
+                    if (item == null) {
+                        val size = info.visibleItemsInfo.maxOfOrNull { it.size } ?: break
+                        listState.scrollToItem(line.page, (line.top / height * size - seen * LINE_AT).toInt())
+                        continue
+                    }
+                    val top = item.offset + line.top / height * item.size - info.viewportStartOffset
+                    val bottom = item.offset + line.bottom / height * item.size - info.viewportStartOffset
+                    if (top >= seen * LINE_NO_HIGHER && bottom <= seen * LINE_NO_LOWER) break
+                    val by = top - seen * LINE_AT
+                    if (still) listState.scrollBy(by) else listState.animateScrollBy(by, spring)
+                    break
+                }
+            } finally {
+                aloud.followedAt = SystemClock.uptimeMillis()
+                aloud.following = false
+            }
+        }
+    }
+    LaunchedEffect(listState, aloud) {
+        var window = listState.layoutInfo.viewportSize
+        var resizedAt = 0L
+        snapshotFlow { Triple(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset, listState.layoutInfo.viewportSize) }.drop(1).collect { (_, _, size) ->
+            val now = SystemClock.uptimeMillis()
+            if (size != window) {
+                // The window changed (the phone was folded, unfolded or turned): the pages are laid
+                // out anew, and go back to the voice by themselves.
+                window = size
+                resizedAt = now
+                aloud.calls++
+                return@collect
+            }
+            val moved = !aloud.following && now - aloud.followedAt > FOLLOW_SETTLE_MS && now - resizedAt > FOLLOW_SETTLE_MS
+            if (moved) nav.movedAt = now
+            if (moved && aloud.listen.active && !aloud.listen.offPage) aloud.listen.offPage = true
+        }
+    }
+}
+
+/** Where on the screen the line being read aloud is put (of its height, from the top), and how far up or down it may be before the pages move. */
+private const val LINE_AT = 0.25f
+private const val LINE_NO_HIGHER = 0.1f
+private const val LINE_NO_LOWER = 0.6f
 
 /**
  * A light tick each time a new page scrolls into first place. A fling through many pages gets a

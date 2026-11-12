@@ -17,6 +17,7 @@ import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.Library
 import io.github.friendlyglobal.jacket.data.LibraryState
+import io.github.friendlyglobal.jacket.importer.PdfPlace
 import io.github.friendlyglobal.jacket.importer.TextLayout
 import io.github.friendlyglobal.jacket.voice.NaturalTtsEngineProvider
 import io.github.friendlyglobal.jacket.voice.NaturalTtsPreferences
@@ -107,6 +108,14 @@ internal class VoicePage(
      * voice had reached, which isn't on the page in front of them.
      */
     var onStoppedElsewhere: (Locator) -> Unit = {}
+
+    /**
+     * For pages that aren't Readium's (a PDF's, which Android draws): where the voice starts when
+     * it is started with them in view. It is given the sentence the voice last stopped on, and
+     * says where to read from: that sentence if it is still in view, else the first words on
+     * screen. Null where the pages have nothing to read from there on.
+     */
+    var startAt: (suspend (stopped: Locator?) -> VoiceStart?)? = null
 }
 
 /** The voice a book is read with, and the language where that isn't the one the book gives: what a running voice was opened with. */
@@ -162,6 +171,9 @@ private fun sameSentence(saved: Locator, stopped: Locator?): Boolean {
 private class UnseenPlace(private val bookId: String, private val open: OpenBook, private val library: Library) {
     /** The sentence the voice is on. */
     var sentence: Locator? = null
+
+    /** In a PDF: where on its pages that sentence is. */
+    var page: PdfPlace? = null
     private var saved: Locator? = null
     private var savedAt = 0L
 
@@ -213,6 +225,19 @@ private class UnseenPlace(private val bookId: String, private val open: OpenBook
     fun save(ended: Boolean = false) {
         val sentence = sentence ?: return
         if (sentence === saved && !ended) return
+        open.pdf?.let { pdf ->
+            // A PDF's place is the page the sentence is drawn on and how far down it, and it is
+            // counted as the reader counts the page in view: the pages before it, and that far
+            // down its own. There is nothing to wait for, and nothing to carry over.
+            val at = page ?: return
+            owed = null
+            val progress = if (ended) 1f else pdf.layout.progressOf(at)
+            library.updateLocator(bookId, sentence.toJSON().toString(), progress, at.page, pdf.layout.pageCount, at.within, back)
+            back = false
+            saved = sentence
+            savedAt = SystemClock.uptimeMillis()
+            return
+        }
         val counted = open.counted ?: run {
             // How far through the book it is can't be told yet. The sentence is saved all the
             // same, at the number the book has: closed now, Jacket would lose the place otherwise.
@@ -302,6 +327,10 @@ internal class ReadAloud(
 
     /** The sentence the voice is on, as a place the pages can go by: where a reader opening the book finds it. Null when nothing is being read. */
     val sentence: Locator? get() = lastPlaced
+
+    /** In a PDF: the sentence the voice is on as letters of its paragraph, which is how it is found on the PDF's pages. Null when nothing is being read. */
+    var pdfSentence: PdfSentence? by mutableStateOf(null)
+        private set
 
     /** The book's place while no reader is there to keep it. */
     private val unseen = UnseenPlace(bookId, open, owner.library)
@@ -442,11 +471,14 @@ internal class ReadAloud(
             // behind another app, the voice starts from the place the book was left at.
             val n = navigator()?.takeIf { page?.inSight?.invoke() == true }
             var left: Locator? = null
+            // Pages that aren't Readium's (a PDF's) say themselves where the voice starts on them.
+            val own = if (from == null && n == null) page?.takeIf { it.inSight() }?.startAt?.invoke(stoppedAt) else null
             val resume = when {
                 from != null -> null
                 // Started again on the page where it stopped: the sentence it stopped on, in the block of
                 // Readium's own reading of the file that holds it.
                 n != null -> resumeOn(n)
+                own != null -> own.block to own.offset
                 else -> {
                     left = leftAt()
                     left?.let { resumeFrom(it) }
@@ -475,7 +507,8 @@ internal class ReadAloud(
                 // Taken up again after a long while, it starts a sentence or two before the one
                 // it stopped on, so the listener finds the thread; the page goes there with it
                 // if that sentence isn't on the one in view.
-                val back = if (resume != null) rewindAfterStop() else 0
+                // (The first words on a PDF's page are a fresh start, not the sentence it stopped on.)
+                val back = if (resume != null && own?.resumed != false) rewindAfterStop() else 0
                 if (back > 0) {
                     stepBack(tts, back)
                     false
@@ -582,6 +615,8 @@ internal class ReadAloud(
                     if (location.utteranceLocator != lastSpoken) {
                         val placed = files.placed(location.utteranceLocator)
                         lastPlaced = placed
+                        // In a PDF: which letters of its paragraph the sentence is, to find it on the PDF's pages by.
+                        if (open.pdf != null) pdfSentence = open.pdfSentence(placed, location.utterance.length)
                         spoken(placed)
                     }
                     lastSpoken = location.utteranceLocator
@@ -1015,6 +1050,28 @@ internal class ReadAloud(
     }
 
     /**
+     * Sends the voice to [block] of its reading of the book, [offset] letters into it (spaces
+     * aside), and it reads on from there: the next page of a PDF, a chapter of its outline, a
+     * sentence tapped on its page. [chapter] when it is the chapter that is being changed, which
+     * the sleep timer's "end of chapter" must know of. Nothing happens while the voice isn't running.
+     */
+    fun readFrom(block: Content.TextElement, offset: Int = 0, chapter: Boolean = false) {
+        val tts = tts ?: return
+        chapterJob?.cancel()
+        chapterJob = scope.launch {
+            if (chapter) {
+                listen.skippingChapter = true
+                listen.chapterSkips++
+            }
+            try {
+                jumpTo(tts, block, offset)
+            } finally {
+                if (chapter) listen.skippingChapter = false
+            }
+        }
+    }
+
+    /**
      * The sentence the voice is on (reading it, or paused on it), as it is marked on the page,
      * and its words; null when nothing is being read. It is what a highlight made without
      * selecting anything marks while the book is read aloud.
@@ -1123,6 +1180,7 @@ internal class ReadAloud(
         if (page == null && wasListening) unseen.save()
         lastSpoken = null
         lastPlaced = null
+        pdfSentence = null
         if (spoken != null) {
             stoppedAt = spoken
             stoppedAtTime = SystemClock.elapsedRealtime()
@@ -1176,6 +1234,7 @@ internal class ReadAloud(
         )
         sent = false
         unseen.sentence = placed
+        unseen.page = pdfSentence?.let { open.pdf?.layout?.placeOf(it.paragraph, it.from) }
         val page = page
         if (!heard) {
             heard = true
@@ -1231,6 +1290,8 @@ internal class ReadAloud(
     /** No reader has the book open: its place is kept here, counted on from what the library says of it now. */
     private fun keepUnseen() {
         unseen.rebase()
+        // (A PDF's place is told by its pages, which are known already.)
+        if (open.pdf != null) return
         scope.launch {
             // How far through the book a sentence is, is told by the book's positions: counting them reads all of it, once.
             runCatching { open.count() }
@@ -1300,7 +1361,8 @@ internal class ReadAloud(
     fun tune(state: LibraryState, phoneLanguage: String?) {
         val settings = state.settings
         val said = publication.metadata.language?.code
-        val voicing = voicing((state.find(bookId) ?: book).language, said, phoneLanguage, text = open.text != null)
+        // (A PDF whose language couldn't be told from its words is read in the phone's, like a text file.)
+        val voicing = voicing((state.find(bookId) ?: book).language, said, phoneLanguage, text = open.text != null || open.pdf != null)
         voice = context.voices.choose(voicing.readIn, settings)
         language = voicing.chosen
         phoneVoiceLanguage = voicing.phoneVoice

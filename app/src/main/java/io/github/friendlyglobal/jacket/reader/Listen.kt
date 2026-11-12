@@ -231,8 +231,17 @@ interface ListenController {
     suspend fun spokenLine(): Rect? = null
 }
 
-/** Stepping by chapter from the player: the chapter being read, by name, and the way to the one before or after it. */
-class ChapterSteps(val title: String, val canStep: (Int) -> Boolean, val onStep: (Int) -> Unit)
+/**
+ * Stepping by chapter from the player: the chapter being read, by name, and the way to the one
+ * before or after it. (By page, with the labels saying so, in a book of pages without chapters.)
+ */
+class ChapterSteps(
+    val title: String,
+    val canStep: (Int) -> Boolean,
+    val onStep: (Int) -> Unit,
+    @param:StringRes val previousLabel: Int = R.string.reader_previous_chapter,
+    @param:StringRes val nextLabel: Int = R.string.reader_next_chapter,
+)
 
 /**
  * How fast the voice gets through a book, learnt from the pages it turns as it reads: the time
@@ -576,7 +585,7 @@ private fun PlayerToolbar(
     ) {
         if (chaptersOnBar != null) {
             IconButton(onClick = { haptics.tick(); chaptersOnBar.onStep(-1) }, enabled = chaptersOnBar.canStep(-1)) {
-                Icon(JacketIcons.ChapterBack, stringResource(R.string.reader_previous_chapter))
+                Icon(JacketIcons.ChapterBack, stringResource(chaptersOnBar.previousLabel))
             }
         }
         IconButton(onClick = { haptics.tick(); controller.skip(-1) }) {
@@ -587,7 +596,7 @@ private fun PlayerToolbar(
         }
         if (chaptersOnBar != null) {
             IconButton(onClick = { haptics.tick(); chaptersOnBar.onStep(1) }, enabled = chaptersOnBar.canStep(1)) {
-                Icon(JacketIcons.ChapterForward, stringResource(R.string.reader_next_chapter))
+                Icon(JacketIcons.ChapterForward, stringResource(chaptersOnBar.nextLabel))
             }
         }
         RateButton(listen, rate, onRate, haptics)
@@ -730,7 +739,7 @@ private fun ChapterPill(chapters: ChapterSteps, named: Boolean, haptics: Haptics
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { haptics.tick(); chapters.onStep(-1) }, enabled = chapters.canStep(-1)) {
-                Icon(JacketIcons.ChapterBack, stringResource(R.string.reader_previous_chapter))
+                Icon(JacketIcons.ChapterBack, stringResource(chapters.previousLabel))
             }
             if (named && chapters.title.isNotBlank()) {
                 Text(
@@ -739,7 +748,7 @@ private fun ChapterPill(chapters: ChapterSteps, named: Boolean, haptics: Haptics
                 )
             }
             IconButton(onClick = { haptics.tick(); chapters.onStep(1) }, enabled = chapters.canStep(1)) {
-                Icon(JacketIcons.ChapterForward, stringResource(R.string.reader_next_chapter))
+                Icon(JacketIcons.ChapterForward, stringResource(chapters.nextLabel))
             }
         }
     }

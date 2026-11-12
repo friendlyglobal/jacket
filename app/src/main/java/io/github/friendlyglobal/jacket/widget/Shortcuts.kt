@@ -10,7 +10,6 @@ import androidx.core.net.toUri
 import io.github.friendlyglobal.jacket.MainActivity
 import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
-import io.github.friendlyglobal.jacket.data.BookFormat
 import io.github.friendlyglobal.jacket.importer.Bitmaps
 import io.github.friendlyglobal.jacket.library
 import kotlinx.coroutines.Dispatchers
@@ -45,7 +44,7 @@ object AppShortcuts {
                 )
             }
             // Formats that can be read aloud.
-            current?.takeIf { it.format == BookFormat.EPUB || it.format == BookFormat.TXT }?.let { book ->
+            current?.takeIf { it.canListen && it.id !in library.wordless.value }?.let { book ->
                 add(
                     ShortcutInfoCompat.Builder(app, "listen")
                         .setShortLabel(app.getString(R.string.reader_listen))

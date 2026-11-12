@@ -143,7 +143,7 @@ class ListenService : MediaLibraryService() {
         private val listening get() = service.listening
         private val library get() = service.library
 
-        private fun books(): List<Book> = booksToListenTo(library.state.value, library.missing.value)
+        private fun books(): List<Book> = booksToListenTo(library.state.value, library.unreadable)
 
         private fun mayBrowse(session: MediaSession, browser: MediaSession.ControllerInfo): Boolean =
             browser.isTrusted || browser.packageName == service.packageName ||

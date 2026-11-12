@@ -284,7 +284,7 @@ The details, the reasons and the size of each item are in [docs/roadmap.md](docs
 
 **Next**
 - Resume listening from your headphones without opening the book, then Android Auto
-- Read-aloud for PDFs (Android 15's PdfRenderer text API)
+- Read-aloud for PDFs (through Android's own PDF reader, on Android 12 and later)
 - Keep your place across two devices through a shared backup file
 - A natural voice for Chinese, and listening to a book in another language (translated on the phone)
 - ISBN barcode scanning to set a cover for a paper book

@@ -277,6 +277,9 @@ class ReaderNav(
 
     /** The language the book itself says it is in (an EPUB does), for the voice picker; null when it doesn't say. */
     var bookLanguage by mutableStateOf<String?>(null)
+
+    /** Read aloud, the player steps by page: a book of pages with no chapters to step by (a PDF without an outline). */
+    var stepsByPage by mutableStateOf(false)
 }
 
 /**
@@ -311,9 +314,18 @@ internal enum class Marked {
  */
 internal class QuickMarks(val highlight: String, val note: String, val onMark: (note: Boolean) -> Unit)
 
-/** Skipping by chapter from the player; null for a book without chapters (or a format that has none). */
-internal fun ReaderNav.chapterSteps(): ChapterSteps? =
-    if (toc.isEmpty()) null else ChapterSteps(title = chapter.ifBlank { title }, canStep = { canStep(it) }, onStep = { step(it) })
+/**
+ * Skipping by chapter from the player; by page in a book of pages that has no chapters and is read
+ * aloud all the same (a PDF without an outline). Null for a book with neither.
+ */
+internal fun ReaderNav.chapterSteps(): ChapterSteps? = when {
+    toc.isNotEmpty() -> ChapterSteps(title = chapter.ifBlank { title }, canStep = { canStep(it) }, onStep = { step(it) })
+    stepsByPage -> ChapterSteps(
+        title = title, canStep = { canStep(it) }, onStep = { step(it) },
+        previousLabel = R.string.reader_previous_page, nextLabel = R.string.reader_next_page,
+    )
+    else -> null
+}
 
 /** The open book's [ReaderNav], for views that only need to report in (see [ReaderError]). */
 internal val LocalReaderNav = compositionLocalOf<ReaderNav?> { null }
@@ -352,7 +364,8 @@ fun ReaderScreen(
     // added (older ones go by the phone's language).
     val voices = context.voices
     val phoneLanguage = LocalConfiguration.current.locales[0]?.toLanguageTag()
-    val readIn = book.language ?: if (book.format == BookFormat.TXT) phoneLanguage else null
+    // (So is a PDF whose language couldn't be told from its words.)
+    val readIn = book.language ?: if (book.format == BookFormat.TXT || book.format == BookFormat.PDF) phoneLanguage else null
     val voice = remember(settings.voice, settings.voices, readIn) { voices.choose(readIn, settings) }
     // On the player: who is reading, and whether the phone is keeping up with them.
     val health by voices.health.collectAsStateWithLifecycle()
@@ -877,7 +890,7 @@ fun ReaderScreen(
                     when (book.format) {
                         // A text file is read through pages made of it, the same way as an EPUB.
                         BookFormat.EPUB, BookFormat.TXT -> EpubReader(book, settings, page, nav, haptics, annotations, respellings, spine, toggleChrome)
-                        BookFormat.PDF -> PdfReader(book, page, nav, haptics, onProgress, toggleChrome)
+                        BookFormat.PDF -> PdfReader(book, settings, page, nav, haptics, respellings, onProgress, toggleChrome)
                         BookFormat.CBZ -> ComicReader(book, page, nav, haptics, onProgress, toggleChrome)
                     }
                 }

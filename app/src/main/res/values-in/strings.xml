@@ -293,6 +293,9 @@
     <string name="listen_no_voice">Ponsel ini tidak memiliki suara teks ke ucapan yang terinstal.</string>
     <string name="listen_no_readable_text">Buku ini tidak memiliki teks yang dapat dibacakan.</string>
     <string name="listen_nothing_to_read">Tidak ada buku di sini yang bisa dibacakan. Jacket tidak bisa membacakan PDF atau komik.</string>
+    <string name="listen_nothing_to_read_comics">Tidak ada buku di sini yang bisa dibacakan. Jacket tidak bisa membacakan komik.</string>
+    <string name="pdf_listen_unavailable">Ponsel ini tidak bisa membacakan PDF. Untuk itu perlu Android 15, atau Android 12 sampai 14 dengan update sistem Google Play terbaru.</string>
+    <string name="pdf_listen_no_text">PDF ini tidak punya teks untuk dibacakan. Halamannya berupa gambar, seperti hasil pindaian.</string>
     <string name="listen_stopped_error">Pembacaan berhenti: %1$s</string>
 
     <string name="widget_reading">Sedang dibaca</string>

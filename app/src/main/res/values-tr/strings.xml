@@ -303,6 +303,9 @@
     <string name="listen_no_voice">Bu telefonda yüklü bir metin okuma sesi yok.</string>
     <string name="listen_no_readable_text">Bu kitapta sesli okunabilecek metin yok.</string>
     <string name="listen_nothing_to_read">Burada sesli okunabilecek bir kitap yok. Jacket, PDF\'leri ve çizgi romanları sesli okuyamaz.</string>
+    <string name="listen_nothing_to_read_comics">Burada sesli okunabilecek bir kitap yok. Jacket, çizgi romanları sesli okuyamaz.</string>
+    <string name="pdf_listen_unavailable">Bu telefon PDF\'leri sesli okuyamıyor. Bunun için Android 15 veya en son Google Play sistem güncellemesini almış Android 12–14 gerekir.</string>
+    <string name="pdf_listen_no_text">Bu PDF\'te sesli okunacak metin yok. Sayfaları, taranmış bir belgedeki gibi resimlerden oluşuyor.</string>
     <string name="listen_stopped_error">Sesli okuma durdu: %1$s</string>
 
     <string name="widget_reading">Okunuyor</string>

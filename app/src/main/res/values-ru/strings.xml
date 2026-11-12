@@ -322,6 +322,9 @@
     <string name="listen_no_voice">На этом телефоне не установлен голос для синтеза речи.</string>
     <string name="listen_no_readable_text">В этой книге нет текста, который можно прочитать вслух.</string>
     <string name="listen_nothing_to_read">Здесь нет книги, которую можно прочитать вслух. Jacket не читает вслух PDF и комиксы.</string>
+    <string name="listen_nothing_to_read_comics">Здесь нет книги, которую можно прочитать вслух. Jacket не читает вслух комиксы.</string>
+    <string name="pdf_listen_unavailable">Этот телефон не может читать PDF вслух. Для этого нужен Android 15 или Android 12–14 с последним системным обновлением Google Play.</string>
+    <string name="pdf_listen_no_text">В этом PDF нет текста, который можно прочитать вслух. Его страницы — картинки, как в скане.</string>
     <string name="listen_stopped_error">Чтение вслух остановлено: %1$s</string>
 
     <string name="widget_reading">Читаю</string>

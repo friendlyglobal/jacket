@@ -302,6 +302,9 @@
     <string name="listen_no_voice">Auf diesem Smartphone ist keine Sprachausgabe-Stimme installiert.</string>
     <string name="listen_no_readable_text">Dieses Buch hat keinen Text, der vorgelesen werden kann.</string>
     <string name="listen_nothing_to_read">Hier gibt es kein Buch, das vorgelesen werden kann. PDFs und Comics kann Jacket nicht vorlesen.</string>
+    <string name="listen_nothing_to_read_comics">Hier gibt es kein Buch, das vorgelesen werden kann. Comics kann Jacket nicht vorlesen.</string>
+    <string name="pdf_listen_unavailable">Dieses Smartphone kann PDFs nicht vorlesen. Dafür braucht es Android 15 oder Android 12 bis 14 mit dem neuesten Google Play-Systemupdate.</string>
+    <string name="pdf_listen_no_text">Dieses PDF enthält keinen Text zum Vorlesen. Seine Seiten sind Bilder, wie bei einem Scan.</string>
     <string name="listen_stopped_error">Vorlesen gestoppt: %1$s</string>
 
     <string name="widget_reading">Ich lese</string>

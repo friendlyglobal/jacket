@@ -293,6 +293,9 @@
     <string name="listen_no_voice">這支手機尚未安裝文字轉語音的語音。</string>
     <string name="listen_no_readable_text">這本書沒有可朗讀的文字。</string>
     <string name="listen_nothing_to_read">這裡沒有可以朗讀的書。Jacket 無法朗讀 PDF 和漫畫。</string>
+    <string name="listen_nothing_to_read_comics">這裡沒有可以朗讀的書。Jacket 無法朗讀漫畫。</string>
+    <string name="pdf_listen_unavailable">這支手機無法朗讀 PDF。需要 Android 15，或已安裝最新 Google Play 系統更新的 Android 12 至 14。</string>
+    <string name="pdf_listen_no_text">這個 PDF 沒有可以朗讀的文字。它的頁面是圖片，就像掃描檔。</string>
     <string name="listen_stopped_error">朗讀已停止：%1$s</string>
 
     <string name="widget_reading">閱讀中</string>

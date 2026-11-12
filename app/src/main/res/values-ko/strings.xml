@@ -293,6 +293,9 @@
     <string name="listen_no_voice">이 휴대전화에는 텍스트 음성 변환(TTS) 음성이 설치되어 있지 않습니다.</string>
     <string name="listen_no_readable_text">이 책에는 소리 내어 읽을 수 있는 텍스트가 없습니다.</string>
     <string name="listen_nothing_to_read">소리 내어 읽을 수 있는 책이 없습니다. Jacket은 PDF와 만화를 소리 내어 읽을 수 없습니다.</string>
+    <string name="listen_nothing_to_read_comics">소리 내어 읽을 수 있는 책이 없습니다. Jacket은 만화를 소리 내어 읽을 수 없습니다.</string>
+    <string name="pdf_listen_unavailable">이 휴대전화에서는 PDF를 소리 내어 읽을 수 없습니다. Android 15, 또는 최신 Google Play 시스템 업데이트가 설치된 Android 12~14가 필요합니다.</string>
+    <string name="pdf_listen_no_text">이 PDF에는 소리 내어 읽을 텍스트가 없습니다. 스캔한 문서처럼 페이지가 그림으로 되어 있습니다.</string>
     <string name="listen_stopped_error">소리 내어 읽기가 중지되었습니다: %1$s</string>
 
     <string name="widget_reading">읽는 중</string>
