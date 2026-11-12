@@ -1,0 +1,8 @@
+Jacket 1.2
+• Pliki tekstowe i udostępniony tekst otwierają się w pełnym czytniku: strony, słuchanie przy wyłączonym ekranie, zakreślenia i wyszukiwanie
+• Powiedz to tak: popraw, jak głos wymawia imię
+• Numery przypisów są pomijane przy czytaniu na głos
+• Na wpół otwarty jak książka, zgięcie jest grzbietem
+• Twoje czytanie: tydzień, miesiąc i rok, z kalendarzem
+• Przeskakiwanie i wyłącznik czasowy w widżecie i na ekranie zewnętrznym Flipa
+• Czytanie wstrzymuje się przy połączeniu i wraca potem

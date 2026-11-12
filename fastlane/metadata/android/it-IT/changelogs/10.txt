@@ -1,0 +1,8 @@
+Jacket 1.2
+• I file di testo e il testo condiviso si aprono nel lettore completo: pagine, ascolto a schermo spento, evidenziazioni e ricerca
+• Dillo così: correggi come la voce pronuncia un nome
+• I numeri delle note vengono saltati ad alta voce
+• Mezzo aperto come un tascabile, la piega diventa il dorso
+• Le tue letture: settimana, mese e anno, con un calendario
+• Salto e timer nel widget e sullo schermo esterno del Flip
+• L'ascolto si ferma per una chiamata e poi riprende

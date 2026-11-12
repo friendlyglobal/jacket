@@ -1,0 +1,8 @@
+Jacket 1.2
+• Text files and shared text open in the full reader: pages, listening with the screen off, highlights and search
+• Say it this way: fix how the voice says a name
+• Footnote numbers are skipped when reading aloud
+• Half-open like a paperback, the fold is the spine
+• Your reading: your week, month and year, and a calendar
+• Skip and sleep timer on the player widget and the Flip cover screen
+• Read-aloud pauses for a call and carries on after

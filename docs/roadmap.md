@@ -60,7 +60,7 @@ Shipped: TalkBack, keyboard-only use, large text up to 300% and AA contrast. Sti
 highlight or note without press-and-hold, PDF and comic zoom without pinching, and reading the
 page's own text with TalkBack inside the paginated view (Listen is the dependable route).
 
-## Done since 1.1, not yet released
+## Shipped in 1.2 (12 November 2026)
 
 ### Plain and shared text work like full books (M)
 A text file, and text shared from another app, is read in the same reader as an EPUB: pages or

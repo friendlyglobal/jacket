@@ -43,7 +43,7 @@ Google Play: coming soon ·
 ## Install
 
 - **From GitHub:** open the [latest release](https://github.com/friendlyglobal/jacket/releases/latest),
-  download `Jacket-1.1.0.apk` and open it. Your browser asks once to be allowed to install apps.
+  download `Jacket-1.2.0.apk` and open it. Your browser asks once to be allowed to install apps.
   It's about 200 MB, because the voices are inside, and it runs on Android 8 and later. Later
   versions install over it the same way, keeping your books and places.
 - **Google Play:** coming soon.
@@ -99,7 +99,10 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
 - **Search inside EPUBs**, with results streaming in and the match marked on the page.
 - **Finishing a book:** the last page offers to mark it finished and suggests what to read next;
   finished books move to their own shelf.
-- PDFs render with Android's `PdfRenderer`, comics page by page, text as flowing paragraphs.
+- **Text files and shared text** open in the same reader as EPUBs: real pages, contents from
+  their chapter headings, highlights and notes, search and bookmarks. Old encodings (Windows,
+  Russian, Japanese, Chinese, Korean) are read correctly.
+- PDFs render with Android's `PdfRenderer`, comics page by page.
   Pinch or double-tap to zoom PDFs and comics. Your place is saved as you read.
 
 ### Listening
@@ -131,12 +134,13 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
 - **Any phone's voice works too:** the phone's text-to-speech is always there, and is what a
   phone short on memory starts with. If a phone can't keep up with a natural voice, the player
   says so and offers the change.
-- EPUB read-aloud keeps going with the screen off, with controls on the lock screen, in the
+- Read-aloud keeps going with the screen off, with controls on the lock screen, in the
   notification shade and on headphones. A sleep timer stops it after 15, 30 or 60 minutes, after
   any length you set, or at the end of the chapter.
-- Play/pause, skip by sentence (EPUB) or paragraph (text), skip to the next or previous chapter,
+- Play/pause, skip by sentence, skip to the next or previous chapter,
   and 0.5× to 3× speed. After a pause of a couple of minutes it picks up a sentence back, so you
-  find the thread. It pauses when another app plays audio or your headphones come out.
+  find the thread. A ringing call or a spoken direction pauses it and it carries on afterwards;
+  music or a video from another app, or headphones coming out, pause it until you press play.
 - **Say it this way:** select a name the voice gets wrong and write it the way it sounds
   ("Hermione" as "her-MY-oh-nee"), for that book or for every book, and hear it before you save.
   It works with every voice, and the words still light up on the page as they're spoken. The small
@@ -179,7 +183,7 @@ are a first pass; corrections from native speakers are welcome (`app/src/main/re
 | Device | How the cover appears |
 | --- | --- |
 | Book-style foldables (Pixel Fold line, others where supported) | **Full-screen on the outer display while you read inside**, using Jetpack WindowManager's dual-screen mode (`WindowAreaController`, `OPERATION_PRESENT_ON_AREA`). Optionally, a strip along the bottom follows the book: the chapter as a wave over a line for the whole book, a turning badge and a running wave while it's read aloud, a badge that grows points through the last tenth, a check and the date once finished. After 30 seconds it steps back to an ambient state: a small dim cover on black with a ring and a number. With *Cover when closed* on, the same cover takes the screen when you fold the phone shut on an open book; if it's being read aloud, a tap brings up the sentence being spoken and the player. |
-| Galaxy Z Flip | A **Flex Window widget**: the Glance widget declares Samsung's `display="sub_screen"` meta-data. Add it under *Settings › Cover screen › Widgets*. The default *Jacket* style fills the cover screen with the cover. |
+| Galaxy Z Flip | A **Flex Window widget**: the Glance widget declares Samsung's `display="sub_screen"` meta-data. Add it under *Settings › Cover screen › Widgets*. The default *Jacket* style fills the cover screen with the cover; while a book is read aloud it adds play, skip by sentence and a sleep timer. |
 | Motorola Razr | Open Jacket on the external display. The UI adapts to small, square windows. |
 | Any phone or tablet | The same widget, on the home screen. |
 
@@ -278,9 +282,6 @@ docs/concept.html            The interactive design concept the app started from
 The details, the reasons and the size of each item are in [docs/roadmap.md](docs/roadmap.md).
 
 **Next**
-- Plain and shared text work like full books: listening with the screen off, highlights, search
-- Skip and sleep buttons on the Galaxy Z Flip cover-screen player
-- A "your reading" page: week, month, year, books finished and a calendar
 - Resume listening from your headphones without opening the book, then Android Auto
 - Read-aloud for PDFs (Android 15's PdfRenderer text API)
 - Keep your place across two devices through a shared backup file
