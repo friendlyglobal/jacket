@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_text_smaller">글자 작게</string>
+    <string name="reading_text_larger">글자 크게</string>
+    <string name="reading_brightness">밝기</string>
+    <string name="reading_warmth">따뜻함</string>
+</resources>

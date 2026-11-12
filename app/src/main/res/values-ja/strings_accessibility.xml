@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_text_smaller">文字を小さく</string>
+    <string name="reading_text_larger">文字を大きく</string>
+    <string name="reading_brightness">明るさ</string>
+    <string name="reading_warmth">暖かさ</string>
+</resources>

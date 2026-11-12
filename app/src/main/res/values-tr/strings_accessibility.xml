@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_text_smaller">Metni küçült</string>
+    <string name="reading_text_larger">Metni büyüt</string>
+    <string name="reading_brightness">Parlaklık</string>
+    <string name="reading_warmth">Sıcaklık</string>
+</resources>

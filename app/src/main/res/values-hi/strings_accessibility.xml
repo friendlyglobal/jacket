@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_text_smaller">टेक्स्ट छोटा करें</string>
+    <string name="reading_text_larger">टेक्स्ट बड़ा करें</string>
+    <string name="reading_brightness">चमक</string>
+    <string name="reading_warmth">गर्माहट</string>
+</resources>

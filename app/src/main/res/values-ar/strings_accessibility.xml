@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_text_smaller">نص أصغر</string>
+    <string name="reading_text_larger">نص أكبر</string>
+    <string name="reading_brightness">السطوع</string>
+    <string name="reading_warmth">الدفء</string>
+</resources>

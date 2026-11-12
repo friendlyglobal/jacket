@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_text_smaller">缩小文字</string>
+    <string name="reading_text_larger">放大文字</string>
+    <string name="reading_brightness">亮度</string>
+    <string name="reading_warmth">色温</string>
+</resources>

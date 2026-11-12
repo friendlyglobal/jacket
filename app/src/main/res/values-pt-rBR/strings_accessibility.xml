@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_text_smaller">Texto menor</string>
+    <string name="reading_text_larger">Texto maior</string>
+    <string name="reading_brightness">Brilho</string>
+    <string name="reading_warmth">Calor</string>
+</resources>
