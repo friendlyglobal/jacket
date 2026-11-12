@@ -149,6 +149,9 @@ fun readerConfiguration(selection: ActionMode.Callback): EpubNavigatorFragment.C
                     // attribute lets the reader ask the page where the voice has got to.
                     "<div data-jacket=\"unread\" style=\"background-color: ${color.toCss()} !important; margin: -1px 0 0 -1px; padding: 0 2px 2px 0;\"></div>"
                 },
+                // Readium adds a template's stylesheet to every chapter file it shows: the one
+                // way there is to add a rule of Jacket's own to the pages.
+                stylesheet = TWO_PAGES_CSS,
             ),
         )
         // Where the voice stopped: the sentence's highlight, staying a moment after listening ends.
@@ -181,6 +184,18 @@ fun readerConfiguration(selection: ActionMode.Callback): EpubNavigatorFragment.C
         )
     }
 }
+
+/**
+ * Two pages when two are asked for outright (book posture, see [BookPosture]), whatever the size
+ * of the text. Readium's stylesheet means the same by its own rule for "two columns", which lets
+ * the column be as wide as it likes; but the column width Jacket sets above is written on the page
+ * itself, as Readium writes everything it is given, and outranks that rule. Left to it, a page of
+ * large text asked to be two would stay one, right across the fold. So the width is let go here,
+ * on the property itself.
+ */
+private const val TWO_PAGES_CSS =
+    ":root[style*=\"--USER__colCount: 2\"], :root[style*=\"--USER__colCount:2\"] " +
+        "{ -webkit-column-width: auto !important; column-width: auto !important; }"
 
 /** Decoration style for highlights and search results: a translucent [color] wash. */
 class Marker(@ColorInt val color: Int, val noted: Boolean = false) : Decoration.Style {
@@ -253,8 +268,11 @@ class SelectionMenu(private val context: Context) : ActionMode.Callback {
     }
 }
 
-/** Maps Jacket's reading settings onto Readium preferences. */
-fun epubPreferences(settings: Settings, page: PageColors): EpubPreferences = EpubPreferences(
+/**
+ * Maps Jacket's reading settings onto Readium preferences. [spread] while the phone is held
+ * half-open like a book: the pages are laid out about its fold (see [BookPosture]).
+ */
+internal fun epubPreferences(settings: Settings, page: PageColors, spread: BookSpread? = null): EpubPreferences = EpubPreferences(
     fontFamily = when (settings.font) {
         ReadingFont.LITERATA -> LITERATA
         ReadingFont.HYPERLEGIBLE -> HYPERLEGIBLE
@@ -268,7 +286,10 @@ fun epubPreferences(settings: Settings, page: PageColors): EpubPreferences = Epu
     theme = if (page.background.luminance() < 0.4f) Theme.DARK else Theme.LIGHT,
     backgroundColor = Color(page.background.toArgb()),
     textColor = Color(page.text.toArgb()),
-    pageMargins = settings.margins.readium,
+    // Two pages outright where the text is too large for Readium to show two by itself: one page
+    // would run across the fold. (Otherwise left to Readium, as ever: nothing is laid out anew.)
+    columnCount = if (spread?.twoPages == true && settings.layout == PageLayout.PAGES) ColumnCount.TWO else null,
+    pageMargins = spread?.margins ?: settings.margins.readium,
     // Line spacing and alignment override the book's own styles, which Readium only allows with
     // publisher styles off; leaving both on "Book" keeps the publisher's typography.
     publisherStyles = settings.lineSpacing == LineSpacing.BOOK && settings.alignment == TextAlignment.BOOK,

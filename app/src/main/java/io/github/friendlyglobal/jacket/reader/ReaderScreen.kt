@@ -140,6 +140,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import io.github.friendlyglobal.jacket.ui.rememberBookFold
 import io.github.friendlyglobal.jacket.data.PageLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.friendlyglobal.jacket.R
@@ -743,7 +744,27 @@ fun ReaderScreen(
     // Tabletop: half-open with the fold lying flat, the page sits above it and a desk of controls below.
     val fold by rememberTabletopFold(watch = settings.tabletop)
     var windowHeight by remember { mutableIntStateOf(0) }
+    var windowWidth by remember { mutableIntStateOf(0) }
     val density = LocalDensity.current
+    // Book posture: half-open with the fold upright, the fold is the spine between the two pages
+    // of the spread (see BookPosture). The pages keep clear of it, and so do the controls: they
+    // sit on the right-hand page, as they would on a phone of that width. Only where there are
+    // two pages to part: a book of pages, not one scrolled, nor a PDF's or a comic's single page.
+    val pagedBook = (book.format == BookFormat.EPUB || book.format == BookFormat.TXT) && settings.layout == PageLayout.PAGES
+    val bookFold by rememberBookFold(watch = pagedBook)
+    val spine = remember(bookFold, windowWidth, windowHeight, density, coverUp) {
+        if (coverUp) null else BookPosture.spine(bookFold, windowWidth, windowHeight, with(density) { BookPosture.OFF_CENTRE.dp.toPx() })
+    }
+    // How far in from the left the controls start: the far side of the fold, or nowhere. They
+    // move there, and back when the phone is opened flat, on the theme's own spring (at once,
+    // with animations removed).
+    val towardSpine by animateDpAsState(
+        spine?.let { with(density) { it.right.toDp() } } ?: 0.dp, MaterialTheme.motionScheme.defaultSpatialSpec(), label = "beside-spine",
+    )
+    // (The spring runs a little past where it is going: on the way back, never past the window's edge.)
+    val besideSpine = towardSpine.coerceAtLeast(0.dp)
+    // The width of one page, which is all the room anything has that must not cross the fold.
+    val onePage = spine?.let { with(density) { minOf(it.left, windowWidth - it.right).toDp() } }
     val belowFold = fold?.let { with(density) { (windowHeight - it.top).coerceAtLeast(0).toDp() } } ?: 0.dp
     val desk = fold?.let { with(density) { (windowHeight - it.bottom).coerceAtLeast(0).toDp() } } ?: 0.dp
 
@@ -796,7 +817,12 @@ fun ReaderScreen(
     val stepAside = { if (!context.screenReaderOn()) chrome = false }
 
     val motion = MaterialTheme.motionScheme
-    Box(Modifier.fillMaxSize().background(page.background).onSizeChanged { windowHeight = it.height }) {
+    Box(
+        Modifier.fillMaxSize().background(page.background).onSizeChanged {
+            windowHeight = it.height
+            windowWidth = it.width
+        },
+    ) {
         FocusHolder(pageFocus)
         // The page and its controls. They grow with the window the backdrop opens on them: a page
         // the size of the book under the cover, the whole screen once it is open.
@@ -824,12 +850,14 @@ fun ReaderScreen(
                 CompositionLocalProvider(LocalReaderNav provides nav) {
                     when (book.format) {
                         // A text file is read through pages made of it, the same way as an EPUB.
-                        BookFormat.EPUB, BookFormat.TXT -> EpubReader(book, settings, page, nav, haptics, annotations, respellings, toggleChrome)
+                        BookFormat.EPUB, BookFormat.TXT -> EpubReader(book, settings, page, nav, haptics, annotations, respellings, spine, toggleChrome)
                         BookFormat.PDF -> PdfReader(book, page, nav, haptics, onProgress, toggleChrome)
                         BookFormat.CBZ -> ComicReader(book, page, nav, haptics, onProgress, toggleChrome)
                     }
                 }
             }
+            // The shadow a book has down its middle, where the pages dip into the spine.
+            SpineShadow(spine, dark = page.background.luminance() < 0.4f)
             Warmth(levels, enabled = settings.edgeSwipes)
             // The page fades in under the indicator when it does arrive, rather than popping up.
             AnimatedVisibility(visible = waiting, enter = EnterTransition.None, exit = fadeOut(motion.slowEffectsSpec())) {
@@ -853,6 +881,7 @@ fun ReaderScreen(
             ) {
                 ReaderFooter(
                     nav, book, page, settings, playerVoice, listenPace, haptics,
+                    onePage = onePage,
                     pageTurns = pageTurns,
                     onControls = {
                         touchedChrome = true
@@ -864,7 +893,7 @@ fun ReaderScreen(
             // After a jump: the way back to where you were, for a little while.
             JumpBack(
                 nav, haptics, visible = opening.settled,
-                modifier = Modifier.align(Alignment.TopCenter).keyboardControls(controlFocus, "jump-back"),
+                modifier = Modifier.align(Alignment.TopCenter).absolutePadding(left = besideSpine).keyboardControls(controlFocus, "jump-back"),
             )
             EdgeLevel(levels)
 
@@ -906,6 +935,8 @@ fun ReaderScreen(
                     onBack = close,
                     firstControl = firstControl,
                     hideControls = hideControls,
+                    // The book's name stays on its own page: the back arrow's width in from the edge.
+                    titleWidth = onePage?.let { (it - TITLE_INSET).coerceAtLeast(TITLE_INSET) },
                 )
             }
 
@@ -919,8 +950,10 @@ fun ReaderScreen(
                     scaleIn(motion.fastSpatialSpec(), initialScale = 0.88f, transformOrigin = BottomMiddle) + fadeIn(motion.fastEffectsSpec()),
                 exit = slideOutVertically(motion.fastSpatialSpec()) { it } +
                     scaleOut(motion.fastSpatialSpec(), targetScale = 0.88f, transformOrigin = BottomMiddle) + fadeOut(motion.defaultEffectsSpec()),
-                modifier = Modifier.align(Alignment.BottomCenter).then(noticeTouches).keyboardControls(controlFocus, "bottom"),
+                modifier = Modifier.align(Alignment.BottomCenter).absolutePadding(left = besideSpine).then(noticeTouches).keyboardControls(controlFocus, "bottom"),
             ) {
+                // On one page of a book held half-open, the bar has that page's width to go by.
+                CompositionLocalProvider(LocalControlsWidth provides (onePage ?: Dp.Unspecified)) {
                 ReaderBottomBar(
                     nav = nav, book = book, haptics = haptics,
                     showScrubber = chrome,
@@ -944,6 +977,7 @@ fun ReaderScreen(
                     onText = { sheet = Sheet.TEXT },
                     onPlaced = { controls.bottom = it },
                 )
+                }
             }
 
             // The last page: celebrate, and offer what's next.
@@ -953,7 +987,7 @@ fun ReaderScreen(
                 visible = nav.atEnd && !finishedDismissed && (!barUp || screenReader) && !nav.listen.active && opening.settled,
                 enter = slideInVertically(motion.defaultSpatialSpec()) { it } + fadeIn(),
                 exit = slideOutVertically(motion.fastSpatialSpec()) { it } + fadeOut(),
-                modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
+                modifier = Modifier.align(Alignment.BottomCenter).absolutePadding(left = besideSpine).navigationBarsPadding()
                     .padding(bottom = if (barUp) FINISHED_OVER_CONTROLS else 48.dp)
                     .keyboardControls(controlFocus, "finished"),
             ) {
@@ -985,6 +1019,13 @@ fun ReaderScreen(
         )
     }
 
+    // A sheet comes up on the right-hand page too, not across the fold.
+    val sheetPage = if (spine != null && onePage != null) {
+        with(density) { SheetPage(width = onePage, offset = ((spine.right + windowWidth) / 2f - windowWidth / 2f).toDp()) }
+    } else {
+        null
+    }
+    CompositionLocalProvider(LocalSheetPage provides sheetPage) {
     when (sheet) {
         Sheet.CONTENTS -> ReaderSheet(onGone = { sheet = Sheet.NONE }) { leave ->
             NotesSheet(
@@ -1100,7 +1141,51 @@ fun ReaderScreen(
             )
         }
     }
+    }
 }
+
+/** The room the book's name has on the top bar, short of a page's width: the back arrow before it, and a margin after. */
+private val TITLE_INSET = 72.dp
+
+/** How far the spine's shadow reaches onto each page. */
+private val SPINE_SHADOW = 20.dp
+
+/**
+ * Book posture: the soft shadow down the middle of an open book, where its pages dip into the
+ * spine. It tells the eye the two halves are two pages. It comes and goes with the posture on the
+ * theme's own fade, and is never strong enough to read as a line: under words it would only be a
+ * smudge, and the words keep clear of it anyway.
+ */
+@Composable
+private fun SpineShadow(spine: IntRect?, dark: Boolean) {
+    val strength by animateFloatAsState(if (spine != null) 1f else 0f, MaterialTheme.motionScheme.defaultEffectsSpec(), label = "spine-shadow")
+    // Kept while it fades, after the phone has been opened flat.
+    var shown by remember { mutableStateOf(spine) }
+    if (spine != null) shown = spine
+    val at = shown ?: return
+    if (strength <= 0f) return
+    Canvas(Modifier.fillMaxSize()) {
+        val reach = SPINE_SHADOW.toPx()
+        val shade = Color.Black.copy(alpha = (if (dark) 0.3f else 0.06f) * strength)
+        val left = at.left.toFloat()
+        val right = at.right.toFloat()
+        drawRect(
+            Brush.horizontalGradient(listOf(Color.Transparent, shade), startX = left - reach, endX = left),
+            topLeft = Offset(left - reach, 0f), size = Size(reach, size.height),
+        )
+        // A hinge with some width to it is in shadow all the way across.
+        if (right > left) drawRect(shade, topLeft = Offset(left, 0f), size = Size(right - left, size.height))
+        drawRect(
+            Brush.horizontalGradient(listOf(shade, Color.Transparent), startX = right, endX = right + reach),
+            topLeft = Offset(right, 0f), size = Size(reach, size.height),
+        )
+    }
+}
+
+/** Where the reader's sheets come up while the phone is held half-open like a book: one page wide, and that far off the middle of the window. */
+private class SheetPage(val width: Dp, val offset: Dp)
+
+private val LocalSheetPage = compositionLocalOf<SheetPage?> { null }
 
 /** The unseen view that keeps the window's focus for the reader (see [FocusHolder]). */
 private class PageFocus {
@@ -1176,7 +1261,14 @@ private fun ReaderSheet(
             }
         }
     }
-    ModalBottomSheet(onDismissRequest = onGone, sheetState = state) { content(leave) }
+    val onPage = LocalSheetPage.current
+    ModalBottomSheet(
+        onDismissRequest = onGone,
+        sheetState = state,
+        // Held half-open like a book, on the right-hand page: not across the fold.
+        modifier = if (onPage != null) Modifier.absoluteOffset(x = onPage.offset) else Modifier,
+        sheetMaxWidth = onPage?.width ?: BottomSheetDefaults.SheetMaxWidth,
+    ) { content(leave) }
 }
 
 private val AnyHeight = setOf(SheetValue.Hidden, SheetValue.PartiallyExpanded, SheetValue.Expanded)
@@ -1370,12 +1462,14 @@ private fun ReaderTopBar(
     firstControl: FocusRequester,
     /** Sends the controls away: for a screen reader, which can't tap the page to do it. */
     hideControls: CustomAccessibilityAction,
+    /** The most room the book's name may take, where it mustn't run across a fold (see [BookPosture]); null for all there is. */
+    titleWidth: Dp? = null,
 ) {
     TopAppBar(
         title = {
             // The book and the chapter are one thing to a screen reader: where you are, as a heading.
             Column(
-                Modifier.semantics(mergeDescendants = true) {
+                (if (titleWidth != null) Modifier.widthIn(max = titleWidth) else Modifier).semantics(mergeDescendants = true) {
                     heading()
                     customActions = listOf(hideControls)
                 },
@@ -1632,11 +1726,15 @@ private fun ReaderFooter(
     /** The voice's pace through this book (see [ReaderScreen]); 0 while unknown. */
     listenPace: Float,
     haptics: Haptics,
+    /** The width of one page, while the phone is held half-open like a book: what the line says keeps to the left-hand page. Null for the whole line. */
+    onePage: Dp? = null,
     /** Turning the page, for a screen reader or a switch (see [ReaderScreen]). */
     pageTurns: List<CustomAccessibilityAction>,
     onControls: () -> Unit,
 ) {
     val controller = nav.listenController
+    // (The line's own margin, and a little more, short of the fold.)
+    val keepToPage = if (onePage != null) Modifier.widthIn(max = (onePage - 40.dp).coerceAtLeast(120.dp)) else Modifier
     val listening = nav.listen.active && controller != null
     val motion = MaterialTheme.motionScheme
     val showControls = stringResource(R.string.listen_show_controls)
@@ -1699,6 +1797,7 @@ private fun ReaderFooter(
                     progress = if (nav.chapterProgress >= 0f) nav.chapterProgress else nav.section.toFloat() / (nav.sectionCount - 1).coerceAtLeast(1),
                     colors = page,
                     haptics = haptics,
+                    modifier = keepToPage,
                 )
             } else {
                 // "5 pages left" gives way to "4" quietly: the page is the thing that moves.
@@ -1711,6 +1810,7 @@ private fun ReaderFooter(
                     Text(
                         text, style = MaterialTheme.typography.labelMedium, color = page.secondary, maxLines = 1, overflow = TextOverflow.Ellipsis,
                         autoSize = fitOnOneLine(MaterialTheme.typography.labelMedium),
+                        modifier = keepToPage,
                     )
                 }
             }

@@ -195,6 +195,8 @@ fun EpubReader(
     annotations: List<Annotation>,
     /** The words the voice is to say the listener's way in this book ("Say it this way"). */
     respellings: List<Respelling>,
+    /** The fold, while the phone is held half-open like a book and the fold is the spine between two pages (see [BookPosture]). */
+    spine: IntRect?,
     onCenterTap: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -230,7 +232,7 @@ fun EpubReader(
     // and Readium's pages refuse a locked book by throwing: Jacket would close under the reader.
     if (publication.isRestricted) return ReaderError(stringResource(R.string.reader_error_protected))
     if (publication.readingOrder.isEmpty()) return ReaderError(stringResource(R.string.reader_error_no_pages))
-    EpubPages(book, publication, start, spoken, text, settings, page, nav, haptics, annotations, respellings, onCenterTap)
+    EpubPages(book, publication, start, spoken, text, settings, page, nav, haptics, annotations, respellings, spine, onCenterTap)
 }
 
 /** A book opened: where to start it, its files as read-aloud reads them, and, for a text file, where its paragraphs are in its pages. */
@@ -256,6 +258,7 @@ private fun EpubPages(
     haptics: Haptics,
     annotations: List<Annotation>,
     respellings: List<Respelling>,
+    spine: IntRect?,
     onCenterTap: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -264,8 +267,19 @@ private fun EpubPages(
     val selectionMenu = remember(publication) { SelectionMenu(context) }
     val scope = rememberCoroutineScope()
     val contents = remember(publication) { Contents(publication) }
-    val preferences = epubPreferences(settings, page)
     val scroll = settings.layout == PageLayout.SCROLL
+    // Held half-open like a book, the two pages are laid out about the fold: two of them whatever
+    // the size of the text, and their margins wide enough to keep the words clear of it. (For most
+    // readers that is how the pages are already, and nothing is laid out anew.) Scrolling, there
+    // are no pages to part.
+    val density = LocalDensity.current
+    val windowWidth = LocalWindowInfo.current.containerSize.width
+    val spread = remember(spine, scroll, settings.textScale, settings.margins, windowWidth, density) {
+        spine?.takeIf { !scroll }?.let { fold ->
+            with(density) { BookPosture.spread(windowWidth.toDp().value, fold.width.toDp().value, settings.textScale, settings.margins.readium) }
+        }
+    }
+    val preferences = epubPreferences(settings, page, spread)
     val tap by rememberUpdatedState(onCenterTap)
     val turner = remember { PageTurner(scope) }
     var navigator by remember { mutableStateOf<EpubNavigatorFragment?>(null) }
@@ -361,7 +375,7 @@ private fun EpubPages(
     turner.style = settings.pageTurn
     turner.paper = page.background
     turner.onTurned = { haptics.tick() }
-    val minEdgePx = with(LocalDensity.current) { 80.dp.toPx() }
+    val minEdgePx = with(density) { 80.dp.toPx() }
 
     // Taps: the outer thirds turn pages (not while scrolling), anything else toggles the controls.
     // While the book is read aloud, a tap on the words is taken first (see voiceTap below).

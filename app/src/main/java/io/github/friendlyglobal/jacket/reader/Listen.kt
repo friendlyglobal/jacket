@@ -70,6 +70,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -109,6 +110,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.Morph
@@ -699,13 +701,23 @@ private fun RateButton(listen: ListenState, rate: Float, onRate: (Float) -> Unit
     }
 }
 
+/**
+ * The room the reader's controls have across, where that is less than the window: one page, on a
+ * phone held half-open like a book, whose controls keep off the fold. Unspecified everywhere else.
+ */
+internal val LocalControlsWidth = compositionLocalOf { Dp.Unspecified }
+
+/** How wide a space the player's bar has: the window, or the one page the controls are on. */
+@Composable
+private fun controlsWidth(): Dp =
+    LocalControlsWidth.current.takeIf { it != Dp.Unspecified } ?: with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() }
+
 /** Windows at least this wide fit the chapter steps on the player's bar, beside the sentence skips. */
 private val CHAPTERS_ON_BAR_FROM = 500.dp
 
 /** The two chapter steps fit on the player's bar; on a narrower window they sit above the player. */
 @Composable
-internal fun chaptersFitOnBar(): Boolean =
-    with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() } >= CHAPTERS_ON_BAR_FROM
+internal fun chaptersFitOnBar(): Boolean = controlsWidth() >= CHAPTERS_ON_BAR_FROM
 
 /** The steps to the previous and the next chapter, around the name of the one being read: above the player on a narrow window. */
 @Composable
@@ -738,8 +750,7 @@ private val VOICE_ON_BAR_FROM = 380.dp
 
 /** The voice's icon fits on the player's bar; on a narrower window its name sits above the player. */
 @Composable
-internal fun voiceFitsOnBar(): Boolean =
-    with(LocalDensity.current) { LocalWindowInfo.current.containerSize.width.toDp() } >= VOICE_ON_BAR_FROM
+internal fun voiceFitsOnBar(): Boolean = controlsWidth() >= VOICE_ON_BAR_FROM
 
 /**
  * "Back to the voice": after the listener moved away from the sentence being read, the way back,

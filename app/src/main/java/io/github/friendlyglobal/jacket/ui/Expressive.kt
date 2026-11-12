@@ -517,6 +517,26 @@ fun rememberTabletopFold(watch: Boolean): State<IntRect?> {
     }
 }
 
+/**
+ * The fold's bounds in the window while the phone is held half-open with its fold upright, like a
+ * book; null in any other posture, on other phones, or while not [watch]ed. (Whether that fold is
+ * a spine between two pages is for the reader to say: see `BookPosture`.)
+ */
+@Composable
+fun rememberBookFold(watch: Boolean): State<IntRect?> {
+    val activity = LocalContext.current.findActivity()
+    return produceState<IntRect?>(null, activity, watch) {
+        value = null
+        if (activity == null || !watch) return@produceState
+        WindowInfoTracker.getOrCreate(activity).windowLayoutInfo(activity).collect { layout ->
+            val fold = layout.displayFeatures.firstNotNullOfOrNull { it as? FoldingFeature }
+            value = fold
+                ?.takeIf { it.state == FoldingFeature.State.HALF_OPENED && it.orientation == FoldingFeature.Orientation.VERTICAL }
+                ?.bounds?.let { IntRect(it.left, it.top, it.right, it.bottom) }
+        }
+    }
+}
+
 /** A hinge this far closed is shut (they don't all read exactly zero). */
 private const val SHUT_BELOW_DEGREES = 20f
 
