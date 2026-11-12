@@ -1,0 +1,8 @@
+Jacket 1.1
+• Umblättern mit Tastatur, Blätterhilfe oder Mausrad
+• Fußnoten öffnen sich in einem Fenster
+• Vorlesen mit 0,5× bis 3×, Sleep-Timer in beliebiger Länge, Kapitel überspringen
+• Nach einer Pause setzt das Vorlesen einen Satz früher ein
+• Markierungen und Notizen als Datei speichern
+• Besser mit TalkBack, Tastatur und großer Schrift, bis 300 %
+• Behoben: 100 % am Buchende, keine doppelten Bücher, sicherere Backups, kopiergeschützte Bücher schließen die App nicht mehr

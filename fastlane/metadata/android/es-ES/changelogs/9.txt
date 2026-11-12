@@ -1,0 +1,8 @@
+Jacket 1.1
+• Pasa páginas con teclado, pasapáginas o rueda del ratón
+• Las notas al pie se abren en una ventana
+• Escucha de 0,5× a 3×, con temporizador de cualquier duración y salto de capítulos
+• Tras una pausa, la escucha retoma una frase antes
+• Guarda subrayados y notas en un archivo
+• Mejor con TalkBack, teclado y letra grande, hasta el 300 %
+• Correcciones: 100 % al acabar un libro, sin duplicados, copias más seguras, los libros protegidos ya no cierran la app

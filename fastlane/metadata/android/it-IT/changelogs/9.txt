@@ -1,0 +1,8 @@
+Jacket 1.1
+• Volta pagina con tastiera, telecomando o rotellina del mouse
+• Le note si aprono in una finestra
+• Ascolta da 0,5× a 3×, con timer di qualsiasi durata e salto dei capitoli
+• Dopo una pausa, l'ascolto riprende una frase prima
+• Salva evidenziazioni e note in un file
+• Migliore con TalkBack, tastiera e testo grande, fino al 300%
+• Correzioni: 100% alla fine del libro, niente doppioni, backup più sicuri, i libri protetti non chiudono più l'app

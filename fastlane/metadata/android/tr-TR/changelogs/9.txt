@@ -1,0 +1,8 @@
+Jacket 1.1
+• Sayfaları klavye, sayfa çevirici veya fare tekerleğiyle çevirin
+• Dipnotlar bir pencerede açılır
+• 0,5× ile 3× arasında dinleyin; istediğiniz uzunlukta uyku zamanlayıcısı ve bölüm atlama
+• Bir aradan sonra dinleme bir cümle geriden başlar
+• Vurguları ve notları dosya olarak kaydedin
+• TalkBack, klavye ve büyük yazıyla daha iyi; %300'e kadar
+• Düzeltmeler: kitap sonunda %100, yinelenen kitap yok, daha güvenli yedekler, korumalı kitaplar uygulamayı kapatmıyor

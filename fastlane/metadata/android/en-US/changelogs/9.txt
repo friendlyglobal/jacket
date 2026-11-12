@@ -1,0 +1,8 @@
+Jacket 1.1
+• Turn pages with a keyboard, a page-turner or a mouse wheel
+• Footnotes open in a pop-up
+• Listen at 0.5× to 3×, with a sleep timer of any length and chapter skips
+• After a pause, listening picks up a sentence back
+• Save highlights and notes as a file
+• Works better with TalkBack, keyboards and large text, up to 300%
+• Fixes: 100% at the end of a book, no duplicate books, safer backups, copy-protected books no longer close the app

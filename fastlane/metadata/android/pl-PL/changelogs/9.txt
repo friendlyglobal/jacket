@@ -1,0 +1,8 @@
+Jacket 1.1
+• Przewracaj strony klawiaturą, pilotem lub kółkiem myszy
+• Przypisy otwierają się w okienku
+• Słuchaj od 0,5× do 3×, z wyłącznikiem czasowym na dowolny czas i przeskakiwaniem rozdziałów
+• Po przerwie słuchanie wraca o jedno zdanie
+• Zapisuj zakreślenia i notatki do pliku
+• Lepiej z TalkBack, klawiaturą i dużym tekstem, do 300%
+• Poprawki: 100% na końcu książki, bez duplikatów, bezpieczniejsze kopie, zabezpieczone książki nie zamykają aplikacji
