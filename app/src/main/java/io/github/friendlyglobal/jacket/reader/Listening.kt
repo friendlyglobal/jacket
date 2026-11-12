@@ -20,6 +20,7 @@ import io.github.friendlyglobal.jacket.data.Saying
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.importer.Bitmaps
 import io.github.friendlyglobal.jacket.importer.NoWordsInPdf
+import io.github.friendlyglobal.jacket.importer.PdfLocked
 import io.github.friendlyglobal.jacket.importer.NothingToRead
 import io.github.friendlyglobal.jacket.importer.PdfWords
 import io.github.friendlyglobal.jacket.importer.PdfWordsUnavailable
@@ -301,13 +302,15 @@ class Listening(private val app: Application) {
                 // that has none is passed over from now on (see Library.wordless), and this Play
                 // goes to the book that would have been read had that been known: a headphone
                 // button is not left with nothing to do because the book on top is a scan.
-                instead = if (e is NoWordsInPdf) toResume()?.takeIf { it.id != book.id } else null
+                // So is a PDF locked with a password that nobody has given yet (see Library.pdfPages).
+                instead = if (e is NoWordsInPdf || e is PdfLocked) toResume()?.takeIf { it.id != book.id } else null
                 if (instead == null) {
                     val message = when (e) {
                         is NothingToRead -> app.getString(R.string.reader_error_text)
                         // A PDF that can't be read aloud says which of the two reasons it is.
                         is NoWordsInPdf -> app.getString(R.string.pdf_listen_no_text)
                         is PdfWordsUnavailable -> app.getString(R.string.pdf_listen_unavailable)
+                        is PdfLocked -> app.getString(R.string.pdf_listen_locked)
                         else -> app.getString(R.string.reader_error_open_book, e.message.orEmpty())
                     }
                     Toast.makeText(app, message, Toast.LENGTH_LONG).show()

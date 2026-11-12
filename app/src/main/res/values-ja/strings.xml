@@ -92,7 +92,7 @@
     <string name="library_remove_message">Jacket 内のコピーと読書位置が削除されます。元のファイルはそのまま残ります。</string>
     <string name="library_remove_confirm">削除</string>
     <string name="library_empty_title">折りたたみスマホに本をまとわせよう</string>
-    <string name="library_empty_message">EPUB、PDF、CBZ コミック、テキスト ファイルを追加してください。Jacket は非公開のコピーを保存し、読書中は表紙を外側の画面またはカバー画面のウィジェットに表示します。</string>
+    <string name="library_empty_message">EPUB、PDF、FB2、CBZ コミック、テキスト ファイルを追加してください。Jacket は非公開のコピーを保存し、読書中は表紙を外側の画面またはカバー画面のウィジェットに表示します。</string>
     <string name="onboarding_next">次へ</string>
     <string name="onboarding_skip">スキップ</string>
     <string name="onboarding_private">本はこのスマートフォンの中だけに保存されます。Jacket にアカウントは不要で、インターネットにも接続しません。</string>
@@ -220,7 +220,7 @@
     <string name="reader_error_open_book">この本を開けませんでした。\n%1$s</string>
     <string name="reader_error_no_pages">この本には表示できるページがありません。</string>
     <string name="reader_error_protected">この本はコピー保護（DRM）されているため、Jacket では開けません。</string>
-    <string name="reader_error_pdf">この PDF を開けませんでした。パスワードで保護された PDF にはまだ対応していません。</string>
+    <string name="reader_error_pdf">この PDF を開けませんでした。</string>
     <string name="reader_error_comic">このコミックを開けませんでした。</string>
     <string name="reader_error_text">このファイルは空か、読み込めませんでした。</string>
     <string name="reader_no_app_for_link">このリンクを開けるアプリがありません。</string>
@@ -296,6 +296,18 @@
     <string name="listen_nothing_to_read_comics">読み上げできる本がありません。コミックは読み上げできません。</string>
     <string name="pdf_listen_unavailable">このスマートフォンでは PDF を読み上げできません。Android 15、または最新の Google Play システム アップデートを適用した Android 12〜14 が必要です。</string>
     <string name="pdf_listen_no_text">この PDF には読み上げるテキストがありません。スキャンのように、ページが画像になっています。</string>
+    <string name="pdf_listen_locked">この PDF はロックされています。聞くには、開いてパスワードを入力してください。</string>
+    <string name="pdf_locked_message">この PDF はパスワードでロックされています。</string>
+    <string name="pdf_locked_enter">パスワードを入力</string>
+    <string name="pdf_locked_unsupported">この PDF はパスワードでロックされています。開くには、Android 15、または最新の Google Play システム アップデートを適用した Android 12〜14 が必要です。</string>
+    <string name="pdf_password_title">この PDF はロックされています</string>
+    <string name="pdf_password_label">パスワード</string>
+    <string name="pdf_password_show">パスワードを表示</string>
+    <string name="pdf_password_remember">このスマートフォンに保存する</string>
+    <string name="pdf_password_remember_note">このスマートフォンにだけ保存され、バックアップには含まれません。</string>
+    <string name="pdf_password_wrong">そのパスワードでは開けませんでした。もう一度お試しください。</string>
+    <string name="pdf_password_forgotten">パスワードを削除しました。次に開くときにもう一度お尋ねします。</string>
+    <string name="library_menu_forget_password">パスワードを削除</string>
     <string name="listen_stopped_error">読み上げが停止しました：%1$s</string>
 
     <string name="widget_reading">読書中</string>

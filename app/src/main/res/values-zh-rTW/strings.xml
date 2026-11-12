@@ -92,7 +92,7 @@
     <string name="library_remove_message">Jacket 會刪除自己保存的副本和你的閱讀位置，原始檔案仍會留在原處。</string>
     <string name="library_remove_confirm">移除</string>
     <string name="library_empty_title">讓摺疊手機穿上你的書</string>
-    <string name="library_empty_message">新增 EPUB、PDF、CBZ 漫畫或文字檔。Jacket 會保留一份私人副本，並在你閱讀時將封面顯示在外螢幕或外螢幕小工具上。</string>
+    <string name="library_empty_message">新增 EPUB、PDF、FB2、CBZ 漫畫或文字檔。Jacket 會保留一份私人副本，並在你閱讀時將封面顯示在外螢幕或外螢幕小工具上。</string>
     <string name="onboarding_next">下一步</string>
     <string name="onboarding_skip">略過</string>
     <string name="onboarding_private">你的書只儲存在這支手機上。Jacket 不需要帳號，也從不連線上網。</string>
@@ -220,7 +220,7 @@
     <string name="reader_error_open_book">無法開啟這本書。\n%1$s</string>
     <string name="reader_error_no_pages">這本書沒有可顯示的頁面。</string>
     <string name="reader_error_protected">這本書受版權保護（DRM），Jacket 無法開啟。</string>
-    <string name="reader_error_pdf">無法開啟這個 PDF。目前尚不支援受密碼保護的 PDF。</string>
+    <string name="reader_error_pdf">無法開啟這個 PDF。</string>
     <string name="reader_error_comic">無法開啟這本漫畫。</string>
     <string name="reader_error_text">這個檔案是空的或無法讀取。</string>
     <string name="reader_no_app_for_link">沒有可開啟這個連結的應用程式。</string>
@@ -296,6 +296,18 @@
     <string name="listen_nothing_to_read_comics">這裡沒有可以朗讀的書。Jacket 無法朗讀漫畫。</string>
     <string name="pdf_listen_unavailable">這支手機無法朗讀 PDF。需要 Android 15，或已安裝最新 Google Play 系統更新的 Android 12 至 14。</string>
     <string name="pdf_listen_no_text">這個 PDF 沒有可以朗讀的文字。它的頁面是圖片，就像掃描檔。</string>
+    <string name="pdf_listen_locked">這個 PDF 已上鎖。請先開啟並輸入密碼，再開始聆聽。</string>
+    <string name="pdf_locked_message">這個 PDF 有密碼保護。</string>
+    <string name="pdf_locked_enter">輸入密碼</string>
+    <string name="pdf_locked_unsupported">這個 PDF 有密碼保護。開啟它需要 Android 15，或已安裝最新 Google Play 系統更新的 Android 12 至 14。</string>
+    <string name="pdf_password_title">這個 PDF 已上鎖</string>
+    <string name="pdf_password_label">密碼</string>
+    <string name="pdf_password_show">顯示密碼</string>
+    <string name="pdf_password_remember">在這支手機上記住</string>
+    <string name="pdf_password_remember_note">只存在這支手機上，不會進入任何備份。</string>
+    <string name="pdf_password_wrong">這個密碼打不開它。請再試一次。</string>
+    <string name="pdf_password_forgotten">已忘記密碼。下次開啟時 Jacket 會再詢問。</string>
+    <string name="library_menu_forget_password">忘記密碼</string>
     <string name="listen_stopped_error">朗讀已停止：%1$s</string>
 
     <string name="widget_reading">閱讀中</string>

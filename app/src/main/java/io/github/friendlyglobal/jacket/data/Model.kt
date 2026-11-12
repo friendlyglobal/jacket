@@ -12,6 +12,16 @@ enum class BookFormat(val extension: String, @StringRes val label: Int) {
     PDF("pdf", R.string.format_pdf),
     CBZ("cbz", R.string.format_comic),
     TXT("txt", R.string.format_text),
+
+    /** An FB2 book, zipped or not: kept as it came, and read through pages made of it (see Fb2Book.kt). */
+    FB2("fb2", R.string.format_fb2),
+    ;
+
+    /** Laid out in pages of words by Readium: an EPUB, and the pages made of a text file or an FB2 book. */
+    val isWords: Boolean get() = this == EPUB || this == TXT || this == FB2
+
+    /** Its place is one of Readium's alone, the same on every device: an EPUB's, and an FB2 book's (a text file's is its paragraph as well). */
+    val isEpubLike: Boolean get() = this == EPUB || this == FB2
 }
 
 /** How the cover-screen widget lays the book out. */
@@ -35,7 +45,7 @@ data class Book(
     val sourceName: String,
     val sizeBytes: Long,
     val addedAt: Long,
-    /** Readium position for EPUB, page index for PDF/CBZ, paragraph index for TXT (kept beside [locator]: see Library.updateLocator). */
+    /** Readium position for EPUB and FB2, page index for PDF/CBZ, paragraph index for TXT (kept beside [locator]: see Library.updateLocator). */
     val position: Int = 0,
     /** How far into that page or paragraph the place is (0..1): PDF/CBZ and TXT. (Jacket 0.2 kept a chapter's scroll fraction here for EPUB.) */
     val positionOffset: Float = 0f,
@@ -43,7 +53,7 @@ data class Book(
     val sectionCount: Int = 0,
     val progress: Float = 0f,
     val lastOpenedAt: Long = 0L,
-    /** Exact reading location as a Readium locator (JSON), for EPUB, and for TXT, which is read through pages made of it. */
+    /** Exact reading location as a Readium locator (JSON), for EPUB, and for TXT and FB2, which are read through pages made of them. */
     val locator: String? = null,
     /** When the book was marked finished; 0 while unread or in progress. */
     val finishedAt: Long = 0L,

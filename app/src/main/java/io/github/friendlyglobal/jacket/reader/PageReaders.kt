@@ -40,6 +40,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -88,7 +89,9 @@ import io.github.friendlyglobal.jacket.ui.motionRemoved
 import io.github.friendlyglobal.jacket.voice.Respelling
 import io.github.friendlyglobal.jacket.importer.Comic
 import io.github.friendlyglobal.jacket.importer.DocumentCloser
+import io.github.friendlyglobal.jacket.importer.Pdf
 import io.github.friendlyglobal.jacket.importer.PdfDocument
+import io.github.friendlyglobal.jacket.importer.PdfLocked
 import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.PageColors
@@ -119,6 +122,8 @@ import kotlin.math.ceil
 @Composable
 private fun <T : Closeable> rememberDocument(key: Any, open: () -> T): Result<T>? {
     val doc by produceState<Result<T>?>(null, key) {
+        // (Opened anew for another key: what the one before came to says nothing of this one.)
+        value = null
         val opened = AtomicReference<T?>()
         try {
             value = withContext(Dispatchers.IO) { runCatching { open().also(opened::set) } }
@@ -275,10 +280,17 @@ fun PdfReader(
     onCenterTap: () -> Unit,
 ) {
     val library = LocalContext.current.library
-    val result = rememberDocument(book.id) { PdfDocument(library.fileOf(book)) }
+    // A PDF locked with a password is tried with the one Jacket has for it, then with what the
+    // reader types (see PdfLock.kt); any other PDF opens as it always did.
+    var typed by remember(book.id) { mutableStateOf<PdfAttempt?>(null) }
+    val result = rememberDocument(book.id to typed) { library.openPdf(book, typed) }
+    val failure = result?.exceptionOrNull()
     when {
         result == null -> ReaderLoading()
-        result.isFailure -> ReaderError(stringResource(R.string.reader_error_pdf))
+        // Locked: the password is asked for, where this phone's Android can open a locked PDF at all.
+        failure is PdfLocked ->
+            if (Pdf.canUnlock) LockedPdf(failure.wrong, haptics) { typed = it } else ReaderError(stringResource(R.string.pdf_locked_unsupported))
+        failure != null -> ReaderError(stringResource(R.string.reader_error_pdf))
         else -> {
             val pdf = result.getOrThrow()
             // Read aloud by the app's voice, like any other book (see PdfAloud): the pages turn
@@ -506,7 +518,12 @@ private fun PageImage(
                     // The sentence being read aloud, marked where it is drawn (only what is drawn changes as it is read).
                     .drawWithContent {
                         drawContent()
-                        aloud?.run { layout?.widthOf(index)?.let { width -> drawMarks(index, width, paper) } }
+                        aloud?.run {
+                            layout?.widthOf(index)?.let { width ->
+                                drawMarks(index, width, paper)
+                                drawFound(index, width)
+                            }
+                        }
                     },
                 contentScale = ContentScale.Fit,
             )
@@ -549,6 +566,19 @@ private fun FollowVoice(listState: LazyListState, aloud: PdfAloud, nav: ReaderNa
             scope.launch {
                 val size = listState.layoutInfo.visibleItemsInfo.maxOfOrNull { it.size } ?: 0
                 listState.animateScrollToItem(place.page, (place.within * size).toInt())
+            }
+        }
+        // To a line of a page (a search result), set where the line being read aloud is kept:
+        // clear of the controls, with what leads up to it in sight.
+        aloud.show = { place ->
+            scope.launch {
+                val info = listState.layoutInfo
+                val size = info.visibleItemsInfo.firstOrNull { it.index == place.page }?.size ?: info.visibleItemsInfo.maxOfOrNull { it.size } ?: 0
+                val above = (info.viewportSize.height / zoomed() * LINE_AT).toInt()
+                listState.scrollToItem(place.page, (place.within * size).toInt() - above)
+                // (A page not yet laid out is another height than the ones in view: once it is, the line is put right.)
+                val laid = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == place.page }?.size ?: return@launch
+                if (laid != size) listState.scrollToItem(place.page, (place.within * laid).toInt() - above)
             }
         }
         aloud.inView = { place ->

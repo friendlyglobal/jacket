@@ -92,7 +92,7 @@
     <string name="library_remove_message">Jacket menghapus salinannya sendiri dan posisi baca Anda. File aslinya tetap di tempatnya.</string>
     <string name="library_remove_confirm">Hapus</string>
     <string name="library_empty_title">Biarkan ponsel lipat Anda memakai buku Anda</string>
-    <string name="library_empty_message">Tambahkan file EPUB, PDF, komik CBZ, atau teks. Jacket menyimpan salinan pribadi dan menampilkan sampulnya di layar luar, atau di widget layar depan, selagi Anda membaca.</string>
+    <string name="library_empty_message">Tambahkan file EPUB, PDF, FB2, komik CBZ, atau teks. Jacket menyimpan salinan pribadi dan menampilkan sampulnya di layar luar, atau di widget layar depan, selagi Anda membaca.</string>
     <string name="onboarding_next">Berikutnya</string>
     <string name="onboarding_skip">Lewati</string>
     <string name="onboarding_private">Buku Anda tetap di ponsel ini. Jacket tidak memerlukan akun dan tidak pernah terhubung ke internet.</string>
@@ -220,7 +220,7 @@
     <string name="reader_error_open_book">Tidak dapat membuka buku ini.\n%1$s</string>
     <string name="reader_error_no_pages">Buku ini tidak memiliki halaman untuk ditampilkan.</string>
     <string name="reader_error_protected">Buku ini dilindungi dari penyalinan (DRM), jadi Jacket tidak dapat membukanya.</string>
-    <string name="reader_error_pdf">PDF ini tidak dapat dibuka. PDF yang dilindungi sandi belum didukung.</string>
+    <string name="reader_error_pdf">PDF ini tidak dapat dibuka.</string>
     <string name="reader_error_comic">Komik ini tidak dapat dibuka.</string>
     <string name="reader_error_text">File ini kosong atau tidak dapat dibaca.</string>
     <string name="reader_no_app_for_link">Tidak ada aplikasi yang dapat membuka link ini.</string>
@@ -296,6 +296,18 @@
     <string name="listen_nothing_to_read_comics">Tidak ada buku di sini yang bisa dibacakan. Jacket tidak bisa membacakan komik.</string>
     <string name="pdf_listen_unavailable">Ponsel ini tidak bisa membacakan PDF. Untuk itu perlu Android 15, atau Android 12 sampai 14 dengan update sistem Google Play terbaru.</string>
     <string name="pdf_listen_no_text">PDF ini tidak punya teks untuk dibacakan. Halamannya berupa gambar, seperti hasil pindaian.</string>
+    <string name="pdf_listen_locked">PDF ini terkunci. Buka dan masukkan sandinya untuk mendengarkan.</string>
+    <string name="pdf_locked_message">PDF ini dikunci dengan sandi.</string>
+    <string name="pdf_locked_enter">Masukkan sandi</string>
+    <string name="pdf_locked_unsupported">PDF ini dikunci dengan sandi. Untuk membukanya perlu Android 15, atau Android 12 sampai 14 dengan update sistem Google Play terbaru.</string>
+    <string name="pdf_password_title">PDF ini terkunci</string>
+    <string name="pdf_password_label">Sandi</string>
+    <string name="pdf_password_show">Tampilkan sandi</string>
+    <string name="pdf_password_remember">Ingat di ponsel ini</string>
+    <string name="pdf_password_remember_note">Hanya disimpan di ponsel ini, tidak pernah ikut dalam cadangan.</string>
+    <string name="pdf_password_wrong">Sandi itu tidak membukanya. Coba lagi.</string>
+    <string name="pdf_password_forgotten">Sandi dilupakan. Jacket akan memintanya lagi lain kali.</string>
+    <string name="library_menu_forget_password">Lupakan sandi</string>
     <string name="listen_stopped_error">Pembacaan berhenti: %1$s</string>
 
     <string name="widget_reading">Sedang dibaca</string>

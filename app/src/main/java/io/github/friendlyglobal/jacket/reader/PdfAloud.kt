@@ -37,6 +37,7 @@ import io.github.friendlyglobal.jacket.importer.DocumentCloser
 import io.github.friendlyglobal.jacket.importer.NoWordsInPdf
 import io.github.friendlyglobal.jacket.importer.PdfChapter
 import io.github.friendlyglobal.jacket.importer.PdfLayout
+import io.github.friendlyglobal.jacket.importer.PdfLocked
 import io.github.friendlyglobal.jacket.importer.PdfPlace
 import io.github.friendlyglobal.jacket.importer.PdfSpot
 import io.github.friendlyglobal.jacket.importer.PdfWords
@@ -102,6 +103,12 @@ internal class PdfAloud(val listen: ListenState) {
     /** The pages answer for themselves: what is at the top of the screen, whether a place is in view, and where a line is in the window. */
     var top: () -> PdfPlace? = { null }
     var goTo: (PdfPlace) -> Unit = {}
+
+    /** Takes the pages to a line (a search result), set a little way down the screen. */
+    var show: (PdfPlace) -> Unit = {}
+
+    /** The search result that was gone to, as it is marked on the pages: a box for each line it is on. */
+    var found: List<MarkedLine> by mutableStateOf(emptyList())
     var inView: (PdfPlace) -> Boolean = { false }
     var lineInWindow: (MarkedLine) -> Rect? = { null }
 
@@ -153,14 +160,30 @@ internal class PdfAloud(val listen: ListenState) {
         }
     }
 
+    /** Draws the search result that was gone to, where it is on [page] (drawn [width] units wide): a wash of the mark's colour, as on any other book's page. */
+    fun DrawScope.drawFound(page: Int, width: Float) {
+        if (width <= 0f) return
+        val scale = size.width / width
+        for (line in found) {
+            if (line.page != page) continue
+            val left = (line.left - WORD_ROOM) * scale
+            val top = (line.top - LINE_ROOM) * scale
+            drawRect(
+                tint, Offset(left, top), Size((line.right + WORD_ROOM) * scale - left, (line.bottom - line.top + 2 * LINE_ROOM) * scale),
+                alpha = FOUND, blendMode = BlendMode.Multiply,
+            )
+        }
+    }
+
     private companion object {
         /** How much room the mark takes around a line and its words, in the page's units. */
         const val LINE_ROOM = 1.5f
         const val WORD_ROOM = 1f
 
-        /** The wash's strength, and the veil's. */
+        /** The wash's strength, and the veil's; and the wash over a search result. */
         const val WASH = 0.3f
         const val VEIL = 0.5f
+        const val FOUND = 0.4f
     }
 }
 
@@ -269,6 +292,7 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
         val message = when (failure) {
             is PdfWordsUnavailable -> resources.getString(R.string.pdf_listen_unavailable)
             is NoWordsInPdf -> resources.getString(R.string.pdf_listen_no_text)
+            is PdfLocked -> resources.getString(R.string.pdf_listen_locked)
             else -> resources.getString(R.string.reader_error_open_book, failure.message.orEmpty())
         }
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
@@ -474,8 +498,36 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
     // The sentence the voice is on, found on the PDF's pages: the PDF reader is asked where
     // its lines and its words are drawn. (A second opening of the file, for its words alone: the
     // one that draws the pages is busy drawing them.)
-    val words = remember(book.id) { PdfWordsSource(library.fileOf(book)) }
+    val words = remember(book.id) { PdfWordsSource(library.fileOf(book)) { library.passwords.of(book.id) } }
     DisposableEffect(words) { onDispose { words.close() } }
+
+    // Search: the PDF's words are looked through as they are read aloud, and a result is gone to
+    // and marked where it is drawn (see PdfSearch.kt).
+    val search = remember(open, layout, words) {
+        PdfSearch(
+            layout = layout,
+            paragraphs = { file -> open.pdfParagraphs(file) },
+            pageName = { page -> resources.getString(R.string.reader_page_number, page + 1) },
+            scope = scope,
+            go = go@{ match ->
+                val place = layout.placeOf(match.paragraph, match.from) ?: return@go
+                // A result on the screen already is only marked. Any other is gone to, and the
+                // way back to where the reader was is on offer for a while, as after any jump.
+                if (aloud.inView(place)) return@go
+                val from = aloud.top() ?: PdfPlace(nav.section, 0f)
+                nav.cameFrom = Origin((layout.progressOf(from) * 100).toInt().coerceIn(0, 100), page = from.page + 1) { aloud.goTo(from) }
+                nav.movedAt = SystemClock.uptimeMillis()
+                aloud.show(place)
+            },
+            mark = { match, text ->
+                aloud.found = if (match == null) emptyList() else words.marked(layout, PdfSentence(match.paragraph, match.from, match.to), text).lines
+            },
+        )
+    }
+    DisposableEffect(search) {
+        nav.search = search
+        onDispose { if (nav.search === search) nav.search = null }
+    }
     LaunchedEffect(voice, words) {
         snapshotFlow { voice.pdfSentence }.collectLatest { sentence ->
             // (When the voice stops, what was marked stays to fade: see below.)
@@ -513,10 +565,11 @@ private const val HERE_MS = 1_800L
 private const val JOIN_POLL_MS = 50L
 
 /**
- * The PDF's file, opened for its words alone: asked where the sentence being read is drawn. One
- * thing at a time, and off the main thread.
+ * The PDF's file, opened for its words alone (with its [password], if it is locked with one):
+ * asked where the sentence being read, or a search result, is drawn. One thing at a time, and off
+ * the main thread.
  */
-private class PdfWordsSource(private val file: File) {
+private class PdfWordsSource(private val file: File, private val password: () -> String?) {
     private val one = Dispatchers.IO.limitedParallelism(1)
     private var pdf: PdfWordsFile? = null
     private var closed = false
@@ -534,7 +587,7 @@ private class PdfWordsSource(private val file: File) {
         val asked = (pieces + parts.filterNotNull()).filter { it.from >= 0 }.groupBy { it.page }
         val boxes = HashMap<Pair<Int, IntRange>, Pair<Float, Float>>()
         if (!closed && asked.isNotEmpty()) {
-            val pdf = pdf ?: runCatching { PdfWordsFile(file) }.getOrNull()?.also { pdf = it }
+            val pdf = pdf ?: runCatching { PdfWordsFile(file, password()) }.getOrNull()?.also { pdf = it }
             if (pdf != null) {
                 for ((page, marks) in asked) {
                     val ranges = marks.map { it.from until it.to }.distinct()

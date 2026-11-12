@@ -52,6 +52,41 @@
                 <data android:mimeType="application/pdf" />
                 <data android:mimeType="application/vnd.comicbook+zip" />
                 <data android:mimeType="application/x-cbz" />
+                <data android:mimeType="application/x-fictionbook+xml" />
+                <data android:mimeType="application/x-fictionbook" />
+                <data android:mimeType="application/x-zip-compressed-fb2" />
+            </intent-filter>
+
+            <!-- An FB2 book held by an app that doesn't know what it is (most don't: to them it is
+                 XML, a zip, or nothing in particular). It is told by the end of its name, so that
+                 Jacket is offered for it and not for every other file of those kinds. Android 12
+                 and later compare the name's end itself (pathSuffix); before that there are only
+                 patterns, which stop at the first full stop they meet, so one for each number of
+                 full stops a name is likely to have. A link that doesn't carry the file's name
+                 can't be told this way: those files are added with the + button. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" />
+                <data android:host="*" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/x-zip-compressed" />
+                <data android:mimeType="text/xml" />
+                <data android:mimeType="application/xml" />
+                <data android:pathSuffix=".fb2" tools:targetApi="s" />
+                <data android:pathSuffix=".fb2.zip" tools:targetApi="s" />
+                <data android:pathSuffix=".fbz" tools:targetApi="s" />
+                <data android:pathPattern=".*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.fb2" />
+                <data android:pathPattern=".*\\.fb2\\.zip" />
+                <data android:pathPattern=".*\\..*\\.fb2\\.zip" />
+                <data android:pathPattern=".*\\..*\\..*\\.fb2\\.zip" />
+                <data android:pathPattern=".*\\.fbz" />
+                <data android:pathPattern=".*\\..*\\.fbz" />
             </intent-filter>
 
             <!-- "Share to Jacket". -->
@@ -63,6 +98,9 @@
                 <data android:mimeType="application/pdf" />
                 <data android:mimeType="application/vnd.comicbook+zip" />
                 <data android:mimeType="application/x-cbz" />
+                <data android:mimeType="application/x-fictionbook+xml" />
+                <data android:mimeType="application/x-fictionbook" />
+                <data android:mimeType="application/x-zip-compressed-fb2" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>

@@ -100,7 +100,7 @@
     <string name="library_remove_message">Jacket usunie swoją kopię i twoją pozycję czytania. Oryginalny plik zostanie tam, gdzie był.</string>
     <string name="library_remove_confirm">Usuń</string>
     <string name="library_empty_title">Ubierz swój składany telefon w książkę</string>
-    <string name="library_empty_message">Dodaj plik EPUB, PDF, komiks CBZ lub plik tekstowy. Jacket przechowuje prywatną kopię i podczas czytania pokazuje okładkę na ekranie zewnętrznym albo w widżecie ekranu zewnętrznego.</string>
+    <string name="library_empty_message">Dodaj plik EPUB, PDF, FB2, komiks CBZ lub plik tekstowy. Jacket przechowuje prywatną kopię i podczas czytania pokazuje okładkę na ekranie zewnętrznym albo w widżecie ekranu zewnętrznego.</string>
     <string name="onboarding_next">Dalej</string>
     <string name="onboarding_skip">Pomiń</string>
     <string name="onboarding_private">Twoje książki zostają na tym telefonie. Jacket nie wymaga konta i nigdy nie łączy się z internetem.</string>
@@ -243,7 +243,7 @@
     <string name="reader_error_open_book">Nie udało się otworzyć tej książki.\n%1$s</string>
     <string name="reader_error_no_pages">Ta książka nie ma stron do wyświetlenia.</string>
     <string name="reader_error_protected">Ta książka jest zabezpieczona przed kopiowaniem (DRM), więc Jacket nie może jej otworzyć.</string>
-    <string name="reader_error_pdf">Nie udało się otworzyć tego pliku PDF. Pliki PDF chronione hasłem nie są jeszcze obsługiwane.</string>
+    <string name="reader_error_pdf">Nie udało się otworzyć tego pliku PDF.</string>
     <string name="reader_error_comic">Nie udało się otworzyć tego komiksu.</string>
     <string name="reader_error_text">Ten plik jest pusty lub nie udało się go odczytać.</string>
     <string name="reader_no_app_for_link">Żadna aplikacja nie może otworzyć tego linku.</string>
@@ -325,6 +325,18 @@
     <string name="listen_nothing_to_read_comics">Nie ma tu książki, którą można przeczytać na głos. Jacket nie czyta na głos komiksów.</string>
     <string name="pdf_listen_unavailable">Ten telefon nie potrafi czytać plików PDF na głos. Potrzebny jest Android 15 albo Android od 12 do 14 z najnowszą aktualizacją systemową Google Play.</string>
     <string name="pdf_listen_no_text">Ten PDF nie zawiera tekstu do przeczytania na głos. Jego strony to obrazy, jak w skanie.</string>
+    <string name="pdf_listen_locked">Ten PDF jest zablokowany. Otwórz go i wpisz hasło, żeby go posłuchać.</string>
+    <string name="pdf_locked_message">Ten PDF jest zablokowany hasłem.</string>
+    <string name="pdf_locked_enter">Wpisz hasło</string>
+    <string name="pdf_locked_unsupported">Ten PDF jest zablokowany hasłem. Do jego otwarcia potrzebny jest Android 15 albo Android od 12 do 14 z najnowszą aktualizacją systemową Google Play.</string>
+    <string name="pdf_password_title">Ten PDF jest zablokowany</string>
+    <string name="pdf_password_label">Hasło</string>
+    <string name="pdf_password_show">Pokaż hasło</string>
+    <string name="pdf_password_remember">Zapamiętaj na tym telefonie</string>
+    <string name="pdf_password_remember_note">Zostaje tylko na tym telefonie, nigdy w kopii zapasowej.</string>
+    <string name="pdf_password_wrong">To hasło go nie otworzyło. Spróbuj ponownie.</string>
+    <string name="pdf_password_forgotten">Hasło zapomniane. Następnym razem Jacket o nie zapyta.</string>
+    <string name="library_menu_forget_password">Zapomnij hasło</string>
     <string name="listen_stopped_error">Czytanie na głos zatrzymane: %1$s</string>
 
     <string name="widget_reading">Czytam</string>

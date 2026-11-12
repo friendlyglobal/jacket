@@ -25,6 +25,8 @@ class BookMeta(
     val sections: Int,
     /** The language the book is in, when the file says (EPUB) or it can be told from the text. */
     val language: String? = null,
+    /** False for a file that has nothing in it to read (an FB2 book with no words). */
+    val hasWords: Boolean = true,
 )
 
 /** What tells one file from any other: how many bytes it has, and their SHA-256 (as hex). */
@@ -33,18 +35,37 @@ data class FileContent(val size: Long, val sha256: String)
 /** The file being added is one the library already has: [book] was made from the very same bytes. */
 class AlreadyInLibrary(val book: Book) : Exception("Already in the library")
 
-/** The text file being added has nothing in it to read. */
+/** The file being added (a text file, an FB2 book) has nothing in it to read. */
 class NothingToRead(name: String) : Exception("Nothing to read in $name")
 
 object BookImporter {
-    /** Offered to the system file picker. Generic types are included because many providers report EPUB/CBZ as zip or octet-stream. */
+    /** What apps call an FB2 book when they call it anything of its own, zipped or not. */
+    val FB2_MIME_TYPES = setOf(
+        "application/x-fictionbook+xml",
+        "application/x-fictionbook",
+        "application/fb2",
+        "application/fb2+xml",
+        "text/fb2+xml",
+        "application/x-zip-compressed-fb2",
+        "application/fb2+zip",
+    )
+
+    /**
+     * Offered to the system file picker. Generic types are included because many providers report
+     * EPUB/CBZ as zip or octet-stream, and an FB2 book as XML, as a zip, or as nothing in particular.
+     */
     val MIME_TYPES = arrayOf(
         "application/epub+zip",
         "application/pdf",
         "application/vnd.comicbook+zip",
         "application/x-cbz",
+        "application/x-fictionbook+xml",
+        "application/x-fictionbook",
+        "application/x-zip-compressed-fb2",
         "application/zip",
         "text/plain",
+        "text/xml",
+        "application/xml",
         "application/octet-stream",
     )
 
@@ -112,6 +133,7 @@ object BookImporter {
                 BookFormat.PDF -> Pdf.readMeta(file)
                 BookFormat.CBZ -> Comic.readMeta(file)
                 BookFormat.TXT -> BookMeta(null, null, null, 0)
+                BookFormat.FB2 -> Fb2Meta.read(file)
             }
         }.getOrNull()
         val cover = meta?.cover ?: TitleCard.render(book.title, book.author)
@@ -158,6 +180,8 @@ object BookImporter {
                 BookFormat.PDF -> Pdf.readMeta(stored)
                 BookFormat.CBZ -> Comic.readMeta(stored)
                 BookFormat.TXT -> readTextMeta(stored)
+                // (Throws for a file that isn't the FB2 book its name says, or that has no words in it.)
+                BookFormat.FB2 -> Fb2Meta.read(stored).also { if (!it.hasWords) throw NothingToRead(name) }
             }
             val title = meta.title?.trim()?.takeIf { it.isNotEmpty() } ?: prettifyFileName(context, name)
             val author = meta.author?.trim().orEmpty()
@@ -235,6 +259,8 @@ object BookImporter {
     private const val START_BYTES = 64_000
 
     private fun detectFormat(name: String, mime: String?, file: File): BookFormat? {
+        // (Before the rest: "book.fb2.zip" ends as a zip does.)
+        if (Fb2.isNamed(name)) return BookFormat.FB2
         when (name.substringAfterLast('.', "").lowercase()) {
             "epub" -> return BookFormat.EPUB
             "pdf" -> return BookFormat.PDF
@@ -245,16 +271,20 @@ object BookImporter {
             "application/epub+zip" -> return BookFormat.EPUB
             "application/pdf" -> return BookFormat.PDF
             "application/vnd.comicbook+zip", "application/x-cbz" -> return BookFormat.CBZ
+            in FB2_MIME_TYPES -> return BookFormat.FB2
         }
-        if (mime?.startsWith("text/") == true) return BookFormat.TXT
-        // Sniff the content as a last resort.
+        // Sniff the content as a last resort. (An FB2 book handed over as plain XML, or as text, is one all the same.)
         val head = ByteArray(4).also { b -> file.inputStream().use { it.read(b) } }
+        val zipped = head[0] == 'P'.code.toByte() && head[1] == 'K'.code.toByte()
+        if (!zipped && Fb2.looksLike(file)) return BookFormat.FB2
+        if (mime?.startsWith("text/") == true) return BookFormat.TXT
         if (head.decodeToString().startsWith("%PDF")) return BookFormat.PDF
-        if (head[0] == 'P'.code.toByte() && head[1] == 'K'.code.toByte()) {
+        if (zipped) {
             return runCatching {
                 ZipFile(file).use { zip ->
                     when {
                         zip.getEntry("META-INF/container.xml") != null -> BookFormat.EPUB
+                        zip.entries().asSequence().take(64).any { it.name.endsWith(".fb2", ignoreCase = true) } -> BookFormat.FB2
                         Comic.pageNames(zip).isNotEmpty() -> BookFormat.CBZ
                         else -> null
                     }
@@ -265,7 +295,7 @@ object BookImporter {
     }
 
     private fun prettifyFileName(context: Context, name: String) =
-        name.substringBeforeLast('.').replace('_', ' ').replace(Regex("\\s+"), " ").trim()
+        (if (Fb2.isNamed(name)) Fb2.bareName(name) else name.substringBeforeLast('.')).replace('_', ' ').replace(Regex("\\s+"), " ").trim()
             .ifEmpty { context.getString(R.string.book_untitled) }
 
     private fun seedFrom(cover: Bitmap): Int? {

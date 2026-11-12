@@ -9,9 +9,13 @@ import androidx.core.util.AtomicFile
 import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.importer.AlreadyInLibrary
 import io.github.friendlyglobal.jacket.importer.BookImporter
+import io.github.friendlyglobal.jacket.importer.Fb2
+import io.github.friendlyglobal.jacket.importer.Fb2Book
+import io.github.friendlyglobal.jacket.importer.Fb2Pages
 import io.github.friendlyglobal.jacket.importer.FileContent
 import io.github.friendlyglobal.jacket.importer.NoWordsInPdf
 import io.github.friendlyglobal.jacket.importer.NothingToRead
+import io.github.friendlyglobal.jacket.importer.PdfLocked
 import io.github.friendlyglobal.jacket.importer.PdfPages
 import io.github.friendlyglobal.jacket.importer.PdfSpokenBook
 import io.github.friendlyglobal.jacket.importer.PdfWords
@@ -127,6 +131,10 @@ class Library(private val context: Context) : LibraryOrganizer {
     private val textPagesDir = File(context.noBackupFilesDir, "text-books")
     private val textPagesLock = Mutex()
 
+    /** The pages made of FB2 books (see Fb2Book.kt): like a text book's, made again from the file whenever they are missing. */
+    private val fb2PagesDir = File(context.noBackupFilesDir, "fb2-books")
+    private val fb2PagesLock = Mutex()
+
     /** The pages PDFs are read aloud from (see PdfWords.kt): made from the PDFs, and made again whenever they are missing. */
     private val pdfPagesDir = File(context.noBackupFilesDir, "pdf-books")
     private val pdfPagesLock = Mutex()
@@ -139,8 +147,14 @@ class Library(private val context: Context) : LibraryOrganizer {
     private val _wordless = MutableStateFlow<Set<String>>(emptySet())
     val wordless: StateFlow<Set<String>> = _wordless.asStateFlow()
 
-    /** The books a Play can't read: their file isn't on this phone, or they are PDFs with no words. */
-    val unreadable: Set<String> get() = _missing.value + _wordless.value
+    /**
+     * The passwords of PDFs locked with one: held while Jacket runs, and kept on this phone only
+     * where the reader asked (see [PdfPasswords]). No part of the library, a backup or catch-up.
+     */
+    internal val passwords = PdfPasswords(File(context.noBackupFilesDir, "pdf-passwords.json"), KeystoreSeal)
+
+    /** The books a Play can't read: their file isn't on this phone, they are PDFs with no words, or locked PDFs nobody has opened yet. */
+    val unreadable: Set<String> get() = _missing.value + _wordless.value + passwords.waiting.value
 
     private val _state = MutableStateFlow(readState())
     val state: StateFlow<LibraryState> = _state.asStateFlow()
@@ -189,9 +203,21 @@ class Library(private val context: Context) : LibraryOrganizer {
             }
         }
         scope.launch(disk) {
+            fb2PagesLock.withLock {
+                val kept = _state.value.books.mapTo(HashSet()) { fb2PagesOf(it.id).name }
+                fb2PagesDir.listFiles()?.filter { it.name !in kept }?.forEach { it.delete() }
+            }
+        }
+        scope.launch(disk) {
             pdfPagesLock.withLock {
+                passwords.load()
                 val kept = _state.value.books.mapTo(HashSet()) { pdfPagesOf(it.id).name }
                 pdfPagesDir.listFiles()?.filter { it.name !in kept }?.forEach { it.delete() }
+                // The words of a locked PDF are kept only while its password is remembered: one
+                // opened with a password that wasn't to be kept leaves nothing behind it.
+                val remembered = passwords.remembered.value
+                _state.value.books.filter { it.format == BookFormat.PDF && it.id !in remembered }.map { pdfPagesOf(it.id) }
+                    .filter(PdfSpokenBook::locked).forEach { it.delete() }
                 val scans = _state.value.books.filter { it.format == BookFormat.PDF && PdfSpokenBook.wordless(pdfPagesOf(it.id)) }.map { it.id }
                 _wordless.update { it + scans }
             }
@@ -250,6 +276,38 @@ class Library(private val context: Context) : LibraryOrganizer {
         }
     }
 
+    private fun fb2PagesOf(id: String) = File(fb2PagesDir, "$id.epub")
+
+    /**
+     * The pages of [book], an FB2 book: made now if they aren't there, or were made by an older
+     * Jacket or from another file (it came back after a restore). The file itself is never
+     * touched. Throws if it can't be read as an FB2 book.
+     */
+    internal suspend fun fb2Pages(book: Book): File = withContext(Dispatchers.IO) {
+        fb2PagesLock.withLock {
+            val source = fileOf(book)
+            val pages = fb2PagesOf(book.id)
+            if (!Fb2Pages.isCurrent(pages, source)) {
+                fb2PagesDir.mkdirs()
+                // Whole or not at all: pages cut short would open as a damaged book.
+                val partial = File(fb2PagesDir, "${pages.name}.part")
+                try {
+                    // As it is now: the title may have been put right since the book was added.
+                    val now = _state.value.find(book.id) ?: book
+                    Fb2Pages.make(source, partial.outputStream().buffered()) { read ->
+                        // In the language the listener chose, or the file names, or its words are in.
+                        val language = now.language ?: read.language ?: runCatching { guessLanguage(read.sample) }.getOrNull()
+                        Fb2Book.About(now.id, now.title, now.author, language)
+                    }
+                    check(partial.renameTo(pages) || run { pages.delete(); partial.renameTo(pages) }) { "Couldn't store the pages of ${book.sourceName}" }
+                } finally {
+                    partial.delete()
+                }
+            }
+            pages
+        }
+    }
+
     private fun pdfPagesOf(id: String) = File(pdfPagesDir, "$id.epub")
 
     /**
@@ -258,12 +316,18 @@ class Library(private val context: Context) : LibraryOrganizer {
      * Jacket or from another file. The PDF itself is never touched. Throws [PdfWordsUnavailable]
      * on a phone whose Android can't get at a PDF's words, [NoWordsInPdf] for a PDF that has
      * none (a scan), and whatever reading the file throws.
+     *
+     * A PDF locked with a password is read with the password the reader gave (see [passwords]),
+     * and only with it: without one to hand it throws [PdfLocked], whether or not its words were
+     * kept from an earlier time, so that nothing of a locked PDF is read aloud until it has been opened.
      */
     internal suspend fun pdfPages(book: Book): PdfPages = withContext(Dispatchers.IO) {
         if (!PdfWords.available) throw PdfWordsUnavailable()
         pdfPagesLock.withLock {
             val source = fileOf(book)
             val pages = pdfPagesOf(book.id)
+            val password = passwords.of(book.id)
+            if (password == null && (passwords.isLocked(book.id) || PdfSpokenBook.locked(pages))) throw PdfLocked(wrong = false)
             val layout = PdfSpokenBook.kept(pages, source) ?: run {
                 pdfPagesDir.mkdirs()
                 // Whole or not at all: pages cut short would open as a damaged book.
@@ -271,7 +335,13 @@ class Library(private val context: Context) : LibraryOrganizer {
                 try {
                     // As it is now: the title may have been put right since the book was added.
                     val now = _state.value.find(book.id) ?: book
-                    val made = partial.outputStream().buffered().let { PdfSpokenBook.make(source, it, now.id, now.title, now.author, now.language) }
+                    val made = try {
+                        partial.outputStream().buffered().let { PdfSpokenBook.make(source, it, now.id, now.title, now.author, now.language, password) }
+                    } catch (e: PdfLocked) {
+                        // Known from now on: a Play passes it over until it has been opened (see [unreadable]).
+                        if (e.wrong) passwords.forget(book.id) else passwords.locked(book.id)
+                        throw e
+                    }
                     check(partial.renameTo(pages) || run { pages.delete(); partial.renameTo(pages) }) { "Couldn't store the pages of ${book.sourceName}" }
                     made
                 } finally {
@@ -442,7 +512,7 @@ class Library(private val context: Context) : LibraryOrganizer {
                 context.contentResolver.query(children, columns, null, null, null)?.use { rows ->
                     while (rows.moveToNext()) {
                         val name = rows.getString(1) ?: continue
-                        if (name.substringAfterLast('.', "").lowercase() !in WATCHED_EXTENSIONS) continue
+                        if (name.substringAfterLast('.', "").lowercase() !in WATCHED_EXTENSIONS && !Fb2.isNamed(name)) continue
                         add(Triple(DocumentsContract.buildDocumentUriUsingTree(tree, rows.getString(0)), name, rows.getLong(2)))
                     }
                 }
@@ -468,6 +538,17 @@ class Library(private val context: Context) : LibraryOrganizer {
         if (_state.value.find(id)?.language == language) return
         _state.update { s -> s.copy(books = s.books.map { if (it.id == id) it.copy(language = language) else it }) }
         changed()
+    }
+
+    /**
+     * Forgets the password of [id], a locked PDF: it is asked for the next time the PDF is opened.
+     * The words kept of the PDF for reading it aloud go with it.
+     */
+    fun forgetPassword(id: String) {
+        passwords.forget(id)
+        scope.launch(disk) { pdfPagesLock.withLock { pdfPagesOf(id).takeIf(PdfSpokenBook::locked)?.delete() } }
+        // (The player widget offers to open it now, not to play it.)
+        WidgetSync.request(context)
     }
 
     /** Marks a book finished (or back to reading). */
@@ -666,9 +747,11 @@ class Library(private val context: Context) : LibraryOrganizer {
             )
         }
         changed(saveNow = true)
+        passwords.forget(id, gone = true)
         scope.launch(disk) {
             fileOf(book).delete()
             textPagesOf(book.id).delete()
+            fb2PagesOf(book.id).delete()
             pdfPagesOf(book.id).delete()
             coverOf(book)?.delete()
             book.originalCover?.let { File(coversDir, it).delete() }

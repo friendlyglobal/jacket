@@ -100,7 +100,7 @@
     <string name="library_remove_message">Jacket видалить свою копію та позицію читання. Оригінальний файл залишиться на місці.</string>
     <string name="library_remove_confirm">Вилучити</string>
     <string name="library_empty_title">Одягніть свій складаний телефон у книгу</string>
-    <string name="library_empty_message">Додайте файл EPUB, PDF, комікс CBZ або текстовий файл. Jacket зберігає приватну копію і, поки ви читаєте, показує обкладинку на зовнішньому екрані або у віджеті зовнішнього екрана.</string>
+    <string name="library_empty_message">Додайте файл EPUB, PDF, FB2, комікс CBZ або текстовий файл. Jacket зберігає приватну копію і, поки ви читаєте, показує обкладинку на зовнішньому екрані або у віджеті зовнішнього екрана.</string>
     <string name="onboarding_next">Далі</string>
     <string name="onboarding_skip">Пропустити</string>
     <string name="onboarding_private">Ваші книжки залишаються на цьому телефоні. Jacket не потребує облікового запису й ніколи не виходить в інтернет.</string>
@@ -243,7 +243,7 @@
     <string name="reader_error_open_book">Не вдалося відкрити книгу.\n%1$s</string>
     <string name="reader_error_no_pages">У цій книзі немає сторінок для показу.</string>
     <string name="reader_error_protected">Ця книга захищена від копіювання (DRM), тому Jacket не може її відкрити.</string>
-    <string name="reader_error_pdf">Не вдалося відкрити цей PDF. PDF із паролем поки не підтримуються.</string>
+    <string name="reader_error_pdf">Не вдалося відкрити цей PDF.</string>
     <string name="reader_error_comic">Не вдалося відкрити цей комікс.</string>
     <string name="reader_error_text">Цей файл порожній або його не вдалося прочитати.</string>
     <string name="reader_no_app_for_link">Немає застосунку, який може відкрити це посилання.</string>
@@ -325,6 +325,18 @@
     <string name="listen_nothing_to_read_comics">Тут немає книжки, яку можна прочитати вголос. Jacket не читає вголос комікси.</string>
     <string name="pdf_listen_unavailable">Цей телефон не може читати PDF уголос. Для цього потрібен Android 15 або Android 12–14 з останнім оновленням системи Google Play.</string>
     <string name="pdf_listen_no_text">У цьому PDF немає тексту, який можна прочитати вголос. Його сторінки — це зображення, як у скані.</string>
+    <string name="pdf_listen_locked">Цей PDF захищено паролем. Відкрийте його й введіть пароль, щоб слухати.</string>
+    <string name="pdf_locked_message">Цей PDF захищено паролем.</string>
+    <string name="pdf_locked_enter">Ввести пароль</string>
+    <string name="pdf_locked_unsupported">Цей PDF захищено паролем. Щоб його відкрити, потрібен Android 15 або Android 12–14 з останнім оновленням системи Google Play.</string>
+    <string name="pdf_password_title">Цей PDF захищено паролем</string>
+    <string name="pdf_password_label">Пароль</string>
+    <string name="pdf_password_show">Показати пароль</string>
+    <string name="pdf_password_remember">Запам’ятати на цьому телефоні</string>
+    <string name="pdf_password_remember_note">Зберігається лише на цьому телефоні й не потрапляє до резервних копій.</string>
+    <string name="pdf_password_wrong">Цей пароль не підійшов. Спробуйте ще раз.</string>
+    <string name="pdf_password_forgotten">Пароль забуто. Наступного разу Jacket запитає його знову.</string>
+    <string name="library_menu_forget_password">Забути пароль</string>
     <string name="listen_stopped_error">Читання вголос зупинено: %1$s</string>
 
     <string name="widget_reading">Читаю</string>

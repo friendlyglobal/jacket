@@ -94,7 +94,7 @@
     <string name="library_remove_message">Jacket löscht seine eigene Kopie und deine Leseposition. Die Originaldatei bleibt, wo sie war.</string>
     <string name="library_remove_confirm">Entfernen</string>
     <string name="library_empty_title">Lass dein Foldable dein Buch tragen</string>
-    <string name="library_empty_message">Füge eine EPUB-, PDF-, CBZ-Comic- oder Textdatei hinzu. Jacket legt eine private Kopie an und zeigt beim Lesen das Cover auf dem Außendisplay oder in einem Cover-Display-Widget.</string>
+    <string name="library_empty_message">Füge eine EPUB-, PDF-, FB2-, CBZ-Comic- oder Textdatei hinzu. Jacket legt eine private Kopie an und zeigt beim Lesen das Cover auf dem Außendisplay oder in einem Cover-Display-Widget.</string>
     <string name="onboarding_next">Weiter</string>
     <string name="onboarding_skip">Überspringen</string>
     <string name="onboarding_private">Deine Bücher bleiben auf diesem Smartphone. Jacket braucht kein Konto und geht nie online.</string>
@@ -227,7 +227,7 @@
     <string name="reader_error_open_book">Dieses Buch konnte nicht geöffnet werden.\n%1$s</string>
     <string name="reader_error_no_pages">Dieses Buch hat keine Seiten zum Anzeigen.</string>
     <string name="reader_error_protected">Dieses Buch ist kopiergeschützt (DRM). Jacket kann es deshalb nicht öffnen.</string>
-    <string name="reader_error_pdf">Dieses PDF konnte nicht geöffnet werden. Passwortgeschützte PDFs werden noch nicht unterstützt.</string>
+    <string name="reader_error_pdf">Dieses PDF konnte nicht geöffnet werden.</string>
     <string name="reader_error_comic">Dieser Comic konnte nicht geöffnet werden.</string>
     <string name="reader_error_text">Diese Datei ist leer oder konnte nicht gelesen werden.</string>
     <string name="reader_no_app_for_link">Keine App kann diesen Link öffnen.</string>
@@ -305,6 +305,18 @@
     <string name="listen_nothing_to_read_comics">Hier gibt es kein Buch, das vorgelesen werden kann. Comics kann Jacket nicht vorlesen.</string>
     <string name="pdf_listen_unavailable">Dieses Smartphone kann PDFs nicht vorlesen. Dafür braucht es Android 15 oder Android 12 bis 14 mit dem neuesten Google Play-Systemupdate.</string>
     <string name="pdf_listen_no_text">Dieses PDF enthält keinen Text zum Vorlesen. Seine Seiten sind Bilder, wie bei einem Scan.</string>
+    <string name="pdf_listen_locked">Dieses PDF ist gesperrt. Öffne es und gib das Passwort ein, um es anzuhören.</string>
+    <string name="pdf_locked_message">Dieses PDF ist mit einem Passwort gesperrt.</string>
+    <string name="pdf_locked_enter">Passwort eingeben</string>
+    <string name="pdf_locked_unsupported">Dieses PDF ist mit einem Passwort gesperrt. Zum Öffnen braucht es Android 15 oder Android 12 bis 14 mit dem neuesten Google Play-Systemupdate.</string>
+    <string name="pdf_password_title">Dieses PDF ist gesperrt</string>
+    <string name="pdf_password_label">Passwort</string>
+    <string name="pdf_password_show">Passwort anzeigen</string>
+    <string name="pdf_password_remember">Auf diesem Smartphone merken</string>
+    <string name="pdf_password_remember_note">Bleibt nur auf diesem Smartphone, nie in einer Sicherung.</string>
+    <string name="pdf_password_wrong">Mit diesem Passwort ging es nicht auf. Versuch es noch einmal.</string>
+    <string name="pdf_password_forgotten">Passwort gelöscht. Jacket fragt beim nächsten Mal wieder danach.</string>
+    <string name="library_menu_forget_password">Passwort nicht mehr merken</string>
     <string name="listen_stopped_error">Vorlesen gestoppt: %1$s</string>
 
     <string name="widget_reading">Ich lese</string>

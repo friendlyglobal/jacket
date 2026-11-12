@@ -164,7 +164,7 @@ private fun ReaderNav.catchUpTo(offer: CatchUpRules.Offer, book: Book) {
             ),
         )
         // A place that came without the exact spot: the step through the book it is on.
-        book.format == BookFormat.EPUB && place.locator == null -> jumpTo(place.position)
+        book.format.isEpubLike && place.locator == null -> jumpTo(place.position)
         else -> goTo(Annotation(id = "", bookId = book.id, kind = AnnotationKind.BOOKMARK, locator = place.locator, section = place.position, progress = place.progress))
     }
 }
