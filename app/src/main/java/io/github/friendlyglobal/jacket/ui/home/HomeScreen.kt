@@ -8,6 +8,8 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.LinearEasing
@@ -30,6 +32,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -171,6 +174,8 @@ fun HomeScreen(
     organizer: LibraryOrganizer? = null,
     /** Jacket's shelf of free classics; the + menu and the empty library offer it. */
     onFreeBooks: () -> Unit = {},
+    /** Opens "Your reading" from the line of today's reading; without it, the line is only a line. */
+    onReading: (() -> Unit)? = null,
 ) {
     val haptics = rememberHaptics()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
@@ -188,6 +193,12 @@ fun HomeScreen(
     val today = remember(state.reading) { java.time.LocalDate.now() }
     val readToday = if (stats) ((state.reading[today.toString()] ?: 0L) / 60_000L).toInt() else 0
     val streak = if (stats) remember(state.reading, today) { readingStreak(state.reading, today) } else 0
+    // "24 min today · Day 5", the way in to "Your reading". On a day with neither yet it is still
+    // the way in, by the page's own name, once there has been any reading to show there.
+    val readingLine = if (!stats || state.reading.isEmpty()) null else listOfNotNull(
+        stringResource(R.string.stats_today, readToday).takeIf { readToday > 0 },
+        stringResource(R.string.stats_streak, streak).takeIf { streak > 1 },
+    ).joinToString(stringResource(R.string.separator)).ifEmpty { if (onReading != null) stringResource(R.string.reading_title) else null }
     // A collection shows all its books, finished or not; the shelves split the rest.
     val collection = state.settings.collection?.let { id -> state.collections.firstOrNull { it.id == id } }
     val source = if (collection != null) state.books else shelf
@@ -306,8 +317,8 @@ fun HomeScreen(
                         onShelf = { haptics.tick(); onShelf(it) },
                         modifier = Modifier.animateItem(),
                         // Beside the pane, today's reading is told there instead.
-                        readToday = if (inlineHero) readToday else 0,
-                        streak = if (inlineHero) streak else 0,
+                        reading = if (inlineHero) readingLine else null,
+                        onReading = onReading,
                         organize = if (organizer == null) null else {
                             {
                                 // Once there's something to sort: a few books, or a collection already.
@@ -366,8 +377,8 @@ fun HomeScreen(
                     NowReadingPane(
                         book = hero,
                         outerAvailable = outerAvailable,
-                        readToday = readToday,
-                        streak = streak,
+                        reading = readingLine,
+                        onReading = onReading,
                         haptics = haptics,
                         onOpen = { onOpen(it, CoverSpot.HERO) },
                         onListen = onListen,
@@ -610,8 +621,9 @@ internal fun libraryPaneWidth(): Dp? {
 private fun NowReadingPane(
     book: Book,
     outerAvailable: Boolean,
-    readToday: Int,
-    streak: Int,
+    /** Today's reading in a line ("24 min today · Day 5"), or null with nothing to say; a tap on it is [onReading]. */
+    reading: String?,
+    onReading: (() -> Unit)?,
     haptics: Haptics,
     onOpen: (Book) -> Unit,
     onListen: ((Book) -> Unit)?,
@@ -709,20 +721,8 @@ private fun NowReadingPane(
                     }
                 }
             }
-            // "24 min today · Day 5", under the book rather than over the shelves.
-            if (readToday > 0 || streak > 1) {
-                Row(Modifier.padding(start = 8.dp, top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(JacketIcons.Clock, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.tertiary)
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        listOfNotNull(
-                            stringResource(R.string.stats_today, readToday).takeIf { readToday > 0 },
-                            stringResource(R.string.stats_streak, streak).takeIf { streak > 1 },
-                        ).joinToString(stringResource(R.string.separator)),
-                        style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
+            // "24 min today · Day 5", under the book rather than over the shelves: the way in to "Your reading".
+            if (reading != null) ReadingLine(reading, onReading, Modifier.padding(top = 2.dp))
         }
     }
 }
@@ -739,9 +739,10 @@ private fun LibraryHeader(
     onFinishedShelf: Boolean,
     onShelf: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    /** Minutes read today, and the run of days read; both 0 when the reader has those switched off. */
-    readToday: Int = 0,
-    streak: Int = 0,
+    /** Today's reading in a line ("24 min today · Day 5"); null when there is none to tell, or the reader has it switched off. */
+    reading: String? = null,
+    /** Opens "Your reading". */
+    onReading: (() -> Unit)? = null,
     /** The collections' chips, when the library can be organized. */
     organize: (@Composable () -> Unit)? = null,
 ) {
@@ -764,19 +765,18 @@ private fun LibraryHeader(
                 style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        // "24 min today · Day 5": only once there is something to say.
-        AnimatedVisibility(visible = readToday > 0 || streak > 0) {
-            Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(JacketIcons.Clock, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.tertiary)
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    listOfNotNull(
-                        stringResource(R.string.stats_today, readToday).takeIf { readToday > 0 },
-                        stringResource(R.string.stats_streak, streak).takeIf { streak > 1 },
-                    ).joinToString(stringResource(R.string.separator)),
-                    style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+        // "24 min today · Day 5": only once there is something to say. A tap opens "Your reading".
+        // (It keeps the words it had while it folds away.)
+        val said = remember { arrayOf("") }
+        if (reading != null) said[0] = reading
+        val motion = MaterialTheme.motionScheme
+        AnimatedVisibility(
+            visible = reading != null,
+            enter = expandVertically(motion.defaultSpatialSpec()) + fadeIn(motion.defaultEffectsSpec()),
+            exit = shrinkVertically(motion.fastSpatialSpec()) + fadeOut(motion.fastEffectsSpec()),
+        ) {
+            // Its words line up under the title: the room around them for a finger hangs outside.
+            ReadingLine(reading ?: said[0], onReading, Modifier.offset(x = (-8).dp))
         }
         if (organize != null) {
             Spacer(Modifier.height(12.dp))

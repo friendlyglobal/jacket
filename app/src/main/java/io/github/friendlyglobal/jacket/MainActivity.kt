@@ -65,6 +65,7 @@ import io.github.friendlyglobal.jacket.ui.LocalCoverTransition
 import io.github.friendlyglobal.jacket.ui.home.FreeBooksScreen
 import io.github.friendlyglobal.jacket.ui.home.HomeScreen
 import io.github.friendlyglobal.jacket.ui.home.Onboarding
+import io.github.friendlyglobal.jacket.ui.home.YourReadingScreen
 import io.github.friendlyglobal.jacket.ui.home.heroBook
 import io.github.friendlyglobal.jacket.ui.home.libraryPaneWidth
 import io.github.friendlyglobal.jacket.ui.home.onFinishedShelf
@@ -238,6 +239,7 @@ private const val HOME = "home"
 private const val SETTINGS = "settings"
 private const val LICENSES = "licenses"
 private const val FREE_BOOKS = "free-books"
+private const val READING = "reading"
 private const val READ = "read:"
 
 @Composable
@@ -262,6 +264,12 @@ private fun JacketRoot(
     val request by openRequests.collectAsStateWithLifecycle()
     val listenFor by listenRequests.collectAsStateWithLifecycle()
     var destination by rememberSaveable { mutableStateOf(HOME) }
+    // "Your reading" is opened from the library and from Settings, and goes back to whichever it was.
+    var readingFrom by rememberSaveable { mutableStateOf(HOME) }
+    val openReading = { from: String ->
+        readingFrom = from
+        destination = READING
+    }
     val snackbar = remember { SnackbarHostState() }
     // Kept here so closing a book can bring the place its cover lands into view.
     val libraryGrid = rememberLazyGridState()
@@ -310,6 +318,11 @@ private fun JacketRoot(
         if (destination.startsWith(READ) && library.state.value.find(destination.removePrefix(READ)) == null) destination = HOME
     }
 
+    // With reading time switched off there is no page of it to be on.
+    LaunchedEffect(destination, state.settings.readingStats) {
+        if (destination == READING && !state.settings.readingStats) destination = readingFrom
+    }
+
     // The outer display follows "is a book open", not a particular reader screen, so switching
     // books keeps it on. A manual toggle in the reader sticks until reading stops.
     val reading = openBook != null
@@ -355,6 +368,13 @@ private fun JacketRoot(
                         val fromBook = initialState.startsWith(READ)
                         val toBook = targetState.startsWith(READ)
                         when {
+                            // "Your reading" slides in over the screen it was opened from, and back off it.
+                            targetState == READING ->
+                                (slideInHorizontally(motion.defaultSpatialSpec()) { it / 3 } + fadeIn(motion.defaultEffectsSpec())) togetherWith
+                                    (slideOutHorizontally(motion.defaultSpatialSpec()) { -it / 10 } + fadeOut(motion.fastEffectsSpec()))
+                            initialState == READING ->
+                                (slideInHorizontally(motion.defaultSpatialSpec()) { -it / 10 } + fadeIn(motion.defaultEffectsSpec())) togetherWith
+                                    (slideOutHorizontally(motion.defaultSpatialSpec()) { it / 3 } + fadeOut(motion.fastEffectsSpec()))
                             targetState == LICENSES || targetState == FREE_BOOKS || (targetState == SETTINGS && initialState != LICENSES) ->
                                 (slideInHorizontally(spatial) { it / 3 } + fadeIn(tween(240))) togetherWith
                                     (slideOutHorizontally(spatial) { -it / 10 } + fadeOut(tween(160)))
@@ -394,7 +414,9 @@ private fun JacketRoot(
                                 onSettings = library::updateSettings,
                                 onBack = { destination = HOME },
                                 onLicenses = { destination = LICENSES },
+                                onReading = { openReading(SETTINGS) },
                             )
+                            target == READING -> YourReadingScreen(state = state, onBack = { destination = readingFrom })
                             target == LICENSES -> LicensesScreen(onBack = { destination = SETTINGS })
                             target == FREE_BOOKS -> FreeBooksScreen(
                                 state = state,
@@ -479,6 +501,7 @@ private fun JacketRoot(
                                             },
                                             organizer = library,
                                             onFreeBooks = { destination = FREE_BOOKS },
+                                            onReading = { openReading(HOME) },
                                             grid = libraryGrid,
                                         )
                                     }

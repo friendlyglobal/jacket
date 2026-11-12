@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Your reading" (the page of reading time, opened from the library and from Settings). In a file of their own, beside strings.xml. -->
+<resources>
+    <!-- The page's title; also the row in Settings that opens it, and what a screen reader says a tap on the library's "24 min today" line does. -->
+    <string name="reading_title">Your reading</string>
+    <!-- Under that row in Settings: what the page holds. -->
+    <string name="settings_reading_description">This week, this month and this year, the days you read and the books you finished.</string>
+    <!-- Three totals of time read, each with a length of time under it ("2 hr 14 min"). -->
+    <string name="reading_this_week">This week</string>
+    <string name="reading_this_month">This month</string>
+    <string name="reading_this_year">This year</string>
+    <!-- The most days in a row with some reading on each, with a number of days under it ("12 days"). -->
+    <string name="reading_longest_streak">Longest streak</string>
+    <!-- The heading over a calendar of one month whose days are coloured by how long was read on each; its two buttons go to the month before and the month after. -->
+    <string name="reading_days_read">Days read</string>
+    <string name="reading_previous_month">Previous month</string>
+    <string name="reading_next_month">Next month</string>
+    <!-- Under the calendar, what it shows, in words: %1$d is how many days had some reading, %2$s the month and year ("November 2026"), %3$s the time read ("6 hours, 12 minutes"). A screen reader reads this in place of the picture. -->
+    <plurals name="reading_month_summary">
+        <item quantity="one">Read on %1$d day in %2$s, %3$s in all</item>
+        <item quantity="other">Read on %1$d days in %2$s, %3$s in all</item>
+    </plurals>
+    <!-- The same line for a month with no reading. %1$s is the month and year. -->
+    <string name="reading_month_none">No reading in %1$s</string>
+    <!-- A small line under the calendar that explains its colours. -->
+    <string name="reading_calendar_hint">The stronger the color, the more you read that day.</string>
+    <!-- The heading over the list of books read to the end, each with the day it was finished; and what stands there while there are none. -->
+    <string name="reading_books_finished">Books finished</string>
+    <string name="reading_finished_none">No books finished yet.</string>
+
+</resources>

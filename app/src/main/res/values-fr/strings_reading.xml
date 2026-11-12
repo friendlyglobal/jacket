@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Your reading" (the page of reading time). See values/strings_reading.xml for what each is for. -->
+<resources>
+    <string name="reading_title">Vos lectures</string>
+    <string name="settings_reading_description">Cette semaine, ce mois-ci et cette année, les jours où vous avez lu et les livres que vous avez terminés.</string>
+    <string name="reading_this_week">Cette semaine</string>
+    <string name="reading_this_month">Ce mois-ci</string>
+    <string name="reading_this_year">Cette année</string>
+    <string name="reading_longest_streak">Plus longue série</string>
+    <string name="reading_days_read">Jours de lecture</string>
+    <string name="reading_previous_month">Mois précédent</string>
+    <string name="reading_next_month">Mois suivant</string>
+    <plurals name="reading_month_summary">
+        <item quantity="one">%2$s : %1$d jour de lecture, %3$s au total</item>
+        <item quantity="many">%2$s : %1$d jours de lecture, %3$s au total</item>
+        <item quantity="other">%2$s : %1$d jours de lecture, %3$s au total</item>
+    </plurals>
+    <string name="reading_month_none">%1$s : aucune lecture</string>
+    <string name="reading_calendar_hint">Plus la couleur est intense, plus vous avez lu ce jour-là.</string>
+    <string name="reading_books_finished">Livres terminés</string>
+    <string name="reading_finished_none">Aucun livre terminé pour l\'instant.</string>
+</resources>
