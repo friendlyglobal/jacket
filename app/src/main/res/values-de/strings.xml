@@ -301,6 +301,7 @@
     <string name="listen_sleep_other_start">Timer starten</string>
     <string name="listen_no_voice">Auf diesem Smartphone ist keine Sprachausgabe-Stimme installiert.</string>
     <string name="listen_no_readable_text">Dieses Buch hat keinen Text, der vorgelesen werden kann.</string>
+    <string name="listen_nothing_to_read">Hier gibt es kein Buch, das vorgelesen werden kann. PDFs und Comics kann Jacket nicht vorlesen.</string>
     <string name="listen_stopped_error">Vorlesen gestoppt: %1$s</string>
 
     <string name="widget_reading">Ich lese</string>

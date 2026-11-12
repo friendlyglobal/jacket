@@ -311,6 +311,7 @@
     <string name="listen_sleep_other_start">Iniciar timer</string>
     <string name="listen_no_voice">Este celular não tem nenhuma voz de conversão de texto em voz instalada.</string>
     <string name="listen_no_readable_text">Este livro não tem texto que possa ser lido em voz alta.</string>
+    <string name="listen_nothing_to_read">Não há nenhum livro aqui que possa ser lido em voz alta. O Jacket não lê PDFs nem quadrinhos em voz alta.</string>
     <string name="listen_stopped_error">A leitura em voz alta parou: %1$s</string>
 
     <string name="widget_reading">Lendo</string>

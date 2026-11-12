@@ -321,6 +321,7 @@
     <string name="listen_sleep_other_start">Запустити таймер</string>
     <string name="listen_no_voice">На цьому телефоні не встановлено голос для синтезу мовлення.</string>
     <string name="listen_no_readable_text">У цій книзі немає тексту, який можна прочитати вголос.</string>
+    <string name="listen_nothing_to_read">Тут немає книжки, яку можна прочитати вголос. Jacket не читає вголос PDF і комікси.</string>
     <string name="listen_stopped_error">Читання вголос зупинено: %1$s</string>
 
     <string name="widget_reading">Читаю</string>

@@ -189,6 +189,9 @@ Jacket. Opening the book finds the same voice at the sentence it is on, reading 
   with it shut, its pages laid out anew by a fold) keeps the number it had, and only going back
   through the book lowers it. The library marks the book being read aloud, and the "Continue
   reading" pane's Listen button pauses it and takes it up again.
+- Play with nothing that can be read aloud says so while Jacket is on screen. From the
+  background it can't: Android only shows such a message for an app allowed to post
+  notifications, and Jacket doesn't ask to be.
 - Still open: it has only been on the emulator, with `cmd media_session` standing in for a
   headset.
 

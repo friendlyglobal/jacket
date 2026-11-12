@@ -292,6 +292,7 @@
     <string name="listen_sleep_other_start">タイマーを開始</string>
     <string name="listen_no_voice">このスマートフォンにはテキスト読み上げの音声がインストールされていません。</string>
     <string name="listen_no_readable_text">この本には読み上げられるテキストがありません。</string>
+    <string name="listen_nothing_to_read">読み上げできる本がありません。PDFとコミックは読み上げできません。</string>
     <string name="listen_stopped_error">読み上げが停止しました：%1$s</string>
 
     <string name="widget_reading">読書中</string>

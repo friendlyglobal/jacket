@@ -311,6 +311,7 @@
     <string name="listen_sleep_other_start">Avvia timer</string>
     <string name="listen_no_voice">Su questo telefono non è installata nessuna voce di sintesi vocale.</string>
     <string name="listen_no_readable_text">Questo libro non contiene testo che si possa leggere ad alta voce.</string>
+    <string name="listen_nothing_to_read">Qui non c\'è nessun libro che si possa leggere ad alta voce. Jacket non può leggere ad alta voce PDF e fumetti.</string>
     <string name="listen_stopped_error">Lettura ad alta voce interrotta: %1$s</string>
 
     <string name="widget_reading">In lettura</string>

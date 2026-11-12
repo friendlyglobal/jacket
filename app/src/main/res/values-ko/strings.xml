@@ -292,6 +292,7 @@
     <string name="listen_sleep_other_start">타이머 시작</string>
     <string name="listen_no_voice">이 휴대전화에는 텍스트 음성 변환(TTS) 음성이 설치되어 있지 않습니다.</string>
     <string name="listen_no_readable_text">이 책에는 소리 내어 읽을 수 있는 텍스트가 없습니다.</string>
+    <string name="listen_nothing_to_read">소리 내어 읽을 수 있는 책이 없습니다. Jacket은 PDF와 만화를 소리 내어 읽을 수 없습니다.</string>
     <string name="listen_stopped_error">소리 내어 읽기가 중지되었습니다: %1$s</string>
 
     <string name="widget_reading">읽는 중</string>

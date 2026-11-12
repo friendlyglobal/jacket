@@ -321,6 +321,7 @@
     <string name="listen_sleep_other_start">Włącz</string>
     <string name="listen_no_voice">Na tym telefonie nie zainstalowano głosu syntezatora mowy.</string>
     <string name="listen_no_readable_text">Ta książka nie zawiera tekstu, który można przeczytać na głos.</string>
+    <string name="listen_nothing_to_read">Nie ma tu książki, którą można przeczytać na głos. Jacket nie czyta na głos plików PDF ani komiksów.</string>
     <string name="listen_stopped_error">Czytanie na głos zatrzymane: %1$s</string>
 
     <string name="widget_reading">Czytam</string>

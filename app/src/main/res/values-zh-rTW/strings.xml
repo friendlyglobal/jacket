@@ -292,6 +292,7 @@
     <string name="listen_sleep_other_start">開始定時</string>
     <string name="listen_no_voice">這支手機尚未安裝文字轉語音的語音。</string>
     <string name="listen_no_readable_text">這本書沒有可朗讀的文字。</string>
+    <string name="listen_nothing_to_read">這裡沒有可以朗讀的書。Jacket 無法朗讀 PDF 和漫畫。</string>
     <string name="listen_stopped_error">朗讀已停止：%1$s</string>
 
     <string name="widget_reading">閱讀中</string>

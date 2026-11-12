@@ -342,6 +342,7 @@
     <string name="listen_sleep_other_start">بدء المؤقت</string>
     <string name="listen_no_voice">لا يوجد صوت مثبَّت لتحويل النص إلى كلام على هذا الهاتف.</string>
     <string name="listen_no_readable_text">لا يحتوي هذا الكتاب على نص يمكن قراءته بصوت عالٍ.</string>
+    <string name="listen_nothing_to_read">لا يوجد هنا كتاب يمكن قراءته بصوت عالٍ. لا يستطيع Jacket قراءة ملفات PDF أو القصص المصوّرة بصوت عالٍ.</string>
     <string name="listen_stopped_error">توقفت القراءة بصوت عالٍ: %1$s</string>
 
     <string name="widget_reading">قيد القراءة</string>

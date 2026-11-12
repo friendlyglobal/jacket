@@ -302,6 +302,7 @@
     <string name="listen_sleep_other_start">Zamanlayıcıyı başlat</string>
     <string name="listen_no_voice">Bu telefonda yüklü bir metin okuma sesi yok.</string>
     <string name="listen_no_readable_text">Bu kitapta sesli okunabilecek metin yok.</string>
+    <string name="listen_nothing_to_read">Burada sesli okunabilecek bir kitap yok. Jacket, PDF\'leri ve çizgi romanları sesli okuyamaz.</string>
     <string name="listen_stopped_error">Sesli okuma durdu: %1$s</string>
 
     <string name="widget_reading">Okunuyor</string>

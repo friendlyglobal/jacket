@@ -301,6 +301,7 @@
     <string name="listen_sleep_other_start">Timer starten</string>
     <string name="listen_no_voice">Op deze telefoon is geen stem voor tekst-naar-spraak geïnstalleerd.</string>
     <string name="listen_no_readable_text">Dit boek heeft geen tekst die kan worden voorgelezen.</string>
+    <string name="listen_nothing_to_read">Er is hier geen boek dat kan worden voorgelezen. Jacket kan geen pdf\'s of strips voorlezen.</string>
     <string name="listen_stopped_error">Voorlezen gestopt: %1$s</string>
 
     <string name="widget_reading">Ik lees</string>

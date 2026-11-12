@@ -292,6 +292,7 @@
     <string name="listen_sleep_other_start">Mulai timer</string>
     <string name="listen_no_voice">Ponsel ini tidak memiliki suara teks ke ucapan yang terinstal.</string>
     <string name="listen_no_readable_text">Buku ini tidak memiliki teks yang dapat dibacakan.</string>
+    <string name="listen_nothing_to_read">Tidak ada buku di sini yang bisa dibacakan. Jacket tidak bisa membacakan PDF atau komik.</string>
     <string name="listen_stopped_error">Pembacaan berhenti: %1$s</string>
 
     <string name="widget_reading">Sedang dibaca</string>

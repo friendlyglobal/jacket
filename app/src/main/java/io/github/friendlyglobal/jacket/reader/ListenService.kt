@@ -278,5 +278,10 @@ class ListenService : MediaLibraryService() {
  */
 @OptIn(UnstableApi::class)
 class ResumeReceiver : MediaButtonReceiver() {
-    override fun shouldStartForegroundService(context: Context, intent: Intent): Boolean = context.listening.canPlay()
+    override fun shouldStartForegroundService(context: Context, intent: Intent): Boolean {
+        val listening = context.listening
+        // (Media3 only asks for a press of Play. With nothing to read aloud, the listener is told
+        // so instead of the press doing nothing.)
+        return listening.canPlay().also { if (!it) listening.nothingToRead() }
+    }
 }

@@ -311,6 +311,7 @@
     <string name="listen_sleep_other_start">Lancer le minuteur</string>
     <string name="listen_no_voice">Aucune voix de synthèse vocale n\'est installée sur ce téléphone.</string>
     <string name="listen_no_readable_text">Ce livre ne contient aucun texte pouvant être lu à voix haute.</string>
+    <string name="listen_nothing_to_read">Aucun livre ici ne peut être lu à voix haute. Jacket ne peut pas lire les PDF ni les BD à voix haute.</string>
     <string name="listen_stopped_error">Lecture à voix haute arrêtée : %1$s</string>
 
     <string name="widget_reading">En cours</string>
