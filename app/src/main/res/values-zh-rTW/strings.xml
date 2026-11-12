@@ -230,6 +230,7 @@
     <string name="selection_highlight">畫線</string>
     <string name="selection_note">筆記</string>
     <string name="selection_share">分享</string>
+    <string name="selection_read_from_here">從這裡開始朗讀</string>
 
     <string name="notes_tab_contents">目錄</string>
     <string name="notes_tab_bookmarks">書籤</string>
@@ -296,6 +297,9 @@
     <string name="listen_nothing_to_read_comics">這裡沒有可以朗讀的書。Jacket 無法朗讀漫畫。</string>
     <string name="pdf_listen_unavailable">這支手機無法朗讀 PDF。需要 Android 15，或已安裝最新 Google Play 系統更新的 Android 12 至 14。</string>
     <string name="pdf_listen_no_text">這個 PDF 沒有可以朗讀的文字。它的頁面是圖片，就像掃描檔。</string>
+    <string name="pdf_highlight_unavailable">這支手機無法在 PDF 上畫線。需要 Android 15，或已安裝最新 Google Play 系統更新的 Android 12 至 14。</string>
+    <string name="pdf_highlight_no_text">這個 PDF 沒有可以畫線的文字。它的頁面是圖片，就像掃描檔。</string>
+    <string name="pdf_highlights_listed_only">這支手機可以列出 PDF 的畫線，但無法在頁面上顯示。</string>
     <string name="pdf_listen_locked">這個 PDF 已上鎖。請先開啟並輸入密碼，再開始聆聽。</string>
     <string name="pdf_locked_message">這個 PDF 有密碼保護。</string>
     <string name="pdf_locked_enter">輸入密碼</string>

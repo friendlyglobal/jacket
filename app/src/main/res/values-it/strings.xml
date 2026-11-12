@@ -245,6 +245,7 @@
     <string name="selection_highlight">Evidenzia</string>
     <string name="selection_note">Nota</string>
     <string name="selection_share">Condividi</string>
+    <string name="selection_read_from_here">Leggi ad alta voce da qui</string>
 
     <string name="notes_tab_contents">Indice</string>
     <string name="notes_tab_bookmarks">Segnalibri</string>
@@ -315,6 +316,9 @@
     <string name="listen_nothing_to_read_comics">Qui non c\'è nessun libro che si possa leggere ad alta voce. Jacket non può leggere ad alta voce i fumetti.</string>
     <string name="pdf_listen_unavailable">Questo telefono non può leggere i PDF ad alta voce. Serve Android 15, oppure Android da 12 a 14 con l\'ultimo aggiornamento di sistema Google Play.</string>
     <string name="pdf_listen_no_text">Questo PDF non ha testo da leggere ad alta voce. Le sue pagine sono immagini, come in una scansione.</string>
+    <string name="pdf_highlight_unavailable">Questo telefono non può evidenziare nei PDF. Serve Android 15, oppure Android da 12 a 14 con l\'ultimo aggiornamento di sistema Google Play.</string>
+    <string name="pdf_highlight_no_text">Questo PDF non ha testo da evidenziare. Le sue pagine sono immagini, come in una scansione.</string>
+    <string name="pdf_highlights_listed_only">Questo telefono può elencare le evidenziazioni di un PDF, ma non può mostrarle sulle sue pagine.</string>
     <string name="pdf_listen_locked">Questo PDF è bloccato. Aprilo e inserisci la password per ascoltarlo.</string>
     <string name="pdf_locked_message">Questo PDF è bloccato da una password.</string>
     <string name="pdf_locked_enter">Inserisci la password</string>

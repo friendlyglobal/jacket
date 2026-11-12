@@ -230,6 +230,7 @@
     <string name="selection_highlight">Sorot</string>
     <string name="selection_note">Catatan</string>
     <string name="selection_share">Bagikan</string>
+    <string name="selection_read_from_here">Bacakan dari sini</string>
 
     <string name="notes_tab_contents">Daftar isi</string>
     <string name="notes_tab_bookmarks">Bookmark</string>
@@ -296,6 +297,9 @@
     <string name="listen_nothing_to_read_comics">Tidak ada buku di sini yang bisa dibacakan. Jacket tidak bisa membacakan komik.</string>
     <string name="pdf_listen_unavailable">Ponsel ini tidak bisa membacakan PDF. Untuk itu perlu Android 15, atau Android 12 sampai 14 dengan update sistem Google Play terbaru.</string>
     <string name="pdf_listen_no_text">PDF ini tidak punya teks untuk dibacakan. Halamannya berupa gambar, seperti hasil pindaian.</string>
+    <string name="pdf_highlight_unavailable">Ponsel ini tidak bisa menyorot teks di PDF. Untuk itu perlu Android 15, atau Android 12 sampai 14 dengan update sistem Google Play terbaru.</string>
+    <string name="pdf_highlight_no_text">PDF ini tidak punya teks untuk disorot. Halamannya berupa gambar, seperti hasil pindaian.</string>
+    <string name="pdf_highlights_listed_only">Ponsel ini bisa menampilkan daftar sorotan PDF, tetapi tidak bisa menampilkannya di halamannya.</string>
     <string name="pdf_listen_locked">PDF ini terkunci. Buka dan masukkan sandinya untuk mendengarkan.</string>
     <string name="pdf_locked_message">PDF ini dikunci dengan sandi.</string>
     <string name="pdf_locked_enter">Masukkan sandi</string>

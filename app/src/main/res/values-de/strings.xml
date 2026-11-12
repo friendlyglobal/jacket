@@ -237,6 +237,7 @@
     <string name="selection_highlight">Markieren</string>
     <string name="selection_note">Notiz</string>
     <string name="selection_share">Teilen</string>
+    <string name="selection_read_from_here">Ab hier vorlesen</string>
 
     <string name="notes_tab_contents">Inhalt</string>
     <string name="notes_tab_bookmarks">Lesezeichen</string>
@@ -305,6 +306,9 @@
     <string name="listen_nothing_to_read_comics">Hier gibt es kein Buch, das vorgelesen werden kann. Comics kann Jacket nicht vorlesen.</string>
     <string name="pdf_listen_unavailable">Dieses Smartphone kann PDFs nicht vorlesen. Dafür braucht es Android 15 oder Android 12 bis 14 mit dem neuesten Google Play-Systemupdate.</string>
     <string name="pdf_listen_no_text">Dieses PDF enthält keinen Text zum Vorlesen. Seine Seiten sind Bilder, wie bei einem Scan.</string>
+    <string name="pdf_highlight_unavailable">Dieses Smartphone kann in PDFs nichts markieren. Dafür braucht es Android 15 oder Android 12 bis 14 mit dem neuesten Google Play-Systemupdate.</string>
+    <string name="pdf_highlight_no_text">Dieses PDF enthält keinen Text zum Markieren. Seine Seiten sind Bilder, wie bei einem Scan.</string>
+    <string name="pdf_highlights_listed_only">Dieses Smartphone kann die Markierungen eines PDFs auflisten, aber nicht auf den Seiten anzeigen.</string>
     <string name="pdf_listen_locked">Dieses PDF ist gesperrt. Öffne es und gib das Passwort ein, um es anzuhören.</string>
     <string name="pdf_locked_message">Dieses PDF ist mit einem Passwort gesperrt.</string>
     <string name="pdf_locked_enter">Passwort eingeben</string>

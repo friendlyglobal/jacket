@@ -230,6 +230,7 @@
     <string name="selection_highlight">ハイライト</string>
     <string name="selection_note">メモ</string>
     <string name="selection_share">共有</string>
+    <string name="selection_read_from_here">ここから読み上げ</string>
 
     <string name="notes_tab_contents">目次</string>
     <string name="notes_tab_bookmarks">ブックマーク</string>
@@ -296,6 +297,9 @@
     <string name="listen_nothing_to_read_comics">読み上げできる本がありません。コミックは読み上げできません。</string>
     <string name="pdf_listen_unavailable">このスマートフォンでは PDF を読み上げできません。Android 15、または最新の Google Play システム アップデートを適用した Android 12〜14 が必要です。</string>
     <string name="pdf_listen_no_text">この PDF には読み上げるテキストがありません。スキャンのように、ページが画像になっています。</string>
+    <string name="pdf_highlight_unavailable">このスマートフォンでは PDF にハイライトを付けられません。Android 15、または最新の Google Play システム アップデートを適用した Android 12〜14 が必要です。</string>
+    <string name="pdf_highlight_no_text">この PDF にはハイライトできるテキストがありません。スキャンのように、ページが画像になっています。</string>
+    <string name="pdf_highlights_listed_only">このスマートフォンでは、PDF のハイライトを一覧には表示できますが、ページ上には表示できません。</string>
     <string name="pdf_listen_locked">この PDF はロックされています。聞くには、開いてパスワードを入力してください。</string>
     <string name="pdf_locked_message">この PDF はパスワードでロックされています。</string>
     <string name="pdf_locked_enter">パスワードを入力</string>

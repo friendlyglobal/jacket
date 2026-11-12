@@ -237,6 +237,7 @@
     <string name="selection_highlight">Markeren</string>
     <string name="selection_note">Notitie</string>
     <string name="selection_share">Delen</string>
+    <string name="selection_read_from_here">Vanaf hier voorlezen</string>
 
     <string name="notes_tab_contents">Inhoud</string>
     <string name="notes_tab_bookmarks">Bladwijzers</string>
@@ -305,6 +306,9 @@
     <string name="listen_nothing_to_read_comics">Er is hier geen boek dat kan worden voorgelezen. Jacket kan geen strips voorlezen.</string>
     <string name="pdf_listen_unavailable">Deze telefoon kan geen pdf\'s voorlezen. Daarvoor is Android 15 nodig, of Android 12 tot en met 14 met de nieuwste Google Play-systeemupdate.</string>
     <string name="pdf_listen_no_text">Deze pdf bevat geen tekst om voor te lezen. De pagina\'s zijn afbeeldingen, zoals bij een scan.</string>
+    <string name="pdf_highlight_unavailable">Deze telefoon kan niet markeren in pdf\'s. Daarvoor is Android 15 nodig, of Android 12 tot en met 14 met de nieuwste Google Play-systeemupdate.</string>
+    <string name="pdf_highlight_no_text">Deze pdf bevat geen tekst om te markeren. De pagina\'s zijn afbeeldingen, zoals bij een scan.</string>
+    <string name="pdf_highlights_listed_only">Deze telefoon kan de markeringen van een pdf in een lijst tonen, maar niet op de pagina\'s.</string>
     <string name="pdf_listen_locked">Deze pdf is vergrendeld. Open hem en voer het wachtwoord in om te luisteren.</string>
     <string name="pdf_locked_message">Deze pdf is vergrendeld met een wachtwoord.</string>
     <string name="pdf_locked_enter">Wachtwoord invoeren</string>

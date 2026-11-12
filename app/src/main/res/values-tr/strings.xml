@@ -238,6 +238,7 @@
     <string name="selection_highlight">Vurgula</string>
     <string name="selection_note">Not</string>
     <string name="selection_share">Paylaş</string>
+    <string name="selection_read_from_here">Buradan itibaren sesli oku</string>
 
     <string name="notes_tab_contents">İçindekiler</string>
     <string name="notes_tab_bookmarks">Yer işaretleri</string>
@@ -306,6 +307,9 @@
     <string name="listen_nothing_to_read_comics">Burada sesli okunabilecek bir kitap yok. Jacket, çizgi romanları sesli okuyamaz.</string>
     <string name="pdf_listen_unavailable">Bu telefon PDF\'leri sesli okuyamıyor. Bunun için Android 15 veya en son Google Play sistem güncellemesini almış Android 12–14 gerekir.</string>
     <string name="pdf_listen_no_text">Bu PDF\'te sesli okunacak metin yok. Sayfaları, taranmış bir belgedeki gibi resimlerden oluşuyor.</string>
+    <string name="pdf_highlight_unavailable">Bu telefon PDF\'lerde vurgulama yapamıyor. Bunun için Android 15 veya en son Google Play sistem güncellemesini almış Android 12–14 gerekir.</string>
+    <string name="pdf_highlight_no_text">Bu PDF\'te vurgulanacak metin yok. Sayfaları, taranmış bir belgedeki gibi resimlerden oluşuyor.</string>
+    <string name="pdf_highlights_listed_only">Bu telefon bir PDF\'in vurgularını listeleyebilir ama sayfalarında gösteremez.</string>
     <string name="pdf_listen_locked">Bu PDF kilitli. Dinlemek için açıp parolasını girin.</string>
     <string name="pdf_locked_message">Bu PDF bir parolayla kilitlenmiş.</string>
     <string name="pdf_locked_enter">Parolayı gir</string>

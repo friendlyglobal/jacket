@@ -230,6 +230,7 @@
     <string name="selection_highlight">划线</string>
     <string name="selection_note">笔记</string>
     <string name="selection_share">分享</string>
+    <string name="selection_read_from_here">从这里开始朗读</string>
 
     <string name="notes_tab_contents">目录</string>
     <string name="notes_tab_bookmarks">书签</string>
@@ -296,6 +297,9 @@
     <string name="listen_nothing_to_read_comics">这里没有可以朗读的书。Jacket 无法朗读漫画。</string>
     <string name="pdf_listen_unavailable">这部手机无法朗读 PDF。需要 Android 15，或者装有最新 Google Play 系统更新的 Android 12 至 14。</string>
     <string name="pdf_listen_no_text">这个 PDF 没有可以朗读的文字。它的页面是图片，像扫描件一样。</string>
+    <string name="pdf_highlight_unavailable">这部手机无法在 PDF 上划线。需要 Android 15，或者装有最新 Google Play 系统更新的 Android 12 至 14。</string>
+    <string name="pdf_highlight_no_text">这个 PDF 没有可以划线的文字。它的页面是图片，像扫描件一样。</string>
+    <string name="pdf_highlights_listed_only">这部手机可以列出 PDF 的划线，但无法在页面上显示。</string>
     <string name="pdf_listen_locked">这个 PDF 已上锁。请先打开并输入密码，然后再听。</string>
     <string name="pdf_locked_message">这个 PDF 有密码保护。</string>
     <string name="pdf_locked_enter">输入密码</string>
