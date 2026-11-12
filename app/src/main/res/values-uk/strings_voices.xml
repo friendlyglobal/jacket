@@ -43,4 +43,17 @@
     <string name="library_empty_message_phone">Додайте EPUB, PDF, комікс CBZ або текстовий файл. Jacket збереже приватну копію, дасть їй справжні сторінки й зможе прочитати її вголос природним голосом.</string>
     <string name="library_try_sample">Спробувати книжку-зразок</string>
     <string name="sample_failed">Не вдалося відкрити книжку-зразок.</string>
+    <string name="say_title">Вимовляти так</string>
+    <string name="say_hint">Підкажіть голосу, як звучить ім’я чи слово.</string>
+    <string name="say_word">Слово в книжці</string>
+    <string name="say_sounds">Звучить як</string>
+    <string name="say_sounds_example">Напишіть так, як воно звучить, наприклад: гер-МАЙ-о-ні</string>
+    <string name="say_hear">Послухати</string>
+    <string name="say_every_book">У всіх книжках</string>
+    <string name="say_scope_all">Усі книжки</string>
+    <string name="say_add">Додати слово</string>
+    <string name="say_remove">Видалити: %1$s</string>
+    <string name="say_empty">Слів поки немає. Натисніть і утримуйте слово на сторінці та виберіть «Вимовляти так» або додайте слово тут.</string>
+    <string name="listen_skip_notes">Пропускати номери приміток</string>
+    <string name="listen_skip_notes_description">Голос не читає маленькі цифри, що відсилають до приміток.</string>
 </resources>

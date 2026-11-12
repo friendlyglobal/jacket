@@ -43,4 +43,17 @@
     <string name="library_empty_message_phone">Tambahkan file EPUB, PDF, komik CBZ, atau teks. Jacket menyimpan salinan pribadi, memberinya halaman sungguhan untuk dibalik, dan bisa membacakannya dengan suara alami.</string>
     <string name="library_try_sample">Coba buku contoh</string>
     <string name="sample_failed">Buku contoh tidak bisa dibuka.</string>
+    <string name="say_title">Ucapkan begini</string>
+    <string name="say_hint">Beri tahu suara cara mengucapkan nama atau kata.</string>
+    <string name="say_word">Kata di buku</string>
+    <string name="say_sounds">Bunyinya</string>
+    <string name="say_sounds_example">Tulis sesuai bunyinya, misalnya: her-MAI-o-ni</string>
+    <string name="say_hear">Dengarkan</string>
+    <string name="say_every_book">Pakai di semua buku</string>
+    <string name="say_scope_all">Semua buku</string>
+    <string name="say_add">Tambah kata</string>
+    <string name="say_remove">Hapus %1$s</string>
+    <string name="say_empty">Belum ada kata. Tekan lama sebuah kata di halaman lalu pilih “Ucapkan begini”, atau tambahkan di sini.</string>
+    <string name="listen_skip_notes">Lewati nomor catatan</string>
+    <string name="listen_skip_notes_description">Suara tidak membacakan angka kecil yang merujuk ke catatan.</string>
 </resources>

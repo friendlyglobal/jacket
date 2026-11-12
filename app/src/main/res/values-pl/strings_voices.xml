@@ -43,4 +43,17 @@
     <string name="library_empty_message_phone">Dodaj plik EPUB, PDF, komiks CBZ lub plik tekstowy. Jacket zachowa prywatną kopię, da jej prawdziwe strony do przewracania i może ją przeczytać na głos naturalnym głosem.</string>
     <string name="library_try_sample">Wypróbuj przykładową książkę</string>
     <string name="sample_failed">Nie udało się otworzyć przykładowej książki.</string>
+    <string name="say_title">Powiedz to tak</string>
+    <string name="say_hint">Podpowiedz głosowi, jak brzmi imię albo słowo.</string>
+    <string name="say_word">Słowo w książce</string>
+    <string name="say_sounds">Brzmi jak</string>
+    <string name="say_sounds_example">Zapisz tak, jak brzmi, na przykład: her-MAJ-o-ni</string>
+    <string name="say_hear">Posłuchaj</string>
+    <string name="say_every_book">Używaj we wszystkich książkach</string>
+    <string name="say_scope_all">Wszystkie książki</string>
+    <string name="say_add">Dodaj słowo</string>
+    <string name="say_remove">Usuń: %1$s</string>
+    <string name="say_empty">Nie ma jeszcze słów. Przytrzymaj słowo na stronie i wybierz „Powiedz to tak” albo dodaj je tutaj.</string>
+    <string name="listen_skip_notes">Pomijaj numery przypisów</string>
+    <string name="listen_skip_notes_description">Głos nie czyta małych cyferek odsyłających do przypisów.</string>
 </resources>

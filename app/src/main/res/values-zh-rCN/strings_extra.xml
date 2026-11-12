@@ -6,7 +6,7 @@
     <string name="jump_back_to_page">返回第 %1$d 页</string>
     <string name="jump_back_to_start">返回开头</string>
     <string name="widget_player_name">Jacket 播放器</string>
-    <string name="widget_player_description">带播放按钮的书：在主屏幕上即可朗读、暂停或继续。</string>
+    <string name="widget_player_description">带播放器的书：在主屏幕上即可播放或暂停、跳到上一句或下一句，并设置睡眠定时。</string>
     <string name="widget_shelf_name">Jacket 书架</string>
     <string name="widget_shelf_description">你正在读的书并排摆放。点按即可打开。</string>
     <string name="widget_streak_name">连续阅读</string>

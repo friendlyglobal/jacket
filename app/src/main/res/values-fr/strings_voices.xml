@@ -43,4 +43,17 @@
     <string name="library_empty_message_phone">Ajoutez un EPUB, un PDF, une BD CBZ ou un fichier texte. Jacket en garde une copie privée, lui donne de vraies pages à tourner et peut le lire à voix haute avec une voix naturelle.</string>
     <string name="library_try_sample">Essayer un livre d\'exemple</string>
     <string name="sample_failed">Impossible d\'ouvrir le livre d\'exemple.</string>
+    <string name="say_title">Le dire ainsi</string>
+    <string name="say_hint">Indiquez à la voix comment se dit un nom ou un mot.</string>
+    <string name="say_word">Mot dans le livre</string>
+    <string name="say_sounds">Se dit</string>
+    <string name="say_sounds_example">Écrivez-le comme il se dit, par exemple : eur-MAÏ-o-ni</string>
+    <string name="say_hear">Écouter</string>
+    <string name="say_every_book">Utiliser dans tous les livres</string>
+    <string name="say_scope_all">Tous les livres</string>
+    <string name="say_add">Ajouter un mot</string>
+    <string name="say_remove">Retirer %1$s</string>
+    <string name="say_empty">Aucun mot pour l\'instant. Appuyez longuement sur un mot de la page et choisissez « Le dire ainsi », ou ajoutez-en un ici.</string>
+    <string name="listen_skip_notes">Sauter les numéros de notes</string>
+    <string name="listen_skip_notes_description">La voix ne lit pas les petits numéros qui renvoient aux notes.</string>
 </resources>

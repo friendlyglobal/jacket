@@ -122,20 +122,50 @@ pages, with a button to that app's page in the Play Store.
   rests on reading Readium's scripts and on a current web view with the newer parts taken away).
   A phone without the Play Store gets the same message, and its button opens the browser.
 
-## Next
-
 ### Say it this way (M)
-Fix how a name is pronounced, and skip note numbers when reading aloud.
+A name the voice gets wrong can be written for it the way it sounds ("Hermione" as
+"her-MY-oh-nee"), and the small numbers that point to notes are passed over when a book is read
+aloud.
 - Asked for on [MobileRead](https://www.mobileread.com/forums/showthread.php?p=4589542) and on
   [another reader app's board](https://voicereader.featurebase.app/p/option-to-correct-pronunciations-in-voice-reader).
-- Nothing like it exists in `voice/` yet.
-- Risk: word highlighting (`voice/SpeechTiming.kt`) has to stay lined up with the changed text.
+- Select a word on the page and choose "Say it this way", or add one from the list (the voice's
+  sheet in the reader, and Settings, under Listening). A word is fixed for the book that is open,
+  or for every book. "Hear it" says it in the voice that reads the book.
+- It is a plain respelling, so every voice reads it: Jacket's natural ones and the phone's own
+  (`voice/SayIt.kt`; both are read through `voice/SpokenEngine.kt`). A word saved with a capital
+  letter is a name, and is left alone where the page has it in small letters.
+- The ink stays on the page's own words: each word the voice reports is told back as its place on
+  the page, so "her-MY-oh-nee" inks in "Hermione".
+- Notes' numbers are the ones a tap already shows as a note over the page (`reader/Notes.kt`); they
+  are found in each chapter file the voice comes to (`reader/SpokenNotes.kt`). "Skip note numbers"
+  is a switch, on by default. A number after a full stop no longer runs two sentences together.
+- The words are kept in the library and in backups. Backups from 1.1 and earlier restore as before.
+- Still open: a fix is a respelling only (no way to give a word's sounds exactly, or its stress,
+  beyond capitals and hyphens, and how a voice takes those is its own affair); a word is matched as
+  written, so "Hermione" doesn't cover a language's other endings of the name; and a very long
+  chapter file (over about a second to read through) starts with its first notes' numbers still
+  read out.
 
 ### Book posture (S–M)
-Half-open, Jacket reads like a paperback, with the fold as the spine.
+Held half-open like a paperback, with the fold upright, the fold is the spine: a page on each
+side of it, nothing of the reader's across it.
 - [Play Books does this](https://goodereader.com/blog/electronic-readers/google-play-books-update-foldable).
-- Jacket reacts only to a flat fold (`ui/Expressive.kt:480`).
-- Open question: check what the two-page spread does half-open today.
+- What the spread did half-open before: exactly what it does flat. The two pages already sat
+  either side of the middle, 40dp clear of the fold with the usual margins; but the toolbar, the
+  chapter slider and the sheets lay across the fold, and text larger than about 112% was one page
+  running right across it.
+- Now the controls sit on the right-hand page, laid out as on a phone of that width, and sheets
+  come up there too; the book's name and the footer's line keep to the left-hand page. Text of any
+  size is two pages, and narrow margins widen just enough to keep the words 28dp from the fold
+  (`reader/BookPosture.kt`). A soft shadow marks the spine.
+- With the usual text size and margins the page itself doesn't change at all, so nothing is laid
+  out again as the phone is opened and closed. Tabletop, the closed cover, the flat spread and
+  phones that don't fold are as they were.
+- Still open: it has only been on the emulator (a real fold's crease may want more or less than
+  28dp); a book read by scrolling, a PDF and a comic are left as they are, across the fold; and the
+  small dialogs (the sleep timer's length, "Say it this way") still open in the middle.
+
+## Next
 
 ### Resume listening without opening the book, then Android Auto (L)
 A headphone button or the car resumes the current book even after Android has closed Jacket.

@@ -15,6 +15,7 @@ import io.github.friendlyglobal.jacket.importer.TextBook
 import io.github.friendlyglobal.jacket.importer.TextDecoding
 import io.github.friendlyglobal.jacket.importer.TextLayout
 import io.github.friendlyglobal.jacket.importer.TextSpot
+import io.github.friendlyglobal.jacket.voice.SayIt
 import io.github.friendlyglobal.jacket.voice.guessLanguage
 import io.github.friendlyglobal.jacket.widget.WidgetSync
 import kotlinx.coroutines.CoroutineScope
@@ -515,6 +516,29 @@ class Library(private val context: Context) : LibraryOrganizer {
         changed()
     }
 
+    /**
+     * "Say it this way": keeps how a word is to be said, in a book or (with no book) in every
+     * book. One way of saying a word in each: saving it again, or another with the same word,
+     * takes the place of the one that was there.
+     */
+    fun saveSaying(saying: Saying) {
+        val word = SayIt.tidy(saying.word)
+        val say = SayIt.tidy(saying.say)
+        if (word.isEmpty() || say.isEmpty()) return
+        val kept = saying.copy(word = word, say = say)
+        _state.update { s ->
+            val others = s.sayings.filterNot { it.id == kept.id || (it.bookId == kept.bookId && SayIt.sameWord(it.word, kept.word)) }
+            val at = s.sayings.indexOfFirst { it.id == kept.id }.takeIf { it >= 0 }?.coerceAtMost(others.size) ?: others.size
+            s.copy(sayings = others.subList(0, at) + kept + others.subList(at, others.size))
+        }
+        changed()
+    }
+
+    fun deleteSaying(id: String) {
+        _state.update { s -> s.copy(sayings = s.sayings.filterNot { it.id == id }) }
+        changed()
+    }
+
     /** Writes a backup of the library (not the book files) to [uri]. */
     suspend fun exportBackup(uri: Uri) = withContext(Dispatchers.IO) {
         val text = Backup.write(_state.value)
@@ -549,6 +573,7 @@ class Library(private val context: Context) : LibraryOrganizer {
                 books = s.books.filterNot { it.id == id },
                 currentId = s.currentId.takeIf { it != id },
                 annotations = s.annotations.filterNot { it.bookId == id },
+                sayings = s.sayings.filterNot { it.bookId == id },
             )
         }
         changed(saveNow = true)

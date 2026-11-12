@@ -6,7 +6,7 @@
     <string name="jump_back_to_page">Torna a pagina %1$d</string>
     <string name="jump_back_to_start">Torna all\'inizio</string>
     <string name="widget_player_name">Lettore di Jacket</string>
-    <string name="widget_player_description">Il tuo libro con un tasto play: ascolta, metti in pausa o riprendi dalla schermata Home.</string>
+    <string name="widget_player_description">Il tuo libro con un lettore: riproduci o metti in pausa, vai indietro o avanti di una frase e imposta il timer di spegnimento dalla schermata Home.</string>
     <string name="widget_shelf_name">Scaffale di Jacket</string>
     <string name="widget_shelf_description">I libri che stai leggendo, uno accanto all\'altro. Toccane uno per aprirlo.</string>
     <string name="widget_streak_name">Serie di lettura</string>

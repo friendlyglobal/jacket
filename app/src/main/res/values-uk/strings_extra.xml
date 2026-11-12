@@ -6,7 +6,7 @@
     <string name="jump_back_to_page">Назад до сторінки %1$d</string>
     <string name="jump_back_to_start">Назад до початку</string>
     <string name="widget_player_name">Плеєр Jacket</string>
-    <string name="widget_player_description">Ваша книжка з кнопкою відтворення: слухайте, ставте на паузу й продовжуйте просто з головного екрана.</string>
+    <string name="widget_player_description">Ваша книжка з плеєром: відтворення й пауза, на речення назад або вперед і таймер сну просто з головного екрана.</string>
     <string name="widget_shelf_name">Полиця Jacket</string>
     <string name="widget_shelf_description">Книжки, які ви читаєте, поруч. Торкніться книжки, щоб відкрити її.</string>
     <string name="widget_streak_name">Серія читання</string>

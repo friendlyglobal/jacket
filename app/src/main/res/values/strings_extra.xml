@@ -11,7 +11,7 @@
     <string name="jump_back_to_start">Back to the start</string>
     <!-- Widgets, as the launcher's widget picker names and describes them -->
     <string name="widget_player_name">Jacket player</string>
-    <string name="widget_player_description">Your book with a play button: read aloud, pause or resume from the home screen.</string>
+    <string name="widget_player_description">Your book with a player: play or pause, skip back or ahead a sentence, and set a sleep timer from the home screen.</string>
     <string name="widget_shelf_name">Jacket shelf</string>
     <string name="widget_shelf_description">The books you\'re reading, side by side. Tap one to open it.</string>
     <string name="widget_streak_name">Reading streak</string>

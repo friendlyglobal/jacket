@@ -6,7 +6,7 @@
     <string name="jump_back_to_page">Retour à la page %1$d</string>
     <string name="jump_back_to_start">Retour au début</string>
     <string name="widget_player_name">Lecteur Jacket</string>
-    <string name="widget_player_description">Votre livre avec un bouton lecture : écoutez, mettez en pause ou reprenez depuis l\'écran d\'accueil.</string>
+    <string name="widget_player_description">Votre livre avec un lecteur : lecture ou pause, une phrase en arrière ou en avant, et minuteur de veille depuis l\'écran d\'accueil.</string>
     <string name="widget_shelf_name">Étagère Jacket</string>
     <string name="widget_shelf_description">Les livres que vous lisez, côte à côte. Touchez-en un pour l\'ouvrir.</string>
     <string name="widget_streak_name">Série de lecture</string>

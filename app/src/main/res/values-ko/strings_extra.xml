@@ -6,7 +6,7 @@
     <string name="jump_back_to_page">%1$d페이지로 돌아가기</string>
     <string name="jump_back_to_start">처음으로 돌아가기</string>
     <string name="widget_player_name">Jacket 플레이어</string>
-    <string name="widget_player_description">재생 버튼이 있는 책: 홈 화면에서 바로 듣고, 일시중지하고, 다시 재생하세요.</string>
+    <string name="widget_player_description">플레이어가 있는 책: 홈 화면에서 재생하거나 일시중지하고, 한 문장 앞뒤로 이동하고, 수면 타이머를 맞추세요.</string>
     <string name="widget_shelf_name">Jacket 책장</string>
     <string name="widget_shelf_description">읽고 있는 책을 나란히 보여 줍니다. 탭하면 열립니다.</string>
     <string name="widget_streak_name">연속 독서</string>
