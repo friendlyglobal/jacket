@@ -1,0 +1,8 @@
+Jacket 1.2
+• Tekstbestanden en gedeelde tekst openen in de volledige lezer: pagina's, luisteren met het scherm uit, markeringen en zoeken
+• Zeg het zo: verbeter hoe de stem een naam uitspreekt
+• Voetnootnummers worden overgeslagen bij het voorlezen
+• Half open als een pocket, de vouw is de rug
+• Je leesoverzicht: week, maand en jaar, met een kalender
+• Overslaan en slaaptimer in de widget en op het buitenscherm van de Flip
+• Voorlezen pauzeert bij een oproep en gaat daarna verder

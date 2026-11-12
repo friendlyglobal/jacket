@@ -1,0 +1,8 @@
+Jacket 1.2
+• Metin dosyaları ve paylaşılan metin tam okuyucuda açılır: sayfalar, ekran kapalıyken dinleme, vurgular ve arama
+• Böyle söyle: sesin bir adı nasıl okuduğunu düzeltin
+• Sesli okurken dipnot numaraları atlanır
+• Cep kitabı gibi yarı açık, kıvrım kitabın sırtı olur
+• Okumalarınız: hafta, ay ve yıl, bir takvimle
+• Oynatıcı widget'ında ve Flip dış ekranında atlama ve uyku zamanlayıcısı
+• Sesli okuma aramada durur, sonra devam eder

@@ -1,0 +1,8 @@
+Jacket 1.2
+• Los archivos de texto y el texto compartido se abren en el lector completo: páginas, escucha con la pantalla apagada, subrayados, búsqueda
+• Decirlo así: corrige cómo dice la voz un nombre
+• Los números de notas se saltan al leer en voz alta
+• Medio abierto como un libro de bolsillo, el pliegue es el lomo
+• Tu lectura: semana, mes y año, con un calendario
+• Saltar y temporizador en el widget y la pantalla exterior del Flip
+• La lectura se pausa con una llamada y sigue después

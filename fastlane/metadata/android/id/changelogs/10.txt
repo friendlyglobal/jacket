@@ -1,0 +1,8 @@
+Jacket 1.2
+• File teks dan teks yang dibagikan terbuka di pembaca lengkap: halaman, mendengarkan dengan layar mati, sorotan, dan pencarian
+• Ucapkan begini: perbaiki cara suara mengucapkan nama
+• Nomor catatan kaki dilewati saat dibacakan
+• Setengah terbuka seperti buku saku, lipatan menjadi punggung buku
+• Riwayat baca Anda: minggu, bulan, dan tahun, dengan kalender
+• Lompat dan timer tidur di widget pemutar dan layar luar Flip
+• Bacaan berhenti saat ada panggilan dan lanjut setelahnya

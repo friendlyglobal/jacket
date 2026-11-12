@@ -1,0 +1,8 @@
+Jacket 1.2
+• Textdateien und geteilter Text öffnen sich im vollen Reader: Seiten, Vorlesen bei ausgeschaltetem Display, Markierungen, Suche
+• So aussprechen: lege fest, wie die Stimme einen Namen sagt
+• Fußnotenzahlen werden beim Vorlesen übersprungen
+• Halb aufgeklappt wie ein Taschenbuch, der Falz ist der Buchrücken
+• Dein Lesen: Woche, Monat und Jahr, mit Kalender
+• Überspringen und Sleep-Timer im Widget und auf dem Flip-Außendisplay
+• Vorlesen pausiert bei Anrufen und geht danach weiter

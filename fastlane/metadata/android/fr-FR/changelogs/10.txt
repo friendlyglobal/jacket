@@ -1,0 +1,8 @@
+Jacket 1.2
+• Les fichiers texte et le texte partagé s'ouvrent dans le lecteur complet : pages, écoute écran éteint, surlignages et recherche
+• Le dire ainsi : corrigez la prononciation d'un nom
+• Les numéros de notes sont sautés à voix haute
+• À demi ouvert comme un livre de poche, le pli devient le dos
+• Vos lectures : semaine, mois et année, avec un calendrier
+• Saut et minuterie dans le widget et l'écran externe du Flip
+• L'écoute se met en pause pendant un appel, puis reprend

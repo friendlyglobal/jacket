@@ -1,0 +1,8 @@
+Jacket 1.2
+• Arquivos de texto e textos compartilhados abrem no leitor completo: páginas, áudio com a tela desligada, destaques e busca
+• Falar deste jeito: ajuste como a voz fala um nome
+• Os números de notas de rodapé são pulados na leitura em voz alta
+• Meio aberto como um livro de bolso, a dobra vira a lombada
+• Sua leitura: semana, mês e ano, com um calendário
+• Pular e timer no widget do player e na tela externa do Flip
+• O áudio pausa numa ligação e continua depois
