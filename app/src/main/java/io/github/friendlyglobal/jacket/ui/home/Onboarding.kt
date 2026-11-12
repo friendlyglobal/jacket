@@ -107,6 +107,9 @@ import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
+import androidx.compose.ui.semantics.contentDescription
+import io.github.friendlyglobal.jacket.ui.asHeading
+import io.github.friendlyglobal.jacket.ui.decorative
 
 /** The welcome's pages. Which of them a phone sees, and in what order, depends on whether it folds. */
 private enum class Welcome { COVER, READ, LISTEN, YOURS, START }
@@ -214,7 +217,8 @@ private fun WelcomePage(page: Welcome, index: Int, pager: PagerState, foldable: 
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Box(Modifier.size(260.dp, 240.dp).parallax(index, pager), contentAlignment = Alignment.Center) {
+        // A moving picture of what the words under it say: a screen reader goes straight to the words.
+        Box(Modifier.size(260.dp, 240.dp).parallax(index, pager).decorative(), contentAlignment = Alignment.Center) {
             when (page) {
                 Welcome.COVER -> WearPicture(active)
                 Welcome.READ -> TurnPicture(active)
@@ -428,7 +432,7 @@ private fun YoursPage(index: Int, pager: PagerState, settings: Settings, onSetti
 private fun YoursLabel(text: String) {
     Text(
         text, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 4.dp, top = 20.dp, bottom = 10.dp),
+        modifier = Modifier.padding(start = 4.dp, top = 20.dp, bottom = 10.dp).asHeading(),
     )
 }
 
@@ -621,7 +625,9 @@ private fun AddPicture(active: Boolean) {
 private fun PageDots(pager: PagerState, pages: Int) {
     val on = MaterialTheme.colorScheme.primary
     val off = MaterialTheme.colorScheme.outlineVariant
-    Canvas(Modifier.size(width = (pages * 8 + (pages - 1) * 8 + 16).dp, height = 8.dp)) {
+    // The dots are a drawing: in words, "Page 2 of 4".
+    val place = stringResource(R.string.book_status_page_of, pager.currentPage + 1, pages)
+    Canvas(Modifier.size(width = (pages * 8 + (pages - 1) * 8 + 16).dp, height = 8.dp).semantics { contentDescription = place }) {
         val dot = 8.dp.toPx()
         val at = pager.currentPage + pager.currentPageOffsetFraction
         var x = 0f
