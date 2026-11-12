@@ -66,8 +66,8 @@ class PlayerWidgetReceiver : GlanceAppWidgetReceiver() {
 }
 
 /**
- * The book you're reading with a big play button: from the home screen, start it reading aloud,
- * or pause and resume the voice without opening Jacket. Books that can't be read aloud (PDFs,
+ * The book you're reading with a big play button: from the home screen, start it reading aloud
+ * from where you left it, and pause and resume the voice, all without opening Jacket. Books that can't be read aloud (PDFs,
  * comics) get an open button instead. One row high it's a bar; taller, the cover grows with it.
  *
  * While the book is being read aloud it is the player: a sentence back, a sentence on and the
@@ -493,9 +493,10 @@ class SleepTimerAction : ActionCallback {
 }
 
 /**
- * Play while the book isn't being read aloud opens it and starts the voice; once it is, play and
- * pause go straight to the read-aloud session, as a headphone button would. Starting the voice
- * again needs the service in the foreground; pausing it doesn't.
+ * Play and pause go straight to the read-aloud session, as a headphone button would, and the book
+ * stays shut: while it isn't being read aloud, Play starts the voice in it at the place it was
+ * left at, with nothing opened (see ListenService). Starting the voice needs the service in the
+ * foreground; pausing it doesn't.
  */
 @Composable
 private fun PlayButton(context: Context, book: Book, model: PlayerModel, size: Dp) {
@@ -509,7 +510,10 @@ private fun PlayButton(context: Context, book: Book, model: PlayerModel, size: D
             R.drawable.ic_widget_play, R.string.listen_play,
             actionStartService(mediaButtonIntent(context, KeyEvent.KEYCODE_MEDIA_PLAY), isForegroundService = true),
         )
-        else -> Triple(R.drawable.ic_widget_play, R.string.reader_listen, actionStartActivity(listenIntent(context, book)))
+        else -> Triple(
+            R.drawable.ic_widget_play, R.string.reader_listen,
+            actionStartService(mediaButtonIntent(context, KeyEvent.KEYCODE_MEDIA_PLAY), isForegroundService = true),
+        )
     }
     SquareIconButton(
         imageProvider = ImageProvider(icon),
