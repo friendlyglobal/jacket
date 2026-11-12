@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- "Your reading" (the page of reading time, opened from the library and from Settings). In a file of their own, beside strings.xml. -->
+<!-- "Your reading" (the page of reading time, opened from the library and from Settings) and what the reader says when the phone's web view is too old to show pages. In a file of their own, beside strings.xml. -->
 <resources>
     <!-- The page's title; also the row in Settings that opens it, and what a screen reader says a tap on the library's "24 min today" line does. -->
     <string name="reading_title">Your reading</string>
@@ -28,4 +28,9 @@
     <string name="reading_books_finished">Books finished</string>
     <string name="reading_finished_none">No books finished yet.</string>
 
+    <!-- Shown in place of a book's pages on a phone whose Android System WebView (the app that draws them) has never been updated. %1$s is that app's name, usually "Android System WebView", sometimes "Chrome". Then the button that opens its page in the Play Store. -->
+    <string name="reader_webview_old">To show pages, Jacket needs a newer %1$s. Update it from the Play Store, then open the book again.</string>
+    <string name="reader_webview_update">Open the Play Store</string>
+    <!-- The app's name where the phone doesn't give one. -->
+    <string name="reader_webview_name" translatable="false">Android System WebView</string>
 </resources>

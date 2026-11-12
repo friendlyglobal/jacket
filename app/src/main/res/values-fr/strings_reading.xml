@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- "Your reading" (the page of reading time). See values/strings_reading.xml for what each is for. -->
+<!-- "Your reading" (the page of reading time) and what the reader says when the phone's web view is too old to show pages. See values/strings_reading.xml for what each is for. -->
 <resources>
     <string name="reading_title">Vos lectures</string>
     <string name="settings_reading_description">Cette semaine, ce mois-ci et cette année, les jours où vous avez lu et les livres que vous avez terminés.</string>
@@ -19,4 +19,6 @@
     <string name="reading_calendar_hint">Plus la couleur est intense, plus vous avez lu ce jour-là.</string>
     <string name="reading_books_finished">Livres terminés</string>
     <string name="reading_finished_none">Aucun livre terminé pour l\'instant.</string>
+    <string name="reader_webview_old">Pour afficher les pages, Jacket a besoin d\'une version plus récente de %1$s. Mettez-la à jour depuis le Play Store, puis rouvrez le livre.</string>
+    <string name="reader_webview_update">Ouvrir le Play Store</string>
 </resources>

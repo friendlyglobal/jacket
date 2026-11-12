@@ -188,6 +188,9 @@ fun EpubReader(
     onCenterTap: () -> Unit,
 ) {
     val context = LocalContext.current
+    // The pages are the phone's web view's to draw. One too old for them can't page through a
+    // chapter: the reader says so, and how to update it, rather than open the book broken.
+    rememberOutdatedWebView()?.let { return WebViewTooOld(it, page) }
     val opened by produceState<Result<Opened>?>(null, book.id) {
         val result = runCatching {
             // Not cancellable: backing out mid-open must still hand the book over to be closed.
