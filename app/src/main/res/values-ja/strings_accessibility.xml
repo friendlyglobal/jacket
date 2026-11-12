@@ -8,4 +8,9 @@
     <string name="reading_text_larger">文字を大きく</string>
     <string name="reading_brightness">明るさ</string>
     <string name="reading_warmth">暖かさ</string>
+    <string name="color_yellow">黄色</string>
+    <string name="color_green">緑</string>
+    <string name="color_blue">青</string>
+    <string name="color_pink">ピンク</string>
+    <string name="color_purple">紫</string>
 </resources>

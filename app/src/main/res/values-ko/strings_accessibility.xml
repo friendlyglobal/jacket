@@ -8,4 +8,9 @@
     <string name="reading_text_larger">글자 크게</string>
     <string name="reading_brightness">밝기</string>
     <string name="reading_warmth">따뜻함</string>
+    <string name="color_yellow">노랑</string>
+    <string name="color_green">초록</string>
+    <string name="color_blue">파랑</string>
+    <string name="color_pink">분홍</string>
+    <string name="color_purple">보라</string>
 </resources>

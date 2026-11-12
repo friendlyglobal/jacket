@@ -8,4 +8,9 @@
     <string name="reading_text_larger">نص أكبر</string>
     <string name="reading_brightness">السطوع</string>
     <string name="reading_warmth">الدفء</string>
+    <string name="color_yellow">أصفر</string>
+    <string name="color_green">أخضر</string>
+    <string name="color_blue">أزرق</string>
+    <string name="color_pink">وردي</string>
+    <string name="color_purple">بنفسجي</string>
 </resources>

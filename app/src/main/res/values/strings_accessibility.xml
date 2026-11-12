@@ -14,4 +14,10 @@
     <!-- Two sliders in the reader's text settings: how bright the page is, and how warm (amber) its light. The same two things a swipe along the page's edges sets. -->
     <string name="reading_brightness">Brightness</string>
     <string name="reading_warmth">Warmth</string>
+    <!-- The colours a highlight can have, as a screen reader names them. -->
+    <string name="color_yellow">Yellow</string>
+    <string name="color_green">Green</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_pink">Pink</string>
+    <string name="color_purple">Purple</string>
 </resources>

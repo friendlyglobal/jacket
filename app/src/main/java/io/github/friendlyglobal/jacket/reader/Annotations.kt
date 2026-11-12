@@ -91,6 +91,16 @@ import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import androidx.annotation.StringRes
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 
 /** The page on screen, as a bookmark would remember it. */
 data class Place(
@@ -209,7 +219,8 @@ private fun ContentsList(nav: ReaderNav, haptics: Haptics, onPick: (TocItem) -> 
                 colors = ListItemDefaults.colors(
                     containerColor = if (current) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
                 ),
-                modifier = Modifier.padding(horizontal = 12.dp).clip(MaterialTheme.shapes.large),
+                // The chapter you're in is filled in for the eye, and said to be the one for the ear.
+                modifier = Modifier.padding(horizontal = 12.dp).clip(MaterialTheme.shapes.large).semantics { selected = current },
             ) {
                 Text(
                     item.title,
@@ -355,21 +366,31 @@ fun HighlightEditor(
             stringResource(R.string.notes_highlight_quote, annotation.text), style = MaterialTheme.typography.bodyLarge, fontStyle = FontStyle.Italic,
             maxLines = 4, overflow = TextOverflow.Ellipsis,
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        // Each colour is a choice with a name, and a full-size target around the dot that shows it.
+        Row(Modifier.selectableGroup(), verticalAlignment = Alignment.CenterVertically) {
             HighlightColor.entries.forEach { color ->
                 val selected = color == annotation.color
                 val shape = if (selected) MaterialShapes.Cookie4Sided.toShape() else CircleShape
+                val name = stringResource(color.label)
                 Box(
                     Modifier
-                        .size(if (selected) 44.dp else 36.dp)
-                        .clip(shape)
-                        .background(Color(color.argb))
-                        .border(2.dp, if (selected) MaterialTheme.colorScheme.onSurface else Color.Transparent, shape)
-                        .clickable {
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .selectable(selected = selected, role = Role.RadioButton) {
                             haptics.tick()
                             onChange(annotation.copy(color = color))
-                        },
-                )
+                        }
+                        .semantics { contentDescription = name },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(
+                        Modifier
+                            .size(if (selected) 44.dp else 36.dp)
+                            .clip(shape)
+                            .background(Color(color.argb))
+                            .border(2.dp, if (selected) MaterialTheme.colorScheme.onSurface else Color.Transparent, shape),
+                    )
+                }
             }
         }
         OutlinedTextField(
@@ -393,6 +414,17 @@ fun HighlightEditor(
         }
     }
 }
+
+/** What a highlight's colour is called, for a screen reader: the dots themselves say nothing. */
+@get:StringRes
+private val HighlightColor.label: Int
+    get() = when (this) {
+        HighlightColor.YELLOW -> R.string.color_yellow
+        HighlightColor.GREEN -> R.string.color_green
+        HighlightColor.BLUE -> R.string.color_blue
+        HighlightColor.PINK -> R.string.color_pink
+        HighlightColor.PURPLE -> R.string.color_purple
+    }
 
 /** Search inside the book: type, see results stream in, tap one to go there. */
 @Composable
@@ -449,6 +481,8 @@ fun SearchPanel(search: BookSearch, haptics: Haptics, onPick: (SearchHit) -> Uni
                         pluralStringResource(R.plurals.search_result_count, hits.size, hits.size)
                     },
                     style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    // Said once the search is done: how many were found is otherwise only seen.
+                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                 )
             }
         }
@@ -525,6 +559,11 @@ fun FinishedCard(
                     Text(
                         if (book.isFinished) stringResource(R.string.finished_title_finished) else stringResource(R.string.finished_title_end),
                         style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold,
+                        // It slides in under the last page: a screen reader says that it has.
+                        modifier = Modifier.semantics {
+                            heading()
+                            liveRegion = LiveRegionMode.Polite
+                        },
                     )
                     Text(book.title, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }

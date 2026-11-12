@@ -8,4 +8,9 @@
     <string name="reading_text_larger">Metni büyüt</string>
     <string name="reading_brightness">Parlaklık</string>
     <string name="reading_warmth">Sıcaklık</string>
+    <string name="color_yellow">Sarı</string>
+    <string name="color_green">Yeşil</string>
+    <string name="color_blue">Mavi</string>
+    <string name="color_pink">Pembe</string>
+    <string name="color_purple">Mor</string>
 </resources>

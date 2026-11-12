@@ -8,4 +8,9 @@
     <string name="reading_text_larger">Текст крупнее</string>
     <string name="reading_brightness">Яркость</string>
     <string name="reading_warmth">Теплота</string>
+    <string name="color_yellow">Жёлтый</string>
+    <string name="color_green">Зелёный</string>
+    <string name="color_blue">Синий</string>
+    <string name="color_pink">Розовый</string>
+    <string name="color_purple">Фиолетовый</string>
 </resources>

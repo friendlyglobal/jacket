@@ -8,4 +8,9 @@
     <string name="reading_text_larger">Texto más grande</string>
     <string name="reading_brightness">Brillo</string>
     <string name="reading_warmth">Calidez</string>
+    <string name="color_yellow">Amarillo</string>
+    <string name="color_green">Verde</string>
+    <string name="color_blue">Azul</string>
+    <string name="color_pink">Rosa</string>
+    <string name="color_purple">Morado</string>
 </resources>
