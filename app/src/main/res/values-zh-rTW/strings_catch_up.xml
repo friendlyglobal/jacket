@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">選擇資料夾</string>
     <string name="catch_up_setup_files_hint">無法選擇想用的資料夾？可以改為把這台裝置的檔案儲存到其中，再逐一加入其他裝置的檔案。</string>
     <string name="catch_up_setup_files">改為儲存檔案</string>
-    <string name="catch_up_failed">Jacket 無法再儲存到那裡。輕觸以重新選擇。</string>
+    <string name="catch_up_failed">Jacket 未能儲存到那裡，稍後會重試。要選擇其他位置，請關閉後重新開啟此功能。</string>
     <string name="catch_up_others">已找到的裝置</string>
     <string name="catch_up_others_none_folder">還沒有。請在另一台裝置上也開啟此功能，並選擇同一個資料夾。</string>
     <string name="catch_up_others_none_files">還沒有。請在另一台裝置上也開啟此功能，然後輕觸這裡選擇它儲存的檔案。</string>

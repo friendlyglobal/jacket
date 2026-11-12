@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">Escolher uma pasta</string>
     <string name="catch_up_setup_files_hint">Não consegue escolher a pasta que quer? Salve nela o arquivo deste dispositivo e depois adicione os arquivos dos outros, um a um.</string>
     <string name="catch_up_setup_files">Salvar um arquivo em vez disso</string>
-    <string name="catch_up_failed">O Jacket não consegue mais salvar ali. Toque para escolher de novo.</string>
+    <string name="catch_up_failed">O Jacket não conseguiu salvar ali e vai tentar de novo. Para escolher outro lugar, desative e ative isto de novo.</string>
     <string name="catch_up_others">Dispositivos encontrados</string>
     <string name="catch_up_others_none_folder">Nenhum ainda. Ative isto também no seu outro dispositivo, com a mesma pasta.</string>
     <string name="catch_up_others_none_files">Nenhum ainda. Ative isto também no seu outro dispositivo e depois toque aqui para escolher o arquivo que ele salvou.</string>

@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">Scegli una cartella</string>
     <string name="catch_up_setup_files_hint">Non riesci a scegliere la cartella che vuoi? Salva lì il file di questo dispositivo, poi aggiungi uno alla volta i file degli altri.</string>
     <string name="catch_up_setup_files">Salva un file, invece</string>
-    <string name="catch_up_failed">Jacket non riesce più a salvare lì. Tocca per scegliere di nuovo.</string>
+    <string name="catch_up_failed">Jacket non è riuscito a salvare lì e riproverà. Per scegliere un altro posto, disattiva e riattiva questa opzione.</string>
     <string name="catch_up_others">Dispositivi trovati</string>
     <string name="catch_up_others_none_folder">Ancora nessuno. Attiva questa opzione anche sull\'altro dispositivo, con la stessa cartella.</string>
     <string name="catch_up_others_none_files">Ancora nessuno. Attiva questa opzione anche sull\'altro dispositivo, poi tocca qui per scegliere il file che ha salvato.</string>

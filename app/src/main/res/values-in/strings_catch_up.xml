@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">Pilih folder</string>
     <string name="catch_up_setup_files_hint">Tidak bisa memilih folder yang Anda inginkan? Simpan saja file perangkat ini di dalamnya, lalu tambahkan file perangkat lain satu per satu.</string>
     <string name="catch_up_setup_files">Simpan file saja</string>
-    <string name="catch_up_failed">Jacket tidak bisa lagi menyimpan di sana. Ketuk untuk memilih lagi.</string>
+    <string name="catch_up_failed">Jacket tidak bisa menyimpan di sana dan akan mencoba lagi. Untuk memilih tempat lain, matikan lalu aktifkan lagi.</string>
     <string name="catch_up_others">Perangkat yang ditemukan</string>
     <string name="catch_up_others_none_folder">Belum ada. Aktifkan ini juga di perangkat Anda yang lain, dengan folder yang sama.</string>
     <string name="catch_up_others_none_files">Belum ada. Aktifkan ini juga di perangkat Anda yang lain, lalu ketuk di sini untuk memilih file yang disimpannya.</string>

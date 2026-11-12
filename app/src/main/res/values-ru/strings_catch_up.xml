@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">Выбрать папку</string>
     <string name="catch_up_setup_files_hint">Не получается выбрать нужную папку? Сохраните в ней файл этого устройства, а затем добавьте файлы остальных устройств по одному.</string>
     <string name="catch_up_setup_files">Сохранить файл вместо папки</string>
-    <string name="catch_up_failed">Jacket больше не может сохранять туда. Нажмите, чтобы выбрать заново.</string>
+    <string name="catch_up_failed">Jacket не смог сохранить туда и попробует ещё раз. Чтобы выбрать другое место, выключите и снова включите это.</string>
     <string name="catch_up_others">Найденные устройства</string>
     <string name="catch_up_others_none_folder">Пока нет. Включите это и на другом устройстве, выбрав ту же папку.</string>
     <string name="catch_up_others_none_files">Пока нет. Включите это и на другом устройстве, а затем нажмите здесь, чтобы выбрать сохранённый им файл.</string>

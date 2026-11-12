@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">फ़ोल्डर चुनें</string>
     <string name="catch_up_setup_files_hint">मनचाहा फ़ोल्डर नहीं चुन पा रहे? उसकी जगह इस डिवाइस की फ़ाइल उसमें सेव करें, फिर दूसरे डिवाइस की फ़ाइलें एक-एक करके जोड़ें।</string>
     <string name="catch_up_setup_files">इसके बजाय फ़ाइल सेव करें</string>
-    <string name="catch_up_failed">Jacket अब वहाँ सेव नहीं कर पा रहा। फिर से चुनने के लिए टैप करें।</string>
+    <string name="catch_up_failed">Jacket वहाँ सेव नहीं कर सका और फिर कोशिश करेगा। कोई और जगह चुनने के लिए इसे बंद करके फिर चालू करें।</string>
     <string name="catch_up_others">मिले हुए डिवाइस</string>
     <string name="catch_up_others_none_folder">अभी कोई नहीं। इसे अपने दूसरे डिवाइस पर भी चालू करें, उसी फ़ोल्डर के साथ।</string>
     <string name="catch_up_others_none_files">अभी कोई नहीं। इसे अपने दूसरे डिवाइस पर भी चालू करें, फिर उसकी सेव की हुई फ़ाइल चुनने के लिए यहाँ टैप करें।</string>

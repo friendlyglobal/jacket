@@ -84,11 +84,12 @@ internal fun CatchUpSettings(haptics: Haptics, modifier: Modifier = Modifier) {
         SegmentedListItem(
             checked = status.on,
             onCheckedChange = { on ->
-                when {
-                    // It couldn't write: the folder may have gone, or the permission with it.
-                    status.on && status.failed -> { haptics.tick(); setUp() }
-                    on -> { haptics.tick(); setUp() }
-                    else -> { haptics.toggle(false); catchUp.disable() }
+                if (on) {
+                    haptics.tick()
+                    setUp()
+                } else {
+                    haptics.toggle(false)
+                    catchUp.disable()
                 }
             },
             modifier = Modifier.asSwitch(),

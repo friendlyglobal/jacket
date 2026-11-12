@@ -135,8 +135,16 @@ class CatchUpRulesTest {
         val fold = fold()
         val tablet = tablet(dune = 0.12f).also { it.round() }
         assertEquals(0.12f, fold.offers(tablet).getValue("f-dune").place.progress, 0f)
-        // And a book the other device never opened tells no place at all.
-        assertNull(DeviceFiles.read(tablet.file)!!.books.first { it.id == "t-pdf" }.place)
+        // And a book the other device never opened, with no bookmarks and in no collection, isn't told of at all.
+        assertEquals(listOf("t-dune"), DeviceFiles.read(tablet.file)!!.books.map { it.id })
+        // Put in a collection, it is, without a place.
+        tablet.change { s ->
+            s.copy(collections = listOf(BookCollection("c1", "Later", 3)), books = s.books.map { if (it.id == "t-pdf") it.copy(collections = setOf("c1")) else it })
+        }
+        tablet.round()
+        val unopened = DeviceFiles.read(tablet.file)!!.books.first { it.id == "t-pdf" }
+        assertNull(unopened.place)
+        assertEquals(setOf("c1"), unopened.collections)
     }
 
     @Test

@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">Wybierz folder</string>
     <string name="catch_up_setup_files_hint">Nie możesz wybrać folderu, którego chcesz? Zapisz w nim plik tego urządzenia, a potem dodaj po kolei pliki pozostałych urządzeń.</string>
     <string name="catch_up_setup_files">Zamiast tego zapisz plik</string>
-    <string name="catch_up_failed">Jacket nie może już tam zapisywać. Kliknij, aby wybrać ponownie.</string>
+    <string name="catch_up_failed">Jacket nie mógł tam zapisać i spróbuje ponownie. Aby wybrać inne miejsce, wyłącz to i włącz ponownie.</string>
     <string name="catch_up_others">Znalezione urządzenia</string>
     <string name="catch_up_others_none_folder">Na razie żadnego. Włącz to też na drugim urządzeniu, wybierając ten sam folder.</string>
     <string name="catch_up_others_none_files">Na razie żadnego. Włącz to też na drugim urządzeniu, a potem kliknij tutaj, aby wybrać plik, który zapisało.</string>

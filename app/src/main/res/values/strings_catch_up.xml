@@ -13,7 +13,8 @@
     <!-- For apps that only let single files be chosen, not folders. The button, and the line above it. -->
     <string name="catch_up_setup_files_hint">Can\'t choose the folder you want? Save this device\'s file in it instead, then add the other devices\' files one by one.</string>
     <string name="catch_up_setup_files">Save a file instead</string>
-    <string name="catch_up_failed">Jacket can\'t save there any more. Tap to choose again.</string>
+    <!-- This device's file couldn't be written: a USB stick is out, or the folder has gone. -->
+    <string name="catch_up_failed">Jacket couldn\'t save there, and will try again. To choose another place, turn this off and on.</string>
     <!-- The row that lists the reader's other devices by name, and what it says while there are none. -->
     <string name="catch_up_others">Devices found</string>
     <string name="catch_up_others_none_folder">None yet. Do the same on your other device, with the same folder.</string>

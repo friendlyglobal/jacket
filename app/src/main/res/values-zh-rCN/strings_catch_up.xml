@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">选择文件夹</string>
     <string name="catch_up_setup_files_hint">选不了想用的文件夹？可以改为把这台设备的文件保存到其中，再逐个添加其他设备的文件。</string>
     <string name="catch_up_setup_files">改为保存文件</string>
-    <string name="catch_up_failed">Jacket 无法再保存到那里。点按以重新选择。</string>
+    <string name="catch_up_failed">Jacket 未能保存到那里，稍后会重试。要选择其他位置，请关闭后重新开启此功能。</string>
     <string name="catch_up_others">已找到的设备</string>
     <string name="catch_up_others_none_folder">还没有。请在另一台设备上也开启此功能，并选择同一个文件夹。</string>
     <string name="catch_up_others_none_files">还没有。请在另一台设备上也开启此功能，然后点按这里选择它保存的文件。</string>

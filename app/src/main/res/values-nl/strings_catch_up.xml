@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">Map kiezen</string>
     <string name="catch_up_setup_files_hint">Kun je de map die je wilt niet kiezen? Sla het bestand van dit apparaat er dan in op en voeg daarna de bestanden van de andere apparaten een voor een toe.</string>
     <string name="catch_up_setup_files">In plaats daarvan een bestand opslaan</string>
-    <string name="catch_up_failed">Jacket kan daar niet meer opslaan. Tik om opnieuw te kiezen.</string>
+    <string name="catch_up_failed">Jacket kon daar niet opslaan en probeert het opnieuw. Zet dit uit en weer aan om een andere plek te kiezen.</string>
     <string name="catch_up_others">Gevonden apparaten</string>
     <string name="catch_up_others_none_folder">Nog geen. Zet dit ook aan op je andere apparaat, met dezelfde map.</string>
     <string name="catch_up_others_none_files">Nog geen. Zet dit ook aan op je andere apparaat en tik dan hier om het bestand te kiezen dat het heeft opgeslagen.</string>

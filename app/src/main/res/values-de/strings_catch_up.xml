@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">Ordner wählen</string>
     <string name="catch_up_setup_files_hint">Der gewünschte Ordner lässt sich nicht wählen? Speichere stattdessen die Datei dieses Geräts darin und füge dann die Dateien der anderen Geräte einzeln hinzu.</string>
     <string name="catch_up_setup_files">Stattdessen eine Datei speichern</string>
-    <string name="catch_up_failed">Jacket kann dort nicht mehr speichern. Tippe, um neu zu wählen.</string>
+    <string name="catch_up_failed">Jacket konnte dort nicht speichern und versucht es erneut. Um einen anderen Ort zu wählen, schalte das aus und wieder ein.</string>
     <string name="catch_up_others">Gefundene Geräte</string>
     <string name="catch_up_others_none_folder">Noch keins. Schalte das auch auf deinem anderen Gerät ein, mit demselben Ordner.</string>
     <string name="catch_up_others_none_files">Noch keins. Schalte das auch auf deinem anderen Gerät ein und tippe dann hier, um die Datei zu wählen, die es gespeichert hat.</string>

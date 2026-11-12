@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">اختيار مجلد</string>
     <string name="catch_up_setup_files_hint">تعذّر اختيار المجلد الذي تريده؟ احفظ ملف هذا الجهاز فيه بدلًا من ذلك، ثم أضف ملفات الأجهزة الأخرى واحدًا تلو الآخر.</string>
     <string name="catch_up_setup_files">حفظ ملف بدلًا من ذلك</string>
-    <string name="catch_up_failed">لم يعد Jacket قادرًا على الحفظ هناك. انقر للاختيار مجددًا.</string>
+    <string name="catch_up_failed">تعذّر على Jacket الحفظ هناك، وسيحاول مجددًا. لاختيار مكان آخر، أوقف هذا ثم شغّله من جديد.</string>
     <string name="catch_up_others">الأجهزة التي عُثر عليها</string>
     <string name="catch_up_others_none_folder">لا يوجد أي جهاز بعد. فعّل هذا على جهازك الآخر أيضًا، مع المجلد نفسه.</string>
     <string name="catch_up_others_none_files">لا يوجد أي جهاز بعد. فعّل هذا على جهازك الآخر أيضًا، ثم انقر هنا لاختيار الملف الذي حفظه.</string>

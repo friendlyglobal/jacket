@@ -156,6 +156,7 @@ internal object CatchUpRules {
         val kept = library.collections.mapTo(HashSet()) { it.id }
         val next = mine.rev + 1
         val shared = ArrayList<SharedBook>(library.books.size)
+        val marked = marks.values.mapNotNullTo(HashSet()) { it.annotation?.bookId }
         val books = library.books.map { book ->
             val told = toldBooks[book.id]
             var set: Set<String> = book.collections.filterTo(HashSet()) { it in kept }
@@ -176,10 +177,14 @@ internal object CatchUpRules {
                     set = set + there
                 }
             }
-            shared += SharedBook(
-                id = book.id, title = book.title, file = book.sourceName, size = book.sizeBytes, sha256 = book.sha256,
-                place = placeOf(book, told?.place, chapters[book.id], next), collections = set, shelved = shelved,
-            )
+            val place = placeOf(book, told?.place, chapters[book.id], next)
+            // A book never opened, with no bookmarks and in no collection, has nothing to tell.
+            if (place != null || shelved > 0 || book.id in marked) {
+                shared += SharedBook(
+                    id = book.id, title = book.title, file = book.sourceName, size = book.sizeBytes, sha256 = book.sha256,
+                    place = place, collections = set, shelved = shelved,
+                )
+            }
             if (set == book.collections) book else book.copy(collections = set)
         }
         if (books != library.books) library = library.copy(books = books)

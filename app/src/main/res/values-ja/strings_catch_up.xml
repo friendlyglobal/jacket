@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">フォルダを選択</string>
     <string name="catch_up_setup_files_hint">使いたいフォルダを選べない場合は、代わりにこのデバイスのファイルをそこに保存し、ほかのデバイスのファイルを 1 つずつ追加してください。</string>
     <string name="catch_up_setup_files">代わりにファイルを保存</string>
-    <string name="catch_up_failed">Jacket はそこに保存できなくなりました。タップして選び直してください。</string>
+    <string name="catch_up_failed">Jacket はそこに保存できませんでした。もう一度試みます。別の場所を選ぶには、この機能をオフにしてからオンにし直してください。</string>
     <string name="catch_up_others">見つかったデバイス</string>
     <string name="catch_up_others_none_folder">まだありません。もう一方のデバイスでも、同じフォルダを選んでオンにしてください。</string>
     <string name="catch_up_others_none_files">まだありません。もう一方のデバイスでもオンにしてから、ここをタップして、そのデバイスが保存したファイルを選んでください。</string>

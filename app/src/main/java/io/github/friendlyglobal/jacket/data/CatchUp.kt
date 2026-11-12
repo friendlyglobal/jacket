@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.util.AtomicFile
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -72,7 +73,7 @@ internal class CatchUp(private val context: Context, private val library: Librar
         /** What this device is called on the others. */
         val device: String = "",
         val writtenAt: Long = 0L,
-        /** This device's file couldn't be written: the folder may have gone, or the permission with it. */
+        /** This device's file couldn't be written last time: the folder isn't there just now (a USB stick taken out), or has gone, or the permission with it. It is tried again at every round. */
         val failed: Boolean = false,
         val others: List<Other> = emptyList(),
     )
@@ -90,11 +91,14 @@ internal class CatchUp(private val context: Context, private val library: Librar
     private val prefs = context.getSharedPreferences("catch_up", Context.MODE_PRIVATE)
     private val stateFile = AtomicFile(File(context.noBackupFilesDir, "catch-up.json"))
 
+    /** Whatever goes wrong here is logged and tried again at the next round: catching up never takes Jacket down with it. */
+    private val failures = CoroutineExceptionHandler { _, e -> Log.e(TAG, "Catching up failed", e) }
+
     /** One thing at a time: everything this device knows of the others is only touched here. */
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO.limitedParallelism(1))
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO.limitedParallelism(1) + failures)
 
     /** Files are read apart from that, so that a folder slow to answer (no signal) holds nothing else up. */
-    private val readers = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val readers = CoroutineScope(SupervisorJob() + Dispatchers.IO + failures)
 
     private val _status = MutableStateFlow(Status(on = isOn, folder = prefs.contains(TREE), failed = prefs.getBoolean(FAILED, false)))
     val status: StateFlow<Status> = _status.asStateFlow()
@@ -413,8 +417,8 @@ internal class CatchUp(private val context: Context, private val library: Librar
     private fun write(config: Config) {
         val resolver = context.contentResolver
         val now = System.currentTimeMillis()
-        val bytes = DeviceFiles.write(mine.copy(writtenAt = now)).toByteArray(Charsets.UTF_8)
         val length = runCatching {
+            val bytes = DeviceFiles.write(mine.copy(writtenAt = now)).toByteArray(Charsets.UTF_8)
             val known = config.own ?: prefs.getString(OWN, null)?.toUri()
             // Some apps holding files won't empty one as it is opened: see [WholeFile].
             known?.let { resolver.writeWhole(it, bytes, atLeast = prefs.getInt(LENGTH, 0).toLong()) }
@@ -445,18 +449,16 @@ internal class CatchUp(private val context: Context, private val library: Librar
             return
         }
         val resolver = context.contentResolver
-        val shown = config.tree?.let { DocumentsContract.buildDocumentUriUsingTree(it, DocumentsContract.getTreeDocumentId(it)) } ?: config.own
-        val where = shown?.let { uri ->
-            runCatching {
-                resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { if (it.moveToFirst()) it.getString(0) else null }
-            }.getOrNull()
-        }
+        val where = runCatching {
+            val shown = config.tree?.let { DocumentsContract.buildDocumentUriUsingTree(it, DocumentsContract.getTreeDocumentId(it)) } ?: config.own
+            shown?.let { uri -> resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { if (it.moveToFirst()) it.getString(0) else null } }
+        }.getOrNull()
         val place = runCatching {
             val pm = context.packageManager
             (config.tree ?: config.own)?.authority?.let { pm.resolveContentProvider(it, 0)?.loadLabel(pm)?.toString() }
         }.getOrNull()
         // The right to write there is this device's, and can be taken away (the folder removed, the app holding it reinstalled).
-        val held = (config.tree ?: config.own).let { uri -> resolver.persistedUriPermissions.any { it.uri == uri && it.isWritePermission } }
+        val held = runCatching { (config.tree ?: config.own).let { uri -> resolver.persistedUriPermissions.any { it.uri == uri && it.isWritePermission } } }.getOrDefault(true)
         _status.value = Status(
             on = true, folder = config.tree != null, where = where?.takeIf { it.isNotBlank() }, place = place, device = mine.name,
             writtenAt = prefs.getLong(WRITTEN_AT, 0L), failed = prefs.getBoolean(FAILED, false) || !held,

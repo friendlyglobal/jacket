@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">Elegir carpeta</string>
     <string name="catch_up_setup_files_hint">¿No puedes elegir la carpeta que quieres? Guarda en ella el archivo de este dispositivo y luego añade uno a uno los archivos de los demás.</string>
     <string name="catch_up_setup_files">Guardar un archivo en su lugar</string>
-    <string name="catch_up_failed">Jacket ya no puede guardar ahí. Toca para volver a elegir.</string>
+    <string name="catch_up_failed">Jacket no pudo guardar ahí y lo intentará de nuevo. Para elegir otro lugar, desactívalo y vuelve a activarlo.</string>
     <string name="catch_up_others">Dispositivos encontrados</string>
     <string name="catch_up_others_none_folder">Ninguno todavía. Actívalo también en tu otro dispositivo, con la misma carpeta.</string>
     <string name="catch_up_others_none_files">Ninguno todavía. Actívalo también en tu otro dispositivo y luego toca aquí para elegir el archivo que guardó.</string>

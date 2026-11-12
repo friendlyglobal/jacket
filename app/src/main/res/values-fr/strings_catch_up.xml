@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">Choisir un dossier</string>
     <string name="catch_up_setup_files_hint">Impossible de choisir le dossier voulu ? Enregistrez-y plutôt le fichier de cet appareil, puis ajoutez un par un les fichiers des autres appareils.</string>
     <string name="catch_up_setup_files">Enregistrer un fichier à la place</string>
-    <string name="catch_up_failed">Jacket ne peut plus enregistrer à cet endroit. Touchez pour choisir à nouveau.</string>
+    <string name="catch_up_failed">Jacket n\'a pas pu enregistrer à cet endroit et réessaiera. Pour choisir un autre endroit, désactivez puis réactivez cette option.</string>
     <string name="catch_up_others">Appareils trouvés</string>
     <string name="catch_up_others_none_folder">Aucun pour l\'instant. Activez aussi cette option sur votre autre appareil, avec le même dossier.</string>
     <string name="catch_up_others_none_files">Aucun pour l\'instant. Activez aussi cette option sur votre autre appareil, puis touchez ici pour choisir le fichier qu\'il a enregistré.</string>

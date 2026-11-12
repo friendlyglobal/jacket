@@ -9,7 +9,7 @@
     <string name="catch_up_choose_folder">Klasör seç</string>
     <string name="catch_up_setup_files_hint">İstediğiniz klasörü seçemiyor musunuz? Bunun yerine bu cihazın dosyasını oraya kaydedin, ardından diğer cihazların dosyalarını sırayla ekleyin.</string>
     <string name="catch_up_setup_files">Bunun yerine dosya kaydet</string>
-    <string name="catch_up_failed">Jacket artık oraya kaydedemiyor. Yeniden seçmek için dokunun.</string>
+    <string name="catch_up_failed">Jacket oraya kaydedemedi, yeniden deneyecek. Başka bir yer seçmek için bunu kapatıp yeniden açın.</string>
     <string name="catch_up_others">Bulunan cihazlar</string>
     <string name="catch_up_others_none_folder">Henüz yok. Bunu diğer cihazınızda da aynı klasörle açın.</string>
     <string name="catch_up_others_none_files">Henüz yok. Bunu diğer cihazınızda da açın, ardından kaydettiği dosyayı seçmek için buraya dokunun.</string>
