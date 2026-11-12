@@ -1,0 +1,8 @@
+Jacket 1.3
+• Putar dari headphone, notifikasi, atau widget, bahkan saat Jacket tertutup
+• PDF dibacakan, halaman ikut berganti
+• Cari di dalam PDF, dan buka PDF yang dilindungi sandi
+• Buku FB2 terbuka di pembaca lengkap
+• Lanjutkan antarperangkat lewat folder yang disinkronkan aplikasi Anda
+• Sorot atau tambah catatan tanpa menekan lama
+• Persentase tidak lagi mundur sendiri

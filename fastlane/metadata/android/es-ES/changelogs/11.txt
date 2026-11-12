@@ -1,0 +1,8 @@
+Jacket 1.3
+• Reproduce desde los auriculares, la notificación o el widget, aunque Jacket esté cerrado
+• Los PDF se leen en voz alta y las páginas pasan solas
+• Búsqueda en PDF, y PDF protegidos con contraseña
+• Los libros FB2 se abren en el lector completo
+• Continuar entre dispositivos, con una carpeta que sincroniza tu app
+• Subraya o añade una nota sin mantener pulsado
+• El porcentaje nunca retrocede por sí solo

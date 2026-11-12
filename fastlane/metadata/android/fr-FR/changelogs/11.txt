@@ -1,0 +1,8 @@
+Jacket 1.3
+• Lecture depuis les écouteurs, la notification ou le widget, même Jacket fermé
+• Les PDF sont lus à voix haute, les pages tournent avec la voix
+• Recherche dans les PDF, et PDF protégés par mot de passe
+• Les livres FB2 s'ouvrent dans le lecteur complet
+• Continuer d'un appareil à l'autre, via un dossier synchronisé
+• Surligner ou noter sans appui long
+• Le pourcentage ne recule jamais tout seul

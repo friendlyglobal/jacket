@@ -1,6 +1,6 @@
 # Jacket Privacy Policy
 
-**Effective date: 10 November 2026**
+**Effective date: 12 November 2026**
 
 Jacket is a free, open-source e-reader for Android, developed at
 [github.com/friendlyglobal/jacket](https://github.com/friendlyglobal/jacket). This policy explains

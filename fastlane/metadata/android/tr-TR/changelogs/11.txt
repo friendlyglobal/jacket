@@ -1,0 +1,8 @@
+Jacket 1.3
+• Jacket kapalıyken bile kulaklıktan, bildirimden veya widget'tan oynatın
+• PDF'ler sesli okunur, sayfalar sesle birlikte çevrilir
+• PDF içinde arama ve parola korumalı PDF'ler
+• FB2 kitaplar tam okuyucuda açılır
+• Eşitleme uygulamanızın tuttuğu bir klasörle cihazlar arasında kaldığınız yerden devam
+• Uzun basmadan vurgu veya not ekleyin
+• Yüzde artık kendiliğinden geri gitmez

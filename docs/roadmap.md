@@ -167,7 +167,7 @@ side of it, nothing of the reader's across it.
   28dp); a book read by scrolling, a PDF and a comic are left as they are, across the fold; and the
   small dialogs (the sleep timer's length, "Say it this way") still open in the middle.
 
-## Coming in 1.3
+## Shipped in 1.3 (12 November 2026)
 
 ### Resume listening without opening the book (L)
 A headphone button, the notification, the lock screen or the player widget starts the voice in the
@@ -371,14 +371,13 @@ Choose a book on the car's screen and have it read from where it was left.
   (they need a content provider), and a run in a real car or the Desktop Head Unit.
 - Risk: Android Auto apps get their own Play review, on every release from then on.
 
-### Earlier ideas
-- A natural voice for Chinese, and listening to a book in another language, translated on the
-  phone.
-- "Currently reading" from Hardcover and Open Library. Jacket has no internet permission, so this
-  would have to come through a file or another app, not a direct connection.
-- ISBN barcode scanning to set a cover for a paper book.
-
 ## Not planned
+- **A natural voice for Chinese:** a voice that reads Chinese well would push the app past
+  Google Play's 200 MB download limit (see Size budget). The phone's own voice reads Chinese.
+- **Listening to a book in another language, translated on the phone:** translation on the
+  phone needs either the internet or models far larger than the whole app.
+- **"Currently reading" from Hardcover and Open Library, and ISBN scanning for covers:** both
+  need the internet, which Jacket doesn't use. Jacket already makes covers and lets you design one.
 - **Cloud sync, accounts, online catalogues (OPDS), fetching web articles:** all need the internet.
   Handing a word off to a dictionary or translate app already works (`reader/EpubReader.kt:718`).
 - **Orientation lock:** Android 16 ignores it on screens 600dp and wider
