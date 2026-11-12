@@ -600,7 +600,7 @@ private fun PagedList(
 
 /** How near the top or the foot of the screen a finger choosing words makes the pages move, and how fast (of how far past that it is, each frame). */
 private val EDGE_SCROLL = 56.dp
-private const val EDGE_SCROLL_SPEED = 0.35f
+private const val EDGE_SCROLL_SPEED = 0.12f
 
 /** A finger this near the middle of a selection handle takes hold of it. */
 private val HANDLE_REACH = 26.dp
