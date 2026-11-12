@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="list_separator">،\u0020</string>
+    <string name="reader_show_controls">إظهار عناصر التحكم</string>
+    <string name="reader_hide_controls">إخفاء عناصر التحكم</string>
+    <string name="reader_place_in_book">الموضع في الكتاب</string>
+    <string name="reading_text_smaller">نص أصغر</string>
+    <string name="reading_text_larger">نص أكبر</string>
+    <string name="reading_brightness">السطوع</string>
+    <string name="reading_warmth">الدفء</string>
+    <string name="color_yellow">أصفر</string>
+    <string name="color_green">أخضر</string>
+    <string name="color_blue">أزرق</string>
+    <string name="color_pink">وردي</string>
+    <string name="color_purple">بنفسجي</string>
+</resources>

@@ -162,7 +162,6 @@
     <string name="reading_text_size_sample">가</string>
     <string name="reading_typeface">글꼴</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">선택됨</string>
     <string name="reading_page">페이지</string>
     <string name="reading_layout">레이아웃</string>
     <string name="reading_layout_hint">책처럼 페이지를 넘깁니다. 스와이프하거나 가장자리를 탭하세요. 펼치면 두 페이지가 나란히 표시됩니다.</string>
@@ -193,8 +192,6 @@
     <string name="reader_search">책에서 검색</string>
     <string name="reader_bookmark_add">이 페이지 북마크</string>
     <string name="reader_bookmark_remove">북마크 삭제</string>
-    <string name="reader_outer_show">외부 화면에 표지 표시</string>
-    <string name="reader_outer_hide">외부 화면에서 표지 숨기기</string>
     <string name="reader_text_settings">텍스트 및 페이지 설정</string>
     <string name="reader_contents_and_notes">목차, 북마크, 하이라이트</string>
     <string name="reader_notes">북마크 및 하이라이트</string>

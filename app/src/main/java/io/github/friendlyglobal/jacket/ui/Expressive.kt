@@ -28,11 +28,18 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
@@ -320,36 +327,56 @@ fun <T> ConnectedChoice(
     check: Boolean = true,
 ) {
     val haptics = rememberHaptics()
-    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
+    // With the phone's font size turned up, three or four words side by side run out of room on
+    // a narrow screen ("Co", "Book", "Highl"). Then each button keeps its room for its word: no
+    // tick or swatch beside it (the fill and shape still say which is chosen), less padding, and
+    // the word as large as fits.
+    val density = LocalDensity.current
+    var width by remember { mutableIntStateOf(0) }
+    val each = with(density) { width.toDp() } / options.size.coerceAtLeast(1)
+    val tight = density.fontScale > 1.15f && width > 0 && each < TIGHT_BELOW * density.fontScale
+    val fitted = fitOnOneLine(MaterialTheme.typography.labelLarge)
+    // One choice out of these: a screen reader counts them ("2 of 4") and knows picking one unpicks the rest.
+    Row(
+        modifier.fillMaxWidth().onSizeChanged { width = it.width }.selectableGroup(),
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+    ) {
         options.forEachIndexed { index, option ->
             val checked = option == selected
-            ToggleButton(
-                checked = checked,
-                onCheckedChange = {
-                    if (!checked) {
-                        haptics.tick()
-                        onSelect(option)
-                    }
-                },
-                modifier = Modifier.weight(1f).semantics { role = Role.RadioButton },
-                shapes = when (index) {
-                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                    options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                },
-            ) {
-                if (checked && check) {
+            val content: @Composable RowScope.() -> Unit = {
+                if (!tight && checked && check) {
                     Icon(JacketIcons.Check, null, Modifier.size(ButtonDefaults.IconSize))
                     Spacer(Modifier.width(6.dp))
-                } else if (leading != null && !checked) {
+                } else if (!tight && leading != null && !checked) {
                     leading(option)
                     Spacer(Modifier.width(6.dp))
                 }
-                Text(label(option), maxLines = 1)
+                Text(label(option), maxLines = 1, softWrap = false, autoSize = fitted)
+            }
+            val onCheckedChange = { _: Boolean ->
+                if (!checked) {
+                    haptics.tick()
+                    onSelect(option)
+                }
+            }
+            val button = Modifier.weight(1f).semantics { role = Role.RadioButton }
+            val shapes = when (index) {
+                0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+            }
+            if (tight) {
+                ToggleButton(checked, onCheckedChange, button, shapes = shapes, contentPadding = TightPadding, content = content)
+            } else {
+                ToggleButton(checked, onCheckedChange, button, shapes = shapes, content = content)
             }
         }
     }
 }
+
+/** A button of a [ConnectedChoice] narrower than this, per unit of font scale, has room for its word and nothing else. */
+private val TIGHT_BELOW = 76.dp
+private val TightPadding = PaddingValues(horizontal = 6.dp)
 
 @Composable
 fun ColorSwatch(color: Color) {
@@ -368,12 +395,19 @@ data class PageColors(val background: Color, val text: Color, val secondary: Col
 @Composable
 fun rememberPageColors(choice: PageColor): PageColors {
     val scheme = MaterialTheme.colorScheme
-    return when (choice) {
-        PageColor.BOOK -> PageColors(scheme.surface, scheme.onSurface, scheme.onSurfaceVariant, scheme.primary)
-        PageColor.PAPER -> PageColors(Color(0xFFF4ECDB), Color(0xFF3A2F23), Color(0xFF7B6B57), Color(0xFF8C5A2B))
-        PageColor.DARK -> PageColors(Color(0xFF1E1D1B), Color(0xFFDDD6CA), Color(0xFF9D968B), Color(0xFFE3B86C))
-        PageColor.BLACK -> PageColors(Color.Black, Color(0xFFCAC5BD), Color(0xFF86817A), Color(0xFFE3B86C))
-    }
+    return fixedPageColors(choice) ?: PageColors(scheme.surface, scheme.onSurface, scheme.onSurfaceVariant, scheme.primary)
+}
+
+/**
+ * The pages that are the same in every book: paper, dark and black. (Null for "Book", which takes
+ * its colours from the book's cover.) Every ink on them is readable on its page: at least 4.5 to
+ * 1, the small quiet line under the page included.
+ */
+internal fun fixedPageColors(choice: PageColor): PageColors? = when (choice) {
+    PageColor.BOOK -> null
+    PageColor.PAPER -> PageColors(Color(0xFFF4ECDB), Color(0xFF3A2F23), Color(0xFF766651), Color(0xFF8C5A2B))
+    PageColor.DARK -> PageColors(Color(0xFF1E1D1B), Color(0xFFDDD6CA), Color(0xFF9D968B), Color(0xFFE3B86C))
+    PageColor.BLACK -> PageColors(Color.Black, Color(0xFFCAC5BD), Color(0xFF86817A), Color(0xFFE3B86C))
 }
 
 /** Swatch shown for each page color in pickers. */

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="list_separator">,\u0020</string>
+    <string name="reader_show_controls">Bediening tonen</string>
+    <string name="reader_hide_controls">Bediening verbergen</string>
+    <string name="reader_place_in_book">Plaats in het boek</string>
+    <string name="reading_text_smaller">Tekst kleiner</string>
+    <string name="reading_text_larger">Tekst groter</string>
+    <string name="reading_brightness">Helderheid</string>
+    <string name="reading_warmth">Warmte</string>
+    <string name="color_yellow">Geel</string>
+    <string name="color_green">Groen</string>
+    <string name="color_blue">Blauw</string>
+    <string name="color_pink">Roze</string>
+    <string name="color_purple">Paars</string>
+</resources>

@@ -197,7 +197,6 @@
     <string name="reading_text_size_sample">أ</string>
     <string name="reading_typeface">نوع الخط</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">محدّد</string>
     <string name="reading_page">الصفحة</string>
     <string name="reading_layout">التخطيط</string>
     <string name="reading_layout_hint">تُقلَب الصفحات كما في الكتاب: اسحب أو انقر على الحواف. وعند فتح الهاتف، تظهر صفحتان متجاورتان.</string>
@@ -228,8 +227,6 @@
     <string name="reader_search">البحث في الكتاب</string>
     <string name="reader_bookmark_add">إضافة إشارة مرجعية لهذه الصفحة</string>
     <string name="reader_bookmark_remove">إزالة الإشارة المرجعية</string>
-    <string name="reader_outer_show">عرض الغلاف على الشاشة الخارجية</string>
-    <string name="reader_outer_hide">إخفاء الغلاف من الشاشة الخارجية</string>
     <string name="reader_text_settings">إعدادات النص والصفحة</string>
     <string name="reader_contents_and_notes">المحتويات والإشارات المرجعية والتمييزات</string>
     <string name="reader_notes">الإشارات المرجعية والتمييزات</string>

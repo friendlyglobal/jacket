@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="list_separator">,\u0020</string>
+    <string name="reader_show_controls">Pokaż sterowanie</string>
+    <string name="reader_hide_controls">Ukryj sterowanie</string>
+    <string name="reader_place_in_book">Miejsce w książce</string>
+    <string name="reading_text_smaller">Mniejszy tekst</string>
+    <string name="reading_text_larger">Większy tekst</string>
+    <string name="reading_brightness">Jasność</string>
+    <string name="reading_warmth">Ciepło</string>
+    <string name="color_yellow">Żółty</string>
+    <string name="color_green">Zielony</string>
+    <string name="color_blue">Niebieski</string>
+    <string name="color_pink">Różowy</string>
+    <string name="color_purple">Fioletowy</string>
+</resources>

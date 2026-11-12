@@ -11,6 +11,12 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import io.github.friendlyglobal.jacket.ui.spoken
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -72,6 +78,7 @@ import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.LibraryState
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
+import io.github.friendlyglobal.jacket.ui.asHeading
 import io.github.friendlyglobal.jacket.ui.pressScale
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import kotlinx.coroutines.Dispatchers
@@ -177,7 +184,7 @@ fun FreeBooksScreen(state: LibraryState, onBack: () -> Unit, onOpen: (Book) -> U
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.free_books_title)) },
+                title = { Text(stringResource(R.string.free_books_title), modifier = Modifier.asHeading()) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(JacketIcons.Back, stringResource(R.string.common_back)) } },
                 actions = {
                     IconButton(onClick = { haptics.tick(); FreeBooks.open(context) }) {
@@ -266,7 +273,22 @@ private fun download(context: Context, url: String) {
 @Composable
 private fun FreeBookTile(book: FreeBook, added: Boolean, haptics: Haptics, modifier: Modifier, onClick: () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
-    Column(modifier) {
+    // One thing to a screen reader, as a book in the library is: its title, its author, and
+    // whether it is in the library already.
+    val said = spoken(
+        stringResource(R.string.list_separator), book.title, book.author,
+        stringResource(R.string.free_books_in_library).takeIf { added },
+    )
+    Column(
+        modifier.clearAndSetSemantics {
+            contentDescription = said
+            role = Role.Button
+            onClick {
+                onClick()
+                true
+            }
+        },
+    ) {
         Box(
             Modifier.fillMaxWidth().aspectRatio(2f / 3f)
                 .pressScale(interaction)

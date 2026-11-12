@@ -175,7 +175,6 @@
     <string name="reading_text_size_sample">A</string>
     <string name="reading_typeface">Tipo de letra</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">Seleccionado</string>
     <string name="reading_page">Página</string>
     <string name="reading_layout">Diseño</string>
     <string name="reading_layout_hint">Las páginas pasan como en un libro: desliza o toca los bordes. Con el teléfono desplegado, verás dos páginas a la vez.</string>
@@ -206,8 +205,6 @@
     <string name="reader_search">Buscar en el libro</string>
     <string name="reader_bookmark_add">Marcar esta página</string>
     <string name="reader_bookmark_remove">Quitar marcador</string>
-    <string name="reader_outer_show">Mostrar portada en la pantalla externa</string>
-    <string name="reader_outer_hide">Ocultar portada de la pantalla externa</string>
     <string name="reader_text_settings">Ajustes de texto y página</string>
     <string name="reader_contents_and_notes">Índice, marcadores y resaltados</string>
     <string name="reader_notes">Marcadores y resaltados</string>

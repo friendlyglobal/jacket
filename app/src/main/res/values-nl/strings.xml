@@ -168,7 +168,6 @@
     <string name="reading_text_size_sample">A</string>
     <string name="reading_typeface">Lettertype</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">Geselecteerd</string>
     <string name="reading_page">Pagina</string>
     <string name="reading_layout">Indeling</string>
     <string name="reading_layout_hint">Pagina\'s slaan om als in een boek: veeg of tik op de randen. Opengevouwen zie je twee pagina\'s naast elkaar.</string>
@@ -199,8 +198,6 @@
     <string name="reader_search">Zoeken in boek</string>
     <string name="reader_bookmark_add">Bladwijzer toevoegen</string>
     <string name="reader_bookmark_remove">Bladwijzer verwijderen</string>
-    <string name="reader_outer_show">Omslag tonen op buitenscherm</string>
-    <string name="reader_outer_hide">Omslag verbergen op buitenscherm</string>
     <string name="reader_text_settings">Tekst- en pagina-instellingen</string>
     <string name="reader_contents_and_notes">Inhoud, bladwijzers en markeringen</string>
     <string name="reader_notes">Bladwijzers en markeringen</string>

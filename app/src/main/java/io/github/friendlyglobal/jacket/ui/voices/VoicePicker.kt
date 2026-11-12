@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.friendlyglobal.jacket.R
@@ -177,8 +178,10 @@ fun VoicePicker(
                 shapes = ListItemDefaults.segmentedShapes(0, count),
                 leadingContent = { Icon(JacketIcons.Volume, null, Modifier.padding(horizontal = 8.dp)) },
                 supportingContent = { Text(stringResource(R.string.voice_phone_description)) },
+                // (The tick is for the eye. The row already says it is the one chosen: with a name
+                // of its own the tick had it said twice.)
                 trailingContent = if (current == null) {
-                    { Icon(JacketIcons.Check, stringResource(R.string.reading_selected)) }
+                    { Icon(JacketIcons.Check, null) }
                 } else null,
             ) { Text(stringResource(R.string.voice_phone)) }
 
@@ -201,7 +204,7 @@ fun VoicePicker(
                     },
                     supportingContent = { NaturalTag(pack.accents[key]) },
                     trailingContent = if (selected) {
-                        { Icon(JacketIcons.Check, stringResource(R.string.reading_selected)) }
+                        { Icon(JacketIcons.Check, null) }
                     } else null,
                 ) { Text(name) }
             }
@@ -325,13 +328,15 @@ private fun LanguageDialog(current: String, bookLanguage: String?, offered: List
             LazyColumn(Modifier.heightIn(max = 420.dp)) {
                 if (fromBook.isNotEmpty()) {
                     item {
+                        val chosen = languageKey(bookLanguage) == current
                         ListItem(
                             onClick = { onPick(null) },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                             supportingContent = { Text(stringResource(R.string.voice_language_from_book)) },
-                            trailingContent = if (languageKey(bookLanguage) == current) {
-                                { Icon(JacketIcons.Check, stringResource(R.string.reading_selected)) }
+                            trailingContent = if (chosen) {
+                                { Icon(JacketIcons.Check, null) }
                             } else null,
+                            modifier = Modifier.semantics { selected = chosen },
                         ) { Text(fromBook) }
                     }
                 }
@@ -340,8 +345,9 @@ private fun LanguageDialog(current: String, bookLanguage: String?, offered: List
                         onClick = { onPick(code) },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                         trailingContent = if (code == current) {
-                            { Icon(JacketIcons.Check, stringResource(R.string.reading_selected)) }
+                            { Icon(JacketIcons.Check, null) }
                         } else null,
+                        modifier = Modifier.semantics { selected = code == current },
                     ) { Text(names[code].orEmpty()) }
                 }
             }

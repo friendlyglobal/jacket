@@ -169,7 +169,6 @@
     <string name="reading_text_size_sample">A</string>
     <string name="reading_typeface">Yazı tipi</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">Seçili</string>
     <string name="reading_page">Sayfa</string>
     <string name="reading_layout">Düzen</string>
     <string name="reading_layout_hint">Sayfalar kitap gibi çevrilir: kaydırın veya kenarlara dokunun. Telefon açıkken iki sayfa yan yana görünür.</string>
@@ -200,8 +199,6 @@
     <string name="reader_search">Kitapta ara</string>
     <string name="reader_bookmark_add">Bu sayfaya yer işareti koy</string>
     <string name="reader_bookmark_remove">Yer işaretini kaldır</string>
-    <string name="reader_outer_show">Kapağı dış ekranda göster</string>
-    <string name="reader_outer_hide">Kapağı dış ekranda gizle</string>
     <string name="reader_text_settings">Metin ve sayfa ayarları</string>
     <string name="reader_contents_and_notes">İçindekiler, yer işaretleri ve vurgular</string>
     <string name="reader_notes">Yer işaretleri ve vurgular</string>

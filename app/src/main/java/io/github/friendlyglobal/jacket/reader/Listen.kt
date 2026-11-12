@@ -99,6 +99,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
@@ -118,8 +119,11 @@ import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.PageColors
+import io.github.friendlyglobal.jacket.ui.fitOnOneLine
 import io.github.friendlyglobal.jacket.ui.motionRemoved
 import io.github.friendlyglobal.jacket.ui.rememberTurn
+import io.github.friendlyglobal.jacket.ui.shrinkToFit
+import io.github.friendlyglobal.jacket.ui.spoken
 import io.github.friendlyglobal.jacket.ui.voices.VoiceChip
 import kotlinx.coroutines.delay
 
@@ -395,7 +399,9 @@ internal fun PlayerLine(
             exit = leave,
         ) {
             // The line runs on its own while the voice gets ready, then shows the place in the book.
-            Crossfade(preparing, animationSpec = motion.defaultEffectsSpec(), label = "line") { busy ->
+            // For the eye only: the play button says when the voice is getting ready, and a bare
+            // "42 percent" read out here would be of nothing in particular.
+            Crossfade(preparing, animationSpec = motion.defaultEffectsSpec(), modifier = Modifier.clearAndSetSemantics {}, label = "line") { busy ->
                 if (busy) {
                     LinearWavyProgressIndicator(Modifier.width(240.dp).padding(bottom = 10.dp))
                 } else {
@@ -500,6 +506,7 @@ private fun ReadingToolbar(reading: ReadingActions, haptics: Haptics) {
     val onListen = reading.onListen
     HorizontalFloatingToolbar(
         expanded = true,
+        modifier = Modifier.shrinkToFit(),
         colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
         floatingActionButton = {
             if (onListen != null) {
@@ -547,7 +554,8 @@ private fun PlayerToolbar(
     val chaptersOnBar = chapters?.takeIf { chaptersFitOnBar() }
     HorizontalFloatingToolbar(
         expanded = true,
-        modifier = modifier,
+        // (Six buttons across: on the narrowest screens they are drawn a little smaller rather than cut off at both ends.)
+        modifier = modifier.shrinkToFit(),
         colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
         floatingActionButton = { PlayButton(listen, controller, haptics) },
     ) {
@@ -598,12 +606,15 @@ private fun PlayButton(listen: ListenState, controller: ListenController, haptic
     val turn = rememberTurn(playing)
     val progress = shapeProgress.value
     val shape = remember(morph, progress) { MorphShape(morph, progress) }
+    // One thing to a screen reader, whatever is drawn on it: a button that says what a press does,
+    // or that the voice is on its way.
+    val label = stringResource(if (preparing) R.string.listen_preparing else if (playing) R.string.listen_pause else R.string.listen_play)
     FloatingToolbarDefaults.VibrantFloatingActionButton(
         onClick = {
             haptics.toggle(!listen.playing)
             controller.toggle()
         },
-        modifier = Modifier.graphicsLayer { rotationZ = turn.value },
+        modifier = Modifier.graphicsLayer { rotationZ = turn.value }.semantics { contentDescription = label },
         shape = shape,
     ) {
         val effects = motion.fastEffectsSpec<Float>()
@@ -616,19 +627,13 @@ private fun PlayButton(listen: ListenState, controller: ListenController, haptic
             },
             transitionSpec = { (scaleIn(spatial, initialScale = 0.6f) + fadeIn(effects)) togetherWith (scaleOut(spatial, targetScale = 0.6f) + fadeOut(effects)) },
             // The icon stays upright inside the turning button.
-            modifier = Modifier.graphicsLayer { rotationZ = -turn.value },
+            modifier = Modifier.graphicsLayer { rotationZ = -turn.value }.clearAndSetSemantics {},
             label = "action",
         ) { face ->
             when (face) {
-                Face.PREPARING -> {
-                    val label = stringResource(R.string.listen_preparing)
-                    LoadingIndicator(
-                        Modifier.size(28.dp).semantics { contentDescription = label },
-                        color = LocalContentColor.current,
-                    )
-                }
-                Face.PAUSE -> Icon(JacketIcons.Pause, stringResource(R.string.listen_pause))
-                Face.PLAY -> Icon(JacketIcons.Play, stringResource(R.string.listen_play))
+                Face.PREPARING -> LoadingIndicator(Modifier.size(28.dp), color = LocalContentColor.current)
+                Face.PAUSE -> Icon(JacketIcons.Pause, null)
+                Face.PLAY -> Icon(JacketIcons.Play, null)
             }
         }
     }
@@ -655,8 +660,13 @@ private fun RateButton(listen: ListenState, rate: Float, onRate: (Float) -> Unit
             colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current),
             modifier = Modifier.semantics { contentDescription = described },
         ) {
-            // Said by the button, as "Speed: 1.25×": not a second time as a bare number.
-            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, modifier = Modifier.clearAndSetSemantics {})
+            // Said by the button, as "Speed: 1.25×": not a second time as a bare number. With the
+            // phone's font size turned up it stays the width of the buttons beside it.
+            Text(
+                label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false,
+                autoSize = fitOnOneLine(MaterialTheme.typography.labelLarge),
+                modifier = Modifier.widthIn(max = 44.dp).clearAndSetSemantics {},
+            )
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             listenRateChoices(rate).forEach { choice ->
@@ -668,6 +678,8 @@ private fun RateButton(listen: ListenState, rate: Float, onRate: (Float) -> Unit
                         onRate(choice)
                         open = false
                     },
+                    // The tick is for the eye; a screen reader is told which speed is the one in use.
+                    modifier = Modifier.semantics { selected = choice == rate },
                 )
             }
         }
@@ -833,7 +845,8 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
         IconButton(onClick = { haptics.tick(); open = true }) {
             BadgedBox(badge = {
                 if (minutesLeft != null) {
-                    Badge { Text("$minutesLeft") }
+                    // The moon's own name says the minutes left: the number isn't read a second time.
+                    Badge(Modifier.clearAndSetSemantics {}) { Text("$minutesLeft") }
                 } else if (listen.sleep == SleepTimer.CHAPTER) {
                     Badge()
                 }
@@ -853,6 +866,7 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
                         start(option, option.minutes)
                         open = false
                     },
+                    modifier = Modifier.semantics { selected = option == running },
                 )
             }
             SleepTimer.entries.filter { it == SleepTimer.OFF || it.minutes > 0 }.forEach { preset(it) }
@@ -866,6 +880,7 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
                         start(SleepTimer.OTHER, own)
                         open = false
                     },
+                    modifier = Modifier.semantics { selected = running == SleepTimer.OTHER },
                 )
             }
             if (hasChapters) preset(SleepTimer.CHAPTER)
@@ -877,6 +892,7 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
                     open = false
                     choosing = true
                 },
+                modifier = Modifier.semantics { selected = running == SleepTimer.OTHER && own == null },
             )
         }
     }
@@ -985,7 +1001,9 @@ internal fun MiniPlayer(
                     BackToVoicePill(controller, colors, haptics)
                 }
             } else {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                // One thing to a screen reader: who is reading and what is left ("Sofia, 4 pages left in chapter").
+                val said = spoken(stringResource(R.string.list_separator), voice.label, left)
+                Row(Modifier.clearAndSetSemantics { contentDescription = said }, verticalAlignment = Alignment.CenterVertically) {
                     val style = MaterialTheme.typography.labelMedium
                     // The same voice icon for every voice; in red when the phone can't keep up with this one.
                     Icon(
@@ -1001,7 +1019,7 @@ internal fun MiniPlayer(
                     if (left.isNotBlank()) {
                         Text(
                             stringResource(R.string.separator) + left, style = style, color = colors.secondary,
-                            maxLines = 1, overflow = TextOverflow.Ellipsis,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis, autoSize = fitOnOneLine(style),
                         )
                     }
                 }

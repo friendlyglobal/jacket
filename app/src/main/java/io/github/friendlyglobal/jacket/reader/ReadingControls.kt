@@ -1,6 +1,10 @@
 package io.github.friendlyglobal.jacket.reader
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
@@ -49,6 +53,7 @@ import io.github.friendlyglobal.jacket.data.ReadingFont
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.ui.ColorSwatch
 import io.github.friendlyglobal.jacket.ui.ConnectedChoice
+import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import io.github.friendlyglobal.jacket.ui.rememberReadingFontFamily
@@ -62,9 +67,22 @@ import androidx.compose.ui.semantics.Role
 import io.github.friendlyglobal.jacket.data.LineSpacing
 import io.github.friendlyglobal.jacket.data.PageMargins
 import io.github.friendlyglobal.jacket.data.TextAlignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import io.github.friendlyglobal.jacket.ui.asHeading
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import io.github.friendlyglobal.jacket.ui.FullHeightThumb
+import io.github.friendlyglobal.jacket.ui.decorative
 
-private const val MIN_SCALE = 0.7f
-private const val MAX_SCALE = 2f
+/**
+ * The smallest and the largest the book's text goes. Three times the usual size is large print and
+ * more: about four words to a line on a folded phone, which the pages still lay out as pages.
+ */
+internal const val MIN_TEXT_SCALE = 0.7f
+internal const val MAX_TEXT_SCALE = 3f
+private const val MIN_SCALE = MIN_TEXT_SCALE
+private const val MAX_SCALE = MAX_TEXT_SCALE
 
 /** Text size, typeface, page color and layout. Used in the reader's sheet and in Settings. */
 @Composable
@@ -73,22 +91,39 @@ fun ReadingControls(
     onSettings: ((Settings) -> Settings) -> Unit,
     modifier: Modifier = Modifier,
     forEpub: Boolean = true,
+    /**
+     * In the reader: brightness and warmth are set here as well as by swiping the page's edges,
+     * for anyone who can't make that swipe (a screen reader, a switch, a keyboard, an unsteady hand).
+     */
+    lightLevels: Boolean = false,
 ) {
     val haptics = rememberHaptics()
     Column(modifier) {
         Label(stringResource(R.string.reading_text_size))
+        val textSize = stringResource(R.string.reading_text_size)
+        val percent = stringResource(R.string.percent, (settings.textScale * 100).roundToInt())
         Row(verticalAlignment = Alignment.CenterVertically) {
+            // Both buttons show an "A": said aloud, each says which way it goes.
+            val smaller = stringResource(R.string.reading_text_smaller)
             FilledTonalIconButton(
                 onClick = { haptics.tick(); onSettings { it.copy(textScale = step(it.textScale, -1)) } },
                 enabled = settings.textScale > MIN_SCALE,
-            ) { Text(stringResource(R.string.reading_text_size_sample), fontSize = 13.sp, fontWeight = FontWeight.Bold) }
+            ) {
+                Text(
+                    stringResource(R.string.reading_text_size_sample), fontSize = 13.sp, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clearAndSetSemantics { contentDescription = smaller },
+                )
+            }
             val size = remember {
                 SliderState(settings.textScale, ((MAX_SCALE - MIN_SCALE) * 10).roundToInt() - 1, MIN_SCALE..MAX_SCALE)
             }
             // Follow changes made elsewhere (the A buttons, the other screen).
             LaunchedEffect(settings.textScale) { size.value = settings.textScale }
+            val sizeTouch = remember { MutableInteractionSource() }
             Slider(
                 state = size,
+                interactionSource = sizeTouch,
+                thumb = { FullHeightThumb(sizeTouch) },
                 onValueChange = { value ->
                     size.value = value
                     val snapped = (value * 10).roundToInt() / 10f
@@ -97,17 +132,28 @@ fun ReadingControls(
                         onSettings { it.copy(textScale = snapped) }
                     }
                 },
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+                // "Text size, 120%": what the slider is and where it stands, not a bare "1.2".
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).semantics {
+                    contentDescription = textSize
+                    stateDescription = percent
+                },
             )
+            val larger = stringResource(R.string.reading_text_larger)
             FilledTonalIconButton(
                 onClick = { haptics.tick(); onSettings { it.copy(textScale = step(it.textScale, 1)) } },
                 enabled = settings.textScale < MAX_SCALE,
-            ) { Text(stringResource(R.string.reading_text_size_sample), fontSize = 20.sp, fontWeight = FontWeight.Bold) }
+            ) {
+                Text(
+                    stringResource(R.string.reading_text_size_sample), fontSize = 20.sp, fontWeight = FontWeight.Bold,
+                    modifier = Modifier.clearAndSetSemantics { contentDescription = larger },
+                )
+            }
         }
+        // The slider has said it already.
         Text(
-            stringResource(R.string.percent, (settings.textScale * 100).roundToInt()),
+            percent,
             style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
+            modifier = Modifier.align(Alignment.CenterHorizontally).decorative(),
         )
 
         Label(stringResource(R.string.reading_typeface))
@@ -210,6 +256,27 @@ fun ReadingControls(
             // Off hands the screen back to the phone, as it was.
             onSettings { it.copy(edgeSwipes = on, brightness = if (on) it.brightness else -1f, warmth = if (on) it.warmth else 0f) }
         }
+        // The same two levels as a slider each: the swipe is the only other way to them.
+        val motion = MaterialTheme.motionScheme
+        AnimatedVisibility(
+            visible = lightLevels && settings.edgeSwipes,
+            enter = expandVertically(motion.defaultSpatialSpec()) + fadeIn(motion.defaultEffectsSpec()),
+            exit = shrinkVertically(motion.fastSpatialSpec()) + fadeOut(motion.fastEffectsSpec()),
+        ) {
+            val context = LocalContext.current
+            Column {
+                LevelSlider(
+                    stringResource(R.string.reading_brightness),
+                    // Left to the phone until it is first set here or by a swipe: it starts from where the phone has it.
+                    level = if (settings.brightness < 0f) phoneBrightness(context) else settings.brightness,
+                    range = DIMMEST..1f,
+                    haptics = haptics,
+                ) { level -> onSettings { it.copy(brightness = level) } }
+                LevelSlider(stringResource(R.string.reading_warmth), settings.warmth, 0f..1f, haptics) { level ->
+                    onSettings { it.copy(warmth = level) }
+                }
+            }
+        }
         ToggleRow(stringResource(R.string.reading_night_pages), stringResource(R.string.reading_night_pages_description), settings.nightPages) { on ->
             haptics.toggle(on)
             onSettings { it.copy(nightPages = on) }
@@ -261,10 +328,8 @@ private fun FontChoice(selected: ReadingFont, onSelect: (ReadingFont) -> Unit) {
             shapes = ListItemDefaults.segmentedShapes(0, 1),
             modifier = Modifier
                 .onSizeChanged { width = it.width }
-                .semantics {
-                    role = Role.DropdownList
-                    stateDescription = current
-                },
+                // (Its name is in its own words: said as its state as well, it was read twice.)
+                .semantics { role = Role.DropdownList },
             leadingContent = { FontSample(selected) },
             supportingContent = { Text(stringResource(selected.description)) },
             trailingContent = { Icon(JacketIcons.ExpandMore, null, Modifier.graphicsLayer { rotationZ = turn }) },
@@ -291,7 +356,8 @@ private fun FontChoice(selected: ReadingFont, onSelect: (ReadingFont) -> Unit) {
                         text = { Text(stringResource(font.label)) },
                         shapes = MenuDefaults.itemShape(index, fonts.size),
                         leadingIcon = { FontSample(font) },
-                        trailingContent = { if (chosen) Icon(JacketIcons.Check, stringResource(R.string.reading_selected)) },
+                        // The tick is for the eye: the item says for itself that it is the one chosen.
+                        trailingContent = { if (chosen) Icon(JacketIcons.Check, null) },
                         supportingText = { Text(stringResource(font.description)) },
                     )
                 }
@@ -300,13 +366,46 @@ private fun FontChoice(selected: ReadingFont, onSelect: (ReadingFont) -> Unit) {
     }
 }
 
-/** "Aa" in [font]: each typeface previews itself. */
+/** "Aa" in [font]: each typeface previews itself. To be looked at: read out, "Aa" says nothing of the typeface. */
 @Composable
 private fun FontSample(font: ReadingFont) {
     Text(
         stringResource(R.string.reading_typeface_sample), fontFamily = rememberReadingFontFamily(font), fontSize = 24.sp,
-        modifier = Modifier.widthIn(min = 40.dp),
+        modifier = Modifier.widthIn(min = 40.dp).decorative(),
     )
+}
+
+/**
+ * Brightness or warmth as a slider, a twentieth at a time: said as what it is and how far along
+ * ("Brightness, 60%").
+ */
+@Composable
+private fun LevelSlider(name: String, level: Float, range: ClosedFloatingPointRange<Float>, haptics: Haptics, onLevel: (Float) -> Unit) {
+    val percent = stringResource(R.string.percent, (level * 100).roundToInt())
+    val state = remember { SliderState(level.coerceIn(range), 0, range) }
+    // Follow changes made elsewhere (a swipe along the page's edge).
+    LaunchedEffect(level) { state.value = level.coerceIn(range) }
+    Column(Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 4.dp)) {
+        Text(name, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.decorative())
+        val touch = remember { MutableInteractionSource() }
+        Slider(
+            state = state,
+            interactionSource = touch,
+            thumb = { FullHeightThumb(touch) },
+            onValueChange = { value ->
+                state.value = value
+                val snapped = ((value * 20).roundToInt() / 20f).coerceIn(range)
+                if (snapped != level) {
+                    haptics.frequentTick()
+                    onLevel(snapped)
+                }
+            },
+            modifier = Modifier.semantics {
+                contentDescription = name
+                stateDescription = percent
+            },
+        )
+    }
 }
 
 /** A reading comfort to switch on or off: its name, a line on what it does, and the switch. */
@@ -330,13 +429,15 @@ private fun ToggleRow(title: String, description: String?, checked: Boolean, onC
     }
 }
 
-private fun step(scale: Float, direction: Int) =
+/** The text size a tenth larger ([direction] +1) or smaller (-1) than [scale], within the sizes there are. */
+internal fun step(scale: Float, direction: Int) =
     ((scale * 10).roundToInt() + direction).div(10f).coerceIn(MIN_SCALE, MAX_SCALE)
 
+/** The name of a group of choices: a heading, so each "Book" and "Normal" below is heard under what it is a choice of. */
 @Composable
 private fun Label(text: String) {
     Text(
         text, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 4.dp, top = 20.dp, bottom = 10.dp),
+        modifier = Modifier.padding(start = 4.dp, top = 20.dp, bottom = 10.dp).asHeading(),
     )
 }

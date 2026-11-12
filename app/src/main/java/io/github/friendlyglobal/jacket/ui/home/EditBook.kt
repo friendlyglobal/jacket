@@ -92,6 +92,9 @@ import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.theme.SeedScheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import io.github.friendlyglobal.jacket.ui.asHeading
 
 /** A cover made in Jacket: one of Material's shapes, large, over the book's name, in a color's tones. */
 data class CoverDesign(val color: Int, val shape: Int = 0, val dark: Boolean = false)
@@ -224,7 +227,7 @@ internal fun EditBookSheet(
         Column(
             Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 16.dp),
         ) {
-            Text(stringResource(R.string.library_edit_book), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.library_edit_book), style = MaterialTheme.typography.titleLarge, modifier = Modifier.asHeading())
             Spacer(Modifier.height(16.dp))
             Box(
                 Modifier.align(Alignment.CenterHorizontally).width(150.dp).aspectRatio(2f / 3f).clip(RoundedCornerShape(14.dp))
@@ -320,32 +323,38 @@ internal fun EditBookSheet(
 @Composable
 private fun Designer(design: CoverDesign, swatches: List<Int>, haptics: Haptics, onChange: (CoverDesign) -> Unit) {
     Column {
-        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        // One of these, each a full-size target around the dot of colour it shows.
+        Row(Modifier.horizontalScroll(rememberScrollState()).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
             swatches.forEachIndexed { index, color ->
                 val chosen = color == design.color
                 val label = stringResource(R.string.cover_color, index + 1)
                 Box(
-                    Modifier.size(40.dp).clip(CircleShape).background(Color(color))
-                        .semantics { contentDescription = label; selected = chosen }
-                        .border(if (chosen) 3.dp else 0.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                        .clickable { haptics.tick(); onChange(design.copy(color = color)) },
+                    Modifier.size(48.dp).clip(CircleShape)
+                        .selectable(selected = chosen, role = Role.RadioButton) { haptics.tick(); onChange(design.copy(color = color)) }
+                        .semantics { contentDescription = label },
                     contentAlignment = Alignment.Center,
                 ) {
-                    if (chosen) Icon(JacketIcons.Check, null, Modifier.size(18.dp), tint = Color.White)
+                    Box(
+                        Modifier.size(40.dp).clip(CircleShape).background(Color(color))
+                            .border(if (chosen) 3.dp else 0.dp, MaterialTheme.colorScheme.onSurface, CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (chosen) Icon(JacketIcons.Check, null, Modifier.size(18.dp), tint = Color.White)
+                    }
                 }
             }
         }
         Spacer(Modifier.height(12.dp))
         val scheme = remember(design.color, design.dark) { if (design.dark) SeedScheme.dark(design.color) else SeedScheme.light(design.color) }
-        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.horizontalScroll(rememberScrollState()).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             CoverDesigns.shapes.forEachIndexed { index, shape ->
                 val chosen = index == design.shape
                 val label = stringResource(R.string.cover_shape, index + 1)
                 Box(
                     Modifier.size(52.dp).clip(RoundedCornerShape(14.dp))
-                        .semantics { contentDescription = label; selected = chosen }
+                        .semantics { contentDescription = label }
                         .background(if (chosen) scheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh)
-                        .clickable { haptics.tick(); onChange(design.copy(shape = index)) }
+                        .selectable(selected = chosen, role = Role.RadioButton) { haptics.tick(); onChange(design.copy(shape = index)) }
                         .padding(8.dp),
                 ) {
                     Box(

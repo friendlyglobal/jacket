@@ -52,6 +52,13 @@ import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.motionRemoved
+import io.github.friendlyglobal.jacket.ui.rememberTimeToAct
+import io.github.friendlyglobal.jacket.ui.screenReaderOn
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -84,14 +91,21 @@ internal fun JumpBack(nav: ReaderNav, haptics: Haptics, visible: Boolean, modifi
     val left = remember { Animatable(1f) }
     // How far the pill has been pulled; up dismisses it, down only gives a little.
     var pulled by remember { mutableFloatStateOf(0f) }
+    val context = LocalContext.current
+    val timeToAct = rememberTimeToAct()
     LaunchedEffect(origin) {
         if (origin == null) return@LaunchedEffect
         leaving = Leaving.WAVED
         pulled = 0f
         left.snapTo(1f)
+        // Under a screen reader the offer waits to be taken or put away: it is found by going
+        // through the screen, which takes as long as it takes. The ring stays full.
+        if (context.screenReaderOn()) return@LaunchedEffect
+        // Anyone who has asked Android for more time to act gets it here too.
+        val stays = timeToAct(JUMP_BACK_MS)
         // With animations removed the ring stays full, but the offer still times out.
-        if (!motionRemoved()) launch { left.animateTo(0f, tween(JUMP_BACK_MS.toInt(), easing = LinearEasing)) }
-        delay(JUMP_BACK_MS)
+        if (!motionRemoved()) launch { left.animateTo(0f, tween(stays.toInt(), easing = LinearEasing)) }
+        delay(stays)
         if (nav.cameFrom === origin) nav.cameFrom = null
     }
     fun end(how: Leaving) {
@@ -142,8 +156,9 @@ internal fun JumpBack(nav: ReaderNav, haptics: Haptics, visible: Boolean, modifi
                         },
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        // A long chapter name gives way before the ✕ does.
-                        modifier = Modifier.widthIn(max = 220.dp),
+                        // A long chapter name gives way before the ✕ does. A screen reader says the
+                        // offer as it appears: nothing else tells that it has.
+                        modifier = Modifier.widthIn(max = 220.dp).semantics { liveRegion = LiveRegionMode.Polite },
                     )
                 }
             },
@@ -165,7 +180,8 @@ internal fun JumpBack(nav: ReaderNav, haptics: Haptics, visible: Boolean, modifi
                     Box(contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(
                             progress = { left.value },
-                            modifier = Modifier.size(26.dp),
+                            // The time running out is for the eye: said aloud it is "87 percent" of nothing.
+                            modifier = Modifier.size(26.dp).clearAndSetSemantics {},
                             color = LocalContentColor.current.copy(alpha = 0.5f),
                             strokeWidth = 2.dp,
                             trackColor = Color.Transparent,

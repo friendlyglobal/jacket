@@ -60,7 +60,11 @@ internal class EdgeLevels(brightness: Float, warmth: Float) {
 }
 
 /** The dimmest the reader goes: still readable in the dark, never a black screen. */
-private const val DIMMEST = 0.02f
+internal const val DIMMEST = 0.02f
+
+/** How bright the phone itself has the screen (0..1): where the reader's own brightness starts from. */
+internal fun phoneBrightness(context: android.content.Context): Float =
+    android.provider.Settings.System.getInt(context.contentResolver, android.provider.Settings.System.SCREEN_BRIGHTNESS, 128) / 255f
 
 /** The strip along each edge that listens for these swipes. */
 private val EdgeStrip = 32.dp

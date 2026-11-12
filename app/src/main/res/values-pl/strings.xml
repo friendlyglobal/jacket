@@ -182,7 +182,6 @@
     <string name="reading_text_size_sample">A</string>
     <string name="reading_typeface">Krój pisma</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">Wybrano</string>
     <string name="reading_page">Strona</string>
     <string name="reading_layout">Układ</string>
     <string name="reading_layout_hint">Strony przewracają się jak w książce: przesuń palcem lub stuknij krawędź. Po rozłożeniu widzisz dwie strony obok siebie.</string>
@@ -213,8 +212,6 @@
     <string name="reader_search">Szukaj w książce</string>
     <string name="reader_bookmark_add">Dodaj zakładkę</string>
     <string name="reader_bookmark_remove">Usuń zakładkę</string>
-    <string name="reader_outer_show">Pokaż okładkę na ekranie zewnętrznym</string>
-    <string name="reader_outer_hide">Ukryj okładkę na ekranie zewnętrznym</string>
     <string name="reader_text_settings">Ustawienia tekstu i strony</string>
     <string name="reader_contents_and_notes">Spis treści, zakładki i zaznaczenia</string>
     <string name="reader_notes">Zakładki i zaznaczenia</string>

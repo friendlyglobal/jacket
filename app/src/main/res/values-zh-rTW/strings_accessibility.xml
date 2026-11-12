@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="list_separator">，</string>
+    <string name="reader_show_controls">顯示控制項</string>
+    <string name="reader_hide_controls">隱藏控制項</string>
+    <string name="reader_place_in_book">書中位置</string>
+    <string name="reading_text_smaller">縮小文字</string>
+    <string name="reading_text_larger">放大文字</string>
+    <string name="reading_brightness">亮度</string>
+    <string name="reading_warmth">色溫</string>
+    <string name="color_yellow">黃色</string>
+    <string name="color_green">綠色</string>
+    <string name="color_blue">藍色</string>
+    <string name="color_pink">粉紅色</string>
+    <string name="color_purple">紫色</string>
+</resources>

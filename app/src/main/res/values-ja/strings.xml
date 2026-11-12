@@ -162,7 +162,6 @@
     <string name="reading_text_size_sample">あ</string>
     <string name="reading_typeface">フォント</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">選択中</string>
     <string name="reading_page">ページ</string>
     <string name="reading_layout">レイアウト</string>
     <string name="reading_layout_hint">本のようにページをめくります。スワイプするか、端をタップしてください。開いた状態では見開きで表示されます。</string>
@@ -193,8 +192,6 @@
     <string name="reader_search">本の中を検索</string>
     <string name="reader_bookmark_add">このページをブックマーク</string>
     <string name="reader_bookmark_remove">ブックマークを削除</string>
-    <string name="reader_outer_show">外側の画面に表紙を表示</string>
-    <string name="reader_outer_hide">外側の画面の表紙を非表示</string>
     <string name="reader_text_settings">文字とページの設定</string>
     <string name="reader_contents_and_notes">目次、ブックマーク、ハイライト</string>
     <string name="reader_notes">ブックマークとハイライト</string>

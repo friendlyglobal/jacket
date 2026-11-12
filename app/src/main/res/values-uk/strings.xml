@@ -182,7 +182,6 @@
     <string name="reading_text_size_sample">A</string>
     <string name="reading_typeface">Шрифт</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">Вибрано</string>
     <string name="reading_page">Сторінка</string>
     <string name="reading_layout">Режим</string>
     <string name="reading_layout_hint">Сторінки гортаються, як у книзі: проведіть пальцем або торкніться краю. У розкладеному вигляді — розворот із двох сторінок.</string>
@@ -213,8 +212,6 @@
     <string name="reader_search">Пошук у книзі</string>
     <string name="reader_bookmark_add">Додати закладку</string>
     <string name="reader_bookmark_remove">Видалити закладку</string>
-    <string name="reader_outer_show">Показати обкладинку на зовнішньому екрані</string>
-    <string name="reader_outer_hide">Сховати обкладинку на зовнішньому екрані</string>
     <string name="reader_text_settings">Налаштування тексту й сторінки</string>
     <string name="reader_contents_and_notes">Зміст, закладки й виділення</string>
     <string name="reader_notes">Закладки й виділення</string>

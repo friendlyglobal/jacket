@@ -70,6 +70,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.toArgb
+import io.github.friendlyglobal.jacket.ui.readableVeil
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -348,7 +350,7 @@ private fun PagedList(
     val first by remember { derivedStateOf { listState.firstVisibleItemIndex } }
     // The last page is on screen when the list can't scroll any further (pages are often shorter
     // than the screen, so the last one never becomes the first visible).
-    val atEnd by remember { derivedStateOf { count > 0 && !listState.canScrollForward } }
+    LaunchedEffect(listState, nav) { snapshotFlow { listState.atEnd() }.collect { nav.atEnd = it } }
     val resources = LocalResources.current
     SideEffect {
         nav.sectionCount = count
@@ -365,7 +367,6 @@ private fun PagedList(
                 scope.launch { listState.animateScrollToItem(target) }
             }
         }
-        nav.atEnd = atEnd
         nav.pageKey = first
         nav.place = {
             Place(null, first, if (count > 1) first / (count - 1f) else 0f, "", resources.getString(R.string.reader_page_number, first + 1))
@@ -425,6 +426,13 @@ private fun PagedList(
     }
     }
 }
+
+/**
+ * Whether the last of the list is in sight: it can scroll no further. Never before the list has
+ * been laid out, when it can't scroll at all: asked then, and not asked again until a page was
+ * turned, a book looked finished on its first page and "The end" came up as it opened.
+ */
+private fun LazyListState.atEnd(): Boolean = layoutInfo.totalItemsCount > 0 && !canScrollForward
 
 @Composable
 private fun PageImage(
@@ -487,7 +495,7 @@ fun TextReader(
     }
     val scope = rememberCoroutineScope()
     val first by remember { derivedStateOf { listState.firstVisibleItemIndex } }
-    val textAtEnd by remember { derivedStateOf { !listState.canScrollForward } }
+    LaunchedEffect(listState, nav) { snapshotFlow { listState.atEnd() }.collect { nav.atEnd = it } }
     val percent = book.percent
     val resources = LocalResources.current
     SideEffect {
@@ -504,7 +512,6 @@ fun TextReader(
                 scope.launch { listState.scrollToItem(target) }
             }
         }
-        nav.atEnd = textAtEnd
         nav.pageKey = first
         nav.place = { Place(null, first, first / text.size.toFloat(), "", text[first].take(160)) }
         nav.onScreen = { mark -> mark.section == first }
@@ -792,7 +799,8 @@ fun TextReader(
     val style = MaterialTheme.typography.bodyLarge.copy(
         fontFamily = family, fontSize = 18.sp * settings.textScale, lineHeight = 29.sp * settings.textScale, color = page.text,
     )
-    val unread = SpanStyle(color = page.text.copy(alpha = 0.4f))
+    // The words still to come are paler, and still readable (see readableVeil).
+    val unread = SpanStyle(color = page.text.copy(alpha = 1f - readableVeil(page.text.toArgb(), page.background.toArgb())))
     val currentWord = SpanStyle(background = page.link.copy(alpha = 0.24f))
     val step = { listState.layoutInfo.viewportSize.height * 0.85f }
     val besideWords = 24.dp

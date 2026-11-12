@@ -207,8 +207,10 @@ internal fun WidgetStylePicker(book: Book?, settings: Settings, haptics: Haptics
                         .padding(5.dp)
                         .clip(RoundedCornerShape(14.dp)),
                 ) {
-                    // As the book stands right now.
-                    WidgetStyle(book, style, settings.showProgress, scale = 0.72f, status = book?.let { CoverStatus.of(it, null) })
+                    // As the book stands right now. A picture of the style: its name below is what is read out.
+                    Box(Modifier.clearAndSetSemantics {}) {
+                        WidgetStyle(book, style, settings.showProgress, scale = 0.72f, status = book?.let { CoverStatus.of(it, null) })
+                    }
                     if (selected) {
                         Box(
                             Modifier.align(Alignment.TopEnd).padding(5.dp).size(22.dp)

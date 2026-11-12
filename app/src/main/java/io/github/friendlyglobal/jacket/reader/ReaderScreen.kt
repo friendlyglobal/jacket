@@ -26,13 +26,25 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalAccessibilityManager
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -140,6 +152,14 @@ import io.github.friendlyglobal.jacket.ui.LocalCoverTransition
 import io.github.friendlyglobal.jacket.ui.PageColors
 import io.github.friendlyglobal.jacket.ui.SystemBarsHidden
 import io.github.friendlyglobal.jacket.ui.motionRemoved
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import io.github.friendlyglobal.jacket.ui.FullHeightThumb
+import io.github.friendlyglobal.jacket.ui.fitOnOneLine
+import io.github.friendlyglobal.jacket.ui.rememberScreenReader
+import io.github.friendlyglobal.jacket.ui.rememberTimeToAct
+import io.github.friendlyglobal.jacket.ui.screenReaderOn
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import io.github.friendlyglobal.jacket.ui.rememberPageColors
 import kotlinx.coroutines.CancellationException
@@ -310,6 +330,15 @@ fun ReaderScreen(
     var sheet by rememberSaveable { mutableStateOf(Sheet.NONE) }
     // Once you touch the controls, they stay until you dismiss them.
     var touchedChrome by remember(book.id) { mutableStateOf(false) }
+    // They stay, too, for anyone finding them without eyes or fingers: under a screen reader, and
+    // while a keyboard's (or a remote's) focus is on one of them. Otherwise they would be gone
+    // before they could be reached. Everything that leaves by itself gives the time Android has
+    // been asked for (see rememberTimeToAct).
+    val screenReader by rememberScreenReader()
+    val timeToAct = rememberTimeToAct()
+    val controlFocus = remember(book.id) { ControlFocus() }
+    val firstControl = remember { FocusRequester() }
+    var focusControls by remember(book.id) { mutableIntStateOf(0) }
     // While listening they tuck away by themselves instead: when they were last touched, and where they sit.
     val controls = remember(book.id) { ControlsWatch() }
     val noticeTouches = Modifier.pointerInput(Unit) {
@@ -384,8 +413,8 @@ fun ReaderScreen(
             if (!motionRemoved()) delay(CHROME_STAGGER_MS)
             entrance = 2
             // ...stay long enough to be discovered, then get out of the way.
-            delay(CHROME_SHOWN_MS)
-            if (!touchedChrome) chrome = false
+            delay(timeToAct(CHROME_SHOWN_MS))
+            if (!touchedChrome && !context.screenReaderOn() && !controlFocus.held) chrome = false
         }
         opening.reveal()
     }
@@ -458,6 +487,16 @@ fun ReaderScreen(
     val pageFocus = remember { PageFocus() }
     val volumeKeys by rememberUpdatedState(settings.volumeKeys)
     val pagesInSight by rememberUpdatedState(!coverUp && !closing)
+    // Tab has asked for the controls: their first button takes the keyboard's focus as soon as it
+    // is there (the bar may still be on its way in).
+    LaunchedEffect(focusControls) {
+        if (focusControls == 0) return@LaunchedEffect
+        repeat(FOCUS_TRIES) {
+            withFrameNanos { }
+            runCatching { firstControl.requestFocus() }
+            if (controlFocus.held) return@LaunchedEffect
+        }
+    }
     DisposableEffect(nav) {
         val target = ReaderKeys.Target(
             context = {
@@ -467,16 +506,29 @@ fun ReaderScreen(
                     volumeKeys = volumeKeys,
                     pages = pagesInSight,
                     paged = nav.paged,
+                    onControl = controlFocus.held,
                 )
             },
             perform = { command ->
-                if (command == ReaderCommand.NEXT_PAGE || command == ReaderCommand.PREVIOUS_PAGE) pageFocus.take()
+                // (A control that has the focus keeps it: Page Down under a button turns the page, and no more.)
+                if ((command == ReaderCommand.NEXT_PAGE || command == ReaderCommand.PREVIOUS_PAGE) && !controlFocus.held) pageFocus.take()
                 when (command) {
                     ReaderCommand.NEXT_PAGE -> nav.turnPage(1)
                     ReaderCommand.PREVIOUS_PAGE -> nav.turnPage(-1)
                     ReaderCommand.PLAY_PAUSE -> nav.listenController?.let {
                         haptics.toggle(!nav.listen.playing)
                         it.toggle()
+                    }
+                    ReaderCommand.FOCUS_CONTROLS -> {
+                        touchedChrome = true
+                        chrome = true
+                        focusControls++
+                    }
+                    ReaderCommand.TOGGLE_CONTROLS -> nav.toggleControls()
+                    ReaderCommand.LEAVE_CONTROLS -> {
+                        chrome = false
+                        peek = false
+                        pageFocus.take()
                     }
                     ReaderCommand.NOTHING -> {}
                 }
@@ -518,7 +570,6 @@ fun ReaderScreen(
     // footer's mini player a few seconds after the last touch, and sooner than that when they sit
     // over the line being read: the words the voice is on are never kept out of sight.
     val listening = listen.active && nav.listenController != null
-    val accessibility = LocalAccessibilityManager.current
     LaunchedEffect(listening, barUp, sheet == Sheet.NONE) {
         if (!barUp) {
             // Gone: whatever was known of them is out of date (a finger can't still be on them).
@@ -526,17 +577,16 @@ fun ReaderScreen(
             controls.pressed = false
         }
         if (!listening || !barUp || sheet != Sheet.NONE) return@LaunchedEffect
-        val stays = accessibility?.calculateRecommendedTimeoutMillis(
-            LISTEN_CONTROLS_MS, containsIcons = true, containsText = true, containsControls = true,
-        ) ?: LISTEN_CONTROLS_MS
+        val stays = timeToAct(LISTEN_CONTROLS_MS)
         // Arriving counts as a touch.
         controls.touchedAt = SystemClock.uptimeMillis()
         while (true) {
             delay(CONTROLS_POLL_MS)
             val now = SystemClock.uptimeMillis()
             // They stay under a finger, under a menu of their own, while the voice gets ready (the
-            // player is what says so), and for someone finding their way by touch with TalkBack.
-            if (controls.pressed || listen.held || listen.preparing || context.exploresByTouch()) {
+            // player is what says so), for someone finding their way by touch with TalkBack, and
+            // while a keyboard has its focus on one of them.
+            if (controls.pressed || listen.held || listen.preparing || context.screenReaderOn() || controlFocus.held) {
                 controls.touchedAt = now
                 continue
             }
@@ -566,7 +616,7 @@ fun ReaderScreen(
         // Sent away by a tap on the page meanwhile: nothing left to do.
         if (!chrome && !peek) return@LaunchedEffect
         // Taken hold of meanwhile: they are the reading controls now, whole, to dismiss as ever.
-        chrome = controls.pressed || controls.touchedAt > stoppedAt || context.exploresByTouch()
+        chrome = controls.pressed || controls.touchedAt > stoppedAt || context.screenReaderOn() || controlFocus.held
         peek = false
     }
     // A voice the phone can't keep up with says so on the player: bring it up to be seen.
@@ -634,7 +684,8 @@ fun ReaderScreen(
     LaunchedEffect(autoListen) {
         if (!autoListen) return@LaunchedEffect
         snapshotFlow { nav.contentReady && nav.listenController != null && opening.settled }.first { it }
-        chrome = false
+        // (Under a screen reader the whole of the controls stays, the way out of the book with them.)
+        if (!context.screenReaderOn()) chrome = false
         nav.listenController?.start()
         peek = nav.listen.active
         onAutoListened()
@@ -643,6 +694,13 @@ fun ReaderScreen(
     // Brightness and warmth, by swiping the page's edges.
     val levels = remember { EdgeLevels(settings.brightness, settings.warmth) }
     val swipes by rememberUpdatedState(settings.edgeSwipes)
+    // They are set from the text settings too (a slider each): the page follows those as well.
+    LaunchedEffect(settings.brightness, settings.warmth) {
+        if (levels.active == 0) {
+            levels.brightness = settings.brightness
+            levels.warmth = settings.warmth
+        }
+    }
     ReaderBrightness(levels, enabled = settings.edgeSwipes)
 
     // Tabletop: half-open with the fold lying flat, the page sits above it and a desk of controls below.
@@ -676,6 +734,31 @@ fun ReaderScreen(
     }
     nav.toggleControls = toggleChrome
 
+    // Turning a page is a swipe, a curl under the finger or a tap on the page's edge: none of which
+    // a screen reader or a switch can do. The same turns are offered as actions on whatever of the
+    // reader's own stands for the page just then (the footer line, the chapter slider), beside
+    // bringing the controls up and sending them away, which is a tap on the page.
+    val nextPageLabel = stringResource(R.string.reader_next_page)
+    val previousPageLabel = stringResource(R.string.reader_previous_page)
+    val hideControlsLabel = stringResource(R.string.reader_hide_controls)
+    // A text file scrolls like any list, which a screen reader moves by itself.
+    val pageTurns = remember(nav, book.format, nextPageLabel, previousPageLabel) {
+        if (book.format == BookFormat.TXT) emptyList() else listOf(
+            CustomAccessibilityAction(nextPageLabel) { nav.turnPage(1); true },
+            CustomAccessibilityAction(previousPageLabel) { nav.turnPage(-1); true },
+        )
+    }
+    val hideControls = remember(hideControlsLabel) {
+        CustomAccessibilityAction(hideControlsLabel) {
+            chrome = false
+            peek = false
+            true
+        }
+    }
+    // Chosen from a sheet, a place in the book is somewhere to read: the controls step aside for
+    // it. Not under a screen reader, whose place among them would go with them.
+    val stepAside = { if (!context.screenReaderOn()) chrome = false }
+
     val motion = MaterialTheme.motionScheme
     Box(Modifier.fillMaxSize().background(page.background).onSizeChanged { windowHeight = it.height }) {
         FocusHolder(pageFocus)
@@ -684,6 +767,9 @@ fun ReaderScreen(
         Box(
             Modifier
                 .fillMaxSize()
+                // Under the cover of a phone folded shut the page and its controls are out of
+                // sight, and out of a screen reader's reach with it: the cover is all there is.
+                .then(if (coverUp) Modifier.clearAndSetSemantics {} else Modifier)
                 .padding(bottom = belowFold)
                 .openingPage(opening)
                 .pointerInput(levels) {
@@ -727,10 +813,11 @@ fun ReaderScreen(
                 visible = footerUp,
                 enter = slideInVertically(motion.fastSpatialSpec()) { it / 2 } + fadeIn(motion.defaultEffectsSpec()),
                 exit = fadeOut(motion.fastEffectsSpec()),
-                modifier = Modifier.align(Alignment.BottomCenter),
+                modifier = Modifier.align(Alignment.BottomCenter).keyboardControls(controlFocus, "footer"),
             ) {
                 ReaderFooter(
                     nav, book, page, settings, playerVoice, listenPace, haptics,
+                    pageTurns = pageTurns,
                     onControls = {
                         touchedChrome = true
                         chrome = true
@@ -739,7 +826,10 @@ fun ReaderScreen(
             }
 
             // After a jump: the way back to where you were, for a little while.
-            JumpBack(nav, haptics, visible = opening.settled, modifier = Modifier.align(Alignment.TopCenter))
+            JumpBack(
+                nav, haptics, visible = opening.settled,
+                modifier = Modifier.align(Alignment.TopCenter).keyboardControls(controlFocus, "jump-back"),
+            )
             EdgeLevel(levels)
 
             AnimatedVisibility(
@@ -747,6 +837,7 @@ fun ReaderScreen(
                 enter = slideInVertically(motion.defaultSpatialSpec()) { -it } + fadeIn(motion.defaultEffectsSpec()),
                 exit = slideOutVertically(motion.fastSpatialSpec()) { -it } + fadeOut(),
                 modifier = Modifier.align(Alignment.TopCenter).then(noticeTouches)
+                    .keyboardControls(controlFocus, "top")
                     .onGloballyPositioned { controls.top = it.boundsInWindow() },
             ) {
                 val marked = remember(nav.pageKey, annotations) {
@@ -777,6 +868,8 @@ fun ReaderScreen(
                     onSearch = { haptics.tick(); sheet = Sheet.SEARCH },
                     onOuter = { on -> haptics.toggle(on); outer.toggle() },
                     onBack = close,
+                    firstControl = firstControl,
+                    hideControls = hideControls,
                 )
             }
 
@@ -790,11 +883,12 @@ fun ReaderScreen(
                     scaleIn(motion.fastSpatialSpec(), initialScale = 0.88f, transformOrigin = BottomMiddle) + fadeIn(motion.fastEffectsSpec()),
                 exit = slideOutVertically(motion.fastSpatialSpec()) { it } +
                     scaleOut(motion.fastSpatialSpec(), targetScale = 0.88f, transformOrigin = BottomMiddle) + fadeOut(motion.defaultEffectsSpec()),
-                modifier = Modifier.align(Alignment.BottomCenter).then(noticeTouches),
+                modifier = Modifier.align(Alignment.BottomCenter).then(noticeTouches).keyboardControls(controlFocus, "bottom"),
             ) {
                 ReaderBottomBar(
                     nav = nav, book = book, haptics = haptics,
                     showScrubber = chrome,
+                    pageActions = pageTurns + hideControls,
                     voice = playerVoice,
                     rate = settings.listenRate,
                     onRate = setRate,
@@ -803,8 +897,9 @@ fun ReaderScreen(
                         nav.listenController?.start()
                         // The bars around the toolbar leave; it stays a moment as the player, so
                         // its controls are seen, then tucks into the footer. (A voice that can't
-                        // start says why, and nothing changes.)
-                        if (nav.listen.active) {
+                        // start says why, and nothing changes.) Under a screen reader the bars
+                        // stay too: the way back to the library is on them.
+                        if (nav.listen.active && !context.screenReaderOn()) {
                             chrome = false
                             peek = true
                         }
@@ -816,11 +911,15 @@ fun ReaderScreen(
             }
 
             // The last page: celebrate, and offer what's next.
+            // (Under a screen reader the controls never leave by themselves, so it doesn't wait for
+            // them to: it sits above them.)
             AnimatedVisibility(
-                visible = nav.atEnd && !finishedDismissed && !barUp && !nav.listen.active && opening.settled,
+                visible = nav.atEnd && !finishedDismissed && (!barUp || screenReader) && !nav.listen.active && opening.settled,
                 enter = slideInVertically(motion.defaultSpatialSpec()) { it } + fadeIn(),
                 exit = slideOutVertically(motion.fastSpatialSpec()) { it } + fadeOut(),
-                modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 48.dp),
+                modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
+                    .padding(bottom = if (barUp) FINISHED_OVER_CONTROLS else 48.dp)
+                    .keyboardControls(controlFocus, "finished"),
             ) {
                 LaunchedEffect(Unit) { haptics.confirm() }
                 FinishedCard(
@@ -837,11 +936,17 @@ fun ReaderScreen(
         // Over everything, so nothing of the reader shows until the book opens: the backdrop the
         // closed book lies on, and the cover itself (not needed while reading).
         if (fold != null && opening.settled) {
-            TabletopDesk(nav, book, settings, setRate, haptics, Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(desk))
+            TabletopDesk(
+                nav, book, settings, setRate, haptics,
+                Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(desk).keyboardControls(controlFocus, "desk"),
+            )
         }
         OpeningBackdrop(opening, MaterialTheme.colorScheme.primaryContainer)
         if (!opening.settled) OpeningCover(book, opening)
-        ClosedCover(coverUp, book, nav, settings, setRate, haptics, onReadHere = onReadShut, onLeave = close)
+        ClosedCover(
+            coverUp, book, nav, settings, setRate, haptics, onReadHere = onReadShut, onLeave = close,
+            modifier = Modifier.keyboardControls(controlFocus, "cover"),
+        )
     }
 
     when (sheet) {
@@ -853,11 +958,11 @@ fun ReaderScreen(
                 // You picked where to go: get out of the way and let them read. The jump waits for
                 // the sheet to leave: loading a chapter would stall it halfway down.
                 onPickToc = { item ->
-                    chrome = false
+                    stepAside()
                     leave { nav.openToc(item) }
                 },
                 onPick = { item ->
-                    chrome = false
+                    stepAside()
                     leave { nav.goTo(item) }
                 },
                 onEdit = { item -> leave { nav.editing = item.id } },
@@ -869,7 +974,7 @@ fun ReaderScreen(
         Sheet.SEARCH -> ReaderSheet(onGone = { sheet = Sheet.NONE }, fullHeight = true) { leave ->
             nav.search?.let { search ->
                 SearchPanel(search, haptics) { hit ->
-                    chrome = false
+                    stepAside()
                     leave { search.show(hit) }
                 }
             }
@@ -879,6 +984,7 @@ fun ReaderScreen(
                 settings, onSettings,
                 Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
                 forEpub = book.format == BookFormat.EPUB,
+                lightLevels = true,
             )
         }
         Sheet.VOICE -> ReaderSheet(onGone = { sheet = Sheet.NONE }) {
@@ -913,7 +1019,7 @@ fun ReaderScreen(
             NoteSheet(
                 shown.note, settings, haptics,
                 onGoTo = {
-                    chrome = false
+                    stepAside()
                     leave { shown.goTo() }
                 },
             )
@@ -1091,6 +1197,36 @@ private fun listeningLeft(nav: ReaderNav, settings: Settings, pace: Float): Stri
     }
 }
 
+/**
+ * Whether the keyboard's focus is on one of the reader's own controls, whichever part of the
+ * screen they are on. While it is, the arrows and Space are that control's (see [readerCommand]),
+ * and the controls stay where they are.
+ */
+@Stable
+internal class ControlFocus {
+    private val parts = mutableStateMapOf<String, Unit>()
+
+    val held: Boolean get() = parts.isNotEmpty()
+
+    fun set(part: String, focused: Boolean) {
+        if (focused) parts[part] = Unit else parts.remove(part)
+    }
+}
+
+/** Marks [part] of the reader's controls, so the focus being anywhere inside it is known to [focus]. */
+@Composable
+internal fun Modifier.keyboardControls(focus: ControlFocus, part: String): Modifier {
+    // A part that leaves the screen with the focus in it takes the focus with it.
+    DisposableEffect(focus, part) { onDispose { focus.set(part, false) } }
+    return onFocusChanged { focus.set(part, it.hasFocus) }
+}
+
+/** How many frames the controls' first button is given to arrive and take the focus, after Tab asks for it. */
+private const val FOCUS_TRIES = 30
+
+/** Room for the controls under the end-of-book card, when both are up. */
+private val FINISHED_OVER_CONTROLS = 232.dp
+
 /** What the tucking away of the controls goes by, while listening: their last touch, and where they sit in the window. */
 private class ControlsWatch {
     var touchedAt = 0L
@@ -1100,10 +1236,6 @@ private class ControlsWatch {
     /** They sit over the line being read aloud. */
     var covering = false
 }
-
-/** TalkBack (or the like) is reading the screen out under a finger: nothing should leave by itself. */
-private fun android.content.Context.exploresByTouch(): Boolean =
-    getSystemService(android.view.accessibility.AccessibilityManager::class.java)?.isTouchExplorationEnabled == true
 
 /** How long after the voice arrives in a chapter skipped to "end of chapter" starts watching for its end: the page takes a moment to say where it is. */
 private const val CHAPTER_SKIP_SETTLE_MS = 1_500L
@@ -1159,10 +1291,20 @@ private fun ReaderTopBar(
     onSearch: () -> Unit,
     onOuter: (Boolean) -> Unit,
     onBack: () -> Unit,
+    /** Takes the keyboard's focus when Tab asks for the controls. */
+    firstControl: FocusRequester,
+    /** Sends the controls away: for a screen reader, which can't tap the page to do it. */
+    hideControls: CustomAccessibilityAction,
 ) {
     TopAppBar(
         title = {
-            Column {
+            // The book and the chapter are one thing to a screen reader: where you are, as a heading.
+            Column(
+                Modifier.semantics(mergeDescendants = true) {
+                    heading()
+                    customActions = listOf(hideControls)
+                },
+            ) {
                 Text(book.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 // A new chapter rolls up into place. Where there's no chapter name (front matter, a
                 // book without contents), the line folds away so the title sits in the middle of
@@ -1186,7 +1328,11 @@ private fun ReaderTopBar(
                 }
             }
         },
-        navigationIcon = { IconButton(onClick = onBack) { Icon(JacketIcons.Back, stringResource(R.string.reader_back_to_library)) } },
+        navigationIcon = {
+            IconButton(onClick = onBack, modifier = Modifier.focusRequester(firstControl)) {
+                Icon(JacketIcons.Back, stringResource(R.string.reader_back_to_library))
+            }
+        },
         actions = {
             if (nav.search != null) {
                 IconButton(onClick = onSearch) { Icon(JacketIcons.Search, stringResource(R.string.reader_search)) }
@@ -1215,11 +1361,9 @@ private fun ReaderTopBar(
                 )
             }
             if (outerAvailable || outerActive) {
+                // One name, and on or off: a name that changed with it would be read against its own state.
                 FilledTonalIconToggleButton(checked = outerActive, onCheckedChange = onOuter) {
-                    Icon(
-                        JacketIcons.OuterScreen,
-                        if (outerActive) stringResource(R.string.reader_outer_hide) else stringResource(R.string.reader_outer_show),
-                    )
+                    Icon(JacketIcons.OuterScreen, stringResource(R.string.onboarding_cover_outside))
                 }
             }
         },
@@ -1238,6 +1382,8 @@ private fun ReaderBottomBar(
     book: Book,
     haptics: Haptics,
     showScrubber: Boolean,
+    /** What a screen reader or a switch can do to the page from the chapter slider: turn it, and send the controls away. */
+    pageActions: List<CustomAccessibilityAction>,
     voice: ListenVoice,
     rate: Float,
     onRate: (Float) -> Unit,
@@ -1271,7 +1417,7 @@ private fun ReaderBottomBar(
                     scaleOut(motion.fastSpatialSpec(), targetScale = 0.9f, transformOrigin = BottomMiddle) + fadeOut(motion.fastEffectsSpec()),
             ) {
                 Column {
-                    Scrubber(nav, book, haptics)
+                    Scrubber(nav, book, haptics, pageActions)
                     Spacer(Modifier.height(12.dp))
                 }
             }
@@ -1317,7 +1463,7 @@ private fun ReaderBottomBar(
 
 /** Drag through the book, with a tick per chapter and a preview of where you'll land. */
 @Composable
-private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics) {
+private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics, pageActions: List<CustomAccessibilityAction>) {
     var preview by remember { mutableStateOf<Float?>(null) }
     val last = (nav.sectionCount - 1).coerceAtLeast(1)
     val target = preview?.roundToInt() ?: nav.section
@@ -1332,8 +1478,16 @@ private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics) {
         shadowElevation = 3.dp,
         modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth().padding(horizontal = 16.dp),
     ) {
+        // To a screen reader the slider speaks for the whole card: what it is, then how far through
+        // the book and in which chapter ("Place in the book, 42% read, Chapter 3"), not a bare
+        // "420". The words above it are the same thing, for the eye.
+        val percent = if (preview != null) target * 100 / last else book.percent
+        val chapter = if (preview != null) nav.sectionName(target) else nav.title
+        val place = stringResource(R.string.reader_place_in_book)
+        val where = listOf(stringResource(R.string.reader_percent_read, percent), chapter.trim())
+            .filter { it.isNotEmpty() }.joinToString(stringResource(R.string.list_separator))
         Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.clearAndSetSemantics {}, verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     if (preview != null) nav.sectionName(target) else nav.title,
                     style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis,
@@ -1346,8 +1500,11 @@ private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics) {
                 )
             }
             Box {
+                val touch = remember { MutableInteractionSource() }
                 Slider(
                     state = slider,
+                    interactionSource = touch,
+                    thumb = { FullHeightThumb(touch) },
                     onValueChange = { value ->
                         if (nav.sectionGroup(value.roundToInt()) != nav.sectionGroup(target)) haptics.tick()
                         preview = value
@@ -1357,6 +1514,11 @@ private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics) {
                         preview?.let { nav.jumpTo(it.roundToInt()) }
                         preview = null
                         haptics.confirm()
+                    },
+                    modifier = Modifier.semantics {
+                        contentDescription = place
+                        stateDescription = where
+                        customActions = pageActions
                     },
                 )
                 // Chapter starts, as small marks along the track.
@@ -1396,17 +1558,29 @@ private fun ReaderFooter(
     /** The voice's pace through this book (see [ReaderScreen]); 0 while unknown. */
     listenPace: Float,
     haptics: Haptics,
+    /** Turning the page, for a screen reader or a switch (see [ReaderScreen]). */
+    pageTurns: List<CustomAccessibilityAction>,
     onControls: () -> Unit,
 ) {
     val controller = nav.listenController
     val listening = nav.listen.active && controller != null
     val motion = MaterialTheme.motionScheme
     val showControls = stringResource(R.string.listen_show_controls)
+    val controlsUp by rememberUpdatedState(onControls)
+    val percentRead = stringResource(R.string.reader_percent_read, book.percent)
+    // While you read, with the controls away, this line is all of the reader's own that is on the
+    // screen. So to a screen reader or a switch it stands for the page: it says where you are,
+    // brings the controls back (what a tap on the page does), and turns the page.
+    val showAll = stringResource(R.string.reader_show_controls)
+    val spoken = listOf(footerText(nav, book, settings), percentRead).filter { it.isNotBlank() }.joinToString(stringResource(R.string.list_separator))
     // Plain text runs to the bottom of the screen, under this line (an EPUB page stops above it).
     val runsUnder = book.format == BookFormat.TXT
+    val insets = WindowInsets.navigationBarsIgnoringVisibility.union(WindowInsets.displayCutout)
     Row(
         Modifier
             .fillMaxWidth()
+            // Clear of a cutout at the top: above everything the line answers for.
+            .windowInsetsPadding(insets.only(WindowInsetsSides.Top))
             .then(
                 if (runsUnder) {
                     // The page's own colour behind the line, fading in from just above it: the
@@ -1425,15 +1599,26 @@ private fun ReaderFooter(
             )
             .then(
                 if (listening) {
-                    Modifier.clickable(interactionSource = null, indication = null, onClickLabel = showControls) {
-                        haptics.tick()
-                        onControls()
+                    // A tap anywhere on the line brings the controls up. A screen reader isn't told
+                    // so twice: it has the button at the line's end for it.
+                    Modifier.pointerInput(Unit) {
+                        detectTapGestures {
+                            haptics.tick()
+                            controlsUp()
+                        }
                     }
                 } else {
-                    Modifier
+                    Modifier.clearAndSetSemantics {
+                        contentDescription = spoken
+                        onClick(label = showAll) {
+                            controlsUp()
+                            true
+                        }
+                        customActions = pageTurns
+                    }
                 },
             )
-            .windowInsetsPadding(WindowInsets.navigationBarsIgnoringVisibility.union(WindowInsets.displayCutout))
+            .windowInsetsPadding(insets.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
             .heightIn(min = FooterSpace)
             .padding(horizontal = 24.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -1466,13 +1651,17 @@ private fun ReaderFooter(
                     transitionSpec = { fadeIn(effects) togetherWith fadeOut(effects) },
                     label = "footer",
                 ) { text ->
-                    Text(text, style = MaterialTheme.typography.labelMedium, color = page.secondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    // With the phone's font size turned up, the whole of it at a smaller size, before any of it is cut off.
+                    Text(
+                        text, style = MaterialTheme.typography.labelMedium, color = page.secondary, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        autoSize = fitOnOneLine(MaterialTheme.typography.labelMedium),
+                    )
                 }
             }
         }
         Text(
             stringResource(R.string.percent, book.percent), style = MaterialTheme.typography.labelMedium, color = page.secondary,
-            textAlign = TextAlign.End, modifier = Modifier.padding(start = 8.dp),
+            textAlign = TextAlign.End, modifier = Modifier.padding(start = 8.dp).semantics { contentDescription = percentRead },
         )
         // While you listen, a tap on the page moves the voice, so the way back to the controls
         // is a button of its own, in the corner under the thumb. Drawn at the footer's scale, it

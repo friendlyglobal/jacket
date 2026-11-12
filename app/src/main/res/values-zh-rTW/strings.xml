@@ -162,7 +162,6 @@
     <string name="reading_text_size_sample">A</string>
     <string name="reading_typeface">字型</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">已選取</string>
     <string name="reading_page">頁面</string>
     <string name="reading_layout">版面</string>
     <string name="reading_layout_hint">像書一樣翻頁：滑動或輕觸螢幕邊緣。展開後會以雙頁顯示。</string>
@@ -193,8 +192,6 @@
     <string name="reader_search">在書中搜尋</string>
     <string name="reader_bookmark_add">將此頁加入書籤</string>
     <string name="reader_bookmark_remove">移除書籤</string>
-    <string name="reader_outer_show">在外螢幕顯示封面</string>
-    <string name="reader_outer_hide">隱藏外螢幕封面</string>
     <string name="reader_text_settings">文字和頁面設定</string>
     <string name="reader_contents_and_notes">目錄、書籤和畫線</string>
     <string name="reader_notes">書籤和畫線</string>

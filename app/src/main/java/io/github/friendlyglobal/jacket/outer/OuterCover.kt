@@ -82,6 +82,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import io.github.friendlyglobal.jacket.ui.spoken
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -164,7 +169,10 @@ fun OuterCover(
 ) {
     var wakeCount by remember { mutableIntStateOf(0) }
     var dimmed by remember { mutableStateOf(false) }
+    val showControls = stringResource(R.string.reader_show_controls)
     val status = book?.let { CoverStatus.of(it, moment) }
+    val resources = LocalResources.current
+    val said = if (book == null) "" else spoken(stringResource(R.string.list_separator), book.title, book.author, book.statusLabel(resources))
     val tapped by rememberUpdatedState(onTap)
     // A tap wakes it. So does a new stage (starting to listen, finishing), which is worth showing;
     // pages turning are not.
@@ -188,7 +196,25 @@ fun OuterCover(
                     }
                 }
             }
-            .pointerInput(Unit) { detectTapGestures { tapped?.invoke() } },
+            .pointerInput(Unit) { detectTapGestures { tapped?.invoke() } }
+            // Where a tap on the cover does something (the cover of a phone folded shut), a screen
+            // reader or a switch can do it too. The cover is one thing to them, said as the book
+            // and where you are in it, with what the tap brings up as its action; the player's
+            // buttons on it stay buttons of their own.
+            .then(
+                if (onTap != null) {
+                    Modifier.semantics(mergeDescendants = true) {
+                        if (said.isNotEmpty()) contentDescription = said
+                        onClick(label = showControls) {
+                            wakeCount++
+                            tapped?.invoke()
+                            true
+                        }
+                    }
+                } else {
+                    Modifier
+                },
+            ),
     ) {
         if (book == null || status == null) {
             val brightness by animateFloatAsState(if (dimmed) AMBIENT_BRIGHTNESS else 1f, tween(AMBIENT_FADE_MS), label = "ambient")
@@ -605,7 +631,8 @@ private fun Scales(
     val wave = animateFloatAsState(if (twoScales) status.chapterProgress ?: 0f else status.progress, spec, label = "wave")
     val thickness = with(LocalDensity.current) { 7.dp.toPx() }
     val stroke = remember(thickness) { Stroke(width = thickness, cap = StrokeCap.Round) }
-    Column {
+    // Lines to look at: the cover says how far through the book you are in words.
+    Column(Modifier.clearAndSetSemantics {}) {
         if (fullWave) {
             SwirlLine({ wave.value }, color, playing = moving, Modifier.fillMaxWidth().height(20.dp))
         } else {
@@ -781,7 +808,7 @@ private fun AmbientStatus(status: CoverStatus, quotes: List<String>, modifier: M
                 Box(contentAlignment = Alignment.Center) {
                     CircularWavyProgressIndicator(
                         progress = { status.progress },
-                        modifier = Modifier.size(52.dp),
+                        modifier = Modifier.size(52.dp).clearAndSetSemantics {},
                         color = accent,
                         trackColor = Color.White.copy(alpha = 0.14f),
                         waveSpeed = 0.dp,

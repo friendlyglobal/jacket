@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.ui.JacketIcons
+import io.github.friendlyglobal.jacket.ui.asHeading
 import io.github.friendlyglobal.jacket.ui.predictiveBack
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import kotlinx.coroutines.Dispatchers
@@ -71,7 +72,7 @@ fun LicensesScreen(onBack: () -> Unit) {
         modifier = Modifier.nestedScroll(scroll.nestedScrollConnection).predictiveBack(onBack),
         topBar = {
             LargeFlexibleTopAppBar(
-                title = { Text(stringResource(R.string.licenses_title)) },
+                title = { Text(stringResource(R.string.licenses_title), modifier = Modifier.asHeading()) },
                 subtitle = { Text(stringResource(R.string.licenses_subtitle)) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(JacketIcons.Back, stringResource(R.string.common_back)) } },
                 scrollBehavior = scroll,

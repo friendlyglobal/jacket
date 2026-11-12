@@ -30,6 +30,9 @@ import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.clickable
+import androidx.glance.semantics.contentDescription
+import androidx.glance.semantics.semantics
+import io.github.friendlyglobal.jacket.ui.spoken
 import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.cornerRadius
@@ -141,13 +144,27 @@ internal fun readingNow(state: LibraryState, missing: Set<String>): List<Book> {
 internal suspend fun loadCover(library: Library, book: Book, maxSide: Int = 600): Bitmap? =
     withContext(Dispatchers.IO) { library.coverOf(book)?.let { Bitmaps.decodeFile(it, maxSide) } }
 
-/** The widget's surface: rounded, dark, and a tap opens [book]. */
+/** The widget's surface: rounded and dark. */
 @Composable
-internal fun base(context: Context, book: Book?) = GlanceModifier
+internal fun surface() = GlanceModifier
     .fillMaxSize()
     .cornerRadius(24.dp)
     .background(GlanceTheme.colors.surface)
-    .clickable(actionStartActivity(openIntent(context, book)))
+
+/**
+ * The widget's surface, where a tap opens [book]. To a screen reader the whole widget is one thing
+ * that says [said]: by default the book in a phrase ("The Time Machine, H. G. Wells, 42% read"),
+ * rather than its cover, its title and its line each read out in turn, the title twice.
+ */
+@Composable
+internal fun base(context: Context, book: Book?, said: String? = book?.let { saidOf(context, it) }): GlanceModifier {
+    val tappable = surface().clickable(actionStartActivity(openIntent(context, book)))
+    return if (said.isNullOrEmpty()) tappable else tappable.semantics { contentDescription = said }
+}
+
+/** A book in a phrase, for a screen reader: its title, who wrote it, and how far through it you are. */
+internal fun saidOf(context: Context, book: Book): String =
+    spoken(context.getString(R.string.list_separator), book.title, book.author, book.statusLabel(context.resources))
 
 @Composable
 internal fun Label(text: String) = Text(

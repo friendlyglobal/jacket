@@ -14,6 +14,8 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.LocalSize
 import androidx.glance.action.clickable
+import androidx.glance.semantics.contentDescription
+import androidx.glance.semantics.semantics
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
@@ -95,6 +97,9 @@ private class ShelfModel(state: LibraryState, missing: Set<String>, moment: Read
     }
 }
 
+/** The narrowest a book on the shelf is to the touch. */
+private val MIN_TARGET = 48.dp
+
 @Composable
 private fun Shelf(context: Context, model: ShelfModel, covers: Map<String, Bitmap>) {
     WidgetTheme(model.seed) {
@@ -110,13 +115,18 @@ private fun Shelf(context: Context, model: ShelfModel, covers: Map<String, Bitma
         val under = (if (model.showProgress) WidgetArt.LINE_HEIGHT + 4.dp else 0.dp) + (if (titled) 32.dp else 0.dp)
         val coverHeight = (size.height - padding * 2 - under).coerceAtLeast(36.dp)
         val coverWidth = (coverHeight * 0.66f).coerceAtMost(size.width - padding * 2)
-        val fits = ((size.width - padding * 2 + gap) / (coverWidth + gap)).toInt().coerceIn(1, ShelfModel.MAX_BOOKS)
+        // A book is never a narrower target than a finger needs, however short the widget.
+        val bookWidth = coverWidth.coerceAtLeast(MIN_TARGET).coerceAtMost(size.width - padding * 2)
+        val fits = ((size.width - padding * 2 + gap) / (bookWidth + gap)).toInt().coerceIn(1, ShelfModel.MAX_BOOKS)
         val books = model.books.take(fits)
-        Row(base(context, books.first()).padding(padding), verticalAlignment = Alignment.Top) {
+        // Each book opens itself and is said by itself ("Dracula, 12% read"): the shelf around them
+        // isn't one more thing to tap, which read all of them out before any of them.
+        Row(surface().padding(padding), verticalAlignment = Alignment.Top) {
             books.forEachIndexed { index, book ->
                 if (index > 0) Spacer(GlanceModifier.width(gap))
                 Column(
-                    GlanceModifier.width(coverWidth).clickable(actionStartActivity(openIntent(context, book))),
+                    GlanceModifier.width(bookWidth).clickable(actionStartActivity(openIntent(context, book)))
+                        .semantics { contentDescription = saidOf(context, book) },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Cover(context, covers[book.id], book.title, coverWidth, coverHeight)

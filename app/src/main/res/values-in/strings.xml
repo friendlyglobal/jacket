@@ -162,7 +162,6 @@
     <string name="reading_text_size_sample">A</string>
     <string name="reading_typeface">Jenis huruf</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">Dipilih</string>
     <string name="reading_page">Halaman</string>
     <string name="reading_layout">Tata letak</string>
     <string name="reading_layout_hint">Halaman dibalik seperti buku: geser, atau ketuk tepinya. Saat ponsel dibuka, dua halaman tampil berdampingan.</string>
@@ -193,8 +192,6 @@
     <string name="reader_search">Telusuri di buku</string>
     <string name="reader_bookmark_add">Bookmark halaman ini</string>
     <string name="reader_bookmark_remove">Hapus bookmark</string>
-    <string name="reader_outer_show">Tampilkan sampul di layar luar</string>
-    <string name="reader_outer_hide">Sembunyikan sampul di layar luar</string>
     <string name="reader_text_settings">Setelan teks dan halaman</string>
     <string name="reader_contents_and_notes">Daftar isi, bookmark, dan sorotan</string>
     <string name="reader_notes">Bookmark dan sorotan</string>
