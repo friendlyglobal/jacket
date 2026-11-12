@@ -361,18 +361,16 @@ class Library(private val context: Context) : LibraryOrganizer {
         changed()
     }
 
-    fun updatePosition(id: String, position: Int, offset: Float, progress: Float, sectionCount: Int) {
+    /**
+     * Saves the page a PDF or a comic was scrolled to: [page] of [pages], the top of the screen
+     * [offset] of the way down it, [progress] of the way through the book.
+     *
+     * [back] says the reader went back through the pages themselves to get here. Without it the
+     * book's progress is never taken down, as for every other book (see [Book.leftOnPage]).
+     */
+    fun updatePage(id: String, page: Int, offset: Float, progress: Float, pages: Int, back: Boolean) {
         if (!offset.isFinite() || !progress.isFinite()) return
-        _state.update { s ->
-            s.copy(books = s.books.map {
-                if (it.id == id) it.copy(
-                    position = position,
-                    positionOffset = offset.coerceIn(0f, 1f),
-                    progress = progress.coerceIn(0f, 1f),
-                    sectionCount = sectionCount,
-                ) else it
-            })
-        }
+        _state.update { s -> s.copy(books = s.books.map { if (it.id == id) it.leftOnPage(page, offset, progress, pages, back) else it }) }
         changed()
     }
 

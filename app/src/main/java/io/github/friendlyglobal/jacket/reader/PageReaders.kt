@@ -45,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -285,10 +286,8 @@ fun PdfReader(
             val aloud = rememberPdfAloud(book, settings, page, nav, respellings)
             // While the voice speaks, the book's place is the sentence it is on, which the voice
             // saves: the page that happens to be in view (moved there to follow it) isn't saved over it.
-            val saved: ProgressSink = { position, offset, progress, sections ->
-                if (!aloud.holdsThePlace && SystemClock.uptimeMillis() - aloud.followedAt > FOLLOW_SETTLE_MS) onProgress(position, offset, progress, sections)
-            }
-            PagedList(pdf.pageCount, book.position, book.positionOffset, pdf.firstPageAspect, page, nav, haptics, saved, onCenterTap, aloud) { index, width ->
+            val held = { aloud.holdsThePlace || SystemClock.uptimeMillis() - aloud.followedAt <= FOLLOW_SETTLE_MS }
+            PagedList(pdf.pageCount, book.position, book.positionOffset, pdf.firstPageAspect, page, nav, haptics, onProgress, onCenterTap, aloud, held) { index, width ->
                 pdf.render(index, width)
             }
         }
@@ -353,6 +352,8 @@ private fun PagedList(
     onCenterTap: () -> Unit,
     /** A PDF's read-aloud: the pages follow the voice and mark its sentence. Null for pages that are never read aloud (a comic's). */
     aloud: PdfAloud? = null,
+    /** The place is somebody else's just now (the voice's, while it reads): the page in view isn't saved as the reader's. */
+    held: () -> Boolean = { false },
     render: suspend (index: Int, width: Int) -> Bitmap?,
 ) {
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = initial.coerceIn(0, (count - 1).coerceAtLeast(0)))
@@ -386,10 +387,10 @@ private fun PagedList(
         nav.turnPage = { delta -> nav.jumpTo(first + delta) }
     }
     PageTicks(listState, haptics)
-    TrackProgress(listState, count, initial, initialOffset, onProgress)
 
     val zoom = remember(listState) { PageZoom(scope, listState) }
     zoom.spring = MaterialTheme.motionScheme.defaultSpatialSpec()
+    TrackProgress(listState, count, initial, initialOffset, held, { zoom.scale }, onProgress)
     // Where each page in view is in the window, and where the pages' own box is: for what is
     // asked in the window's terms (a tap on a line, where the line being read is). Not state:
     // nothing is laid out again for it.
@@ -656,27 +657,70 @@ private const val TICK_GAP_MS = 160L
  * The place saved is an item (a page, a paragraph) and how far down it the top of the screen was:
  * the list opens on item [start], and is first put [startOffset] of the way down it, so a tall
  * page or a long paragraph isn't begun again from its top.
+ *
+ * With each place goes whether the reader went back through the pages to get to it (see
+ * [ScrolledPlace]): the one thing that lets the book's progress fall. The page the list opens on,
+ * and the pages as they lie after the window or the zoom ([zoomed]) has changed, are the same
+ * place shown again. While the place is [held] by somebody else (the voice), nothing is saved.
  */
 @Composable
-private fun TrackProgress(listState: LazyListState, count: Int, start: Int, startOffset: Float, onProgress: ProgressSink) {
+private fun TrackProgress(
+    listState: LazyListState,
+    count: Int,
+    start: Int,
+    startOffset: Float,
+    held: () -> Boolean,
+    zoomed: () -> Float,
+    onProgress: ProgressSink,
+) {
     val sink by rememberUpdatedState(onProgress)
+    val holds by rememberUpdatedState(held)
+    val zoom by rememberUpdatedState(zoomed)
     LaunchedEffect(listState, count) {
+        val place = ScrolledPlace()
+        val index = start.coerceIn(0, (count - 1).coerceAtLeast(0))
         if (startOffset > 0f && startOffset.isFinite()) {
             // Known once the item has been laid out: its height differs from one screen to another.
             // (Not waited for long: nothing is saved until this is done.)
-            val index = start.coerceIn(0, (count - 1).coerceAtLeast(0))
             val item = withTimeoutOrNull(2_000) {
                 snapshotFlow { listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == index } }.first { it != null }
             }
             if (item != null) listState.scrollToItem(index, ceil(startOffset.coerceAtMost(1f) * item.size).toInt())
         }
+        // The page the book opens on is where its place is.
+        place.at(index, if (startOffset.isFinite()) startOffset else 0f)
+        // Folded, unfolded, turned or zoomed, the pages lie differently, and the top of the screen
+        // is another fraction of the page it was on: the same place, to be counted from where it is now.
+        launch {
+            snapshotFlow { listState.layoutInfo.viewportSize to zoom() }.drop(1).collect {
+                // (Once the pages have been laid out in the new window.)
+                withFrameNanos { }
+                val (page, fraction) = listState.topOfScreen()
+                if (holds()) place.shownAgain() else place.at(page, fraction)
+            }
+        }
         snapshotFlow { Triple(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset, listState.canScrollForward) }
-            .collectLatest { (index, offset, more) ->
+            .collectLatest { (_, _, more) ->
                 delay(300)
-                val size = listState.layoutInfo.visibleItemsInfo.firstOrNull()?.size?.coerceAtLeast(1) ?: 1
-                val fraction = (offset / size.toFloat()).coerceIn(0f, 1f)
-                val progress = if (!more) 1f else ((index + fraction) / count).coerceIn(0f, 1f)
-                sink(index, fraction, progress, count)
+                if (holds()) {
+                    // Wherever the pages are when the place is the reader's again is where it is then.
+                    place.shownAgain()
+                    return@collectLatest
+                }
+                val (page, fraction) = listState.topOfScreen()
+                val progress = if (!more) 1f else ((page + fraction) / count).coerceIn(0f, 1f)
+                sink(page, fraction, progress, count, place.wentBackTo(page, fraction))
             }
     }
+}
+
+/**
+ * The page at the top of the screen, and how far down it the top is (0..1). (The page the list
+ * counts as its first, which is not always the first it has laid out: the foot of the page before
+ * can show in the room kept clear above it.)
+ */
+private fun LazyListState.topOfScreen(): Pair<Int, Float> {
+    val index = firstVisibleItemIndex
+    val size = layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }?.size?.coerceAtLeast(1) ?: 1
+    return index to (firstVisibleItemScrollOffset / size.toFloat()).coerceIn(0f, 1f)
 }

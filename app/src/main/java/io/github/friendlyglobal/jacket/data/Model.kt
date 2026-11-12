@@ -102,15 +102,38 @@ data class Book(
  * themselves: a page turned back, a jump, an earlier sentence tapped. The place itself is always
  * the one given.
  */
-internal fun Book.leftAt(locator: String, progress: Float, position: Int, positions: Int, offset: Float?, back: Boolean): Book {
-    val counted = progress.coerceIn(0f, 1f)
-    return copy(
+internal fun Book.leftAt(locator: String, progress: Float, position: Int, positions: Int, offset: Float?, back: Boolean): Book =
+    copy(
         locator = locator,
-        progress = if (back || !this.progress.isFinite()) counted else maxOf(this.progress, counted),
+        progress = countedAt(progress, back),
         position = position.coerceAtLeast(0),
         positionOffset = offset?.takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: positionOffset,
         sectionCount = positions.coerceAtLeast(0),
     )
+
+/**
+ * [this] book left on a page of pictures (a PDF's, a comic's) by scrolling: [page] of [pages],
+ * with the top of the screen [offset] of the way down it, counted as [progress] of the way
+ * through the book.
+ *
+ * The same rule as [leftAt]: the place is always the one given, and the progress only falls when
+ * the reader went [back]. A page is counted from how far down it the screen's top is, which is
+ * never quite the same twice (the page is a different height folded and unfolded, and the voice
+ * counts its sentence's own line, a little below the top of the screen it is shown on). The
+ * sentence a PDF was last read aloud to ([Book.locator]) stays as it is: scrolling says nothing of it.
+ */
+internal fun Book.leftOnPage(page: Int, offset: Float, progress: Float, pages: Int, back: Boolean): Book =
+    copy(
+        progress = countedAt(progress, back),
+        position = page.coerceAtLeast(0),
+        positionOffset = offset.takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: positionOffset,
+        sectionCount = pages.coerceAtLeast(0),
+    )
+
+/** The progress [this] book has once a place counted as [progress] is saved: lower than it was only if the reader went [back]. */
+private fun Book.countedAt(progress: Float, back: Boolean): Float {
+    val counted = progress.coerceIn(0f, 1f)
+    return if (back || !this.progress.isFinite()) counted else maxOf(this.progress, counted)
 }
 
 enum class ReadingFont(@StringRes val label: Int, @StringRes val description: Int) {

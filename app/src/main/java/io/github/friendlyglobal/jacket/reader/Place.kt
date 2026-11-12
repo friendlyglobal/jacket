@@ -311,6 +311,51 @@ internal class PagePlace {
 }
 
 /**
+ * Whether the reader has gone back through pages that are scrolled (a PDF's, a comic's): what
+ * [PagePlace] tells of a book of pages turned, told of these.
+ *
+ * Their place is the page at the top of the screen and how far down it the top is. Everything
+ * that moves a list of pages is the reader's own doing (a finger, a tap on the page's edge, a
+ * jump), so a place taken as theirs that comes before the one last counted is them going back.
+ * All but the places Jacket itself put in front of them: the page the book opens on, the pages
+ * laid out anew (folded, unfolded, zoomed, where the same top of the screen is another fraction
+ * of a page of another height), and the page the voice was followed to. Those are the same place
+ * shown again, and the first place seen after them is where the place is now.
+ */
+internal class ScrolledPlace {
+    /** The place the book's was last counted on (the pages before it, and how far down its own); null when it isn't known in the pages as they now lie. */
+    private var on: Float? = null
+
+    /** The pages have been laid out anew or moved by Jacket itself: the next place seen is the same place, shown again. */
+    fun shownAgain() {
+        on = null
+    }
+
+    /** The book's place is [offset] of the way down [page]: it opened there, or was put back there. */
+    fun at(page: Int, offset: Float) {
+        on = counted(page, offset)
+    }
+
+    /** [offset] of the way down [page] is taken as the reader's place: whether they went back through the pages to get to it. */
+    fun wentBackTo(page: Int, offset: Float): Boolean {
+        val at = counted(page, offset)
+        val from = on
+        val back = from != null && at < from - NEAR
+        // The same place told again a hair higher (a pixel's rounding) is no move: the place the
+        // count was made on stands, so that many small steps back add up to one.
+        on = if (!back && from != null && at < from) from else at
+        return back
+    }
+
+    private fun counted(page: Int, offset: Float): Float = page.coerceAtLeast(0) + if (offset.isFinite()) offset.coerceIn(0f, 1f) else 0f
+
+    private companion object {
+        /** Less of a page than this is the same place: a page is put back to the nearest pixel. */
+        const val NEAR = 0.01f
+    }
+}
+
+/**
  * Whether a sentence of the voice's comes before another: each is told by the chapter file it is
  * in (its number in the book) and the letters before it in that file (see [TextPlaces]), so one
  * is before the other by exactly that. It is how a listener sending the voice back (the previous

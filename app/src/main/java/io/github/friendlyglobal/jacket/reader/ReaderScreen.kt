@@ -330,7 +330,8 @@ internal fun ReaderNav.chapterSteps(): ChapterSteps? = when {
 /** The open book's [ReaderNav], for views that only need to report in (see [ReaderError]). */
 internal val LocalReaderNav = compositionLocalOf<ReaderNav?> { null }
 
-typealias ProgressSink = (position: Int, offset: Float, progress: Float, sections: Int) -> Unit
+/** A page of pictures (a PDF's, a comic's) taken as the reader's place; [back] when they went back through the pages to get to it. */
+typealias ProgressSink = (position: Int, offset: Float, progress: Float, sections: Int, back: Boolean) -> Unit
 
 private enum class Sheet { NONE, CONTENTS, TEXT, SEARCH, VOICE, WORDS }
 
@@ -786,8 +787,8 @@ fun ReaderScreen(
             .maxWithOrNull(compareBy<Book>({ it.lastOpenedAt }, { it.addedAt }))
     }
 
-    val onProgress: ProgressSink = { position, offset, progress, sections ->
-        library.updatePosition(book.id, position, offset, progress, sections)
+    val onProgress: ProgressSink = { position, offset, progress, sections, back ->
+        library.updatePage(book.id, position, offset, progress, sections, back)
     }
     // A tap on the page: the full controls, or the page to itself again (the lone toolbar goes too).
     val toggleChrome = {
