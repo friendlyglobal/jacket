@@ -106,6 +106,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.DecimalStyle
 import java.time.format.FormatStyle
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
@@ -399,6 +400,8 @@ private fun MonthGrid(reading: MonthReading, today: LocalDate, locale: Locale) {
     val shades = remember(scheme) { readingShadeColors(scheme) }
     val todayHere = if (YearMonth.from(today) == reading.month) today.dayOfMonth else -1
     val number = MaterialTheme.typography.labelLarge
+    // The days in the language's own digits, as the totals above them are written.
+    val numerals = remember(locale) { (0..31).map { String.format(locale, "%d", it) } }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             for (day in weekDays(weekStart)) {
@@ -425,7 +428,7 @@ private fun MonthGrid(reading: MonthReading, today: LocalDate, locale: Locale) {
                             .then(if (day == todayHere) Modifier.border(2.dp, scheme.onSurface, RoundedCornerShape(12.dp)) else Modifier),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(day.toString(), style = number, color = shade.ink, maxLines = 1, softWrap = false, autoSize = fitOnOneLine(number))
+                        Text(numerals[day], style = number, color = shade.ink, maxLines = 1, softWrap = false, autoSize = fitOnOneLine(number))
                     }
                 }
             }
@@ -453,7 +456,7 @@ private fun FinishedBook(book: Book, index: Int, count: Int, locale: Locale, mod
     val day = remember(book.finishedAt, locale) {
         Instant.ofEpochMilli(book.finishedAt).atZone(ZoneId.systemDefault()).toLocalDate()
             .takeIf { it >= FIRST_REAL_FINISH }
-            ?.let { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale).format(it) }
+            ?.let { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale).withDecimalStyle(DecimalStyle.of(locale)).format(it) }
     }
     val line = listOfNotNull(book.author.takeIf { it.isNotBlank() }, day)
     val phrase = spoken(stringResource(R.string.list_separator), book.title, book.author, day)
