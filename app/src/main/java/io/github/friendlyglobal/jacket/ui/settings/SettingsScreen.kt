@@ -81,6 +81,9 @@ import io.github.friendlyglobal.jacket.autoBackup
 import io.github.friendlyglobal.jacket.data.AutoBackup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.friendlyglobal.jacket.ui.asHeading
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 
 private const val SOURCE_URL = "https://github.com/friendlyglobal/jacket"
 private const val PRIVACY_URL = "https://usefriendly.app/products/jacket/privacy/"
@@ -171,7 +174,7 @@ fun SettingsScreen(
         modifier = Modifier.nestedScroll(scroll.nestedScrollConnection).predictiveBack(onBack),
         topBar = {
             LargeFlexibleTopAppBar(
-                title = { Text(stringResource(R.string.settings_title)) },
+                title = { Text(stringResource(R.string.settings_title), modifier = Modifier.asHeading()) },
                 subtitle = { Text(stringResource(R.string.settings_subtitle)) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(JacketIcons.Back, stringResource(R.string.common_back)) } },
                 scrollBehavior = scroll,
@@ -532,6 +535,7 @@ private fun AutoBackupRow(status: AutoBackup.Status, onChange: (Boolean) -> Unit
     SegmentedListItem(
         checked = status.on,
         onCheckedChange = { if (status.on && status.failed) onChooseAgain() else onChange(it) },
+        modifier = Modifier.asSwitch(),
         shapes = ListItemDefaults.segmentedShapes(1, 3),
         leadingContent = { Icon(JacketIcons.Upload, null) },
         supportingContent = {
@@ -554,6 +558,7 @@ private fun SwitchRow(index: Int, count: Int, title: String, description: String
     SegmentedListItem(
         checked = checked,
         onCheckedChange = onChange,
+        modifier = Modifier.asSwitch(),
         shapes = ListItemDefaults.segmentedShapes(index, count),
         supportingContent = if (description != null) { { Text(description) } } else null,
         trailingContent = {
@@ -567,6 +572,9 @@ private fun SwitchRow(index: Int, count: Int, title: String, description: String
         },
     ) { Text(title) }
 }
+
+/** A row that wears a switch is a switch to a screen reader too ("on", "off"), as the same rows in the reader's sheet are: not a tick box. */
+private fun Modifier.asSwitch(): Modifier = semantics { role = Role.Switch }
 
 @Composable
 private fun Hint(text: String, modifier: Modifier) {

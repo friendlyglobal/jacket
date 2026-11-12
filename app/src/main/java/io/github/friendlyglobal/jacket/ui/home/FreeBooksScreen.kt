@@ -78,6 +78,7 @@ import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.LibraryState
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
+import io.github.friendlyglobal.jacket.ui.asHeading
 import io.github.friendlyglobal.jacket.ui.pressScale
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import kotlinx.coroutines.Dispatchers
@@ -183,7 +184,7 @@ fun FreeBooksScreen(state: LibraryState, onBack: () -> Unit, onOpen: (Book) -> U
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.free_books_title)) },
+                title = { Text(stringResource(R.string.free_books_title), modifier = Modifier.asHeading()) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(JacketIcons.Back, stringResource(R.string.common_back)) } },
                 actions = {
                     IconButton(onClick = { haptics.tick(); FreeBooks.open(context) }) {
