@@ -119,8 +119,10 @@ import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.PageColors
+import io.github.friendlyglobal.jacket.ui.fitOnOneLine
 import io.github.friendlyglobal.jacket.ui.motionRemoved
 import io.github.friendlyglobal.jacket.ui.rememberTurn
+import io.github.friendlyglobal.jacket.ui.shrinkToFit
 import io.github.friendlyglobal.jacket.ui.voices.VoiceChip
 import kotlinx.coroutines.delay
 
@@ -503,6 +505,7 @@ private fun ReadingToolbar(reading: ReadingActions, haptics: Haptics) {
     val onListen = reading.onListen
     HorizontalFloatingToolbar(
         expanded = true,
+        modifier = Modifier.shrinkToFit(),
         colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
         floatingActionButton = {
             if (onListen != null) {
@@ -550,7 +553,8 @@ private fun PlayerToolbar(
     val chaptersOnBar = chapters?.takeIf { chaptersFitOnBar() }
     HorizontalFloatingToolbar(
         expanded = true,
-        modifier = modifier,
+        // (Six buttons across: on the narrowest screens they are drawn a little smaller rather than cut off at both ends.)
+        modifier = modifier.shrinkToFit(),
         colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(),
         floatingActionButton = { PlayButton(listen, controller, haptics) },
     ) {
@@ -655,8 +659,13 @@ private fun RateButton(listen: ListenState, rate: Float, onRate: (Float) -> Unit
             colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current),
             modifier = Modifier.semantics { contentDescription = described },
         ) {
-            // Said by the button, as "Speed: 1.25×": not a second time as a bare number.
-            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, modifier = Modifier.clearAndSetSemantics {})
+            // Said by the button, as "Speed: 1.25×": not a second time as a bare number. With the
+            // phone's font size turned up it stays the width of the buttons beside it.
+            Text(
+                label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false,
+                autoSize = fitOnOneLine(MaterialTheme.typography.labelLarge),
+                modifier = Modifier.widthIn(max = 44.dp).clearAndSetSemantics {},
+            )
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             listenRateChoices(rate).forEach { choice ->
@@ -1007,7 +1016,7 @@ internal fun MiniPlayer(
                     if (left.isNotBlank()) {
                         Text(
                             stringResource(R.string.separator) + left, style = style, color = colors.secondary,
-                            maxLines = 1, overflow = TextOverflow.Ellipsis,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis, autoSize = fitOnOneLine(style),
                         )
                     }
                 }

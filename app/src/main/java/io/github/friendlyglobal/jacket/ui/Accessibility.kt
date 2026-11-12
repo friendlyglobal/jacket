@@ -5,8 +5,17 @@ import android.view.accessibility.AccessibilityManager
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.DpSize
+import kotlin.math.roundToInt
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isUnspecified
+import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -68,6 +77,46 @@ fun rememberTimeToAct(): (Long) -> Long {
 @Composable
 fun FullHeightThumb(interaction: MutableInteractionSource) {
     SliderDefaults.Thumb(interactionSource = interaction, thumbSize = DpSize(4.dp, 48.dp))
+}
+
+/**
+ * For words that have one line's room and no second line to go to (a button in a row of buttons,
+ * the line under the page). With the phone's font size turned up they are as large as fits, down
+ * to the size they have with it left alone, rather than cut off mid-word. Null (nothing to do)
+ * while the font size is left alone.
+ */
+@Composable
+fun fitOnOneLine(style: TextStyle): TextAutoSize? {
+    val density = LocalDensity.current
+    if (density.fontScale <= 1f || style.fontSize.isUnspecified) return null
+    // The size on screen these words have at the phone's own font size, in today's scaled units.
+    val unscaled = with(density) { style.fontSize.value.dp.toSp() }
+    return remember(unscaled, style.fontSize) {
+        if (unscaled.value >= style.fontSize.value) null else TextAutoSize.StepBased(minFontSize = unscaled, maxFontSize = style.fontSize, stepSize = 0.5.sp)
+    }
+}
+
+/**
+ * Draws what it holds a little smaller when it is wider than the room there is, so that all of it
+ * is on the screen: a row of buttons that can't wrap (the player's bar) on the narrowest screens,
+ * at the largest display and font sizes, where it ran off both edges. Anywhere it fits, nothing
+ * changes.
+ */
+fun Modifier.shrinkToFit(): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints.copy(minWidth = 0, maxWidth = Constraints.Infinity))
+    val room = constraints.maxWidth
+    if (room == Constraints.Infinity || placeable.width <= room) {
+        layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+    } else {
+        val scale = room.toFloat() / placeable.width
+        layout(room, (placeable.height * scale).roundToInt()) {
+            placeable.placeWithLayer(0, 0) {
+                scaleX = scale
+                scaleY = scale
+                transformOrigin = TransformOrigin(0f, 0f)
+            }
+        }
+    }
 }
 
 /** A title a screen reader can jump to, heading by heading. */

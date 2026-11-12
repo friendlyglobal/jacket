@@ -140,6 +140,7 @@ import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.role
 import io.github.friendlyglobal.jacket.ui.asHeading
 import io.github.friendlyglobal.jacket.ui.decorative
+import io.github.friendlyglobal.jacket.ui.fitOnOneLine
 import io.github.friendlyglobal.jacket.ui.spoken
 
 @Composable
@@ -691,7 +692,7 @@ private fun NowReadingPane(
                         ) {
                             Icon(JacketIcons.Book, null, Modifier.size(ButtonDefaults.IconSize))
                             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                            Text(stringResource(R.string.library_read), maxLines = 1)
+                            Text(stringResource(R.string.library_read), maxLines = 1, autoSize = fitOnOneLine(MaterialTheme.typography.labelLarge))
                         }
                         // Formats that can be read aloud.
                         if (onListen != null && (book.format == BookFormat.EPUB || book.format == BookFormat.TXT)) {
@@ -702,7 +703,7 @@ private fun NowReadingPane(
                             ) {
                                 Icon(JacketIcons.Headphones, null, Modifier.size(ButtonDefaults.IconSize))
                                 Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                                Text(stringResource(R.string.library_listen), maxLines = 1)
+                                Text(stringResource(R.string.library_listen), maxLines = 1, autoSize = fitOnOneLine(MaterialTheme.typography.labelLarge))
                             }
                         }
                     }

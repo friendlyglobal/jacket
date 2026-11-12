@@ -1,6 +1,10 @@
 package io.github.friendlyglobal.jacket.reader
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
@@ -253,7 +257,12 @@ fun ReadingControls(
             onSettings { it.copy(edgeSwipes = on, brightness = if (on) it.brightness else -1f, warmth = if (on) it.warmth else 0f) }
         }
         // The same two levels as a slider each: the swipe is the only other way to them.
-        AnimatedVisibility(visible = lightLevels && settings.edgeSwipes) {
+        val motion = MaterialTheme.motionScheme
+        AnimatedVisibility(
+            visible = lightLevels && settings.edgeSwipes,
+            enter = expandVertically(motion.defaultSpatialSpec()) + fadeIn(motion.defaultEffectsSpec()),
+            exit = shrinkVertically(motion.fastSpatialSpec()) + fadeOut(motion.fastEffectsSpec()),
+        ) {
             val context = LocalContext.current
             Column {
                 LevelSlider(

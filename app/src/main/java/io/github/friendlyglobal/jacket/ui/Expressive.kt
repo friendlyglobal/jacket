@@ -28,6 +28,12 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -321,37 +327,56 @@ fun <T> ConnectedChoice(
     check: Boolean = true,
 ) {
     val haptics = rememberHaptics()
+    // With the phone's font size turned up, three or four words side by side run out of room on
+    // a narrow screen ("Co", "Book", "Highl"). Then each button keeps its room for its word: no
+    // tick or swatch beside it (the fill and shape still say which is chosen), less padding, and
+    // the word as large as fits.
+    val density = LocalDensity.current
+    var width by remember { mutableIntStateOf(0) }
+    val each = with(density) { width.toDp() } / options.size.coerceAtLeast(1)
+    val tight = density.fontScale > 1.15f && width > 0 && each < TIGHT_BELOW * density.fontScale
+    val fitted = fitOnOneLine(MaterialTheme.typography.labelLarge)
     // One choice out of these: a screen reader counts them ("2 of 4") and knows picking one unpicks the rest.
-    Row(modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)) {
+    Row(
+        modifier.fillMaxWidth().onSizeChanged { width = it.width }.selectableGroup(),
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
+    ) {
         options.forEachIndexed { index, option ->
             val checked = option == selected
-            ToggleButton(
-                checked = checked,
-                onCheckedChange = {
-                    if (!checked) {
-                        haptics.tick()
-                        onSelect(option)
-                    }
-                },
-                modifier = Modifier.weight(1f).semantics { role = Role.RadioButton },
-                shapes = when (index) {
-                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                    options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                },
-            ) {
-                if (checked && check) {
+            val content: @Composable RowScope.() -> Unit = {
+                if (!tight && checked && check) {
                     Icon(JacketIcons.Check, null, Modifier.size(ButtonDefaults.IconSize))
                     Spacer(Modifier.width(6.dp))
-                } else if (leading != null && !checked) {
+                } else if (!tight && leading != null && !checked) {
                     leading(option)
                     Spacer(Modifier.width(6.dp))
                 }
-                Text(label(option), maxLines = 1)
+                Text(label(option), maxLines = 1, softWrap = false, autoSize = fitted)
+            }
+            val onCheckedChange = { _: Boolean ->
+                if (!checked) {
+                    haptics.tick()
+                    onSelect(option)
+                }
+            }
+            val button = Modifier.weight(1f).semantics { role = Role.RadioButton }
+            val shapes = when (index) {
+                0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+            }
+            if (tight) {
+                ToggleButton(checked, onCheckedChange, button, shapes = shapes, contentPadding = TightPadding, content = content)
+            } else {
+                ToggleButton(checked, onCheckedChange, button, shapes = shapes, content = content)
             }
         }
     }
 }
+
+/** A button of a [ConnectedChoice] narrower than this, per unit of font scale, has room for its word and nothing else. */
+private val TIGHT_BELOW = 76.dp
+private val TightPadding = PaddingValues(horizontal = 6.dp)
 
 @Composable
 fun ColorSwatch(color: Color) {

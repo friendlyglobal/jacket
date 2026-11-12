@@ -156,6 +156,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
 import io.github.friendlyglobal.jacket.ui.FullHeightThumb
+import io.github.friendlyglobal.jacket.ui.fitOnOneLine
 import io.github.friendlyglobal.jacket.ui.rememberScreenReader
 import io.github.friendlyglobal.jacket.ui.rememberTimeToAct
 import io.github.friendlyglobal.jacket.ui.screenReaderOn
@@ -1647,7 +1648,11 @@ private fun ReaderFooter(
                     transitionSpec = { fadeIn(effects) togetherWith fadeOut(effects) },
                     label = "footer",
                 ) { text ->
-                    Text(text, style = MaterialTheme.typography.labelMedium, color = page.secondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    // With the phone's font size turned up, the whole of it at a smaller size, before any of it is cut off.
+                    Text(
+                        text, style = MaterialTheme.typography.labelMedium, color = page.secondary, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        autoSize = fitOnOneLine(MaterialTheme.typography.labelMedium),
+                    )
                 }
             }
         }
