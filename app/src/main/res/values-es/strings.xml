@@ -245,6 +245,7 @@
     <string name="selection_highlight">Resaltar</string>
     <string name="selection_note">Nota</string>
     <string name="selection_share">Compartir</string>
+    <string name="selection_read_from_here">Leer en voz alta desde aquí</string>
 
     <string name="notes_tab_contents">Índice</string>
     <string name="notes_tab_bookmarks">Marcadores</string>
@@ -315,6 +316,9 @@
     <string name="listen_nothing_to_read_comics">Aquí no hay ningún libro que se pueda leer en voz alta. Jacket no puede leer cómics en voz alta.</string>
     <string name="pdf_listen_unavailable">Este teléfono no puede leer PDF en voz alta. Hace falta Android 15, o Android 12 a 14 con la última actualización del sistema de Google Play.</string>
     <string name="pdf_listen_no_text">Este PDF no tiene texto que leer en voz alta. Sus páginas son imágenes, como las de un escaneo.</string>
+    <string name="pdf_highlight_unavailable">Este teléfono no puede resaltar en los PDF. Hace falta Android 15, o Android 12 a 14 con la última actualización del sistema de Google Play.</string>
+    <string name="pdf_highlight_no_text">Este PDF no tiene texto que resaltar. Sus páginas son imágenes, como las de un escaneo.</string>
+    <string name="pdf_highlights_listed_only">Este teléfono puede mostrar la lista de resaltados de un PDF, pero no puede mostrarlos en sus páginas.</string>
     <string name="pdf_listen_locked">Este PDF está bloqueado. Ábrelo e introduce su contraseña para escucharlo.</string>
     <string name="pdf_locked_message">Este PDF está bloqueado con una contraseña.</string>
     <string name="pdf_locked_enter">Introducir contraseña</string>

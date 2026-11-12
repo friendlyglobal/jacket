@@ -280,6 +280,8 @@
     <string name="selection_highlight">Highlight</string>
     <string name="selection_note">Note</string>
     <string name="selection_share">Share</string>
+    <!-- In the menu over words selected on a PDF's page: the voice starts reading at those words. -->
+    <string name="selection_read_from_here">Read aloud from here</string>
 
     <!-- Contents, bookmarks and highlights sheet -->
     <string name="notes_tab_contents">Contents</string>
@@ -358,6 +360,10 @@
     <string name="listen_nothing_to_read_comics">There is no book here that can be read aloud. Jacket can\'t read comics aloud.</string>
     <string name="pdf_listen_unavailable">This phone can\'t read PDFs aloud. That takes Android 15, or Android 12 to 14 with the latest Google Play system update.</string>
     <string name="pdf_listen_no_text">This PDF has no text to read aloud. Its pages are pictures, like a scan.</string>
+    <!-- Highlights in a PDF need its words from Android, as reading it aloud does. Where there are none (an older Android, a scan), a press and hold on the page says why, and so does the list of highlights. The third is said above highlights that came from another of the reader's devices. -->
+    <string name="pdf_highlight_unavailable">This phone can\'t highlight in PDFs. That takes Android 15, or Android 12 to 14 with the latest Google Play system update.</string>
+    <string name="pdf_highlight_no_text">This PDF has no text to highlight. Its pages are pictures, like a scan.</string>
+    <string name="pdf_highlights_listed_only">This phone can list a PDF\'s highlights but can\'t show them on its pages.</string>
     <string name="pdf_listen_locked">This PDF is locked. Open it and enter its password to listen.</string>
     <string name="pdf_locked_message">This PDF is locked with a password.</string>
     <string name="pdf_locked_enter">Enter password</string>

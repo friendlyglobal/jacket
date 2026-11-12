@@ -230,6 +230,7 @@
     <string name="selection_highlight">하이라이트</string>
     <string name="selection_note">메모</string>
     <string name="selection_share">공유</string>
+    <string name="selection_read_from_here">여기서부터 소리 내어 읽기</string>
 
     <string name="notes_tab_contents">목차</string>
     <string name="notes_tab_bookmarks">북마크</string>
@@ -296,6 +297,9 @@
     <string name="listen_nothing_to_read_comics">소리 내어 읽을 수 있는 책이 없습니다. Jacket은 만화를 소리 내어 읽을 수 없습니다.</string>
     <string name="pdf_listen_unavailable">이 휴대전화에서는 PDF를 소리 내어 읽을 수 없습니다. Android 15, 또는 최신 Google Play 시스템 업데이트가 설치된 Android 12~14가 필요합니다.</string>
     <string name="pdf_listen_no_text">이 PDF에는 소리 내어 읽을 텍스트가 없습니다. 스캔한 문서처럼 페이지가 그림으로 되어 있습니다.</string>
+    <string name="pdf_highlight_unavailable">이 휴대전화에서는 PDF에 하이라이트를 할 수 없습니다. Android 15, 또는 최신 Google Play 시스템 업데이트가 설치된 Android 12~14가 필요합니다.</string>
+    <string name="pdf_highlight_no_text">이 PDF에는 하이라이트할 텍스트가 없습니다. 스캔한 문서처럼 페이지가 그림으로 되어 있습니다.</string>
+    <string name="pdf_highlights_listed_only">이 휴대전화에서는 PDF의 하이라이트를 목록으로 볼 수 있지만 페이지에는 표시할 수 없습니다.</string>
     <string name="pdf_listen_locked">이 PDF는 잠겨 있습니다. 들으려면 열어서 비밀번호를 입력하세요.</string>
     <string name="pdf_locked_message">이 PDF는 비밀번호로 잠겨 있습니다.</string>
     <string name="pdf_locked_enter">비밀번호 입력</string>

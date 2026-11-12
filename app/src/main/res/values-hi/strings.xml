@@ -238,6 +238,7 @@
     <string name="selection_highlight">हाइलाइट</string>
     <string name="selection_note">नोट</string>
     <string name="selection_share">शेयर करें</string>
+    <string name="selection_read_from_here">यहाँ से पढ़कर सुनाएँ</string>
 
     <string name="notes_tab_contents">विषय-सूची</string>
     <string name="notes_tab_bookmarks">बुकमार्क</string>
@@ -306,6 +307,9 @@
     <string name="listen_nothing_to_read_comics">यहाँ ऐसी कोई किताब नहीं है जिसे पढ़कर सुनाया जा सके। Jacket कॉमिक पढ़कर नहीं सुना सकता।</string>
     <string name="pdf_listen_unavailable">यह फ़ोन PDF पढ़कर नहीं सुना सकता। इसके लिए Android 15 चाहिए, या Android 12 से 14 जिसमें Google Play का नया सिस्टम अपडेट हो।</string>
     <string name="pdf_listen_no_text">इस PDF में पढ़कर सुनाने लायक़ कोई टेक्स्ट नहीं है। इसके पन्ने तस्वीरें हैं, जैसे स्कैन में होते हैं।</string>
+    <string name="pdf_highlight_unavailable">यह फ़ोन PDF में हाइलाइट नहीं कर सकता। इसके लिए Android 15 चाहिए, या Android 12 से 14 जिसमें Google Play का नया सिस्टम अपडेट हो।</string>
+    <string name="pdf_highlight_no_text">इस PDF में हाइलाइट करने लायक़ कोई टेक्स्ट नहीं है। इसके पन्ने तस्वीरें हैं, जैसे स्कैन में होते हैं।</string>
+    <string name="pdf_highlights_listed_only">यह फ़ोन PDF के हाइलाइट की सूची दिखा सकता है, पर उन्हें उसके पन्नों पर नहीं दिखा सकता।</string>
     <string name="pdf_listen_locked">यह PDF लॉक है। सुनने के लिए इसे खोलें और इसका पासवर्ड डालें।</string>
     <string name="pdf_locked_message">यह PDF पासवर्ड से लॉक है।</string>
     <string name="pdf_locked_enter">पासवर्ड डालें</string>

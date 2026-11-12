@@ -240,9 +240,8 @@ a line has the voice read on from there.
     the outline itself could be read on any phone.
   - Reading a long PDF's words takes a moment the first time it is opened (about 3 seconds for
     440 pages on the emulator). Listen pressed before then says it is getting ready.
-  - Highlights and notes are still not there for PDFs (search is: see below), and a page saved
-    by scrolling is counted as before (only the voice's place goes through the rule that the
-    percent never falls).
+  - A page saved by scrolling is counted as before (only the voice's place goes through the
+    rule that the percent never falls).
   - Text that runs right to left, and vertical text, haven't been tried.
 
 ### Catch up on a second device (M)
@@ -346,15 +345,70 @@ the match where it is drawn (`reader/PdfSearch.kt`, `reader/TextSearch.kt`).
   - A match is found inside one paragraph: words that end one paragraph and begin the next are not.
   - On phones that can't get at a PDF's words (Android 8 to 11) there is no search, and no
     Search button, as before.
-  - Highlights and notes on PDFs. What they need: (1) a way to choose words on a page that is a
-    picture: press-and-hold with handles (Android's `selectContent` takes points as well as
-    counts) and the menu EPUBs have; the top bar's "highlight the sentence being read" could
-    come first, since that sentence's letters are known already. (2) A place that means the same
-    on another device: today a PDF's mark is only a page. It would be kept as the page, the
-    words, and a little of what stands around them, and found again in the page's text, because
-    paragraph numbers change when the reading order gets better and catch-up shares marks
-    between devices. (3) Drawing each mark of the pages in view (the search mark shows how) and
-    a tap on one to change it. About a week.
+
+## Done since 1.3 (not yet released)
+
+### Highlights and notes on PDFs (M)
+Where Android hands over a PDF's words (Android 15, or Android 12 to 14 with SDK extension 13),
+a PDF takes highlights and notes as other books do (`reader/PdfHighlights.kt`,
+`reader/PdfMarks.kt`).
+- **Choosing words.** A PDF's page is a picture, so Jacket does the selecting itself, from what
+  it already knows of the page: the paragraphs it is read aloud as, and where each of their
+  lines is drawn (`importer/PdfLayout.kt`). A press and hold selects the word under the finger
+  (Android is asked where each word of that line is drawn), the finger can go on to take more,
+  and two handles stretch the selection afterwards. What is selected runs in reading order: down
+  one column and then the next, and over a page's edge. A handle held at the top or the foot of
+  the screen moves the pages.
+- **The menu** by the selection: the five colours (one tap highlights in that colour), Note,
+  Copy, Share, "Say it this way", "Read aloud from here", and the phone's own text actions
+  (Translate and the like). It is Jacket's own menu, not the system's: there is no web page
+  here to ask for one. It waits while a finger is choosing or the pages are moving.
+- **Without press-and-hold.** The top bar's "Highlight or add a note" marks the sentence being
+  read aloud, or the first paragraph on the page (a line by itself that ends no sentence is
+  taken for a heading and passed over). It is the same button, menu and screen-reader actions
+  as in other books, so it works with TalkBack and a keyboard.
+- **Where a highlight is kept.** As the page it begins on, its words, and about 40 letters of
+  what stands before and after them, in the highlight's own place (`Annotation.locator`, as
+  JSON: `{"pdf":1,"page":…,"before":…,"after":…}`). Never a paragraph number: paragraphs are
+  made by Jacket from the page's lines, and are numbered differently whenever the reading order
+  gets better. The highlight is found again by looking for its words in the page's own, spaces,
+  the hyphens of broken words and ligatures aside; where the same words stand twice, by what
+  stood around them; on the pages either side if not on its own; and a highlight of several
+  paragraphs that is no longer found whole (they are read in another order) is looked for a
+  paragraph at a time. So it survives reopening, a later Jacket, and another device, which
+  reads the same file its own way. A Jacket from before this lists such a highlight by its
+  words and page and leaves the place alone.
+- **Drawing.** Each highlight is a wash of its colour over its lines, from the boxes Android
+  gives for those letters (as the search mark and the sentence being read aloud are), with a
+  dotted line under one that carries a note. It is drawn inside the zoomed page, so it follows
+  zoom and scroll for nothing. A tap on one opens the editor: colour, note, delete.
+- **Everywhere else** a highlight goes, a PDF's goes: the list beside the contents (with its
+  page, and choosing one goes to its line), "Save as a file" and sharing (the page is said:
+  "Chapter · Page 12 · 30%"), backups, and catch-up between devices, deletions included.
+  Nothing was added to those: a PDF highlight is a highlight.
+- **Older Android** (8 to 11, or 12 to 14 without the update), and scans: nothing can be
+  selected or drawn, and nothing is offered. A press and hold says why, once, and so does the
+  list of highlights; highlights that came from another device are listed there, and can be
+  read, edited and deleted.
+- Found on the way: the pages said where they were in the window by what of them was in sight,
+  so a tap on a line of a page whose top had scrolled off (to have the voice read from there)
+  was counted from the top of the screen. They now say where the whole page is.
+- Still open:
+  - It has only been on the emulator, on Android 15; the Android 12 to 14 way was run there
+    too, and on no such phone.
+  - Selecting goes by whole words. In writing with no spaces Chinese and Japanese go by the
+    character; Thai, Lao and Khmer go by the whole run between spaces.
+  - Text that runs right to left hasn't been tried. The handles are meant to change sides for it.
+  - Running titles and page numbers can't be selected: they are no part of what is read.
+  - On a page the PDF reader couldn't place the lines of, those lines can't be selected.
+  - A highlight whose words are no longer found on its page (another edition of the file) is
+    listed and not drawn.
+  - The menu is tall. Where it fits neither above nor below nor beside the selection, it sits
+    at the foot of the screen, over part of it.
+  - The EPUB menu is still the system's, with one Highlight (in the colour last used) and no
+    "Read aloud from here".
+  - The selection menu can't be reached with a keyboard alone (nor can a press and hold): a
+    keyboard has the top bar's button.
 
 ## Next
 

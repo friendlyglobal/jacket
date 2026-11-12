@@ -40,6 +40,22 @@ internal class PdfMark(
     val bottom: Float,
 )
 
+/**
+ * One line of a page, as it is read: the letters [start] until [end] of [paragraph], and the box
+ * the line is drawn in ([left] to [bottom], in the page's units). What a finger on the page is
+ * over, when words are chosen there.
+ */
+internal class PdfTextLine(
+    val page: Int,
+    val paragraph: Int,
+    val start: Int,
+    val end: Int,
+    val left: Float,
+    val top: Float,
+    val right: Float,
+    val bottom: Float,
+)
+
 /** A line of a PDF's contents: its [title], how deep it is (0 at the top), the [page] it opens on, and the first paragraph read aloud from there (-1 if none). */
 internal class PdfChapter(val title: String, val level: Int, val page: Int, val paragraph: Int)
 
@@ -163,6 +179,43 @@ internal class PdfLayout private constructor(
             }
         }
         return null
+    }
+
+    /** Every page's lines, in the order they are read: made once, the first time a page's are asked for. */
+    private val lines: List<List<PdfTextLine>> by lazy {
+        val out = List(pageCount) { ArrayList<PdfTextLine>() }
+        for (paragraph in 0 until paragraphs) {
+            var run = first[paragraph]
+            while (run < first[paragraph + 1]) {
+                val left = boxes[run * 4]; val top = boxes[run * 4 + 1]; val right = boxes[run * 4 + 2]; val bottom = boxes[run * 4 + 3]
+                // The stretches of one line come one after the other, with the line's box each.
+                var last = run
+                while (last + 1 < first[paragraph + 1] && runPage[last + 1] == runPage[run] && boxes[(last + 1) * 4 + 1] == top && boxes[(last + 1) * 4] == left) last++
+                // (A line the PDF reader couldn't place is read, and can't be pointed at.)
+                if (runCount[run] != PdfLine.UNPLACED && right > left && bottom > top) {
+                    out[runPage[run]] += PdfTextLine(runPage[run], paragraph, runAt[run], runAt[last] + runLength[last], left, top, right, bottom)
+                }
+                run = last + 1
+            }
+        }
+        out
+    }
+
+    /** The lines of [page] that are read, in the order they are read: each with the paragraph it is of, and which of its letters. */
+    fun linesOn(page: Int): List<PdfTextLine> = lines.getOrElse(page) { emptyList() }
+
+    /** The paragraphs that have words on [page], in the order they are read. */
+    fun paragraphsOn(page: Int): List<Int> = linesOn(page).map { it.paragraph }.distinct()
+
+    /** How many lines [paragraph] takes up on the pages. */
+    fun lineCountOf(paragraph: Int): Int {
+        if (paragraph !in 0 until paragraphs) return 0
+        var lines = 0
+        for (run in first[paragraph] until first[paragraph + 1]) {
+            val carriesOn = run > first[paragraph] && runPage[run - 1] == runPage[run] && boxes[(run - 1) * 4 + 1] == boxes[run * 4 + 1] && boxes[(run - 1) * 4] == boxes[run * 4]
+            if (!carriesOn) lines++
+        }
+        return lines
     }
 
     /** How many letters [paragraph] has. */

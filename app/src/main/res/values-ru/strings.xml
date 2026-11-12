@@ -253,6 +253,7 @@
     <string name="selection_highlight">Выделить</string>
     <string name="selection_note">Заметка</string>
     <string name="selection_share">Поделиться</string>
+    <string name="selection_read_from_here">Читать вслух отсюда</string>
 
     <string name="notes_tab_contents">Оглавление</string>
     <string name="notes_tab_bookmarks">Закладки</string>
@@ -325,6 +326,9 @@
     <string name="listen_nothing_to_read_comics">Здесь нет книги, которую можно прочитать вслух. Jacket не читает вслух комиксы.</string>
     <string name="pdf_listen_unavailable">Этот телефон не может читать PDF вслух. Для этого нужен Android 15 или Android 12–14 с последним системным обновлением Google Play.</string>
     <string name="pdf_listen_no_text">В этом PDF нет текста, который можно прочитать вслух. Его страницы — картинки, как в скане.</string>
+    <string name="pdf_highlight_unavailable">Этот телефон не может выделять текст в PDF. Для этого нужен Android 15 или Android 12–14 с последним системным обновлением Google Play.</string>
+    <string name="pdf_highlight_no_text">В этом PDF нет текста, который можно выделить. Его страницы — картинки, как в скане.</string>
+    <string name="pdf_highlights_listed_only">Этот телефон может показать список выделений в PDF, но не может показать их на страницах.</string>
     <string name="pdf_listen_locked">Этот PDF защищён паролем. Откройте его и введите пароль, чтобы слушать.</string>
     <string name="pdf_locked_message">Этот PDF защищён паролем.</string>
     <string name="pdf_locked_enter">Ввести пароль</string>

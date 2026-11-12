@@ -255,6 +255,8 @@ class ReaderNav(
      * which a screen reader and a keyboard can't do. Null for formats without highlights.
      */
     internal var highlightHere by mutableStateOf<(suspend (note: Boolean) -> Marked)?>(null)
+    /** Set where a book that could have highlights can't on this phone, or has no words to highlight (a PDF: see [NoHighlights]). */
+    internal var noHighlights by mutableStateOf<NoHighlights?>(null)
     /** Turns a page for the keys and the mouse wheel: +1 forward, -1 back. */
     var turnPage: (Int) -> Unit = { step(it) }
     /** The book reads right to left: the arrow keys go the other way round. */
@@ -297,6 +299,14 @@ class Origin(
     val page: Int = 0,
     val back: () -> Unit,
 )
+
+/**
+ * Nothing can be highlighted in the open book, and [why], in words for the reader: a PDF on a
+ * phone whose Android can't hand over its words, or one with no words in it. [listed] is what
+ * to say over highlights that are there all the same (made on another of the reader's devices):
+ * they are listed, and can't be shown on the pages. Null where there can be none.
+ */
+internal class NoHighlights(val why: String, val listed: String?)
 
 /** What came of highlighting without selecting (see [ReaderNav.highlightHere]). */
 internal enum class Marked {
@@ -895,7 +905,7 @@ fun ReaderScreen(
                     when (book.format) {
                         // A text file and an FB2 book are read through pages made of them, the same way as an EPUB.
                         BookFormat.EPUB, BookFormat.TXT, BookFormat.FB2 -> EpubReader(book, settings, page, nav, haptics, annotations, respellings, spine, toggleChrome)
-                        BookFormat.PDF -> PdfReader(book, settings, page, nav, haptics, respellings, onProgress, toggleChrome)
+                        BookFormat.PDF -> PdfReader(book, settings, page, nav, haptics, annotations, respellings, onProgress, toggleChrome)
                         BookFormat.CBZ -> ComicReader(book, page, nav, haptics, onProgress, toggleChrome)
                     }
                 }
@@ -1099,6 +1109,8 @@ fun ReaderScreen(
                 onDelete = { item -> library.deleteAnnotation(item.id) },
                 onShare = { shareHighlights(context, book, annotations) },
                 onSave = { highlightsFile.launch(highlightsFileName(book.title, resources.getString(R.string.notes_tab_highlights))) },
+                noHighlights = nav.noHighlights?.why,
+                highlightsNote = nav.noHighlights?.listed,
             )
         }
         Sheet.SEARCH -> ReaderSheet(onGone = { sheet = Sheet.NONE }, fullHeight = true) { leave ->

@@ -270,6 +270,7 @@
     <string name="selection_highlight">تمييز</string>
     <string name="selection_note">ملاحظة</string>
     <string name="selection_share">مشاركة</string>
+    <string name="selection_read_from_here">القراءة بصوت عالٍ من هنا</string>
 
     <string name="notes_tab_contents">المحتويات</string>
     <string name="notes_tab_bookmarks">الإشارات</string>
@@ -346,6 +347,9 @@
     <string name="listen_nothing_to_read_comics">لا يوجد هنا كتاب يمكن قراءته بصوت عالٍ. لا يستطيع Jacket قراءة القصص المصوّرة بصوت عالٍ.</string>
     <string name="pdf_listen_unavailable">لا يستطيع هذا الهاتف قراءة ملفات PDF بصوت عالٍ. يتطلّب ذلك Android 15، أو Android 12 إلى 14 مع آخر تحديث لنظام Google Play.</string>
     <string name="pdf_listen_no_text">لا يحتوي هذا الملف على نص يمكن قراءته بصوت عالٍ. صفحاته صور، كالصفحات الممسوحة ضوئيًا.</string>
+    <string name="pdf_highlight_unavailable">لا يستطيع هذا الهاتف تمييز النص في ملفات PDF. يتطلّب ذلك Android 15، أو Android 12 إلى 14 مع آخر تحديث لنظام Google Play.</string>
+    <string name="pdf_highlight_no_text">لا يحتوي هذا الملف على نص يمكن تمييزه. صفحاته صور، كالصفحات الممسوحة ضوئيًا.</string>
+    <string name="pdf_highlights_listed_only">يستطيع هذا الهاتف عرض قائمة تمييزات ملف PDF، لكنه لا يستطيع إظهارها على صفحاته.</string>
     <string name="pdf_listen_locked">ملف PDF هذا مقفل. افتحه وأدخل كلمة المرور للاستماع إليه.</string>
     <string name="pdf_locked_message">ملف PDF هذا مقفل بكلمة مرور.</string>
     <string name="pdf_locked_enter">إدخال كلمة المرور</string>

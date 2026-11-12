@@ -107,6 +107,50 @@ class HighlightsExportTest {
     }
 
     @Test
+    fun `a PDF's highlights say the page they are on, shared and saved`() {
+        val words: (Annotation) -> String = { highlightPlace(it, separator = " · ", page = { number -> "Page $number" }, percent = { percent -> "$percent%" }) }
+        val manual = book("p", "The Manual").copy(format = BookFormat.PDF)
+        val marks = listOf(
+            // Under a chapter of the PDF's outline, with a note; and in a PDF with no outline (pages count from 1).
+            Annotation("h2", "p", AnnotationKind.HIGHLIGHT, locator = PdfAnchor(11, "before", "after").write(), section = 11, progress = 0.3f, chapter = "Setting up", text = "Hold the button for five seconds.", note = "Try this"),
+            Annotation("h1", "p", AnnotationKind.HIGHLIGHT, locator = PdfAnchor(0).write(), section = 0, progress = 0.01f, text = "Read this first.\nAll of it."),
+            // A bookmark has a page too, and is no highlight.
+            Annotation("b", "p", AnnotationKind.BOOKMARK, section = 4, progress = 0.1f, text = "Page 5"),
+        )
+        assertEquals("Setting up · Page 12 · 30%", words(marks[0]))
+        assertEquals("Page 1 · 1%", words(marks[1]))
+        assertEquals("10%", words(marks[2]))
+        // An EPUB's highlight says what it always did.
+        assertEquals("Loomings · 50%", words(notes[0]))
+        assertEquals(
+            "# The Manual\n\n> Read this first.\nAll of it.\n(Page 1 · 1%)\n\n> Hold the button for five seconds.\n(Setting up · Page 12 · 30%)\nTry this",
+            highlightsText(manual, highlightsOf(marks), place = words),
+        )
+        assertEquals(
+            """
+            # The Manual
+
+            > Read this first.
+            > All of it.
+
+            (Page 1 · 1%)
+
+            > Hold the button for five seconds.
+
+            (Setting up · Page 12 · 30%)
+
+            Try this
+
+            """.trimIndent(),
+            highlightsText(manual, highlightsOf(marks), asFile = true, place = words),
+        )
+        // In the whole library's file it stands under its own book, as any other book's do.
+        val all = allHighlightsMarkdown(LibraryState(books = listOf(moby, manual), annotations = notes + marks), words)!!
+        assertEquals(listOf("# Moby Dick — Herman Melville", "# The Manual"), all.lines().filter { it.startsWith("# ") })
+        assertEquals(1, Regex("\\(Setting up · Page 12 · 30%\\)").findAll(all).count())
+    }
+
+    @Test
     fun `the file is named for what it holds, in letters a file name can have`() {
         assertEquals("Moby Dick Highlights.md", highlightsFileName("Moby Dick", "Highlights"))
         assertEquals("Jacket Highlights 2026-11-11.md", highlightsFileName("Jacket", "Highlights", "2026-11-11"))

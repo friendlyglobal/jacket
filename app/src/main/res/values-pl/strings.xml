@@ -253,6 +253,7 @@
     <string name="selection_highlight">Zaznacz</string>
     <string name="selection_note">Notatka</string>
     <string name="selection_share">Udostępnij</string>
+    <string name="selection_read_from_here">Czytaj na głos od tego miejsca</string>
 
     <string name="notes_tab_contents">Spis treści</string>
     <string name="notes_tab_bookmarks">Zakładki</string>
@@ -325,6 +326,9 @@
     <string name="listen_nothing_to_read_comics">Nie ma tu książki, którą można przeczytać na głos. Jacket nie czyta na głos komiksów.</string>
     <string name="pdf_listen_unavailable">Ten telefon nie potrafi czytać plików PDF na głos. Potrzebny jest Android 15 albo Android od 12 do 14 z najnowszą aktualizacją systemową Google Play.</string>
     <string name="pdf_listen_no_text">Ten PDF nie zawiera tekstu do przeczytania na głos. Jego strony to obrazy, jak w skanie.</string>
+    <string name="pdf_highlight_unavailable">Ten telefon nie potrafi zaznaczać w plikach PDF. Potrzebny jest Android 15 albo Android od 12 do 14 z najnowszą aktualizacją systemową Google Play.</string>
+    <string name="pdf_highlight_no_text">Ten PDF nie zawiera tekstu do zaznaczenia. Jego strony to obrazy, jak w skanie.</string>
+    <string name="pdf_highlights_listed_only">Ten telefon może pokazać listę zaznaczeń z pliku PDF, ale nie może pokazać ich na stronach.</string>
     <string name="pdf_listen_locked">Ten PDF jest zablokowany. Otwórz go i wpisz hasło, żeby go posłuchać.</string>
     <string name="pdf_locked_message">Ten PDF jest zablokowany hasłem.</string>
     <string name="pdf_locked_enter">Wpisz hasło</string>
