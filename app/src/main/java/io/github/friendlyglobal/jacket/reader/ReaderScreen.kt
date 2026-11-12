@@ -161,6 +161,7 @@ import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import io.github.friendlyglobal.jacket.ui.rememberPageColors
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -526,32 +527,56 @@ fun ReaderScreen(
         onDispose { if (ReaderKeys.target === target) ReaderKeys.target = null }
     }
 
-    // Sleep timer: pause after the chosen time, or when the chapter changes.
+    // Sleep timer: pause after the chosen time, or when the chapter changes. The timer is watched
+    // here, not waited for in recomposition: set from the widget while Jacket is behind another
+    // app, or on the cover screen of a phone folded shut, nothing on this screen is recomposed,
+    // and the timer has to start all the same.
     val listen = nav.listen
-    LaunchedEffect(listen.sleep, listen.sleepEndsAt, listen.chapterSkips) {
-        val timer = listen.sleep
-        if (timer == SleepTimer.OFF) return@LaunchedEffect
-        if (timer == SleepTimer.CHAPTER) {
-            // A chapter skipped to from the player is the one whose end is waited for: once the
-            // voice has arrived in it, and the page has said which chapter that is.
-            if (listen.chapterSkips > 0) {
-                snapshotFlow { listen.skippingChapter }.first { !it }
-                delay(CHAPTER_SKIP_SETTLE_MS)
+    LaunchedEffect(nav) {
+        snapshotFlow { Triple(listen.sleep, listen.sleepEndsAt, listen.chapterSkips) }.collectLatest { (timer, endsAt, _) ->
+            if (!timer.timed) listen.sleepLeft = 0
+            if (timer == SleepTimer.OFF) return@collectLatest
+            if (timer == SleepTimer.CHAPTER) {
+                // A chapter skipped to from the player is the one whose end is waited for: once the
+                // voice has arrived in it, and the page has said which chapter that is.
+                if (listen.chapterSkips > 0) {
+                    snapshotFlow { listen.skippingChapter }.first { !it }
+                    delay(CHAPTER_SKIP_SETTLE_MS)
+                }
+                // Whichever comes first: the voice moving into the next chapter file, or the page
+                // (following the voice) reaching the next chapter in the contents.
+                val start = listen.spokenFile to nav.tocIndex
+                snapshotFlow { listen.spokenFile to nav.tocIndex }.first { (file, chapter) ->
+                    (file != start.first && file >= 0 && start.first >= 0) || chapter != start.second
+                }
+            } else {
+                // Counted down a minute at a time: the widget's moon says how many are left.
+                while (true) {
+                    val left = endsAt - SystemClock.uptimeMillis()
+                    if (left <= 0L) break
+                    listen.sleepLeft = sleepMinutesShown(left)
+                    delay(sleepMinuteEndsIn(left))
+                }
             }
-            // Whichever comes first: the voice moving into the next chapter file, or the page
-            // (following the voice) reaching the next chapter in the contents.
-            val start = listen.spokenFile to nav.tocIndex
-            snapshotFlow { listen.spokenFile to nav.tocIndex }.first { (file, chapter) ->
-                (file != start.first && file >= 0 && start.first >= 0) || chapter != start.second
-            }
-        } else {
-            delay((listen.sleepEndsAt - SystemClock.uptimeMillis()).coerceAtLeast(0))
+            if (listen.playing) nav.listenController?.toggle()
+            listen.sleepLeft = 0
+            listen.sleep = SleepTimer.OFF
         }
-        if (listen.playing) nav.listenController?.toggle()
-        listen.sleep = SleepTimer.OFF
     }
     // Stopping read-aloud clears the timer.
-    LaunchedEffect(listen.active) { if (!listen.active) listen.sleep = SleepTimer.OFF }
+    LaunchedEffect(nav) { snapshotFlow { listen.active }.collect { active -> if (!active) listen.sleep = SleepTimer.OFF } }
+    // The widget's skip and sleep buttons reach this book's player through here (see ListenRemote).
+    DisposableEffect(nav) {
+        val player = ListenRemote.Player(
+            listen = nav.listen,
+            controller = { nav.listenController },
+            hasChapters = { nav.toc.isNotEmpty() },
+            ownSleepMinutes = { library.state.value.settings.sleepMinutes },
+        )
+        ListenRemote.player = player
+        // Only clear our own: opening the next book briefly overlaps the outgoing reader.
+        onDispose { if (ListenRemote.player === player) ListenRemote.player = null }
+    }
 
     // While the book is read aloud, the controls don't stay over the text. They tuck away into the
     // footer's mini player a few seconds after the last touch, and sooner than that when they sit
@@ -646,6 +671,8 @@ fun ReaderScreen(
                 listening = nav.listen.active,
                 playing = nav.listen.playing,
                 marks = nav.marks,
+                sleepMinutes = if (nav.listen.sleep.timed) nav.listen.sleepLeft else 0,
+                sleepAtChapterEnd = nav.listen.sleep == SleepTimer.CHAPTER,
             )
         }.collect(library::report)
     }

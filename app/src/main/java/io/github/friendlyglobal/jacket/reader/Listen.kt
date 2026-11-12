@@ -157,6 +157,19 @@ class ListenState {
     var sleep by mutableStateOf(SleepTimer.OFF)
     /** When a timed sleep ends (uptime millis). */
     var sleepEndsAt by mutableLongStateOf(0L)
+    /**
+     * The whole minutes a timed sleep still has, counted down by the reader while it runs (see
+     * ReaderScreen): for what shows the timer away from the reader's screen, the widget's moon.
+     * 0 without a timed sleep.
+     */
+    var sleepLeft by mutableIntStateOf(0)
+
+    /** Sets the sleep timer at [now] (uptime millis): off, to the end of the chapter, or ([SleepTimer.timed]) to stop after [minutes]. */
+    fun startSleep(timer: SleepTimer, minutes: Int, now: Long = SystemClock.uptimeMillis()) {
+        sleep = timer
+        sleepEndsAt = now + minutes * 60_000L
+        sleepLeft = if (timer.timed) minutes else 0
+    }
     /** The chapter file the voice is in (EPUB), or -1: lets "end of chapter" stop on time. */
     var spokenFile by mutableIntStateOf(-1)
     /** The sentence being spoken, and how many of its characters have been: shown over the cover when the phone is shut. */
@@ -835,10 +848,7 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
     val settings by library.state.collectAsStateWithLifecycle()
     // The listener's own length, unless it is one of the usual ones anyway.
     val own = settings.settings.sleepMinutes.takeIf { minutes -> minutes > 0 && SleepTimer.entries.none { it.minutes == minutes } }
-    val start = { timer: SleepTimer, minutes: Int ->
-        listen.sleep = timer
-        listen.sleepEndsAt = SystemClock.uptimeMillis() + minutes * 60_000L
-    }
+    val start = { timer: SleepTimer, minutes: Int -> listen.startSleep(timer, minutes) }
     val minutesLeft = rememberSleepMinutesLeft(listen)
     Box {
         val label = sleepLabel(listen, minutesLeft)

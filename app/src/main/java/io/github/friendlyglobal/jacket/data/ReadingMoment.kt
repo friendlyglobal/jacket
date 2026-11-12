@@ -17,6 +17,10 @@ data class ReadingMoment(
     val playing: Boolean = false,
     /** Where the book's chapters start, as fractions of the whole (0..1): the cover draws the book as its chapters. */
     val marks: List<Float> = emptyList(),
+    /** The whole minutes a sleep timer still has to run; 0 without a timed one. */
+    val sleepMinutes: Int = 0,
+    /** The sleep timer is waiting for the chapter to end. */
+    val sleepAtChapterEnd: Boolean = false,
 )
 
 /** The stages of a book, as the cover screen and the widget tell them apart. */
