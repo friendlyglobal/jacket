@@ -42,7 +42,6 @@ import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -98,8 +97,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -132,7 +129,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -169,10 +165,8 @@ import io.github.friendlyglobal.jacket.ui.LocalCoverTransition
 import io.github.friendlyglobal.jacket.ui.PageColors
 import io.github.friendlyglobal.jacket.ui.SystemBarsHidden
 import io.github.friendlyglobal.jacket.ui.motionRemoved
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
-import io.github.friendlyglobal.jacket.ui.FullHeightThumb
 import io.github.friendlyglobal.jacket.ui.fitOnOneLine
 import io.github.friendlyglobal.jacket.ui.rememberScreenReader
 import io.github.friendlyglobal.jacket.ui.rememberTimeToAct
@@ -1636,8 +1630,9 @@ private fun ReaderTopBar(
 
 /**
  * The controls at the bottom of the page, floating over it: "Back to the voice" when the listener
- * has wandered off, the chapter slider with the full controls, and the toolbar, which is the
- * reading toolbar or the player (the same bar, turning from one into the other where it sits).
+ * has wandered off, the chapter control (the slider with the full controls, the chapter steps for
+ * a narrow player: see ChapterControl), and the toolbar, which is the reading toolbar or the
+ * player (the same bar, turning from one into the other where it sits).
  */
 @Composable
 private fun ReaderBottomBar(
@@ -1656,7 +1651,6 @@ private fun ReaderBottomBar(
     /** Where the controls sit in the window, as they come and go: they keep off the line being read aloud. */
     onPlaced: (Rect) -> Unit,
 ) {
-    val motion = MaterialTheme.motionScheme
     Column(
         // Clear of the navigation bar whether or not it is showing, so the toolbar never moves.
         Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.navigationBarsIgnoringVisibility).padding(bottom = 12.dp),
@@ -1670,29 +1664,23 @@ private fun ReaderBottomBar(
             val listening = nav.listen.active && controller != null
             // Back to the voice heads the stack: above the chapter slider and the player alike.
             controller?.let { BackToVoiceButton(nav.listen, it, haptics) }
-            // It springs up off the toolbar and drops back onto it, moving and scaling only: the
-            // stack isn't laid out again frame by frame.
-            AnimatedVisibility(
-                visible = showScrubber && nav.sectionCount > 1,
-                enter = slideInVertically(motion.fastSpatialSpec()) { it / 3 } +
-                    scaleIn(motion.fastSpatialSpec(), initialScale = 0.9f, transformOrigin = BottomMiddle) + fadeIn(motion.fastEffectsSpec()),
-                exit = slideOutVertically(motion.fastSpatialSpec()) { it / 3 } +
-                    scaleOut(motion.fastSpatialSpec(), targetScale = 0.9f, transformOrigin = BottomMiddle) + fadeOut(motion.fastEffectsSpec()),
-            ) {
-                Column {
-                    Scrubber(nav, book, haptics, pageActions)
-                    Spacer(Modifier.height(12.dp))
-                }
-            }
+            // One chapter control, whatever is up: the slider's card with the full controls, and
+            // the player's chapter steps where its bar is too narrow for them. Those ride in the
+            // card when it is there, and are a pill of their own when it isn't.
+            val chapters = nav.chapterSteps()
+            ChapterControl(
+                form = chapterForm(
+                    slider = showScrubber && nav.sectionCount > 1,
+                    listening = listening, steps = chapters != null, stepsOnBar = chaptersFitOnBar(),
+                ),
+                nav = nav, book = book, chapters = chapters, haptics = haptics, pageActions = pageActions,
+            )
             // On a window too narrow for the voice's icon on the bar, its name unfolds above the
             // toolbar as it becomes the player. (Not the player's wavy line: over the page it
             // would run across the text.)
-            val chapters = nav.chapterSteps()
             PlayerLine(
                 nav.listen, progress = nav.section.toFloat() / (nav.sectionCount - 1).coerceAtLeast(1),
                 voice = voice, haptics = haptics, visible = listening, line = false,
-                // The slider just above names the chapter already, when it is there.
-                chapters = chapters, chapterTitle = !(showScrubber && nav.sectionCount > 1),
             )
             val (previousLabel, nextLabel) = when {
                 nav.toc.isNotEmpty() -> R.string.reader_previous_chapter to R.string.reader_next_chapter
@@ -1719,87 +1707,6 @@ private fun ReaderBottomBar(
                 voice = voice,
                 chapters = chapters,
             )
-        }
-    }
-}
-
-/** Drag through the book, with a tick per chapter and a preview of where you'll land. */
-@Composable
-private fun Scrubber(nav: ReaderNav, book: Book, haptics: Haptics, pageActions: List<CustomAccessibilityAction>) {
-    var preview by remember { mutableStateOf<Float?>(null) }
-    val last = (nav.sectionCount - 1).coerceAtLeast(1)
-    val target = preview?.roundToInt() ?: nav.section
-    val slider = remember(nav.sectionCount) {
-        SliderState(nav.section.toFloat(), if (nav.sectionCount in 3..60) nav.sectionCount - 2 else 0, 0f..last.toFloat())
-    }
-    // Follow page turns while not being dragged.
-    LaunchedEffect(nav.section) { if (preview == null) slider.value = nav.section.toFloat() }
-    Surface(
-        shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shadowElevation = 3.dp,
-        modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth().padding(horizontal = 16.dp),
-    ) {
-        // To a screen reader the slider speaks for the whole card: what it is, then how far through
-        // the book and in which chapter ("Place in the book, 42% read, Chapter 3"), not a bare
-        // "420". The words above it are the same thing, for the eye.
-        val percent = if (preview != null) target * 100 / last else book.percent
-        val chapter = if (preview != null) nav.sectionName(target) else nav.title
-        val place = stringResource(R.string.reader_place_in_book)
-        val where = listOf(stringResource(R.string.reader_percent_read, percent), chapter.trim())
-            .filter { it.isNotEmpty() }.joinToString(stringResource(R.string.list_separator))
-        Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 6.dp)) {
-            Row(Modifier.clearAndSetSemantics {}, verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    if (preview != null) nav.sectionName(target) else nav.title,
-                    style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    stringResource(R.string.percent, if (preview != null) target * 100 / last else book.percent),
-                    style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
-            Box {
-                val touch = remember { MutableInteractionSource() }
-                Slider(
-                    state = slider,
-                    interactionSource = touch,
-                    thumb = { FullHeightThumb(touch) },
-                    onValueChange = { value ->
-                        if (nav.sectionGroup(value.roundToInt()) != nav.sectionGroup(target)) haptics.tick()
-                        preview = value
-                        slider.value = value
-                    },
-                    onValueChangeFinished = {
-                        preview?.let { nav.jumpTo(it.roundToInt()) }
-                        preview = null
-                        haptics.confirm()
-                    },
-                    modifier = Modifier.semantics {
-                        contentDescription = place
-                        stateDescription = where
-                        customActions = pageActions
-                    },
-                )
-                // Chapter starts, as small marks along the track.
-                val marks = nav.marks
-                if (marks.size in 2..80) {
-                    val onActive = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
-                    val onInactive = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
-                    Canvas(Modifier.matchParentSize()) {
-                        val inset = 8.dp.toPx()
-                        val radius = 1.5.dp.toPx()
-                        val current = slider.value / last
-                        for (mark in marks) {
-                            if (mark <= 0.002f || mark >= 0.998f) continue
-                            val x = inset + mark * (size.width - 2 * inset)
-                            drawCircle(if (mark < current) onActive else onInactive, radius, Offset(x, size.height / 2))
-                        }
-                    }
-                }
-            }
         }
     }
 }
