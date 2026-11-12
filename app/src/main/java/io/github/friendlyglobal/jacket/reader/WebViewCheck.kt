@@ -112,8 +112,18 @@ internal object WebViewCheck {
      * the version of an app known to count that way, otherwise from what the web view itself says
      * ([userAgent], only asked for then). Null when neither can tell.
      */
-    fun chromium(packageName: String?, versionName: String?, userAgent: () -> String?): Int? =
-        (if (packageName in CHROMIUM_NUMBERED) major(versionName) else null) ?: chromiumOf(userAgent())
+    fun chromium(packageName: String?, versionName: String?, userAgent: () -> String?): Int? {
+        // A number no Android 8 web view ever had (they start at 58) is not a Chromium version:
+        // a custom build's "1.0", say. It counts for nothing.
+        val fromPackage = (if (packageName in CHROMIUM_NUMBERED) major(versionName) else null)?.takeIf { it >= NO_OLDER_ON_ANDROID_8 }
+        if (fromPackage != null && fromPackage >= OLDEST) return fromPackage
+        // Old by its version name: turning a book away is worth a second look, so the web view is
+        // asked as well, and what it says of itself decides.
+        return chromiumOf(userAgent()) ?: fromPackage
+    }
+
+    /** Below this, a version name can't be a Chromium version on Android 8 or later (see [chromium]). */
+    private const val NO_OLDER_ON_ANDROID_8 = 50
 
     /** Too old for the pages. A web view whose version can't be told is never turned away: it is most likely a new one. */
     fun tooOld(chromium: Int?): Boolean = chromium != null && chromium in 1 until OLDEST

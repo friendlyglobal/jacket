@@ -46,9 +46,9 @@ class WebViewCheckTest {
 
     @Test
     fun `Android 8's own web view is too old, and the first with ResizeObserver is not`() {
-        assertTrue(tooOld(google, "58.0.3029.125", unasked))
-        assertTrue(tooOld(google, "61.0.3163.98", unasked))
-        assertTrue(tooOld(google, "63.0.3239.111", unasked))
+        assertTrue(tooOld(google, "58.0.3029.125") { agent("58.0.3029.125") })
+        assertTrue(tooOld(google, "61.0.3163.98") { agent("61.0.3163.98") })
+        assertTrue(tooOld(google, "63.0.3239.111") { agent("63.0.3239.111") })
         assertFalse(tooOld(google, "64.0.3282.137", unasked))
         assertFalse(tooOld(google, "69.0.3497.100", unasked))
         assertFalse(tooOld(google, "91.0.4472.114", unasked))
@@ -57,9 +57,9 @@ class WebViewCheckTest {
 
     @Test
     fun `Chrome standing in as the web view is read the same way`() {
-        assertTrue(tooOld("com.android.chrome", "58.0.3029.83", unasked))
+        assertTrue(tooOld("com.android.chrome", "58.0.3029.83") { agent("58.0.3029.83") })
         assertFalse(tooOld("com.android.chrome", "138.0.7204.63", unasked))
-        assertTrue(tooOld("com.android.webview", "58.0.3029.125", unasked))
+        assertTrue(tooOld("com.android.webview", "58.0.3029.125") { agent("58.0.3029.125") })
         assertFalse(tooOld("com.chrome.beta", "143.0.7499.10", unasked))
     }
 
@@ -112,5 +112,16 @@ class WebViewCheckTest {
         assertEquals("com.google.android.webview", WebViewCheck.listingFor("com.android.webview"))
         assertEquals("com.google.android.webview", WebViewCheck.listingFor("com.huawei.webview"))
         assertEquals("com.google.android.webview", WebViewCheck.listingFor(null))
+    }
+
+    @Test
+    fun `an old version name is checked against what the web view says of itself`() {
+        // A custom build whose web view calls itself "1.0", or an old number the web view
+        // contradicts: the web view's own word decides, and a modern one is let through.
+        assertFalse(tooOld("com.android.webview", "1.0") { agent("114.0.5735.196", android = "13") })
+        assertFalse(tooOld("com.android.webview", "1.0") { null })
+        assertFalse(tooOld(google, "58.0.3029.125") { agent("120.0.6099.230", android = "8.1.0") })
+        // Old by both counts, or old by its version and silent: too old.
+        assertTrue(tooOld(google, "58.0.3029.125") { null })
     }
 }
