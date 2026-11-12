@@ -1,0 +1,4 @@
+Jacket 1.4.1
+• Ouvindo numa tela estreita, os botões de capítulo agora entram no controle deslizante quando os controles aparecem, em vez de ficarem embaixo dele
+• As vozes naturais voltam ao melhor som assim que o celular dá conta, e um momento de sobrecarga não as deixa mais ásperas
+• Menos trabalho para o celular ao ler em voz alta com a tela apagada

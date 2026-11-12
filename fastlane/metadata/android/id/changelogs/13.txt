@@ -1,0 +1,4 @@
+Jacket 1.4.1
+• Saat mendengarkan di layar sempit, tombol bab kini bergabung dengan penggeser saat kontrol muncul, tidak lagi di bawahnya
+• Suara alami kembali ke suara terbaiknya begitu ponsel sanggup mengejar, dan satu momen sibuk tidak lagi membuatnya lebih kasar
+• Ponsel bekerja lebih ringan saat membacakan dengan layar mati

@@ -1,0 +1,4 @@
+Jacket 1.4.1
+• Dar ekranda dinlerken denetimler açıldığında bölüm düğmeleri artık kaydırıcının altında durmak yerine kaydırıcıya katılıyor
+• Doğal sesler, telefonunuz yetişir yetişmez en iyi seslerine dönüyor; tek bir yoğun an artık onları daha pürüzlü yapmıyor
+• Ekran kapalıyken sesli okurken telefonunuza daha az iş düşüyor

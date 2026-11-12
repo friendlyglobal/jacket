@@ -1,0 +1,4 @@
+Jacket 1.4.1
+• Bij luisteren op een smal scherm zitten de hoofdstukknoppen nu in de schuifbalk als de bediening verschijnt, in plaats van eronder
+• Natuurlijke stemmen klinken weer op hun best zodra je telefoon het bijhoudt, en één druk moment maakt ze niet meer ruwer
+• Minder werk voor je telefoon tijdens voorlezen met het scherm uit

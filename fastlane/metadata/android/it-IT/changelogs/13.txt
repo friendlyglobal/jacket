@@ -1,0 +1,4 @@
+Jacket 1.4.1
+• Ascoltando su uno schermo stretto, i pulsanti dei capitoli ora si uniscono al cursore quando compaiono i controlli, invece di stare sotto
+• Le voci naturali tornano al loro suono migliore appena il telefono tiene il passo, e un momento di carico non le rende più ruvide
+• Meno lavoro per il telefono durante la lettura ad alta voce a schermo spento

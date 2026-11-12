@@ -1,0 +1,4 @@
+Jacket 1.4.1
+• En écoute sur un écran étroit, les boutons de chapitre rejoignent maintenant le curseur quand les commandes apparaissent, au lieu d'être en dessous
+• Les voix naturelles retrouvent leur meilleur son dès que le téléphone suit, et un moment chargé ne les rend plus rêches
+• Moins de travail pour le téléphone pendant la lecture à voix haute écran éteint

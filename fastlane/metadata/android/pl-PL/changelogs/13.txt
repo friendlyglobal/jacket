@@ -1,0 +1,4 @@
+Jacket 1.4.1
+• Podczas słuchania na wąskim ekranie przyciski rozdziałów trafiają teraz do suwaka, gdy pojawiają się elementy sterujące, zamiast stać pod nim
+• Naturalne głosy wracają do najlepszego brzmienia, gdy tylko telefon nadąża, a jedna chwila obciążenia nie sprawia już, że brzmią szorstko
+• Mniej pracy dla telefonu podczas czytania na głos przy wyłączonym ekranie
