@@ -1,0 +1,8 @@
+Jacket 1.3
+• Toque play nos fones, na notificação ou no widget, mesmo com o Jacket fechado
+• PDFs lidos em voz alta, com as páginas virando junto
+• Busca dentro de PDFs, e PDFs protegidos por senha
+• Livros FB2 abrem no leitor completo
+• Continuar entre dispositivos, por uma pasta que seu app de sincronização mantém
+• Destaque ou nota sem precisar segurar o dedo
+• A porcentagem nunca volta sozinha

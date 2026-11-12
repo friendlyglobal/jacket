@@ -1,0 +1,8 @@
+Jacket 1.3
+• Riproduci da cuffie, notifica o widget, anche con Jacket chiuso
+• I PDF letti ad alta voce, con le pagine che girano insieme
+• Ricerca nei PDF, e PDF protetti da password
+• I libri FB2 si aprono nel lettore completo
+• Riprendi tra dispositivi, con una cartella che la tua app di sincronizzazione mantiene
+• Evidenzia o aggiungi una nota senza tenere premuto
+• La percentuale non torna mai indietro da sola

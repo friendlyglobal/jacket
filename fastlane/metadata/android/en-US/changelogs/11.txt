@@ -1,0 +1,8 @@
+Jacket 1.3
+• Play from your headphones, the notification or the widget, even when Jacket is closed
+• PDFs are read aloud, with the pages turning along
+• Search inside PDFs, and open password-protected ones
+• FB2 books open in the full reader
+• Catch up between devices, through a folder your sync app keeps
+• Highlight or add a note without press-and-hold
+• The percent never slips back by itself

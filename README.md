@@ -43,7 +43,7 @@ Google Play: coming soon ·
 ## Install
 
 - **From GitHub:** open the [latest release](https://github.com/friendlyglobal/jacket/releases/latest),
-  download `Jacket-1.2.0.apk` and open it. Your browser asks once to be allowed to install apps.
+  download `Jacket-1.3.0.apk` and open it. Your browser asks once to be allowed to install apps.
   It's about 200 MB, because the voices are inside, and it runs on Android 8 and later. Later
   versions install over it the same way, keeping your books and places.
 - **Google Play:** coming soon.
@@ -110,6 +110,11 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
   as such. Files saved as windows-1251 are read correctly.
 - PDFs render with Android's `PdfRenderer`, comics page by page.
   Pinch or double-tap to zoom PDFs and comics. Your place is saved as you read.
+- **PDFs read aloud and searched.** Where Android hands over a PDF's words (Android 15, or 12 to
+  14 with the latest Google Play system update), Listen reads a PDF with the same voices: the
+  pages turn with it and the sentence being read is marked where it's drawn. Running headers and
+  page numbers are skipped, columns are read in order, and a PDF's own contents list gives
+  chapters. Search finds words in it and marks them on the page.
 - **Password-protected PDFs** ask for their password, then open to be read and read aloud like
   any other. Jacket can remember the password for that book, on the phone only and never in a
   backup, and forget it again from the book's menu. (Android 15, or Android 12 to 14 with the
@@ -145,7 +150,8 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
   phone short on memory starts with. If a phone can't keep up with a natural voice, the player
   says so and offers the change.
 - Read-aloud keeps going with the screen off, with controls on the lock screen, in the
-  notification shade and on headphones. A sleep timer stops it after 15, 30 or 60 minutes, after
+  notification shade and on headphones. Play on your headphones, the notification or the widget
+  carries on with the book you were listening to, even when Jacket isn't open. A sleep timer stops it after 15, 30 or 60 minutes, after
   any length you set, or at the end of the chapter.
 - Play/pause, skip by sentence, skip to the next or previous chapter,
   and 0.5× to 3× speed. After a pause of a couple of minutes it picks up a sentence back, so you
@@ -182,11 +188,16 @@ are a first pass; corrections from native speakers are welcome (`app/src/main/re
   month and this year, a calendar of the days you read, and the books you finished.
 - **Shortcuts:** long-press Jacket's icon for the book you're reading, the one before it, and
   "Listen".
+- **What's playing:** a book being read aloud shows a small moving mark on its cover.
 
 ### Your data
 - **Backup:** Settings › Backup saves your books list, places, bookmarks, highlights and settings
   to a file you choose (not the book files). Restore it on a new phone, then add the books again:
   each one finds its place and notes. Android's own device backup keeps the same data.
+- **Catch up between devices:** on each device, pick a folder that your sync app (Google Drive and
+  others) keeps in step. When another device is further on in a book, Jacket offers to go there;
+  bookmarks, highlights, notes and collections carry over. Jacket itself never goes online: it
+  only reads and writes a file in that folder.
 
 ### The cover, where people can see it
 
@@ -292,12 +303,8 @@ docs/concept.html            The interactive design concept the app started from
 The details, the reasons and the size of each item are in [docs/roadmap.md](docs/roadmap.md).
 
 **Next**
-- Resume listening from your headphones without opening the book, then Android Auto
-- Read-aloud for PDFs (through Android's own PDF reader, on Android 12 and later)
-- Pick up on one device where you left off on another, through a folder your devices share
-- A natural voice for Chinese, and listening to a book in another language (translated on the phone)
-- ISBN barcode scanning to set a cover for a paper book
 - Highlights and notes on PDFs
+- Android Auto (waiting for Google Play, since Auto apps have their own review)
 
 Kindle, Google Play Books and other stores don't expose what you're reading, and DRM-protected
 files can't be opened. Jacket won't try to work around either.

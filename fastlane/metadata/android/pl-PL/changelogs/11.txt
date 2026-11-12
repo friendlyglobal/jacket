@@ -1,0 +1,8 @@
+Jacket 1.3
+• Odtwarzaj ze słuchawek, powiadomienia lub widżetu, nawet gdy Jacket jest zamknięty
+• PDF-y czytane na głos, strony przewracają się same
+• Wyszukiwanie w PDF-ach i PDF-y chronione hasłem
+• Książki FB2 otwierają się w pełnym czytniku
+• Kontynuuj między urządzeniami przez folder synchronizowany przez Twoją aplikację
+• Zakreślaj i dodawaj notatki bez przytrzymywania
+• Procent nigdy sam się nie cofa

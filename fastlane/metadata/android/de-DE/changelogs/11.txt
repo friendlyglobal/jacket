@@ -1,0 +1,8 @@
+Jacket 1.3
+• Wiedergabe über Kopfhörer, Benachrichtigung oder Widget, auch wenn Jacket geschlossen ist
+• PDFs werden vorgelesen, die Seiten blättern mit
+• Suche in PDFs, und passwortgeschützte PDFs öffnen
+• FB2-Bücher öffnen sich im vollen Reader
+• Zwischen Geräten weiterlesen, über einen Ordner deiner Sync-App
+• Markieren oder Notiz anlegen ohne langes Drücken
+• Der Prozentwert rutscht nie von selbst zurück

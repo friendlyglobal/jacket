@@ -1,0 +1,8 @@
+Jacket 1.3
+• Afspelen via je koptelefoon, de melding of de widget, ook als Jacket dicht is
+• Pdf's worden voorgelezen, de pagina's slaan mee om
+• Zoeken in pdf's, en pdf's met een wachtwoord openen
+• FB2-boeken openen in de volledige lezer
+• Verder lezen tussen apparaten, via een map die je sync-app bijhoudt
+• Markeren of een notitie maken zonder lang indrukken
+• Het percentage gaat nooit vanzelf terug
