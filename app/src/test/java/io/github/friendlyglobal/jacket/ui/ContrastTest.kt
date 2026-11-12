@@ -2,6 +2,7 @@ package io.github.friendlyglobal.jacket.ui
 
 import androidx.compose.ui.graphics.toArgb
 import io.github.friendlyglobal.jacket.data.PageColor
+import io.github.friendlyglobal.jacket.ui.theme.SeedScheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -30,6 +31,20 @@ class ContrastTest {
             }
             // "Back to the voice" is written in the page's colour on the link colour.
             assertTrue("$choice: words on the link colour", contrast(paper, page.link.toArgb()) >= READABLE)
+        }
+    }
+
+    @Test
+    fun `a page that takes its colours from the book's cover is readable whatever the cover`() {
+        // Covers of every hue, a grey one, a near-black and a near-white one.
+        val covers = listOf(0xFF2E7D8C, 0xFFE0633F, 0xFFF4C76B, 0xFF6750A4, 0xFF386A20, 0xFFB3261E, 0xFF0B57D0, 0xFF808080, 0xFF101010, 0xFFF8F8F8)
+        for (cover in covers) for (scheme in listOf(SeedScheme.light(cover.toInt()), SeedScheme.dark(cover.toInt()))) {
+            val paper = scheme.surface.toArgb()
+            for ((name, ink) in listOf("text" to scheme.onSurface, "the quiet line" to scheme.onSurfaceVariant, "links" to scheme.primary)) {
+                val ratio = contrast(ink.toArgb(), paper)
+                assertTrue("cover %08X: %s is %.2f to 1".format(cover, name, ratio), ratio >= READABLE)
+            }
+            assertTrue("cover %08X: words on the link colour".format(cover), contrast(paper, scheme.primary.toArgb()) >= READABLE)
         }
     }
 
