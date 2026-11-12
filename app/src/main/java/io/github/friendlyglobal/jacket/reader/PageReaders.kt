@@ -35,7 +35,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -614,7 +613,12 @@ private class PagePoint(val page: Int, val x: Float, val y: Float)
  * in the window a point of a page is, are both told from it.
  */
 private class PageFrames(private val list: LazyListState) {
-    /** Each page's picture, as it is laid out. Asked where it is when that is wanted: it moves without being laid out again. */
+    /**
+     * Each page's picture, as it is laid out. Asked where it is when that is wanted: it moves
+     * without being laid out again. (The list uses a picture's place again for another page, so
+     * one kept here for a page that has gone out of view may be another page's by now: only the
+     * pages in view are answered for.)
+     */
     val pages = HashMap<Int, LayoutCoordinates>()
 
     /** Where page [index] is in the window; null unless it is in view. */
@@ -679,7 +683,6 @@ private fun PageImage(
     val aspect = bitmap?.let { it.width / it.height.toFloat() } ?: placeholderAspect
     // The page develops on its placeholder rather than popping onto it.
     val developed = animateFloatAsState(if (bitmap != null) 1f else 0f, MaterialTheme.motionScheme.defaultEffectsSpec(), label = "page")
-    if (aloud != null) DisposableEffect(index) { onDispose { frames.pages.remove(index) } }
     Box(
         Modifier
             .widthIn(max = 900.dp)

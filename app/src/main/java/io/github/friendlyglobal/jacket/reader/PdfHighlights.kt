@@ -54,6 +54,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputScope
@@ -428,7 +430,7 @@ internal class PdfMarking(
             if (line.page != page) continue
             val left = (line.left - WORD_ROOM) * scale
             val top = (line.top - LINE_ROOM) * scale
-            drawRect(tint, Offset(left, top), Size((line.right + WORD_ROOM) * scale - left, (line.bottom - line.top + 2 * LINE_ROOM) * scale), alpha = SELECTED)
+            drawRect(onPaper(tint), Offset(left, top), Size((line.right + WORD_ROOM) * scale - left, (line.bottom - line.top + 2 * LINE_ROOM) * scale), alpha = SELECTED)
         }
     }
 
@@ -441,14 +443,15 @@ internal class PdfMarking(
         if (selection == null || width <= 0f) return
         val scale = size.width / width
         val radius = HANDLE_RADIUS.toPx() / zoom.coerceAtLeast(0.1f)
+        val ink = onPaper(tint)
         for (handle in SelectionHandle.entries) {
             val at = handlePoint(handle)?.takeIf { it.page == page } ?: continue
             val x = at.x * scale
             val y = (at.bottom + LINE_ROOM) * scale
             val centre = Offset(if (at.hangsLeft) x - radius else x + radius, y + radius)
-            drawCircle(tint, radius, centre)
+            drawCircle(ink, radius, centre)
             // Its corner is at the words.
-            drawRect(tint, Offset(if (at.hangsLeft) centre.x else centre.x - radius, centre.y - radius), Size(radius, radius))
+            drawRect(ink, Offset(if (at.hangsLeft) centre.x else centre.x - radius, centre.y - radius), Size(radius, radius))
         }
     }
 
@@ -470,6 +473,15 @@ internal class PdfMarking(
 
         private const val KEPT_LINES = 400
         private const val MOST_LETTERS = 60_000
+
+        /**
+         * [tint] as it shows on a PDF's page, which is paper whatever colours the reader has chosen
+         * for their own pages: a pale tint (the one dark pages have) is darkened until it shows on white.
+         */
+        private fun onPaper(tint: Color): Color = if (tint.luminance() > PALE) lerp(tint, Color.Black, DARKENED) else tint
+
+        private const val PALE = 0.4f
+        private const val DARKENED = 0.45f
 
         /** Boxes that lie side by side on one line, as one box. */
         private fun joined(lines: List<MarkedLine>): List<MarkedLine> {
