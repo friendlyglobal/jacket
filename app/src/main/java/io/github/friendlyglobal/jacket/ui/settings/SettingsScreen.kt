@@ -80,6 +80,7 @@ import android.text.format.DateUtils
 import io.github.friendlyglobal.jacket.autoBackup
 import io.github.friendlyglobal.jacket.data.AutoBackup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.friendlyglobal.jacket.ui.asHeading
 
 private const val SOURCE_URL = "https://github.com/friendlyglobal/jacket"
 private const val PRIVACY_URL = "https://usefriendly.app/products/jacket/privacy/"
@@ -487,11 +488,12 @@ private fun ProfileCard(state: LibraryState, modifier: Modifier) {
     }
 }
 
+/** The name of a group of settings: a heading, so a screen reader can go from group to group down a long page. */
 @Composable
 private fun GroupTitle(text: String, modifier: Modifier) {
     Text(
         text, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(start = 16.dp, top = 28.dp, bottom = 10.dp),
+        modifier = modifier.padding(start = 16.dp, top = 28.dp, bottom = 10.dp).asHeading(),
     )
 }
 
