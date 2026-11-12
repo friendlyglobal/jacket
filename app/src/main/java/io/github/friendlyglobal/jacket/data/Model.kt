@@ -490,14 +490,15 @@ internal object LibraryJson {
         put("sha256", sha256 ?: JSONObject.NULL)
     }
 
-    private fun Annotation.toJson() = JSONObject().apply {
+    /** A bookmark or highlight as it is written to the library, a backup and the file other devices read. */
+    fun Annotation.toJson() = JSONObject().apply {
         put("id", id); put("bookId", bookId); put("kind", kind.name)
         put("locator", locator ?: JSONObject.NULL); put("section", section)
         put("progress", progress.toDouble()); put("chapter", chapter); put("text", text)
         put("note", note); put("color", color.name); put("createdAt", createdAt)
     }
 
-    private fun JSONObject.toAnnotation() = Annotation(
+    fun JSONObject.toAnnotation() = Annotation(
         id = getString("id"),
         bookId = getString("bookId"),
         kind = AnnotationKind.valueOf(getString("kind")),
