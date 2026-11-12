@@ -1683,6 +1683,14 @@ private class ReadAloud(
 
     /** Readium's read-aloud navigator, whichever voice is behind it. */
     private var tts: TtsNavigator<*, *, *, *>? = null
+
+    /** The phone's sound, shared with other apps: the voice stops for a call or a spoken direction, and goes on after it (see [VoiceFocus]). */
+    private val focus = VoiceFocus(
+        context,
+        speaking = { tts?.playback?.value?.playWhenReady == true },
+        pause = { tts?.pause() },
+        play = { tts?.play() },
+    )
     private var submitRate: (Float) -> Unit = {}
     private var session: Job? = null
 
@@ -1749,6 +1757,8 @@ private class ReadAloud(
                 return@launch
             }
             this@ReadAloud.tts = tts
+            // Jacket asks for the phone's sound itself (see VoiceFocus): Readium's way talks over a ringing call.
+            VoiceFocus.leaveTheSoundTo(tts.asMedia3Player())
             // Lock screen, notification and headphone controls; keeps playing with the screen off.
             mediaSession = ListenService.attach(context.applicationContext, tts.asMedia3Player(), bookId)
             launch {
@@ -1767,6 +1777,8 @@ private class ReadAloud(
                         if (asked && !playback.playWhenReady) pausedAt = SystemClock.elapsedRealtime()
                         if (!asked && playback.playWhenReady) takeRewind().takeIf { it > 0 }?.let { back -> launch { stepBack(tts, back) } }
                     }
+                    // Whoever asked, the voice reads only while it may have the phone's sound.
+                    if (asked != playback.playWhenReady) focus.asked(playback.playWhenReady)
                     asked = playback.playWhenReady
                     // Held still while a tap moves the voice: it carries on reading where it lands.
                     if (started && !jumping) {
@@ -2353,6 +2365,7 @@ private class ReadAloud(
         listen.phrase = ""
         tts?.close()
         tts = null
+        focus.release()
         listen.active = false
         listen.playing = false
         listen.preparing = false
