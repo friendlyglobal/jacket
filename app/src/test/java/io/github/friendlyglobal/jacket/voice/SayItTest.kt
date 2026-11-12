@@ -161,6 +161,27 @@ class SayItTest {
     private fun cut(text: String) = sentencesOf(text)
 
     @Test
+    fun withNothingToSayAnotherWayTheVoiceIsHandedThePagesOwnSentences() {
+        // No word to say another way, and no note's number in the paragraph: what reaches the
+        // voice is what reached it before there was any of this, sentence for sentence.
+        val paragraph = "\u201cMr. Darcy,\u201d she said, \u201cis all politeness.\u201d He bowed. It was 1811; nobody laughed\u2014not even Lydia!"
+        val asEver = joinTitles(paragraph, cut(paragraph))
+        val edits = SpeechEdits()
+        // With the notes' numbers read like anything else, and with them passed over where there are none to pass over.
+        for (notes in listOf<((String) -> List<IntRange>)?>(null, { emptyList() })) {
+            edits.noteMarks = notes
+            val ranges = edits.sentences(paragraph) { joinTitles(it, cut(it)) }
+            assertEquals(asEver, ranges)
+            for (range in ranges) {
+                val said = edits.spoken(paragraph.substring(range))
+                assertEquals(paragraph.substring(range), said.spoken)
+                assertFalse(said.changed)
+                assertEquals(3..7, said.toPage(3..7))
+            }
+        }
+    }
+
+    @Test
     fun aNotesNumberAfterAFullStopNoLongerJoinsTwoSentences() {
         val paragraph = "It was late.12 Nobody came. He left3 at once."
         val edits = SpeechEdits()
