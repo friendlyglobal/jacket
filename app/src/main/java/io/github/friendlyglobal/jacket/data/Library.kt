@@ -319,20 +319,14 @@ class Library(private val context: Context) : LibraryOrganizer {
      * ever, goes the paragraph it is in: [position] of [positions] paragraphs, and [offset] of the
      * way into it. A Jacket from before text books had pages reads that, and so does this one
      * when the pages a locator names are no longer the book's.
+     *
+     * [back] says the reader went back through the book themselves to get here. Without it the
+     * book's progress is never taken down: a place counted again counts a little differently, and
+     * is the same place (see [Book.leftAt]).
      */
-    fun updateLocator(id: String, locator: String, progress: Float, position: Int, positions: Int, offset: Float? = null) {
+    fun updateLocator(id: String, locator: String, progress: Float, position: Int, positions: Int, offset: Float? = null, back: Boolean) {
         if (!progress.isFinite()) return
-        _state.update { s ->
-            s.copy(books = s.books.map {
-                if (it.id == id) it.copy(
-                    locator = locator,
-                    progress = progress.coerceIn(0f, 1f),
-                    position = position.coerceAtLeast(0),
-                    positionOffset = offset?.takeIf { o -> o.isFinite() }?.coerceIn(0f, 1f) ?: it.positionOffset,
-                    sectionCount = positions.coerceAtLeast(0),
-                ) else it
-            })
-        }
+        _state.update { s -> s.copy(books = s.books.map { if (it.id == id) it.leftAt(locator, progress, position, positions, offset, back) else it }) }
         changed()
     }
 

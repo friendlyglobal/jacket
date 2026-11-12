@@ -93,9 +93,11 @@ internal class VoicePage(
 
     /**
      * The voice has started on a sentence, told as a place the pages can go by. While a reader is
-     * open it keeps the book's place, by the page the sentence is on.
+     * open it keeps the book's place, by the page the sentence is on. The second is whether it is
+     * an earlier sentence the listener sent the voice back to (the previous sentence, one tapped,
+     * the chapter before): only then may the book's progress fall for it.
      */
-    var onSpoken: (Locator) -> Unit = {}
+    var onSpoken: (Locator, Boolean) -> Unit = { _, _ -> }
 
     /** The voice has read the book's last sentence: there is nothing more of it to hear. */
     var onEnded: () -> Unit = {}
@@ -113,15 +115,31 @@ internal data class Tuning(val voice: VoiceRef?, val language: String?, val phon
 /**
  * Saves [sentence], one of the voice's, as the place of the book [bookId], [progress] of the way
  * through it: with the Readium position it falls in (about a page of text, of [positions]), or,
- * for a text file, the paragraph it is in, kept beside every saved place.
+ * for a text file, the paragraph it is in, kept beside every saved place. The book's progress
+ * only goes down for it if the listener sent the voice [back] (see [Library.updateLocator]).
  */
-internal fun Library.saveSpoken(bookId: String, sentence: Locator, progress: Double, positions: List<Locator>, textFile: TextLayout?) {
+internal fun Library.saveSpoken(bookId: String, sentence: Locator, progress: Double, positions: List<Locator>, textFile: TextLayout?, back: Boolean) {
     if (textFile != null) {
         val paragraph = textFile.sentencePlace(sentence)
-        updateLocator(bookId, sentence.toJSON().toString(), progress.toFloat(), paragraph.paragraph, textFile.paragraphs, paragraph.within)
+        updateLocator(bookId, sentence.toJSON().toString(), progress.toFloat(), paragraph.paragraph, textFile.paragraphs, paragraph.within, back)
     } else {
         val position = positions.indexOfLast { (it.locations.totalProgression ?: 0.0) <= progress }.coerceAtLeast(0)
-        updateLocator(bookId, sentence.toJSON().toString(), progress.toFloat(), position, positions.size)
+        updateLocator(bookId, sentence.toJSON().toString(), progress.toFloat(), position, positions.size, back = back)
+    }
+}
+
+/**
+ * Saves [sentence] as the place of the book [bookId] before how far through the book it is can
+ * be told (the book's positions are still being counted): the progress stays what it was, and is
+ * counted when it can be. The place is what must not be lost if the app is closed meanwhile.
+ */
+internal fun Library.saveSpokenUncounted(bookId: String, sentence: Locator, textFile: TextLayout?) {
+    val book = state.value.find(bookId) ?: return
+    if (textFile != null) {
+        val paragraph = textFile.sentencePlace(sentence)
+        updateLocator(bookId, sentence.toJSON().toString(), book.progress, paragraph.paragraph, textFile.paragraphs, paragraph.within, back = false)
+    } else {
+        updateLocator(bookId, sentence.toJSON().toString(), book.progress, book.position, book.sectionCount, back = false)
     }
 }
 
@@ -154,19 +172,36 @@ private class UnseenPlace(private val bookId: String, private val open: OpenBook
     private var lead: Pair<Int, Double>? = null
     private var based = true
 
+    /** The listener has sent the voice back since the last save: the one thing that lets the book's progress fall. */
+    private var back = false
+
     /** The voice starts, or goes on, with no reader: its count carries on from the book's own as it is now. */
     fun rebase() {
         based = false
         lead = null
         saved = null
         owed = null
+        back = false
+    }
+
+    /** A reader has the book open and keeps its place from here: nothing more is saved from here, not even a save that was waiting. */
+    fun handedOver() {
+        owed = null
+        back = false
+    }
+
+    /** The place the voice starts from was saved by Jacket 1.0.0, by a count of its own: its progress is put right by the first save, up or down. */
+    fun recount() {
+        back = true
     }
 
     /**
      * A new sentence: saved often enough that little is heard twice if the app is closed under
      * the voice, and no oftener (every save writes the library and redraws the widgets).
+     * [wentBack] when it is an earlier one the listener sent the voice to.
      */
-    fun spoken() {
+    fun spoken(wentBack: Boolean) {
+        if (wentBack) back = true
         if (SystemClock.uptimeMillis() - savedAt >= SPOKEN_SAVE_MS) save()
     }
 
@@ -179,6 +214,10 @@ private class UnseenPlace(private val bookId: String, private val open: OpenBook
         val sentence = sentence ?: return
         if (sentence === saved && !ended) return
         val counted = open.counted ?: run {
+            // How far through the book it is can't be told yet. The sentence is saved all the
+            // same, at the number the book has: closed now, Jacket would lose the place otherwise.
+            library.saveSpokenUncounted(bookId, sentence, open.text?.layout)
+            savedAt = SystemClock.uptimeMillis()
             owed = ended || owed == true
             return
         }
@@ -197,7 +236,10 @@ private class UnseenPlace(private val bookId: String, private val open: OpenBook
         val within = spokenWithin(told, page = null, lead = lead?.takeIf { it.first == file }?.second, pages = null)
         // A voice that has read the book to its end has read all of it (see [spokenIsAllOfTheBook]).
         val progress = if (ended) 1.0 else counted.spans.total(file, within) ?: return
-        library.saveSpoken(bookId, sentence, progress, counted.positions, open.text?.layout)
+        // However it is counted here, the number the book shows doesn't go down for it, unless
+        // the listener sent the voice back (the previous sentence, from a headset or the widget).
+        library.saveSpoken(bookId, sentence, progress, counted.positions, open.text?.layout, back)
+        back = false
         saved = sentence
         savedAt = SystemClock.uptimeMillis()
     }
@@ -266,6 +308,14 @@ internal class ReadAloud(
 
     /** The voice has spoken since it was last started: the book it reads is the one being read. */
     private var heard = false
+
+    /**
+     * The listener has just sent the voice somewhere (a sentence on or back, a tapped sentence,
+     * another chapter), and it hasn't said where it landed yet. The voice also steps back by
+     * itself, a sentence or two when it is taken up again after a while: that is not the
+     * listener going back, and the book's progress doesn't fall for it.
+     */
+    private var sent = false
 
     /** The chapter the voice is in, by name, as far as the book's files tell (chapters that share a file are told by the page). */
     var chapter by mutableStateOf("")
@@ -638,6 +688,8 @@ internal class ReadAloud(
 
     /** Steps the voice [sentences] sentences back, or as many as there are before it. */
     private suspend fun stepBack(tts: TtsNavigator<*, *, *, *>, sentences: Int) {
+        // (The voice's own doing, not the listener's: see [sent].)
+        sent = false
         repeat(sentences) { if (!skipSentence(tts, tts.location.value, forward = false)) return }
     }
 
@@ -922,6 +974,7 @@ internal class ReadAloud(
     private suspend fun jumpTo(tts: TtsNavigator<*, *, *, *>, block: Content.TextElement, offset: Int) {
         here?.cancel()
         jumping = true
+        sent = true
         // Sent somewhere by hand, it reads from exactly there, however long it had been paused.
         pausedAt = 0L
         try {
@@ -981,6 +1034,7 @@ internal class ReadAloud(
 
     override fun skip(delta: Int) {
         val tts = tts ?: return
+        sent = true
         if (delta < 0) tts.skipToPreviousUtterance() else tts.skipToNextUtterance()
     }
 
@@ -1107,6 +1161,13 @@ internal class ReadAloud(
      * The sentence is told as a place the pages can go by (see [SpokenFiles.placed]).
      */
     private fun spoken(placed: Locator) {
+        // Sent there by the listener, and it is before the sentence the voice was on: they went back.
+        val was = unseen.sentence
+        val back = sent && was != null && comesBefore(
+            open.contents.resourceOf(placed.href), placed.locations.progression ?: 0.0,
+            open.contents.resourceOf(was.href), was.locations.progression ?: 0.0,
+        )
+        sent = false
         unseen.sentence = placed
         val page = page
         if (!heard) {
@@ -1116,7 +1177,7 @@ internal class ReadAloud(
             if (page == null) owner.heard(bookId)
         }
         // A reader keeps the place by the page the sentence is on; with none it is kept here.
-        if (page != null) page.onSpoken(placed) else unseen.spoken()
+        if (page != null) page.onSpoken(placed, back) else unseen.spoken(back)
     }
 
     // ---- With and without a reader ----------------------------------------------------------
@@ -1130,9 +1191,12 @@ internal class ReadAloud(
     fun attach(page: VoicePage) {
         if (this.page === page) return
         this.page = page
+        // The reader keeps the place from here. A save that was still waiting to be made here
+        // would land after the reader's own, on top of wherever they have turned to since.
+        unseen.handedOver()
         listen.offPage = false
         val at = lastPlaced ?: return
-        page.onSpoken(at)
+        page.onSpoken(at, false)
         scope.launch {
             val n = navigator() ?: return@launch
             followedAt = SystemClock.uptimeMillis()
@@ -1163,14 +1227,17 @@ internal class ReadAloud(
         scope.launch {
             // How far through the book a sentence is, is told by the book's positions: counting them reads all of it, once.
             runCatching { open.count() }
-            unseen.counted()
+            // (Unless a reader has opened the book meanwhile: the place is the reader's to keep now.)
+            if (page == null) unseen.counted()
         }
     }
 
     /** The place the book was left at, as the library has it now; null for a book never opened. */
     private suspend fun leftAt(): Locator? {
         val now = owner.library.state.value.find(bookId) ?: book
-        val saved = runCatching { open.leftAt(now) }.getOrNull() ?: return null
+        val left = runCatching { open.left(now) }.getOrNull()
+        val saved = left?.place ?: return null
+        if (left.oldCount) unseen.recount()
         // The sentence this voice stopped on itself keeps the time it stopped at: how long ago
         // that was says how far back it starts. Any other place is from some other day.
         if (!sameSentence(saved, stoppedAt)) {

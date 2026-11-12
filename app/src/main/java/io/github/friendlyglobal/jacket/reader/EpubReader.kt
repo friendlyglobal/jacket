@@ -189,15 +189,16 @@ fun EpubReader(
                 val open = listening.books.acquire(book)
                 // That voice's sentence is the book's place right now: it opens there. Otherwise,
                 // at the place it was left at.
-                val start = listening.sentenceOf(book.id) ?: withContext(Dispatchers.IO) { open.leftAt(book) }
-                Opened(open, start)
+                val reading = listening.sentenceOf(book.id)
+                val left = if (reading != null) null else withContext(Dispatchers.IO) { open.left(book) }
+                Opened(open, reading ?: left?.place, oldCount = left?.oldCount == true)
             }
         }
         value = result
         awaitDispose { result.getOrNull()?.open?.let(listening.books::releaseSoon) }
     }
     val result = opened ?: return ReaderLoading()
-    val (open, start) = result.getOrElse {
+    val (open, start, oldCount) = result.getOrElse {
         // A text file with nothing in it (one added before Jacket turned those away) says so.
         return ReaderError(if (it is NothingToRead) stringResource(R.string.reader_error_text) else stringResource(R.string.reader_error_open_book, it.message.orEmpty()))
     }
@@ -206,11 +207,11 @@ fun EpubReader(
     // and Readium's pages refuse a locked book by throwing: Jacket would close under the reader.
     if (publication.isRestricted) return ReaderError(stringResource(R.string.reader_error_protected))
     if (publication.readingOrder.isEmpty()) return ReaderError(stringResource(R.string.reader_error_no_pages))
-    EpubPages(book, open, start, open.text?.layout, settings, page, nav, haptics, annotations, respellings, spine, onCenterTap)
+    EpubPages(book, open, start, oldCount, open.text?.layout, settings, page, nav, haptics, annotations, respellings, spine, onCenterTap)
 }
 
-/** A book opened (see [OpenBook]), and where to start it. */
-private data class Opened(val open: OpenBook, val start: Locator?)
+/** A book opened (see [OpenBook]), where to start it, and whether that place is a sentence Jacket 1.0.0 saved by its own count (see [OpenBook.Left]). */
+private data class Opened(val open: OpenBook, val start: Locator?, val oldCount: Boolean)
 
 @Composable
 private fun EpubPages(
@@ -218,6 +219,8 @@ private fun EpubPages(
     /** The book as Readium has it open, which read-aloud shares (see [OpenBook]). */
     open: OpenBook,
     start: Locator?,
+    /** [start] is a sentence Jacket 1.0.0 saved by a count of its own: the book's progress is counted over once it is seen on its page. */
+    oldCount: Boolean,
     /** For a text file: where its paragraphs are in these pages. Its place is kept as a paragraph too (see [Library.updateLocator]). */
     textFile: TextLayout?,
     settings: Settings,
@@ -266,8 +269,12 @@ private fun EpubPages(
         SpokenPlace().apply {
             sentence = start?.takeIf { it.isSpoken }
             saved = sentence
+            recount = oldCount && sentence != null
         }
     }
+    // Whether the reader has gone back through the book, which is all that lets its progress fall
+    // (see PagePlace): told from the pages Readium reports.
+    val pagePlace = remember { PagePlace() }
 
     /**
      * The place to keep while the pages re-flow, and to open a navigator at: the page in front of
@@ -321,6 +328,8 @@ private fun EpubPages(
         object : FragmentFactory() {
             override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
                 val from = resize.target ?: placeToKeep() ?: start
+                // New pages: the first one seen is the book's place shown again, not a page turned to.
+                pagePlace.unsettled()
                 // Kept until the navigator is seen on that page: what it reports before then is
                 // where it is on its way, not where the reader is.
                 resize.target = from
@@ -407,6 +416,13 @@ private fun EpubPages(
         val resource = contents.resourceOf(here.href)
         if (direction > 0) resource != contents.fileCount - 1 || file.index < file.count - 1 else resource != 0 || file.index > 0
     }
+    /** How many pages Readium counted in the file when it reported [place]; null if it hasn't said. */
+    fun pagesAt(place: Locator): Int? = filePage.takeIf { it.count > 0 && it.href == place.href.toString() }?.count
+
+    /** The page Readium reports at [page], as [PagePlace] tells pages apart ([pages] where Readium has yet to say how many its file has). */
+    fun seen(page: Locator, pages: Int? = pagesAt(page)): PageSeen =
+        PageSeen(contents.resourceOf(page.href), page.locations.progression ?: 0.0, pages.takeIf { !navigatorScrolls(navigator) })
+
     /**
      * Saves the page at [locator] as the reader's place, [progress] of the way through the book.
      * Not every page Readium reports is that. While pages re-flow, and while a navigator is on its
@@ -417,6 +433,11 @@ private fun EpubPages(
     suspend fun savePage(locator: Locator, progress: Double) {
         fun notTheReaders() = resize.target != null || voiceHoldsThePlace(nav.listen.active, nav.listen.playing)
         if (notTheReaders()) return
+        val here = seen(locator)
+        // A book left on a sentence, and still on the page that sentence is on, keeps the
+        // sentence as its place: saved over with this page's first words, it would be taken up
+        // again (by the voice, started with the book shut) from the top of the page.
+        if (voiceAt.sentence != null && pagePlace.isOn(here) && !pagePlace.jumping(SystemClock.uptimeMillis())) return
         // Saved with the first words on the page, as a bookmark is. How far down the file a page
         // starts shifts with every layout (folded or not, a text size, a blank page Readium adds
         // at the end): by that alone the book reopens a page out. The words are where they are.
@@ -426,22 +447,25 @@ private fun EpubPages(
         // Asking the page took a moment, and the pages may have started to re-flow in it.
         if (notTheReaders()) return
         resize.known = locator to place
+        // The book's progress only falls when the reader went back through it: to a page before
+        // the one its place was counted on, by a jump, or (the voice paused or stopped while they
+        // were looking elsewhere) to a page of their own choosing. A page that is the same place
+        // shown again, reopened or laid out anew, counts a little differently and takes nothing off.
+        val back = pagePlace.wentBackTo(here, SystemClock.uptimeMillis()) || (nav.listen.active && nav.listen.offPage)
         val position = ((locator.locations.position ?: 1) - 1).coerceAtLeast(0)
         if (textFile != null) {
             val paragraph = textFile.pagePlace(top, locator)
-            library.updateLocator(book.id, place.toJSON().toString(), progress.toFloat(), paragraph.paragraph, textFile.paragraphs, paragraph.within)
+            library.updateLocator(book.id, place.toJSON().toString(), progress.toFloat(), paragraph.paragraph, textFile.paragraphs, paragraph.within, back)
         } else {
-            library.updateLocator(book.id, place.toJSON().toString(), progress.toFloat(), position, positions.size)
+            library.updateLocator(book.id, place.toJSON().toString(), progress.toFloat(), position, positions.size, back = back)
         }
         // The reader has moved on from where the voice last was.
         voiceAt.sentence = null
         voiceAt.unseen = false
+        voiceAt.back = false
     }
 
     val owner = LocalLifecycleOwner.current
-
-    /** How many pages Readium counted in the file when it reported [place]; null if it hasn't said. */
-    fun pagesAt(place: Locator): Int? = filePage.takeIf { it.count > 0 && it.href == place.href.toString() }?.count
 
     /**
      * How far down its file the page in front of the listener starts, when that page is where the
@@ -495,8 +519,20 @@ private fun EpubPages(
         // (the voice has turned its page, or read the book to its end): not to be counted over
         // again, another way, as the screen goes dark.
         if (sentence === voiceAt.saved && ((page == null && !ended) || progress == voiceAt.savedProgress)) return
+        // The book's progress only falls for it if the listener sent the voice back (the previous
+        // sentence, an earlier one tapped, the chapter before). Counted again any other way (the
+        // page it is on seen at last, the voice stepping back a sentence by itself after a
+        // pause) it is the same place, and takes nothing off. A sentence Jacket 1.0.0 saved by
+        // its own count is the one exception: seen on its page, it is counted over, up or down.
+        val back = voiceAt.back || (voiceAt.recount && page != null)
         // (With the Readium position it falls in, or its paragraph in a text file, kept beside every saved place.)
-        library.saveSpoken(book.id, sentence, progress, positions, textFile)
+        library.saveSpoken(book.id, sentence, progress, positions, textFile, back)
+        voiceAt.back = false
+        if (page != null) {
+            voiceAt.recount = false
+            // The page in view is the one the book's place is on: a page turned back from here is the reader going back.
+            current?.let { pagePlace.at(seen(it)) }
+        }
         voiceAt.saved = sentence
         voiceAt.savedProgress = progress
         voiceAt.savedAt = SystemClock.uptimeMillis()
@@ -511,6 +547,9 @@ private fun EpubPages(
         // The place from before the first change: pages re-flow through several sizes as a phone
         // folds, and it may be folded and unfolded again without a page being turned.
         if (resize.target == null) resize.target = placeToKeep()
+        // Laid out anew, the pages say nothing of where the reader was by where they start: the
+        // page they are put back to is the same place, however it counts.
+        pagePlace.unsettled()
         resize.job?.cancel()
         resize.job = scope.launch {
             // The text would be seen jumping about while the pages re-flow and the place is
@@ -538,6 +577,7 @@ private fun EpubPages(
                     // A book being opened has waited behind its cover for this, and waits no longer.
                     nav.contentReady = true
                     if (said.shows(target, pagesAt(said) ?: pages, n.overflow.value)) {
+                        pagePlace.at(seen(said, pagesAt(said) ?: pages))
                         resize.target = null
                         // The page now showing is the one those words are on.
                         if (target.text.highlight != null) resize.known = said to target
@@ -571,6 +611,7 @@ private fun EpubPages(
         val kept = resize.target ?: return@LaunchedEffect
         val opened = n.currentLocator.value
         if (reported == null || opened.shows(kept, reported.count, n.overflow.value)) {
+            pagePlace.at(seen(opened, reported?.count))
             resize.target = null
             // The page it opened on is the one the saved words are on.
             if (kept.text.highlight != null) resize.known = opened to kept
@@ -822,6 +863,8 @@ private fun EpubPages(
     fun jumpTo(place: Locator) {
         val n = navigator ?: return
         val from = n.currentLocator.value
+        // The reader's own doing: wherever it lands is their place, back through the book or on.
+        pagePlace.jumped(SystemClock.uptimeMillis())
         n.go(place, animated = false)
         if (from.href.removeFragment().isEquivalent(place.href.removeFragment())) return
         jump[0]?.cancel()
@@ -831,7 +874,10 @@ private fun EpubPages(
                 // Readium says where it is a moment after it gets there.
                 withTimeoutOrNull(ARRIVAL_MS) { n.currentLocator.first { it !== from } }
                 delay(SCROLL_SETTLE_MS)
-                if (navigator === n) n.go(place, animated = false)
+                if (navigator === n) {
+                    pagePlace.jumped(SystemClock.uptimeMillis())
+                    n.go(place, animated = false)
+                }
                 // A moment for the page gone to to be drawn.
                 delay(JUMP_DRAWN_MS)
             } finally {
@@ -844,6 +890,7 @@ private fun EpubPages(
     // A jump remembers the page it left from, so the reader can offer the way back.
     val markOrigin = {
         nav.movedAt = SystemClock.uptimeMillis()
+        pagePlace.jumped(nav.movedAt)
         val here = current
         val n = navigator
         if (here != null && n != null) {
@@ -932,8 +979,9 @@ private fun EpubPages(
     listen.skipNotes = settings.skipNoteNumbers
 
     // While the voice is speaking, the book's place is the sentence it is on (see saveSpoken).
-    voicePage.onSpoken = { sentence ->
+    voicePage.onSpoken = { sentence, back ->
         voiceAt.sentence = sentence
+        if (back) voiceAt.back = true
         // Out of sight, the page can't follow (unless the listener had left it to look elsewhere).
         if (!owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) && !nav.listen.offPage) voiceAt.unseen = true
         // Often enough that little is heard twice if the app is closed under the voice, and no
@@ -964,6 +1012,8 @@ private fun EpubPages(
                 resize.target = sentence
                 putBack()
             } else {
+                // (Sent after the voice: the page it lands on is the book's place, not one the reader turned to.)
+                pagePlace.unsettled()
                 navigator?.go(sentence, animated = false)
                 // An unfolding phone shows its pages a moment before it changes their size. Until
                 // Readium is seen at the sentence, that is still the place to put them back at.
@@ -997,6 +1047,9 @@ private fun EpubPages(
     voicePage.hereAppears = MaterialTheme.motionScheme.defaultEffectsSpec()
     voicePage.hereFades = MaterialTheme.motionScheme.slowEffectsSpec()
     voicePage.onStoppedElsewhere = { spoken ->
+        // The page the listener chose is theirs: once it is saved as the book's place (at their
+        // next page turn), the progress is what that page counts, not what the voice had reached.
+        pagePlace.choseAPage()
         val resource = contents.resourceOf(spoken.href)
         val progress = spoken.locations.progression?.let { spans?.total(resource, it) } ?: spoken.locations.totalProgression
         nav.cameFrom = Origin(
@@ -1186,6 +1239,10 @@ private class SpokenPlace {
     var ended: Locator? = null
     /** The page in front of the reader, as Readium reported it, when it is the last of the book. */
     var lastPage: Locator? = null
+    /** The listener has sent the voice back since its place was last saved: what lets the book's progress fall for it. */
+    var back = false
+    /** The sentence the book was left on was saved by Jacket 1.0.0, by a count of its own: counted over once it is seen on its page. */
+    var recount = false
 }
 
 /**
