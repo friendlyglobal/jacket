@@ -97,6 +97,7 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
   text apps. With TalkBack or a keyboard, the highlighter button on the top bar marks the sentence
   being read aloud, or the first paragraph on the page, and takes a note for it. Everything is listed next to the contents. A book's highlights and notes can be
   shared as text in one go or saved as a Markdown file, and Settings saves every book's at once.
+  PDFs have them too (see below).
 - **Search inside the book**, with results streaming in and the match marked on the page: in
   EPUBs, FB2 books and text files, and in PDFs on Android 15 (or Android 12 to 14 with the
   latest Google Play system update), where a result is marked on the PDF's own page.
@@ -115,6 +116,14 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
   pages turn with it and the sentence being read is marked where it's drawn. Running headers and
   page numbers are skipped, columns are read in order, and a PDF's own contents list gives
   chapters. Search finds words in it and marks them on the page.
+- **Highlights and notes on PDFs**, on those same phones. Press and hold a word and drag the
+  handles to choose more, across a column or a page. The menu highlights in five colours, takes
+  a note, copies, shares, opens "Say it this way" or reads aloud from there. Highlights are drawn
+  on the page and follow zoom and scroll, and a tap on one opens it. They are listed with the
+  contents with their page, saved with "Save as a file", kept in backups and carried between
+  your devices by catch-up. A highlight is kept as its page, its words and a few words either
+  side, so it is found again on another device. On an older Android, where a PDF's words can't
+  be read, a PDF's highlights are listed and can't be made or shown on the page: Jacket says so.
 - **Password-protected PDFs** ask for their password, then open to be read and read aloud like
   any other. Jacket can remember the password for that book, on the phone only and never in a
   backup, and forget it again from the book's menu. (Android 15, or Android 12 to 14 with the
@@ -303,7 +312,6 @@ docs/concept.html            The interactive design concept the app started from
 The details, the reasons and the size of each item are in [docs/roadmap.md](docs/roadmap.md).
 
 **Next**
-- Highlights and notes on PDFs
 - Android Auto (waiting for Google Play, since Auto apps have their own review)
 
 Kindle, Google Play Books and other stores don't expose what you're reading, and DRM-protected
