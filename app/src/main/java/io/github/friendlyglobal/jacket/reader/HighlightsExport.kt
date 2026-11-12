@@ -24,10 +24,18 @@ internal const val HIGHLIGHTS_MIME = "text/markdown"
 internal fun highlightsOf(annotations: List<Annotation>): List<Annotation> =
     annotations.filter { it.kind == AnnotationKind.HIGHLIGHT && it.text.isNotBlank() }.sortedBy { it.progress }
 
-/** Where in its book [highlight] is, in words: "Chapter 3 · 42%". */
-internal fun highlightPlace(resources: Resources, highlight: Annotation): String =
-    listOf(highlight.chapter, resources.getString(R.string.percent, (highlight.progress * 100).toInt()))
-        .filter { it.isNotBlank() }.joinToString(resources.getString(R.string.separator))
+/** Where in its book [highlight] is, in words: "Chapter 3 · 42%", and for one in a PDF its page too: "Chapter 3 · Page 12 · 42%". */
+internal fun highlightPlace(resources: Resources, highlight: Annotation): String = highlightPlace(
+    highlight,
+    separator = resources.getString(R.string.separator),
+    page = { resources.getString(R.string.reader_page_number, it) },
+    percent = { resources.getString(R.string.percent, it) },
+)
+
+/** The same, with the words to say it in: what goes between its parts, a [page] by its number (from 1), and a [percent]. */
+internal fun highlightPlace(highlight: Annotation, separator: String, page: (Int) -> String, percent: (Int) -> String): String =
+    listOfNotNull(highlight.chapter, highlight.pdfPage?.let { page(it + 1) }, percent((highlight.progress * 100).toInt()))
+        .filter { it.isNotBlank() }.joinToString(separator)
 
 /**
  * Everything highlighted in [book], with its notes, as text: a quote per paragraph. [place] says

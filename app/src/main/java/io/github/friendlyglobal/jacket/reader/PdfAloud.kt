@@ -31,6 +31,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import io.github.friendlyglobal.jacket.R
+import io.github.friendlyglobal.jacket.data.Annotation
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.importer.DocumentCloser
@@ -40,11 +41,13 @@ import io.github.friendlyglobal.jacket.importer.PdfLayout
 import io.github.friendlyglobal.jacket.importer.PdfLocked
 import io.github.friendlyglobal.jacket.importer.PdfPlace
 import io.github.friendlyglobal.jacket.importer.PdfSpot
+import io.github.friendlyglobal.jacket.importer.PdfTextLine
 import io.github.friendlyglobal.jacket.importer.PdfWords
 import io.github.friendlyglobal.jacket.importer.PdfWordsFile
 import io.github.friendlyglobal.jacket.importer.PdfWordsUnavailable
 import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.listening
+import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.PageColors
 import io.github.friendlyglobal.jacket.ui.motionRemoved
 import io.github.friendlyglobal.jacket.voice.Respelling
@@ -111,6 +114,12 @@ internal class PdfAloud(val listen: ListenState) {
     var found: List<MarkedLine> by mutableStateOf(emptyList())
     var inView: (PdfPlace) -> Boolean = { false }
     var lineInWindow: (MarkedLine) -> Rect? = { null }
+
+    /** The reader's highlights on the pages, and choosing words on them (see PdfHighlights.kt); null until the PDF's words are to hand, and where they never are. */
+    var marking: PdfMarking? by mutableStateOf(null)
+
+    /** Why nothing can be highlighted in this PDF, in words, where nothing can: said when the page is pressed and held. Null where highlighting works, and until that is known. */
+    var cantMark: String? by mutableStateOf(null)
 
     /** A tap on the page at ([x], [y]) of [page], in the page's own units, while it is read aloud: true if the voice went there. */
     var onTap: (page: Int, x: Float, y: Float) -> Boolean = { _, _, _ -> false }
@@ -250,7 +259,15 @@ private class SpokenPdf {
  * it is pressed; so it does for a PDF that turns out to have no words.
  */
 @Composable
-internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, nav: ReaderNav, respellings: List<Respelling>): PdfAloud {
+internal fun rememberPdfAloud(
+    book: Book,
+    settings: Settings,
+    page: PageColors,
+    nav: ReaderNav,
+    respellings: List<Respelling>,
+    annotations: List<Annotation>,
+    haptics: Haptics,
+): PdfAloud {
     val context = LocalContext.current
     val library = context.library
     val listening = context.listening
@@ -405,6 +422,19 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
         }
     }
 
+    // Highlights need the PDF's words too. Where there are none to be had (an older Android, a
+    // scan), nothing is offered, and the reader is told why: when the page is pressed and held,
+    // and in the list of highlights.
+    val noMarks = when (opened?.exceptionOrNull()) {
+        is PdfWordsUnavailable -> NoHighlights(resources.getString(R.string.pdf_highlight_unavailable), resources.getString(R.string.pdf_highlights_listed_only))
+        is NoWordsInPdf -> NoHighlights(resources.getString(R.string.pdf_highlight_no_text), null)
+        else -> null
+    }
+    SideEffect {
+        aloud.cantMark = noMarks?.why
+        nav.noHighlights = noMarks
+    }
+
     if (open == null || voice == null || layout == null) return aloud
 
     // The voice has these pages for as long as the PDF is open here. They aren't Readium's, so
@@ -418,11 +448,16 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
             chapter = { nav.tocIndex },
         )
     }
+    // "Read aloud from here", chosen over selected words: where the voice is to start, asked once.
+    val asked = remember(voice) { arrayOfNulls<PdfSpot>(1) }
     voicePage.startAt = { stopped ->
         // The sentence the voice stopped on, if it is still in view; else the first words on screen.
         val resumed = stopped?.takeIf { it.isSpoken }?.let { open.pdfSentence(it, 1) }
             ?.takeIf { sentence -> layout.placeOf(sentence.paragraph, sentence.from)?.let(aloud.inView) == true }
+        val from = asked[0]
+        asked[0] = null
         when {
+            from != null -> open.pdfStart(from, resumed = false)
             resumed != null -> open.pdfStart(PdfSpot(resumed.paragraph, resumed.from), resumed = true)
             else -> (aloud.top() ?: PdfPlace(nav.section, 0f)).let { top -> layout.spotAt(top) ?: layout.firstOn(top.page) }?.let { open.pdfStart(it, resumed = false) }
         }
@@ -528,6 +563,17 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
         nav.search = search
         onDispose { if (nav.search === search) nav.search = null }
     }
+    // Highlights and notes: found on the pages and drawn there, and made by choosing words on them
+    // (see PdfHighlights.kt). "Read aloud from here" sends the voice to the words chosen, or
+    // starts it there.
+    rememberPdfMarking(book, nav, aloud, open, layout, voice, words, annotations, haptics) { spot ->
+        if (nav.listen.active && voice.pdfSentence != null) {
+            scope.launch { open.pdfStart(spot, resumed = false)?.let { voice.readFrom(it.block, it.offset) } }
+        } else if (!nav.listen.active) {
+            asked[0] = spot
+            nav.listenController?.start()
+        }
+    }
     LaunchedEffect(voice, words) {
         snapshotFlow { voice.pdfSentence }.collectLatest { sentence ->
             // (When the voice stops, what was marked stays to fade: see below.)
@@ -569,10 +615,37 @@ private const val JOIN_POLL_MS = 50L
  * asked where the sentence being read, or a search result, is drawn. One thing at a time, and off
  * the main thread.
  */
-private class PdfWordsSource(private val file: File, private val password: () -> String?) {
+internal class PdfWordsSource(private val file: File, private val password: () -> String?) {
     private val one = Dispatchers.IO.limitedParallelism(1)
     private var pdf: PdfWordsFile? = null
     private var closed = false
+
+    /** Where [ranges], stretches of the PDF's paragraphs, are drawn: a box for each line they take up, in the order they are read. For a highlight, and for what is selected. */
+    suspend fun lines(layout: PdfLayout, ranges: List<PdfSentence>): List<MarkedLine> = ranges.flatMap { marked(layout, it, "").lines }
+
+    /**
+     * The words of [line], which is of a paragraph that reads [text], and where along the line
+     * each is drawn: what a finger on the line is over. Where the PDF reader can't say, they are
+     * set out along the line by their letters.
+     */
+    suspend fun wordsOf(layout: PdfLayout, line: PdfTextLine, text: String): List<PdfWordBox> = withContext(one) {
+        val words = PdfSelecting.words(text, line.start, line.end)
+        val guessed = PdfSelecting.spread(line, words)
+        // (A word is one stretch of its line, or two where something unseen stood in the middle of it.)
+        val parts = words.map { word -> layout.marks(line.paragraph, word.first, word.last + 1).filter { it.page == line.page && it.top == line.top && it.from >= 0 } }
+        val asked = parts.flatten().map { it.from until it.to }.distinct()
+        val found = HashMap<IntRange, Pair<Float, Float>>()
+        if (!closed && asked.isNotEmpty()) {
+            val pdf = pdf ?: runCatching { PdfWordsFile(file, password()) }.getOrNull()?.also { pdf = it }
+            pdf?.boxes(line.page, asked)?.forEachIndexed { index, boxes ->
+                if (boxes.isNotEmpty()) found[asked[index]] = boxes.minOf { it.left } to boxes.maxOf { it.right }
+            }
+        }
+        words.indices.map { index ->
+            val known = parts[index].mapNotNull { found[it.from until it.to] }
+            if (known.isEmpty()) guessed[index] else PdfWordBox(words[index].first, words[index].last + 1, known.minOf { it.first }, known.maxOf { it.second })
+        }
+    }
 
     /**
      * [sentence], which reads [text], as it is marked on the pages: a box for each line it takes

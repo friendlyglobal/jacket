@@ -82,6 +82,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -162,6 +163,10 @@ fun NotesSheet(
     onShare: (() -> Unit)? = null,
     /** Saves them as a file instead. */
     onSave: (() -> Unit)? = null,
+    /** Where nothing can be highlighted in this book, why: said in place of how highlights are made. */
+    noHighlights: String? = null,
+    /** And what to say over highlights that are listed all the same (made on another device), and can't be shown on the page. */
+    highlightsNote: String? = null,
 ) {
     val bookmarks = annotations.filter { it.kind == AnnotationKind.BOOKMARK }.sortedBy { it.progress }
     val highlights = annotations.filter { it.kind == AnnotationKind.HIGHLIGHT }.sortedBy { it.progress }
@@ -210,9 +215,9 @@ fun NotesSheet(
                     AnnotationList(bookmarks, haptics, onPick, onEdit = null, onDelete)
                 }
                 NotesTab.HIGHLIGHTS -> if (highlights.isEmpty()) {
-                    EmptyNotes(JacketIcons.Highlight, stringResource(R.string.notes_no_highlights), stringResource(R.string.notes_no_highlights_hint))
+                    EmptyNotes(JacketIcons.Highlight, stringResource(R.string.notes_no_highlights), noHighlights ?: stringResource(R.string.notes_no_highlights_hint))
                 } else {
-                    AnnotationList(highlights, haptics, onPick, onEdit, onDelete, onShare, onSave)
+                    AnnotationList(highlights, haptics, onPick, onEdit, onDelete, onShare, onSave, note = highlightsNote)
                 }
             }
         }
@@ -254,8 +259,19 @@ private fun AnnotationList(
     onDelete: (Annotation) -> Unit,
     onShare: (() -> Unit)? = null,
     onSave: (() -> Unit)? = null,
+    /** Said above the list, where there is something to say of all of it (highlights that this phone can list and can't show on the page). */
+    note: String? = null,
 ) {
+    val resources = LocalResources.current
     LazyColumn(Modifier.fillMaxWidth().navigationBarsPadding()) {
+        if (note != null) {
+            item(key = "note") {
+                Text(
+                    note, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 28.dp, vertical = 8.dp),
+                )
+            }
+        }
         if (onShare != null || onSave != null) {
             // All of them at once, to keep somewhere else: as a file, or sent to another app.
             item(key = "share") {
@@ -293,11 +309,8 @@ private fun AnnotationList(
                     }
                 },
                 overlineContent = {
-                    Text(
-                        listOf(item.chapter, stringResource(R.string.percent, (item.progress * 100).toInt()))
-                            .filter { it.isNotBlank() }.joinToString(stringResource(R.string.separator)),
-                        maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    )
+                    // (For a highlight in a PDF, its page too.)
+                    Text(remember(item, resources) { highlightPlace(resources, item) }, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 },
                 supportingContent = if (item.note.isNotBlank()) {
                     { Text(item.note, fontStyle = FontStyle.Italic, maxLines = 3, overflow = TextOverflow.Ellipsis) }
@@ -442,7 +455,7 @@ fun HighlightEditor(
 
 /** What a highlight's colour is called, for a screen reader: the dots themselves say nothing. */
 @get:StringRes
-private val HighlightColor.label: Int
+internal val HighlightColor.label: Int
     get() = when (this) {
         HighlightColor.YELLOW -> R.string.color_yellow
         HighlightColor.GREEN -> R.string.color_green
