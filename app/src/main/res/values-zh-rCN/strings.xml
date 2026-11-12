@@ -92,7 +92,7 @@
     <string name="library_remove_message">Jacket 会删除它保存的副本和你的阅读位置。原始文件仍保留在原处。</string>
     <string name="library_remove_confirm">移除</string>
     <string name="library_empty_title">让折叠屏手机穿上你的书</string>
-    <string name="library_empty_message">添加 EPUB、PDF、CBZ 漫画或文本文件。Jacket 会保存一份私有副本，并在你阅读时把封面显示在外屏或外屏小组件上。</string>
+    <string name="library_empty_message">添加 EPUB、PDF、FB2、CBZ 漫画或文本文件。Jacket 会保存一份私有副本，并在你阅读时把封面显示在外屏或外屏小组件上。</string>
     <string name="onboarding_next">下一步</string>
     <string name="onboarding_skip">跳过</string>
     <string name="onboarding_private">你的书只保存在这部手机上。Jacket 无需账号，也从不联网。</string>
@@ -220,7 +220,7 @@
     <string name="reader_error_open_book">无法打开此书。\n%1$s</string>
     <string name="reader_error_no_pages">这本书没有可显示的页面。</string>
     <string name="reader_error_protected">这本书受版权保护（DRM），Jacket 无法打开。</string>
-    <string name="reader_error_pdf">无法打开此 PDF。暂不支持受密码保护的 PDF。</string>
+    <string name="reader_error_pdf">无法打开此 PDF。</string>
     <string name="reader_error_comic">无法打开此漫画。</string>
     <string name="reader_error_text">此文件为空或无法读取。</string>
     <string name="reader_no_app_for_link">没有可打开此链接的应用。</string>
@@ -296,6 +296,18 @@
     <string name="listen_nothing_to_read_comics">这里没有可以朗读的书。Jacket 无法朗读漫画。</string>
     <string name="pdf_listen_unavailable">这部手机无法朗读 PDF。需要 Android 15，或者装有最新 Google Play 系统更新的 Android 12 至 14。</string>
     <string name="pdf_listen_no_text">这个 PDF 没有可以朗读的文字。它的页面是图片，像扫描件一样。</string>
+    <string name="pdf_listen_locked">这个 PDF 已上锁。请先打开并输入密码，然后再听。</string>
+    <string name="pdf_locked_message">这个 PDF 有密码保护。</string>
+    <string name="pdf_locked_enter">输入密码</string>
+    <string name="pdf_locked_unsupported">这个 PDF 有密码保护。打开它需要 Android 15，或者装有最新 Google Play 系统更新的 Android 12 至 14。</string>
+    <string name="pdf_password_title">这个 PDF 已上锁</string>
+    <string name="pdf_password_label">密码</string>
+    <string name="pdf_password_show">显示密码</string>
+    <string name="pdf_password_remember">在这部手机上记住</string>
+    <string name="pdf_password_remember_note">只保存在这部手机上，不会进入任何备份。</string>
+    <string name="pdf_password_wrong">这个密码打不开它。请再试一次。</string>
+    <string name="pdf_password_forgotten">已忘记密码。下次打开时 Jacket 会再次询问。</string>
+    <string name="library_menu_forget_password">忘记密码</string>
     <string name="listen_stopped_error">朗读已停止：%1$s</string>
 
     <string name="widget_reading">在读</string>

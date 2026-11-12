@@ -97,7 +97,7 @@
     <string name="library_remove_message">Jacket elimina la propria copia e la tua posizione di lettura. Il file originale resta dov\'era.</string>
     <string name="library_remove_confirm">Rimuovi</string>
     <string name="library_empty_title">Vesti il tuo pieghevole con il tuo libro</string>
-    <string name="library_empty_message">Aggiungi un EPUB, un PDF, un fumetto CBZ o un file di testo. Jacket ne conserva una copia privata e ne mostra la copertina sullo schermo esterno, o in un widget, mentre leggi.</string>
+    <string name="library_empty_message">Aggiungi un EPUB, un PDF, un FB2, un fumetto CBZ o un file di testo. Jacket ne conserva una copia privata e ne mostra la copertina sullo schermo esterno, o in un widget, mentre leggi.</string>
     <string name="onboarding_next">Avanti</string>
     <string name="onboarding_skip">Salta</string>
     <string name="onboarding_private">I tuoi libri restano su questo telefono. Jacket non ha account e non va mai online.</string>
@@ -235,7 +235,7 @@
     <string name="reader_error_open_book">Impossibile aprire questo libro.\n%1$s</string>
     <string name="reader_error_no_pages">Questo libro non ha pagine da mostrare.</string>
     <string name="reader_error_protected">Questo libro è protetto dalla copia (DRM), quindi Jacket non può aprirlo.</string>
-    <string name="reader_error_pdf">Impossibile aprire questo PDF. I PDF protetti da password non sono ancora supportati.</string>
+    <string name="reader_error_pdf">Impossibile aprire questo PDF.</string>
     <string name="reader_error_comic">Impossibile aprire questo fumetto.</string>
     <string name="reader_error_text">Questo file è vuoto o non è stato possibile leggerlo.</string>
     <string name="reader_no_app_for_link">Nessuna app può aprire questo link.</string>
@@ -315,6 +315,18 @@
     <string name="listen_nothing_to_read_comics">Qui non c\'è nessun libro che si possa leggere ad alta voce. Jacket non può leggere ad alta voce i fumetti.</string>
     <string name="pdf_listen_unavailable">Questo telefono non può leggere i PDF ad alta voce. Serve Android 15, oppure Android da 12 a 14 con l\'ultimo aggiornamento di sistema Google Play.</string>
     <string name="pdf_listen_no_text">Questo PDF non ha testo da leggere ad alta voce. Le sue pagine sono immagini, come in una scansione.</string>
+    <string name="pdf_listen_locked">Questo PDF è bloccato. Aprilo e inserisci la password per ascoltarlo.</string>
+    <string name="pdf_locked_message">Questo PDF è bloccato da una password.</string>
+    <string name="pdf_locked_enter">Inserisci la password</string>
+    <string name="pdf_locked_unsupported">Questo PDF è bloccato da una password. Per aprirlo serve Android 15, oppure Android da 12 a 14 con l\'ultimo aggiornamento di sistema Google Play.</string>
+    <string name="pdf_password_title">Questo PDF è bloccato</string>
+    <string name="pdf_password_label">Password</string>
+    <string name="pdf_password_show">Mostra la password</string>
+    <string name="pdf_password_remember">Ricorda su questo telefono</string>
+    <string name="pdf_password_remember_note">Resta solo su questo telefono, mai in un backup.</string>
+    <string name="pdf_password_wrong">Questa password non l\'ha aperto. Riprova.</string>
+    <string name="pdf_password_forgotten">Password dimenticata. Jacket la chiederà la prossima volta.</string>
+    <string name="library_menu_forget_password">Dimentica la password</string>
     <string name="listen_stopped_error">Lettura ad alta voce interrotta: %1$s</string>
 
     <string name="widget_reading">In lettura</string>

@@ -186,6 +186,9 @@ fun HomeScreen(
     aloud: Aloud? = null,
     /** Pauses the voice (false) or has it read on (true), from the "Continue reading" pane. */
     onAloud: (Boolean) -> Unit = {},
+    /** The locked PDFs whose password is remembered on this phone: their menu offers to forget it. */
+    remembered: Set<String> = emptySet(),
+    onForgetPassword: (Book) -> Unit = {},
 ) {
     val haptics = rememberHaptics()
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
@@ -231,6 +234,8 @@ fun HomeScreen(
         onCollections = { collectionsFor = it.id },
         onEdit = { editing = it.id },
         organize = organizer != null,
+        remembered = remembered,
+        onForgetPassword = onForgetPassword,
     )
 
     Scaffold(

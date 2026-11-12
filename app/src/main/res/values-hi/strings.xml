@@ -95,7 +95,7 @@
     <string name="library_remove_message">Jacket अपनी कॉपी और आपकी पढ़ने की जगह मिटा देता है। मूल फ़ाइल जहाँ थी, वहीं रहती है।</string>
     <string name="library_remove_confirm">हटाएँ</string>
     <string name="library_empty_title">अपने फ़ोल्डेबल को अपनी किताब पहनाएँ</string>
-    <string name="library_empty_message">कोई EPUB, PDF, CBZ कॉमिक या टेक्स्ट फ़ाइल जोड़ें। Jacket उसकी एक निजी कॉपी रखता है और आपके पढ़ते समय उसका कवर बाहरी स्क्रीन पर या कवर-स्क्रीन विजेट में दिखाता है।</string>
+    <string name="library_empty_message">कोई EPUB, PDF, FB2, CBZ कॉमिक या टेक्स्ट फ़ाइल जोड़ें। Jacket उसकी एक निजी कॉपी रखता है और आपके पढ़ते समय उसका कवर बाहरी स्क्रीन पर या कवर-स्क्रीन विजेट में दिखाता है।</string>
     <string name="onboarding_next">आगे</string>
     <string name="onboarding_skip">छोड़ें</string>
     <string name="onboarding_private">आपकी किताबें इसी फ़ोन में रहती हैं। Jacket में कोई खाता नहीं है और यह कभी ऑनलाइन नहीं जाता।</string>
@@ -228,7 +228,7 @@
     <string name="reader_error_open_book">यह किताब खोली नहीं जा सकी।\n%1$s</string>
     <string name="reader_error_no_pages">इस किताब में दिखाने के लिए कोई पेज नहीं है।</string>
     <string name="reader_error_protected">यह किताब कॉपी से सुरक्षित (DRM) है, इसलिए Jacket इसे नहीं खोल सकता।</string>
-    <string name="reader_error_pdf">यह PDF खोली नहीं जा सकी। पासवर्ड से सुरक्षित PDF अभी काम नहीं करतीं।</string>
+    <string name="reader_error_pdf">यह PDF खोली नहीं जा सकी।</string>
     <string name="reader_error_comic">यह कॉमिक खोली नहीं जा सकी।</string>
     <string name="reader_error_text">यह फ़ाइल खाली है या पढ़ी नहीं जा सकी।</string>
     <string name="reader_no_app_for_link">कोई भी ऐप यह लिंक नहीं खोल सकता।</string>
@@ -306,6 +306,18 @@
     <string name="listen_nothing_to_read_comics">यहाँ ऐसी कोई किताब नहीं है जिसे पढ़कर सुनाया जा सके। Jacket कॉमिक पढ़कर नहीं सुना सकता।</string>
     <string name="pdf_listen_unavailable">यह फ़ोन PDF पढ़कर नहीं सुना सकता। इसके लिए Android 15 चाहिए, या Android 12 से 14 जिसमें Google Play का नया सिस्टम अपडेट हो।</string>
     <string name="pdf_listen_no_text">इस PDF में पढ़कर सुनाने लायक़ कोई टेक्स्ट नहीं है। इसके पन्ने तस्वीरें हैं, जैसे स्कैन में होते हैं।</string>
+    <string name="pdf_listen_locked">यह PDF लॉक है। सुनने के लिए इसे खोलें और इसका पासवर्ड डालें।</string>
+    <string name="pdf_locked_message">यह PDF पासवर्ड से लॉक है।</string>
+    <string name="pdf_locked_enter">पासवर्ड डालें</string>
+    <string name="pdf_locked_unsupported">यह PDF पासवर्ड से लॉक है। इसे खोलने के लिए Android 15 चाहिए, या Android 12 से 14 जिसमें Google Play का नया सिस्टम अपडेट हो।</string>
+    <string name="pdf_password_title">यह PDF लॉक है</string>
+    <string name="pdf_password_label">पासवर्ड</string>
+    <string name="pdf_password_show">पासवर्ड दिखाएँ</string>
+    <string name="pdf_password_remember">इस फ़ोन पर याद रखें</string>
+    <string name="pdf_password_remember_note">सिर्फ़ इसी फ़ोन पर रहता है, किसी बैकअप में नहीं जाता।</string>
+    <string name="pdf_password_wrong">इस पासवर्ड से PDF नहीं खुली। फिर से कोशिश करें।</string>
+    <string name="pdf_password_forgotten">पासवर्ड भुला दिया गया। अगली बार Jacket इसे फिर पूछेगा।</string>
+    <string name="library_menu_forget_password">पासवर्ड भुला दें</string>
     <string name="listen_stopped_error">पढ़कर सुनाना रुक गया: %1$s</string>
 
     <string name="widget_reading">पढ़ी जा रही</string>

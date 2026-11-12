@@ -1,6 +1,7 @@
 package io.github.friendlyglobal.jacket.importer
 
 import android.graphics.RectF
+import android.graphics.pdf.LoadParams
 import android.graphics.pdf.PdfRenderer
 import android.graphics.pdf.PdfRendererPreV
 import android.graphics.pdf.models.selection.SelectionBoundary
@@ -71,10 +72,24 @@ private interface OpenPdf : Closeable {
     fun <T> page(index: Int, read: (OpenPage) -> T): T
 }
 
+/** Opens a PDF with [open], which may be given a password: Android says a PDF is locked, or the password wrong, by a SecurityException. */
+private inline fun <T> opening(file: File, password: String?, open: (ParcelFileDescriptor) -> T): T {
+    val pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+    return try {
+        open(pfd)
+    } catch (e: SecurityException) {
+        pfd.close()
+        throw PdfLocked(wrong = password != null)
+    } catch (t: Throwable) {
+        pfd.close()
+        throw t
+    }
+}
+
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-private class Android15Pdf(file: File) : OpenPdf {
-    private val renderer = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).let { pfd ->
-        try { PdfRenderer(pfd) } catch (t: Throwable) { pfd.close(); throw t }
+private class Android15Pdf(file: File, password: String?) : OpenPdf {
+    private val renderer = opening(file, password) { pfd ->
+        if (password == null) PdfRenderer(pfd) else PdfRenderer(pfd, LoadParams.Builder().setPassword(password).build())
     }
     override val pageCount: Int get() = renderer.pageCount
 
@@ -95,9 +110,9 @@ private class Android15Pdf(file: File) : OpenPdf {
 
 /** The same reader as Android 15's, as Google's system updates bring it to Android 12, 13 and 14. */
 @RequiresExtension(extension = Build.VERSION_CODES.S, version = PdfWords.PDF_EXTENSION)
-private class EarlierPdf(file: File) : OpenPdf {
-    private val renderer = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).let { pfd ->
-        try { PdfRendererPreV(pfd) } catch (t: Throwable) { pfd.close(); throw t }
+private class EarlierPdf(file: File, password: String?) : OpenPdf {
+    private val renderer = opening(file, password) { pfd ->
+        if (password == null) PdfRendererPreV(pfd) else PdfRendererPreV(pfd, LoadParams.Builder().setPassword(password).build())
     }
     override val pageCount: Int get() = renderer.pageCount
 
@@ -117,13 +132,14 @@ private class EarlierPdf(file: File) : OpenPdf {
 }
 
 /**
- * A PDF opened for its words. Not for more than one thread at a time: the PDF reader has one page
- * open at once.
+ * A PDF opened for its words; with [password], one that is locked with it (throws [PdfLocked]
+ * for a locked PDF given none, or the wrong one). Not for more than one thread at a time: the PDF
+ * reader has one page open at once.
  */
-internal class PdfWordsFile(file: File) : Closeable {
+internal class PdfWordsFile(file: File, password: String? = null) : Closeable {
     private val pdf: OpenPdf = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM -> Android15Pdf(file)
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.S) >= PdfWords.PDF_EXTENSION -> EarlierPdf(file)
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM -> Android15Pdf(file, password)
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.S) >= PdfWords.PDF_EXTENSION -> EarlierPdf(file, password)
         else -> throw UnsupportedOperationException("This Android can't read a PDF's text")
     }
 
@@ -236,13 +252,23 @@ internal object PdfSpokenBook {
 
     private const val STAMP = "jacket-pdf-book"
 
+    /** Ends the stamp of pages made of a PDF that is locked with a password. */
+    private const val LOCKED = " locked"
+
     /** The layout kept in [pages], if they were made from [source] by this version; null if they must be made again. */
     fun kept(pages: File, source: File): PdfLayout? = runCatching {
         ZipFile(pages).use { zip ->
-            if (zip.comment != stamp(source)) return null
+            if (zip.comment?.removeSuffix(LOCKED) != stamp(source)) return null
             DataInputStream(zip.getInputStream(zip.getEntry(LAYOUT)).buffered()).use(PdfLayout::read)
         }
     }.getOrNull()
+
+    /**
+     * Whether the pages kept in [pages] are those of a PDF locked with a password. They hold its
+     * words unlocked, so they are kept only while its password is remembered, and read only with
+     * the password to hand (see Library.pdfPages).
+     */
+    fun locked(pages: File): Boolean = runCatching { ZipFile(pages).use { zip -> zip.comment?.let { it.startsWith(STAMP) && it.endsWith(LOCKED) } == true } }.getOrDefault(false)
 
     /** Whether the pages kept in [pages] say that their PDF has no words: they were made, and came out empty. */
     fun wordless(pages: File): Boolean = runCatching {
@@ -253,16 +279,19 @@ internal object PdfSpokenBook {
      * Reads the words of the PDF [source] and writes the pages made of them to [out] (and closes
      * it): a small EPUB, a file for each chapter of the PDF's outline, every paragraph named by
      * its number. A PDF with no words gives a file with no pages, which says so the next time.
+     *
+     * With [password], the PDF is one locked with it. Throws [PdfLocked] for a locked PDF given
+     * none, or the wrong one.
      */
-    fun make(source: File, out: OutputStream, id: String, title: String, author: String, language: String?): PdfLayout {
-        val pages = PdfWordsFile(source).use { pdf -> List(pdf.pageCount) { pdf.page(it) } }
+    fun make(source: File, out: OutputStream, id: String, title: String, author: String, language: String?, password: String? = null): PdfLayout {
+        val pages = PdfWordsFile(source, password).use { pdf -> List(pdf.pageCount) { pdf.page(it) } }
         val paragraphs = PdfReading.paragraphs(pages)
         val layout = PdfLayout.of(pages, paragraphs, if (paragraphs.isEmpty()) emptyList() else PdfOutline.read(source))
         val said = language ?: runCatching {
             guessLanguage(buildString { for (p in paragraphs) { if (length > LANGUAGE_SAMPLE) break; append(p.text).append('\n') } })
         }.getOrNull()
         ZipOutputStream(out).use { zip ->
-            zip.setComment(stamp(source))
+            zip.setComment(stamp(source) + if (password != null) LOCKED else "")
             val mime = "application/epub+zip".toByteArray(Charsets.US_ASCII)
             zip.putNextEntry(
                 ZipEntry("mimetype").apply {

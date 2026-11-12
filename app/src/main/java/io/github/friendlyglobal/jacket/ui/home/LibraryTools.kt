@@ -110,6 +110,9 @@ internal class BookActions(
     val onCollections: (Book) -> Unit,
     val onEdit: (Book) -> Unit,
     val organize: Boolean,
+    /** The locked PDFs whose password is remembered on this phone, and forgetting one's. */
+    val remembered: Set<String> = emptySet(),
+    val onForgetPassword: (Book) -> Unit = {},
 )
 
 /** The items of a book's menu, for the grid's long press and the list's ⋮ alike. */
@@ -142,6 +145,12 @@ internal fun BookMenuItems(book: Book, onCover: Boolean, haptics: Haptics, actio
         leadingIcon = { Icon(JacketIcons.Check, null) },
         onClick = { close(); haptics.confirm(); actions.onFinished(book, !book.isFinished) },
     )
+    if (book.id in actions.remembered) {
+        DropdownMenuItem(
+            text = { Text(stringResource(R.string.library_menu_forget_password)) }, leadingIcon = { Icon(JacketIcons.Lock, null) },
+            onClick = { close(); haptics.confirm(); actions.onForgetPassword(book) },
+        )
+    }
     DropdownMenuItem(
         text = { Text(stringResource(R.string.library_menu_remove)) }, leadingIcon = { Icon(JacketIcons.Delete, null) },
         onClick = { close(); actions.onRemove(book) },
@@ -160,6 +169,7 @@ internal fun bookActionsFor(book: Book, onCover: Boolean, haptics: Haptics, acti
     val cover = stringResource(R.string.library_menu_show_on_cover)
     val finished = stringResource(if (book.isFinished) R.string.library_menu_mark_unfinished else R.string.library_menu_mark_finished)
     val remove = stringResource(R.string.library_menu_remove)
+    val forget = stringResource(R.string.library_menu_forget_password)
     return buildList {
         if (actions.organize) {
             add(CustomAccessibilityAction(pin) { haptics.toggle(!book.isPinned); actions.onPin(book, !book.isPinned); true })
@@ -168,6 +178,7 @@ internal fun bookActionsFor(book: Book, onCover: Boolean, haptics: Haptics, acti
         }
         if (!onCover) add(CustomAccessibilityAction(cover) { haptics.confirm(); actions.onShowOnCover(book); true })
         add(CustomAccessibilityAction(finished) { haptics.confirm(); actions.onFinished(book, !book.isFinished); true })
+        if (book.id in actions.remembered) add(CustomAccessibilityAction(forget) { haptics.confirm(); actions.onForgetPassword(book); true })
         add(CustomAccessibilityAction(remove) { actions.onRemove(book); true })
     }
 }

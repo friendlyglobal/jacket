@@ -265,6 +265,9 @@ class ReaderNav(
     /** The first page is on screen (or nothing more is coming): the opening cover may lift. */
     var contentReady by mutableStateOf(false)
 
+    /** The book has opened: its cover is out of the way, and the page can ask for something (a locked PDF's password). */
+    var opened by mutableStateOf(false)
+
     /** A tap on the page brings the controls up, or sends them away: for a page with no taps of its own (see [ReaderError]). */
     var toggleControls: () -> Unit = {}
 
@@ -802,6 +805,7 @@ fun ReaderScreen(
         }
     }
     nav.toggleControls = toggleChrome
+    SideEffect { nav.opened = opening.settled }
 
     // Turning a page is a swipe, a curl under the finger or a tap on the page's edge: none of which
     // a screen reader or a switch can do. The same turns are offered as actions on whatever of the

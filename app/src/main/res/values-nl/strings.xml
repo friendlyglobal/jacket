@@ -94,7 +94,7 @@
     <string name="library_remove_message">Jacket verwijdert zijn eigen kopie en je leespositie. Het originele bestand blijft waar het was.</string>
     <string name="library_remove_confirm">Verwijderen</string>
     <string name="library_empty_title">Laat je foldable je boek dragen</string>
-    <string name="library_empty_message">Voeg een EPUB-, PDF-, CBZ-strip- of tekstbestand toe. Jacket bewaart een privékopie en zet de omslag op je buitenscherm, of in een coverschermwidget, terwijl je leest.</string>
+    <string name="library_empty_message">Voeg een EPUB-, PDF-, FB2-, CBZ-strip- of tekstbestand toe. Jacket bewaart een privékopie en zet de omslag op je buitenscherm, of in een coverschermwidget, terwijl je leest.</string>
     <string name="onboarding_next">Volgende</string>
     <string name="onboarding_skip">Overslaan</string>
     <string name="onboarding_private">Je boeken blijven op deze telefoon. Jacket heeft geen account en gaat nooit online.</string>
@@ -227,7 +227,7 @@
     <string name="reader_error_open_book">Kan dit boek niet openen.\n%1$s</string>
     <string name="reader_error_no_pages">Dit boek heeft geen pagina\'s om te tonen.</string>
     <string name="reader_error_protected">Dit boek is beveiligd tegen kopiëren (DRM), dus Jacket kan het niet openen.</string>
-    <string name="reader_error_pdf">Deze PDF kan niet worden geopend. PDF\'s met een wachtwoord worden nog niet ondersteund.</string>
+    <string name="reader_error_pdf">Deze pdf kan niet worden geopend.</string>
     <string name="reader_error_comic">Deze strip kan niet worden geopend.</string>
     <string name="reader_error_text">Dit bestand is leeg of kan niet worden gelezen.</string>
     <string name="reader_no_app_for_link">Geen app kan deze link openen.</string>
@@ -305,6 +305,18 @@
     <string name="listen_nothing_to_read_comics">Er is hier geen boek dat kan worden voorgelezen. Jacket kan geen strips voorlezen.</string>
     <string name="pdf_listen_unavailable">Deze telefoon kan geen pdf\'s voorlezen. Daarvoor is Android 15 nodig, of Android 12 tot en met 14 met de nieuwste Google Play-systeemupdate.</string>
     <string name="pdf_listen_no_text">Deze pdf bevat geen tekst om voor te lezen. De pagina\'s zijn afbeeldingen, zoals bij een scan.</string>
+    <string name="pdf_listen_locked">Deze pdf is vergrendeld. Open hem en voer het wachtwoord in om te luisteren.</string>
+    <string name="pdf_locked_message">Deze pdf is vergrendeld met een wachtwoord.</string>
+    <string name="pdf_locked_enter">Wachtwoord invoeren</string>
+    <string name="pdf_locked_unsupported">Deze pdf is vergrendeld met een wachtwoord. Om hem te openen is Android 15 nodig, of Android 12 tot en met 14 met de nieuwste Google Play-systeemupdate.</string>
+    <string name="pdf_password_title">Deze pdf is vergrendeld</string>
+    <string name="pdf_password_label">Wachtwoord</string>
+    <string name="pdf_password_show">Wachtwoord tonen</string>
+    <string name="pdf_password_remember">Onthouden op deze telefoon</string>
+    <string name="pdf_password_remember_note">Blijft alleen op deze telefoon, nooit in een back-up.</string>
+    <string name="pdf_password_wrong">Met dat wachtwoord ging hij niet open. Probeer het opnieuw.</string>
+    <string name="pdf_password_forgotten">Wachtwoord vergeten. Jacket vraagt er de volgende keer weer om.</string>
+    <string name="library_menu_forget_password">Wachtwoord vergeten</string>
     <string name="listen_stopped_error">Voorlezen gestopt: %1$s</string>
 
     <string name="widget_reading">Ik lees</string>

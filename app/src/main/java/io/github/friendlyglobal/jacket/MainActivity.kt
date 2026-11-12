@@ -34,6 +34,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -265,6 +266,9 @@ private fun JacketRoot(
     val haptics = rememberHaptics()
     val state by library.state.collectAsStateWithLifecycle()
     val missing by library.missing.collectAsStateWithLifecycle()
+    // The locked PDFs whose password is remembered on this phone: their menu offers to forget it.
+    val remembered by library.passwords.remembered.collectAsStateWithLifecycle()
+    var forgotten by remember { mutableIntStateOf(0) }
     val busy by importing.collectAsStateWithLifecycle()
     val outerAvailable by outer.available.collectAsStateWithLifecycle()
     // A phone that folds is welcomed with its outer screen; any other isn't told about one.
@@ -300,6 +304,10 @@ private fun JacketRoot(
         val id = request ?: return@LaunchedEffect
         if (library.state.value.find(id) != null) open(id, null)
         openRequests.value = null
+    }
+    // A password forgotten from a book's menu is said to be, with what that means.
+    LaunchedEffect(forgotten) {
+        if (forgotten > 0) snackbar.showSnackbar(resources.getString(R.string.pdf_password_forgotten), duration = SnackbarDuration.Short)
     }
     // The collector below outlives many recompositions: it opens books as the library is now.
     val openNow by rememberUpdatedState(open)
@@ -539,6 +547,11 @@ private fun JacketRoot(
                                             aloud = readAloud.aloud(),
                                             onAloud = { play -> if (play) readAloud.play() else readAloud.pause() },
                                             organizer = library,
+                                            remembered = remembered,
+                                            onForgetPassword = { book ->
+                                                library.forgetPassword(book.id)
+                                                forgotten++
+                                            },
                                             onFreeBooks = { destination = FREE_BOOKS },
                                             onReading = { openReading(HOME) },
                                             grid = libraryGrid,

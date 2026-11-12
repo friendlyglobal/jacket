@@ -37,6 +37,7 @@ import io.github.friendlyglobal.jacket.importer.DocumentCloser
 import io.github.friendlyglobal.jacket.importer.NoWordsInPdf
 import io.github.friendlyglobal.jacket.importer.PdfChapter
 import io.github.friendlyglobal.jacket.importer.PdfLayout
+import io.github.friendlyglobal.jacket.importer.PdfLocked
 import io.github.friendlyglobal.jacket.importer.PdfPlace
 import io.github.friendlyglobal.jacket.importer.PdfSpot
 import io.github.friendlyglobal.jacket.importer.PdfWords
@@ -269,6 +270,7 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
         val message = when (failure) {
             is PdfWordsUnavailable -> resources.getString(R.string.pdf_listen_unavailable)
             is NoWordsInPdf -> resources.getString(R.string.pdf_listen_no_text)
+            is PdfLocked -> resources.getString(R.string.pdf_listen_locked)
             else -> resources.getString(R.string.reader_error_open_book, failure.message.orEmpty())
         }
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
@@ -474,7 +476,7 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
     // The sentence the voice is on, found on the PDF's pages: the PDF reader is asked where
     // its lines and its words are drawn. (A second opening of the file, for its words alone: the
     // one that draws the pages is busy drawing them.)
-    val words = remember(book.id) { PdfWordsSource(library.fileOf(book)) }
+    val words = remember(book.id) { PdfWordsSource(library.fileOf(book)) { library.passwords.of(book.id) } }
     DisposableEffect(words) { onDispose { words.close() } }
     LaunchedEffect(voice, words) {
         snapshotFlow { voice.pdfSentence }.collectLatest { sentence ->
@@ -513,10 +515,10 @@ private const val HERE_MS = 1_800L
 private const val JOIN_POLL_MS = 50L
 
 /**
- * The PDF's file, opened for its words alone: asked where the sentence being read is drawn. One
- * thing at a time, and off the main thread.
+ * The PDF's file, opened for its words alone (with its [password], if it is locked with one):
+ * asked where the sentence being read is drawn. One thing at a time, and off the main thread.
  */
-private class PdfWordsSource(private val file: File) {
+private class PdfWordsSource(private val file: File, private val password: () -> String?) {
     private val one = Dispatchers.IO.limitedParallelism(1)
     private var pdf: PdfWordsFile? = null
     private var closed = false
@@ -534,7 +536,7 @@ private class PdfWordsSource(private val file: File) {
         val asked = (pieces + parts.filterNotNull()).filter { it.from >= 0 }.groupBy { it.page }
         val boxes = HashMap<Pair<Int, IntRange>, Pair<Float, Float>>()
         if (!closed && asked.isNotEmpty()) {
-            val pdf = pdf ?: runCatching { PdfWordsFile(file) }.getOrNull()?.also { pdf = it }
+            val pdf = pdf ?: runCatching { PdfWordsFile(file, password()) }.getOrNull()?.also { pdf = it }
             if (pdf != null) {
                 for ((page, marks) in asked) {
                     val ranges = marks.map { it.from until it.to }.distinct()

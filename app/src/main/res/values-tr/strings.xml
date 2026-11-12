@@ -95,7 +95,7 @@
     <string name="library_remove_message">Jacket kendi kopyasını ve okuma konumunuzu siler. Orijinal dosya olduğu yerde kalır.</string>
     <string name="library_remove_confirm">Kaldır</string>
     <string name="library_empty_title">Katlanabilir telefonunuz kitabınızı giysin</string>
-    <string name="library_empty_message">Bir EPUB, PDF, CBZ çizgi roman veya metin dosyası ekleyin. Jacket özel bir kopya saklar ve siz okurken kitabın kapağını dış ekranda ya da kapak ekranı widget\'ında gösterir.</string>
+    <string name="library_empty_message">Bir EPUB, PDF, FB2, CBZ çizgi roman veya metin dosyası ekleyin. Jacket özel bir kopya saklar ve siz okurken kitabın kapağını dış ekranda ya da kapak ekranı widget\'ında gösterir.</string>
     <string name="onboarding_next">İleri</string>
     <string name="onboarding_skip">Atla</string>
     <string name="onboarding_private">Kitaplarınız bu telefonda kalır. Jacket hesap gerektirmez ve asla internete bağlanmaz.</string>
@@ -228,7 +228,7 @@
     <string name="reader_error_open_book">Bu kitap açılamadı.\n%1$s</string>
     <string name="reader_error_no_pages">Bu kitapta gösterilecek sayfa yok.</string>
     <string name="reader_error_protected">Bu kitap kopya korumalı (DRM), bu yüzden Jacket onu açamıyor.</string>
-    <string name="reader_error_pdf">Bu PDF açılamadı. Parola korumalı PDF\'ler henüz desteklenmiyor.</string>
+    <string name="reader_error_pdf">Bu PDF açılamadı.</string>
     <string name="reader_error_comic">Bu çizgi roman açılamadı.</string>
     <string name="reader_error_text">Bu dosya boş veya okunamadı.</string>
     <string name="reader_no_app_for_link">Bu bağlantıyı açabilecek bir uygulama yok.</string>
@@ -306,6 +306,18 @@
     <string name="listen_nothing_to_read_comics">Burada sesli okunabilecek bir kitap yok. Jacket, çizgi romanları sesli okuyamaz.</string>
     <string name="pdf_listen_unavailable">Bu telefon PDF\'leri sesli okuyamıyor. Bunun için Android 15 veya en son Google Play sistem güncellemesini almış Android 12–14 gerekir.</string>
     <string name="pdf_listen_no_text">Bu PDF\'te sesli okunacak metin yok. Sayfaları, taranmış bir belgedeki gibi resimlerden oluşuyor.</string>
+    <string name="pdf_listen_locked">Bu PDF kilitli. Dinlemek için açıp parolasını girin.</string>
+    <string name="pdf_locked_message">Bu PDF bir parolayla kilitlenmiş.</string>
+    <string name="pdf_locked_enter">Parolayı gir</string>
+    <string name="pdf_locked_unsupported">Bu PDF bir parolayla kilitlenmiş. Açmak için Android 15 veya en son Google Play sistem güncellemesini almış Android 12–14 gerekir.</string>
+    <string name="pdf_password_title">Bu PDF kilitli</string>
+    <string name="pdf_password_label">Parola</string>
+    <string name="pdf_password_show">Parolayı göster</string>
+    <string name="pdf_password_remember">Bu telefonda hatırla</string>
+    <string name="pdf_password_remember_note">Yalnızca bu telefonda tutulur, hiçbir yedeğe girmez.</string>
+    <string name="pdf_password_wrong">Bu parola PDF\'i açmadı. Tekrar deneyin.</string>
+    <string name="pdf_password_forgotten">Parola unutuldu. Jacket bir dahaki sefere yeniden soracak.</string>
+    <string name="library_menu_forget_password">Parolayı unut</string>
     <string name="listen_stopped_error">Sesli okuma durdu: %1$s</string>
 
     <string name="widget_reading">Okunuyor</string>

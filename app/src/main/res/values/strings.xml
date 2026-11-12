@@ -121,7 +121,7 @@
     <string name="library_remove_message">Jacket deletes its own copy and your reading position. The original file stays where it was.</string>
     <string name="library_remove_confirm">Remove</string>
     <string name="library_empty_title">Let your foldable wear your book</string>
-    <string name="library_empty_message">Add an EPUB, PDF, CBZ comic or text file. Jacket keeps a private copy and puts its cover on your outer screen, or in a cover-screen widget, while you read.</string>
+    <string name="library_empty_message">Add an EPUB, PDF, FB2, CBZ comic or text file. Jacket keeps a private copy and puts its cover on your outer screen, or in a cover-screen widget, while you read.</string>
 
     <!-- Welcome, shown once before the first book (its other words are the library's and the settings' own) -->
     <string name="onboarding_next">Next</string>
@@ -267,7 +267,7 @@
     <string name="reader_error_open_book">Couldn\'t open this book.\n%1$s</string>
     <string name="reader_error_no_pages">This book has no pages to show.</string>
     <string name="reader_error_protected">This book is copy-protected (DRM), so Jacket can\'t open it.</string>
-    <string name="reader_error_pdf">This PDF couldn\'t be opened. Password-protected PDFs aren\'t supported yet.</string>
+    <string name="reader_error_pdf">This PDF couldn\'t be opened.</string>
     <string name="reader_error_comic">This comic couldn\'t be opened.</string>
     <string name="reader_error_text">This file is empty or couldn\'t be read.</string>
     <string name="reader_no_app_for_link">No app can open this link.</string>
@@ -358,6 +358,18 @@
     <string name="listen_nothing_to_read_comics">There is no book here that can be read aloud. Jacket can\'t read comics aloud.</string>
     <string name="pdf_listen_unavailable">This phone can\'t read PDFs aloud. That takes Android 15, or Android 12 to 14 with the latest Google Play system update.</string>
     <string name="pdf_listen_no_text">This PDF has no text to read aloud. Its pages are pictures, like a scan.</string>
+    <string name="pdf_listen_locked">This PDF is locked. Open it and enter its password to listen.</string>
+    <string name="pdf_locked_message">This PDF is locked with a password.</string>
+    <string name="pdf_locked_enter">Enter password</string>
+    <string name="pdf_locked_unsupported">This PDF is locked with a password. Opening it takes Android 15, or Android 12 to 14 with the latest Google Play system update.</string>
+    <string name="pdf_password_title">This PDF is locked</string>
+    <string name="pdf_password_label">Password</string>
+    <string name="pdf_password_show">Show password</string>
+    <string name="pdf_password_remember">Remember on this phone</string>
+    <string name="pdf_password_remember_note">Kept on this phone only, never in a backup.</string>
+    <string name="pdf_password_wrong">That password didn\'t open it. Try again.</string>
+    <string name="pdf_password_forgotten">Password forgotten. Jacket will ask for it next time.</string>
+    <string name="library_menu_forget_password">Forget password</string>
     <!-- %1$s: the reason, from the speech engine. -->
     <string name="listen_stopped_error">Read aloud stopped: %1$s</string>
 

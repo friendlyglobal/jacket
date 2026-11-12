@@ -107,7 +107,7 @@
     <string name="library_remove_message">سيحذف تطبيق Jacket نسخته الخاصة وموضع قراءتك. ويبقى الملف الأصلي في مكانه.</string>
     <string name="library_remove_confirm">إزالة</string>
     <string name="library_empty_title">دَع هاتفك القابل للطي يرتدي كتابك</string>
-    <string name="library_empty_message">أضف ملف EPUB أو PDF أو قصة مصوّرة CBZ أو ملفًا نصيًا. يحتفظ تطبيق Jacket بنسخة خاصة، ويعرض غلافها على الشاشة الخارجية أو في أداة شاشة الغطاء أثناء قراءتك.</string>
+    <string name="library_empty_message">أضف ملف EPUB أو PDF أو FB2 أو قصة مصوّرة CBZ أو ملفًا نصيًا. يحتفظ تطبيق Jacket بنسخة خاصة، ويعرض غلافها على الشاشة الخارجية أو في أداة شاشة الغطاء أثناء قراءتك.</string>
     <string name="onboarding_next">التالي</string>
     <string name="onboarding_skip">تخطٍّ</string>
     <string name="onboarding_private">كتبك تبقى على هذا الهاتف. لا يحتاج Jacket إلى حساب ولا يتصل بالإنترنت أبدًا.</string>
@@ -260,7 +260,7 @@
     <string name="reader_error_open_book">تعذّر فتح هذا الكتاب.\n%1$s</string>
     <string name="reader_error_no_pages">لا يحتوي هذا الكتاب على صفحات لعرضها.</string>
     <string name="reader_error_protected">هذا الكتاب محمي من النسخ (DRM)، لذلك لا يستطيع Jacket فتحه.</string>
-    <string name="reader_error_pdf">تعذّر فتح ملف PDF هذا. ملفات PDF المحمية بكلمة مرور غير مدعومة بعد.</string>
+    <string name="reader_error_pdf">تعذّر فتح ملف PDF هذا.</string>
     <string name="reader_error_comic">تعذّر فتح هذه القصة المصوّرة.</string>
     <string name="reader_error_text">هذا الملف فارغ أو تعذّرت قراءته.</string>
     <string name="reader_no_app_for_link">لا يوجد تطبيق يمكنه فتح هذا الرابط.</string>
@@ -346,6 +346,18 @@
     <string name="listen_nothing_to_read_comics">لا يوجد هنا كتاب يمكن قراءته بصوت عالٍ. لا يستطيع Jacket قراءة القصص المصوّرة بصوت عالٍ.</string>
     <string name="pdf_listen_unavailable">لا يستطيع هذا الهاتف قراءة ملفات PDF بصوت عالٍ. يتطلّب ذلك Android 15، أو Android 12 إلى 14 مع آخر تحديث لنظام Google Play.</string>
     <string name="pdf_listen_no_text">لا يحتوي هذا الملف على نص يمكن قراءته بصوت عالٍ. صفحاته صور، كالصفحات الممسوحة ضوئيًا.</string>
+    <string name="pdf_listen_locked">ملف PDF هذا مقفل. افتحه وأدخل كلمة المرور للاستماع إليه.</string>
+    <string name="pdf_locked_message">ملف PDF هذا مقفل بكلمة مرور.</string>
+    <string name="pdf_locked_enter">إدخال كلمة المرور</string>
+    <string name="pdf_locked_unsupported">ملف PDF هذا مقفل بكلمة مرور. يتطلّب فتحه Android 15، أو Android 12 إلى 14 مع آخر تحديث لنظام Google Play.</string>
+    <string name="pdf_password_title">ملف PDF هذا مقفل</string>
+    <string name="pdf_password_label">كلمة المرور</string>
+    <string name="pdf_password_show">إظهار كلمة المرور</string>
+    <string name="pdf_password_remember">تذكّرها على هذا الهاتف</string>
+    <string name="pdf_password_remember_note">تُحفظ على هذا الهاتف فقط، ولا تدخل في أي نسخة احتياطية.</string>
+    <string name="pdf_password_wrong">لم تفتح كلمة المرور هذه الملف. حاول مرة أخرى.</string>
+    <string name="pdf_password_forgotten">تم نسيان كلمة المرور. سيطلبها Jacket في المرة القادمة.</string>
+    <string name="library_menu_forget_password">نسيان كلمة المرور</string>
     <string name="listen_stopped_error">توقفت القراءة بصوت عالٍ: %1$s</string>
 
     <string name="widget_reading">قيد القراءة</string>
