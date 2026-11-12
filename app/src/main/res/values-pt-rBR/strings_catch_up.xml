@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">Seus outros dispositivos</string>
+    <string name="catch_up_title">Continuar entre dispositivos</string>
+    <string name="catch_up_description">Leia em dois dispositivos e continue em um de onde parou no outro.</string>
+    <string name="catch_up_setup_body">Escolha uma pasta que todos os seus dispositivos compartilham: uma que um app como Google Drive, Dropbox ou Syncthing mantém igual em cada um deles, ou um pen drive que você leva de um para o outro.\n\nO Jacket guarda ali um arquivo pequeno com suas posições, marcadores, destaques, notas e coleções, e lê os arquivos que seus outros dispositivos guardam ali. O Jacket nunca se conecta à internet: quem faz isso é o app que compartilha a pasta. Seus livros, capas e configurações ficam em cada dispositivo.\n\nDepois faça o mesmo no seu outro dispositivo, com a mesma pasta.</string>
+    <string name="catch_up_device_name">Nome deste dispositivo</string>
+    <string name="catch_up_choose_folder">Escolher uma pasta</string>
+    <string name="catch_up_setup_files_hint">Não consegue escolher a pasta que quer? Salve nela o arquivo deste dispositivo e depois adicione os arquivos dos outros, um a um.</string>
+    <string name="catch_up_setup_files">Salvar um arquivo em vez disso</string>
+    <string name="catch_up_failed">O Jacket não consegue mais salvar ali. Toque para escolher de novo.</string>
+    <string name="catch_up_others">Dispositivos encontrados</string>
+    <string name="catch_up_others_none_folder">Nenhum ainda. Ative isto também no seu outro dispositivo, com a mesma pasta.</string>
+    <string name="catch_up_others_none_files">Nenhum ainda. Ative isto também no seu outro dispositivo e depois toque aqui para escolher o arquivo que ele salvou.</string>
+    <string name="catch_up_others_add">%1$s. Toque para adicionar o arquivo de outro dispositivo.</string>
+    <string name="catch_up_hint">O Jacket pergunta antes de levar você à página a que outro dispositivo chegou: sua posição nunca muda sozinha. Marcadores, destaques, notas e coleções ficam iguais em todos os dispositivos, e o que você apaga em um é apagado nos outros.</string>
+    <string name="catch_up_offer_page">No %1$s você está na página %2$d.</string>
+    <string name="catch_up_offer_page_chapter">No %1$s você está na página %2$d, em %3$s.</string>
+    <string name="catch_up_offer_percent">No %1$s você está em %2$d%%.</string>
+    <string name="catch_up_offer_percent_chapter">No %1$s você está em %2$d%%, em %3$s.</string>
+    <string name="catch_up_offer_book">No %1$s você está mais adiante em %2$s.</string>
+    <string name="catch_up_go">Ir para lá</string>
+</resources>

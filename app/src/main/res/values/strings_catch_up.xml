@@ -16,8 +16,8 @@
     <string name="catch_up_failed">Jacket can\'t save there any more. Tap to choose again.</string>
     <!-- The row that lists the reader's other devices by name, and what it says while there are none. -->
     <string name="catch_up_others">Devices found</string>
-    <string name="catch_up_others_none_folder">None yet. Turn this on on your other device too, with the same folder.</string>
-    <string name="catch_up_others_none_files">None yet. Turn this on on your other device too, then tap here to choose the file it saved.</string>
+    <string name="catch_up_others_none_folder">None yet. Do the same on your other device, with the same folder.</string>
+    <string name="catch_up_others_none_files">None yet. Do the same on your other device, then tap here to choose the file it saved.</string>
     <!-- %1$s is the names of the devices found, e.g. "Tablet, Phone". -->
     <string name="catch_up_others_add">%1$s. Tap to add another device\'s file.</string>
     <string name="catch_up_hint">Jacket asks before taking you to the page another device reached: your place never changes by itself. Bookmarks, highlights, notes and collections are kept the same on every device, and what you delete on one is deleted on the others.</string>

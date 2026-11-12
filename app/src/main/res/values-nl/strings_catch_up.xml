@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">Je andere apparaten</string>
+    <string name="catch_up_title">Verder lezen tussen apparaten</string>
+    <string name="catch_up_description">Lees op twee apparaten en ga op het ene verder waar je op het andere was gebleven.</string>
+    <string name="catch_up_setup_body">Kies een map die al je apparaten delen: een map die een app als Google Drive, Dropbox of Syncthing op elk apparaat gelijk houdt, of een USB-stick die je van het ene naar het andere meeneemt.\n\nJacket bewaart daar een klein bestand met je posities, bladwijzers, markeringen, notities en collecties, en leest de bestanden die je andere apparaten daar bewaren. Jacket gaat zelf nooit online: dat doet de app die de map deelt. Je boeken, omslagen en instellingen blijven op elk apparaat.\n\nDoe daarna hetzelfde op je andere apparaat, met dezelfde map.</string>
+    <string name="catch_up_device_name">Naam van dit apparaat</string>
+    <string name="catch_up_choose_folder">Map kiezen</string>
+    <string name="catch_up_setup_files_hint">Kun je de map die je wilt niet kiezen? Sla het bestand van dit apparaat er dan in op en voeg daarna de bestanden van de andere apparaten een voor een toe.</string>
+    <string name="catch_up_setup_files">In plaats daarvan een bestand opslaan</string>
+    <string name="catch_up_failed">Jacket kan daar niet meer opslaan. Tik om opnieuw te kiezen.</string>
+    <string name="catch_up_others">Gevonden apparaten</string>
+    <string name="catch_up_others_none_folder">Nog geen. Zet dit ook aan op je andere apparaat, met dezelfde map.</string>
+    <string name="catch_up_others_none_files">Nog geen. Zet dit ook aan op je andere apparaat en tik dan hier om het bestand te kiezen dat het heeft opgeslagen.</string>
+    <string name="catch_up_others_add">%1$s. Tik om het bestand van nog een apparaat toe te voegen.</string>
+    <string name="catch_up_hint">Jacket vraagt het eerst voordat het je naar de pagina brengt waar een ander apparaat was: je positie verandert nooit vanzelf. Bladwijzers, markeringen, notities en collecties blijven op elk apparaat gelijk, en wat je op het ene verwijdert, wordt ook op de andere verwijderd.</string>
+    <string name="catch_up_offer_page">Op %1$s ben je op pagina %2$d.</string>
+    <string name="catch_up_offer_page_chapter">Op %1$s ben je op pagina %2$d, in %3$s.</string>
+    <string name="catch_up_offer_percent">Op %1$s ben je op %2$d%%.</string>
+    <string name="catch_up_offer_percent_chapter">Op %1$s ben je op %2$d%%, in %3$s.</string>
+    <string name="catch_up_offer_book">Op %1$s ben je verder in %2$s.</string>
+    <string name="catch_up_go">Ga erheen</string>
+</resources>

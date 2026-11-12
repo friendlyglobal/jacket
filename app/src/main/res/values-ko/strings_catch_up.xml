@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">내 다른 기기</string>
+    <string name="catch_up_title">기기 간 이어 읽기</string>
+    <string name="catch_up_description">두 기기에서 읽고, 한 기기에서 멈춘 곳부터 다른 기기에서 이어 읽으세요.</string>
+    <string name="catch_up_setup_body">모든 기기가 함께 쓰는 폴더를 선택하세요. Google 드라이브, Dropbox, Syncthing 같은 앱이 기기마다 똑같이 유지해 주는 폴더나, 기기 사이에 옮겨 꽂는 USB 메모리면 됩니다.\n\nJacket은 그곳에 읽던 위치, 북마크, 하이라이트, 메모, 컬렉션이 담긴 작은 파일을 두고, 다른 기기가 그곳에 둔 파일을 읽습니다. Jacket 자체는 인터넷에 연결하지 않습니다. 그 일은 폴더를 공유하는 앱이 합니다. 책, 표지, 설정은 각 기기에 그대로 남습니다.\n\n그런 다음 다른 기기에서도 같은 폴더로 똑같이 설정하세요.</string>
+    <string name="catch_up_device_name">이 기기의 이름</string>
+    <string name="catch_up_choose_folder">폴더 선택</string>
+    <string name="catch_up_setup_files_hint">원하는 폴더를 선택할 수 없나요? 대신 이 기기의 파일을 그 폴더에 저장한 다음, 다른 기기의 파일을 하나씩 추가하세요.</string>
+    <string name="catch_up_setup_files">대신 파일 저장</string>
+    <string name="catch_up_failed">Jacket이 더 이상 그곳에 저장할 수 없습니다. 탭하여 다시 선택하세요.</string>
+    <string name="catch_up_others">찾은 기기</string>
+    <string name="catch_up_others_none_folder">아직 없습니다. 다른 기기에서도 같은 폴더로 이 기능을 켜세요.</string>
+    <string name="catch_up_others_none_files">아직 없습니다. 다른 기기에서도 이 기능을 켠 다음, 여기를 탭하여 그 기기가 저장한 파일을 선택하세요.</string>
+    <string name="catch_up_others_add">%1$s. 탭하여 다른 기기의 파일을 추가하세요.</string>
+    <string name="catch_up_hint">다른 기기에서 읽은 페이지로 이동하기 전에 Jacket이 먼저 묻습니다. 읽던 위치는 절대 저절로 바뀌지 않습니다. 북마크, 하이라이트, 메모, 컬렉션은 모든 기기에서 똑같이 유지되며, 한 기기에서 삭제한 것은 다른 기기에서도 삭제됩니다.</string>
+    <string name="catch_up_offer_page">%1$s에서는 %2$d페이지까지 읽었습니다.</string>
+    <string name="catch_up_offer_page_chapter">%1$s에서는 %2$d페이지(%3$s)까지 읽었습니다.</string>
+    <string name="catch_up_offer_percent">%1$s에서는 %2$d%%까지 읽었습니다.</string>
+    <string name="catch_up_offer_percent_chapter">%1$s에서는 %2$d%%(%3$s)까지 읽었습니다.</string>
+    <string name="catch_up_offer_book">%1$s에서는 %2$s을(를) 더 많이 읽었습니다.</string>
+    <string name="catch_up_go">그곳으로 이동</string>
+</resources>

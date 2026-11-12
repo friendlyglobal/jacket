@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">你的其他设备</string>
+    <string name="catch_up_title">在设备之间接着读</string>
+    <string name="catch_up_description">在两台设备上阅读，在一台上从另一台读到的地方接着读。</string>
+    <string name="catch_up_setup_body">选择一个所有设备都能共用的文件夹：由 Google 云端硬盘、Dropbox 或 Syncthing 这类应用在各台设备上保持一致的文件夹，或者你在设备之间来回插拔的 U 盘。\n\nJacket 会在那里保存一个小文件，记录你的阅读位置、书签、划线、笔记和合集，并读取其他设备保存在那里的文件。Jacket 本身从不联网：联网的是共享该文件夹的应用。你的图书、封面和设置仍留在各自的设备上。\n\n然后在另一台设备上选择同一个文件夹，做同样的设置。</string>
+    <string name="catch_up_device_name">这台设备的名称</string>
+    <string name="catch_up_choose_folder">选择文件夹</string>
+    <string name="catch_up_setup_files_hint">选不了想用的文件夹？可以改为把这台设备的文件保存到其中，再逐个添加其他设备的文件。</string>
+    <string name="catch_up_setup_files">改为保存文件</string>
+    <string name="catch_up_failed">Jacket 无法再保存到那里。点按以重新选择。</string>
+    <string name="catch_up_others">已找到的设备</string>
+    <string name="catch_up_others_none_folder">还没有。请在另一台设备上也开启此功能，并选择同一个文件夹。</string>
+    <string name="catch_up_others_none_files">还没有。请在另一台设备上也开启此功能，然后点按这里选择它保存的文件。</string>
+    <string name="catch_up_others_add">%1$s。点按以添加另一台设备的文件。</string>
+    <string name="catch_up_hint">在带你前往另一台设备读到的页面之前，Jacket 会先询问：你的阅读位置绝不会自行改变。书签、划线、笔记和合集在每台设备上保持一致，在一台设备上删除的内容也会在其他设备上删除。</string>
+    <string name="catch_up_offer_page">你在“%1$s”上读到了第 %2$d 页。</string>
+    <string name="catch_up_offer_page_chapter">你在“%1$s”上读到了第 %2$d 页（%3$s）。</string>
+    <string name="catch_up_offer_percent">你在“%1$s”上读到了 %2$d%%。</string>
+    <string name="catch_up_offer_percent_chapter">你在“%1$s”上读到了 %2$d%%（%3$s）。</string>
+    <string name="catch_up_offer_book">你在“%1$s”上把《%2$s》读得更靠后。</string>
+    <string name="catch_up_go">前往</string>
+</resources>

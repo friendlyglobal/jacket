@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">Deine anderen Geräte</string>
+    <string name="catch_up_title">Zwischen Geräten weiterlesen</string>
+    <string name="catch_up_description">Lies auf zwei Geräten und mach auf dem einen dort weiter, wo du auf dem anderen aufgehört hast.</string>
+    <string name="catch_up_setup_body">Wähle einen Ordner, den alle deine Geräte gemeinsam haben: einen, den eine App wie Google Drive, Dropbox oder Syncthing auf allen gleich hält, oder einen USB-Stick, den du zwischen ihnen mitnimmst.\n\nJacket legt dort eine kleine Datei mit deinen Lesepositionen, Lesezeichen, Markierungen, Notizen und Sammlungen ab und liest die Dateien, die deine anderen Geräte dort ablegen. Jacket selbst geht nie online: Das übernimmt die App, die den Ordner teilt. Deine Bücher, Cover und Einstellungen bleiben auf dem jeweiligen Gerät.\n\nMach danach dasselbe auf deinem anderen Gerät, mit demselben Ordner.</string>
+    <string name="catch_up_device_name">Name dieses Geräts</string>
+    <string name="catch_up_choose_folder">Ordner wählen</string>
+    <string name="catch_up_setup_files_hint">Der gewünschte Ordner lässt sich nicht wählen? Speichere stattdessen die Datei dieses Geräts darin und füge dann die Dateien der anderen Geräte einzeln hinzu.</string>
+    <string name="catch_up_setup_files">Stattdessen eine Datei speichern</string>
+    <string name="catch_up_failed">Jacket kann dort nicht mehr speichern. Tippe, um neu zu wählen.</string>
+    <string name="catch_up_others">Gefundene Geräte</string>
+    <string name="catch_up_others_none_folder">Noch keins. Schalte das auch auf deinem anderen Gerät ein, mit demselben Ordner.</string>
+    <string name="catch_up_others_none_files">Noch keins. Schalte das auch auf deinem anderen Gerät ein und tippe dann hier, um die Datei zu wählen, die es gespeichert hat.</string>
+    <string name="catch_up_others_add">%1$s. Tippe, um die Datei eines weiteren Geräts hinzuzufügen.</string>
+    <string name="catch_up_hint">Jacket fragt, bevor es dich zu der Seite bringt, die ein anderes Gerät erreicht hat: Deine Leseposition ändert sich nie von selbst. Lesezeichen, Markierungen, Notizen und Sammlungen sind auf allen Geräten gleich, und was du auf einem löschst, wird auch auf den anderen gelöscht.</string>
+    <string name="catch_up_offer_page">Auf %1$s bist du auf Seite %2$d.</string>
+    <string name="catch_up_offer_page_chapter">Auf %1$s bist du auf Seite %2$d, in %3$s.</string>
+    <string name="catch_up_offer_percent">Auf %1$s bist du bei %2$d&#160;%%.</string>
+    <string name="catch_up_offer_percent_chapter">Auf %1$s bist du bei %2$d&#160;%%, in %3$s.</string>
+    <string name="catch_up_offer_book">Auf %1$s bist du in %2$s schon weiter.</string>
+    <string name="catch_up_go">Dorthin</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">Perangkat Anda yang lain</string>
+    <string name="catch_up_title">Lanjutkan antarperangkat</string>
+    <string name="catch_up_description">Baca di dua perangkat, dan lanjutkan di satu perangkat dari tempat Anda berhenti di perangkat lain.</string>
+    <string name="catch_up_setup_body">Pilih folder yang dipakai bersama oleh semua perangkat Anda: folder yang dijaga tetap sama di tiap perangkat oleh aplikasi seperti Google Drive, Dropbox, atau Syncthing, atau flashdisk USB yang Anda bawa di antara perangkat.\n\nJacket menyimpan file kecil di sana berisi posisi baca, bookmark, sorotan, catatan, dan koleksi Anda, serta membaca file yang disimpan perangkat Anda yang lain di sana. Jacket sendiri tidak pernah online: itu dilakukan oleh aplikasi yang membagikan folder tersebut. Buku, sampul, dan setelan Anda tetap di tiap perangkat.\n\nLalu lakukan hal yang sama di perangkat Anda yang lain, dengan folder yang sama.</string>
+    <string name="catch_up_device_name">Nama perangkat ini</string>
+    <string name="catch_up_choose_folder">Pilih folder</string>
+    <string name="catch_up_setup_files_hint">Tidak bisa memilih folder yang Anda inginkan? Simpan saja file perangkat ini di dalamnya, lalu tambahkan file perangkat lain satu per satu.</string>
+    <string name="catch_up_setup_files">Simpan file saja</string>
+    <string name="catch_up_failed">Jacket tidak bisa lagi menyimpan di sana. Ketuk untuk memilih lagi.</string>
+    <string name="catch_up_others">Perangkat yang ditemukan</string>
+    <string name="catch_up_others_none_folder">Belum ada. Aktifkan ini juga di perangkat Anda yang lain, dengan folder yang sama.</string>
+    <string name="catch_up_others_none_files">Belum ada. Aktifkan ini juga di perangkat Anda yang lain, lalu ketuk di sini untuk memilih file yang disimpannya.</string>
+    <string name="catch_up_others_add">%1$s. Ketuk untuk menambahkan file perangkat lain.</string>
+    <string name="catch_up_hint">Jacket bertanya dulu sebelum membawa Anda ke halaman yang dicapai perangkat lain: posisi Anda tidak pernah berubah sendiri. Bookmark, sorotan, catatan, dan koleksi dijaga tetap sama di semua perangkat, dan yang Anda hapus di satu perangkat ikut terhapus di perangkat lain.</string>
+    <string name="catch_up_offer_page">Di %1$s Anda berada di halaman %2$d.</string>
+    <string name="catch_up_offer_page_chapter">Di %1$s Anda berada di halaman %2$d, di %3$s.</string>
+    <string name="catch_up_offer_percent">Di %1$s Anda sudah membaca %2$d%%.</string>
+    <string name="catch_up_offer_percent_chapter">Di %1$s Anda sudah membaca %2$d%%, di %3$s.</string>
+    <string name="catch_up_offer_book">Di %1$s Anda sudah lebih jauh membaca %2$s.</string>
+    <string name="catch_up_go">Buka di sana</string>
+</resources>

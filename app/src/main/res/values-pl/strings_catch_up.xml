@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">Twoje inne urządzenia</string>
+    <string name="catch_up_title">Kontynuuj między urządzeniami</string>
+    <string name="catch_up_description">Czytaj na dwóch urządzeniach i zaczynaj na jednym tam, gdzie kończysz na drugim.</string>
+    <string name="catch_up_setup_body">Wybierz folder wspólny dla wszystkich Twoich urządzeń: taki, który aplikacja typu Dysk Google, Dropbox lub Syncthing utrzymuje jednakowy na każdym z nich, albo pendrive, który przenosisz między nimi.\n\nJacket trzyma tam mały plik z Twoimi pozycjami, zakładkami, zaznaczeniami, notatkami i kolekcjami oraz czyta pliki, które trzymają tam Twoje inne urządzenia. Sam Jacket nigdy nie łączy się z internetem: robi to aplikacja, która udostępnia folder. Książki, okładki i ustawienia zostają na każdym urządzeniu.\n\nPotem zrób to samo na drugim urządzeniu, wybierając ten sam folder.</string>
+    <string name="catch_up_device_name">Nazwa tego urządzenia</string>
+    <string name="catch_up_choose_folder">Wybierz folder</string>
+    <string name="catch_up_setup_files_hint">Nie możesz wybrać folderu, którego chcesz? Zapisz w nim plik tego urządzenia, a potem dodaj po kolei pliki pozostałych urządzeń.</string>
+    <string name="catch_up_setup_files">Zamiast tego zapisz plik</string>
+    <string name="catch_up_failed">Jacket nie może już tam zapisywać. Kliknij, aby wybrać ponownie.</string>
+    <string name="catch_up_others">Znalezione urządzenia</string>
+    <string name="catch_up_others_none_folder">Na razie żadnego. Włącz to też na drugim urządzeniu, wybierając ten sam folder.</string>
+    <string name="catch_up_others_none_files">Na razie żadnego. Włącz to też na drugim urządzeniu, a potem kliknij tutaj, aby wybrać plik, który zapisało.</string>
+    <string name="catch_up_others_add">%1$s. Kliknij, aby dodać plik kolejnego urządzenia.</string>
+    <string name="catch_up_hint">Jacket pyta, zanim przeniesie Cię na stronę, do której doszło inne urządzenie: Twoja pozycja nigdy nie zmienia się sama. Zakładki, zaznaczenia, notatki i kolekcje są takie same na wszystkich urządzeniach, a to, co usuniesz na jednym, znika też z pozostałych.</string>
+    <string name="catch_up_offer_page">Na urządzeniu %1$s jesteś na stronie %2$d.</string>
+    <string name="catch_up_offer_page_chapter">Na urządzeniu %1$s jesteś na stronie %2$d, w: %3$s.</string>
+    <string name="catch_up_offer_percent">Na urządzeniu %1$s masz przeczytane %2$d%%.</string>
+    <string name="catch_up_offer_percent_chapter">Na urządzeniu %1$s masz przeczytane %2$d%%, w: %3$s.</string>
+    <string name="catch_up_offer_book">Na urządzeniu %1$s jesteś dalej w książce %2$s.</string>
+    <string name="catch_up_go">Przejdź tam</string>
+</resources>

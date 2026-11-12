@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">आपके दूसरे डिवाइस</string>
+    <string name="catch_up_title">डिवाइस के बीच वहीं से आगे पढ़ें</string>
+    <string name="catch_up_description">दो डिवाइस पर पढ़ें, और एक पर वहीं से शुरू करें जहाँ दूसरे पर छोड़ा था।</string>
+    <string name="catch_up_setup_body">ऐसा फ़ोल्डर चुनें जो आपके सभी डिवाइस पर साझा हो: जिसे Google Drive, Dropbox या Syncthing जैसा कोई ऐप हर डिवाइस पर एक जैसा रखता हो, या कोई USB ड्राइव जिसे आप एक से दूसरे डिवाइस में लगाते हों।\n\nJacket वहाँ एक छोटी फ़ाइल रखता है जिसमें आपकी पढ़ने की जगहें, बुकमार्क, हाइलाइट, नोट और संग्रह होते हैं, और वह फ़ाइलें पढ़ता है जो आपके दूसरे डिवाइस वहाँ रखते हैं। Jacket खुद कभी ऑनलाइन नहीं जाता: यह काम वह ऐप करता है जो फ़ोल्डर साझा करता है। आपकी किताबें, कवर और सेटिंग हर डिवाइस पर ही रहती हैं।\n\nफिर अपने दूसरे डिवाइस पर भी यही करें, उसी फ़ोल्डर के साथ।</string>
+    <string name="catch_up_device_name">इस डिवाइस का नाम</string>
+    <string name="catch_up_choose_folder">फ़ोल्डर चुनें</string>
+    <string name="catch_up_setup_files_hint">मनचाहा फ़ोल्डर नहीं चुन पा रहे? उसकी जगह इस डिवाइस की फ़ाइल उसमें सेव करें, फिर दूसरे डिवाइस की फ़ाइलें एक-एक करके जोड़ें।</string>
+    <string name="catch_up_setup_files">इसके बजाय फ़ाइल सेव करें</string>
+    <string name="catch_up_failed">Jacket अब वहाँ सेव नहीं कर पा रहा। फिर से चुनने के लिए टैप करें।</string>
+    <string name="catch_up_others">मिले हुए डिवाइस</string>
+    <string name="catch_up_others_none_folder">अभी कोई नहीं। इसे अपने दूसरे डिवाइस पर भी चालू करें, उसी फ़ोल्डर के साथ।</string>
+    <string name="catch_up_others_none_files">अभी कोई नहीं। इसे अपने दूसरे डिवाइस पर भी चालू करें, फिर उसकी सेव की हुई फ़ाइल चुनने के लिए यहाँ टैप करें।</string>
+    <string name="catch_up_others_add">%1$s। किसी और डिवाइस की फ़ाइल जोड़ने के लिए टैप करें।</string>
+    <string name="catch_up_hint">किसी दूसरे डिवाइस पर पहुँचे पेज पर ले जाने से पहले Jacket पूछता है: आपकी जगह कभी अपने आप नहीं बदलती। बुकमार्क, हाइलाइट, नोट और संग्रह हर डिवाइस पर एक जैसे रखे जाते हैं, और जो आप एक पर मिटाते हैं वह दूसरों पर भी मिट जाता है।</string>
+    <string name="catch_up_offer_page">%1$s पर आप पेज %2$d पर हैं।</string>
+    <string name="catch_up_offer_page_chapter">%1$s पर आप पेज %2$d पर हैं, %3$s में।</string>
+    <string name="catch_up_offer_percent">%1$s पर आप %2$d%% पढ़ चुके हैं।</string>
+    <string name="catch_up_offer_percent_chapter">%1$s पर आप %2$d%% पढ़ चुके हैं, %3$s में।</string>
+    <string name="catch_up_offer_book">%1$s पर आप %2$s में और आगे हैं।</string>
+    <string name="catch_up_go">वहाँ जाएँ</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">أجهزتك الأخرى</string>
+    <string name="catch_up_title">المتابعة بين الأجهزة</string>
+    <string name="catch_up_description">اقرأ على جهازين، وتابع على أحدهما من حيث توقفت على الآخر.</string>
+    <string name="catch_up_setup_body">اختر مجلدًا تتشاركه كل أجهزتك: مجلدًا يُبقيه تطبيق مثل Google Drive أو Dropbox أو Syncthing متطابقًا على كل جهاز، أو ذاكرة USB تنقلها بين الأجهزة.\n\nيحتفظ Jacket هناك بملف صغير فيه مواضع قراءتك وإشاراتك المرجعية وتمييزاتك وملاحظاتك ومجموعاتك، ويقرأ الملفات التي تحتفظ بها أجهزتك الأخرى هناك. لا يتصل Jacket نفسه بالإنترنت أبدًا: التطبيق الذي يشارك المجلد هو من يفعل ذلك. تبقى كتبك وأغلفتها وإعداداتك على كل جهاز.\n\nثم افعل الشيء نفسه على جهازك الآخر، مع المجلد نفسه.</string>
+    <string name="catch_up_device_name">اسم هذا الجهاز</string>
+    <string name="catch_up_choose_folder">اختيار مجلد</string>
+    <string name="catch_up_setup_files_hint">تعذّر اختيار المجلد الذي تريده؟ احفظ ملف هذا الجهاز فيه بدلًا من ذلك، ثم أضف ملفات الأجهزة الأخرى واحدًا تلو الآخر.</string>
+    <string name="catch_up_setup_files">حفظ ملف بدلًا من ذلك</string>
+    <string name="catch_up_failed">لم يعد Jacket قادرًا على الحفظ هناك. انقر للاختيار مجددًا.</string>
+    <string name="catch_up_others">الأجهزة التي عُثر عليها</string>
+    <string name="catch_up_others_none_folder">لا يوجد أي جهاز بعد. فعّل هذا على جهازك الآخر أيضًا، مع المجلد نفسه.</string>
+    <string name="catch_up_others_none_files">لا يوجد أي جهاز بعد. فعّل هذا على جهازك الآخر أيضًا، ثم انقر هنا لاختيار الملف الذي حفظه.</string>
+    <string name="catch_up_others_add">%1$s. انقر لإضافة ملف جهاز آخر.</string>
+    <string name="catch_up_hint">يسألك Jacket قبل أن ينقلك إلى الصفحة التي بلغها جهاز آخر: موضعك لا يتغير أبدًا من تلقاء نفسه. تبقى الإشارات المرجعية والتمييزات والملاحظات والمجموعات متطابقة على كل الأجهزة، وما تحذفه على أحدها يُحذف على البقية.</string>
+    <string name="catch_up_offer_page">على %1$s وصلتَ إلى الصفحة %2$d.</string>
+    <string name="catch_up_offer_page_chapter">على %1$s وصلتَ إلى الصفحة %2$d، في %3$s.</string>
+    <string name="catch_up_offer_percent">على %1$s قرأتَ %2$d%%.</string>
+    <string name="catch_up_offer_percent_chapter">على %1$s قرأتَ %2$d%%، في %3$s.</string>
+    <string name="catch_up_offer_book">على %1$s تقدّمتَ أكثر في %2$s.</string>
+    <string name="catch_up_go">الانتقال إلى هناك</string>
+</resources>
