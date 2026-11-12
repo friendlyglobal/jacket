@@ -47,6 +47,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import io.github.friendlyglobal.jacket.ui.fitOnOneLine
+import io.github.friendlyglobal.jacket.ui.readableVeil
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -135,8 +138,10 @@ internal fun BoxScope.ClosedCover(
                         color = MaterialTheme.colorScheme.surfaceContainer,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
+                        // (Less of a margin on the narrowest screens: the player's bar needs the width.)
+                        val side = if (voiceFitsOnBar()) 24.dp else 12.dp
                         Column(
-                            Modifier.padding(start = 24.dp, end = 24.dp, top = 28.dp, bottom = 32.dp),
+                            Modifier.padding(start = side, end = side, top = 28.dp, bottom = 32.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             // The player and the plain choices change places as listening starts and stops.
@@ -185,7 +190,7 @@ internal fun BoxScope.ClosedCover(
                                         ) {
                                             Icon(JacketIcons.Book, null, Modifier.size(ButtonDefaults.IconSize))
                                             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                                            Text(stringResource(R.string.library_menu_open), maxLines = 1)
+                                            Text(stringResource(R.string.library_menu_open), maxLines = 1, autoSize = fitOnOneLine(MaterialTheme.typography.labelLarge))
                                         }
                                         FilledTonalButton(
                                             onClick = {
@@ -197,7 +202,7 @@ internal fun BoxScope.ClosedCover(
                                         ) {
                                             Icon(JacketIcons.Back, null, Modifier.size(ButtonDefaults.IconSize))
                                             Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                                            Text(stringResource(R.string.library_title), maxLines = 1)
+                                            Text(stringResource(R.string.library_title), maxLines = 1, autoSize = fitOnOneLine(MaterialTheme.typography.labelLarge))
                                         }
                                     }
                                 }
@@ -320,7 +325,10 @@ internal fun SpokenPhrase(listen: ListenState, settings: Settings) {
     ) { phrase ->
         // A sentence on its way out is wholly spoken.
         val spoken = if (phrase == listen.phrase) listen.spoken.coerceIn(0, phrase.length) else phrase.length
-        val unread = SpanStyle(color = LocalContentColor.current.copy(alpha = 0.45f))
+        // Paler until spoken, and still readable against the panel (see readableVeil).
+        val ink = LocalContentColor.current
+        val veil = readableVeil(ink.toArgb(), MaterialTheme.colorScheme.surfaceContainer.toArgb(), most = 0.55f)
+        val unread = SpanStyle(color = ink.copy(alpha = 1f - veil))
         Text(
             buildAnnotatedString {
                 append(phrase)

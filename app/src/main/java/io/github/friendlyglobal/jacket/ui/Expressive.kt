@@ -395,12 +395,19 @@ data class PageColors(val background: Color, val text: Color, val secondary: Col
 @Composable
 fun rememberPageColors(choice: PageColor): PageColors {
     val scheme = MaterialTheme.colorScheme
-    return when (choice) {
-        PageColor.BOOK -> PageColors(scheme.surface, scheme.onSurface, scheme.onSurfaceVariant, scheme.primary)
-        PageColor.PAPER -> PageColors(Color(0xFFF4ECDB), Color(0xFF3A2F23), Color(0xFF7B6B57), Color(0xFF8C5A2B))
-        PageColor.DARK -> PageColors(Color(0xFF1E1D1B), Color(0xFFDDD6CA), Color(0xFF9D968B), Color(0xFFE3B86C))
-        PageColor.BLACK -> PageColors(Color.Black, Color(0xFFCAC5BD), Color(0xFF86817A), Color(0xFFE3B86C))
-    }
+    return fixedPageColors(choice) ?: PageColors(scheme.surface, scheme.onSurface, scheme.onSurfaceVariant, scheme.primary)
+}
+
+/**
+ * The pages that are the same in every book: paper, dark and black. (Null for "Book", which takes
+ * its colours from the book's cover.) Every ink on them is readable on its page: at least 4.5 to
+ * 1, the small quiet line under the page included.
+ */
+internal fun fixedPageColors(choice: PageColor): PageColors? = when (choice) {
+    PageColor.BOOK -> null
+    PageColor.PAPER -> PageColors(Color(0xFFF4ECDB), Color(0xFF3A2F23), Color(0xFF766651), Color(0xFF8C5A2B))
+    PageColor.DARK -> PageColors(Color(0xFF1E1D1B), Color(0xFFDDD6CA), Color(0xFF9D968B), Color(0xFFE3B86C))
+    PageColor.BLACK -> PageColors(Color.Black, Color(0xFFCAC5BD), Color(0xFF86817A), Color(0xFFE3B86C))
 }
 
 /** Swatch shown for each page color in pickers. */

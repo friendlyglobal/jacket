@@ -71,6 +71,7 @@ import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.readium
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.PageColors
+import io.github.friendlyglobal.jacket.ui.readableVeil
 import io.github.friendlyglobal.jacket.importer.Epub
 import io.github.friendlyglobal.jacket.voice.NaturalTtsEngineProvider
 import io.github.friendlyglobal.jacket.voice.NaturalTtsPreferences
@@ -843,6 +844,7 @@ private fun EpubPages(
         }
     }
     listen.colors = page.link.toArgb() to page.background.toArgb()
+    listen.veil = readableVeil(page.text.toArgb(), page.background.toArgb())
 
     // While the voice is speaking, the book's place is the sentence it is on (see saveSpoken).
     listen.onSpoken = { sentence ->
@@ -1558,6 +1560,8 @@ private class ReadAloud(
     private var mediaSession: androidx.media3.session.MediaSession? = null
     /** Highlight tint and page color, for the read-along decorations. */
     var colors: Pair<Int, Int> = 0 to 0
+    /** How strong the veil over the words still to come is: as strong as leaves them readable on this page. */
+    var veil = 0.6f
     private var speed = 1f
 
     /** The natural voice that reads this book, or null for the phone's own. */
@@ -2040,7 +2044,7 @@ private class ReadAloud(
             add(Decoration("sentence", sentence, Decoration.Style.Highlight(tint = tint)))
             if (unread > 0 && location.utterance.substring(spoken).isNotBlank()) {
                 val rest = sentence.copy(text = sentence.text.substring(spoken until location.utterance.length))
-                add(Decoration("unread", rest, UnreadVeil(paper.withAlpha(0.6f))))
+                add(Decoration("unread", rest, UnreadVeil(paper.withAlpha(veil))))
             }
         }
     }

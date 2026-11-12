@@ -70,6 +70,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.toArgb
+import io.github.friendlyglobal.jacket.ui.readableVeil
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
@@ -792,7 +794,8 @@ fun TextReader(
     val style = MaterialTheme.typography.bodyLarge.copy(
         fontFamily = family, fontSize = 18.sp * settings.textScale, lineHeight = 29.sp * settings.textScale, color = page.text,
     )
-    val unread = SpanStyle(color = page.text.copy(alpha = 0.4f))
+    // The words still to come are paler, and still readable (see readableVeil).
+    val unread = SpanStyle(color = page.text.copy(alpha = 1f - readableVeil(page.text.toArgb(), page.background.toArgb())))
     val currentWord = SpanStyle(background = page.link.copy(alpha = 0.24f))
     val step = { listState.layoutInfo.viewportSize.height * 0.85f }
     val besideWords = 24.dp
