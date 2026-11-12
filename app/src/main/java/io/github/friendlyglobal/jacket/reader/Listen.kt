@@ -123,6 +123,7 @@ import io.github.friendlyglobal.jacket.ui.fitOnOneLine
 import io.github.friendlyglobal.jacket.ui.motionRemoved
 import io.github.friendlyglobal.jacket.ui.rememberTurn
 import io.github.friendlyglobal.jacket.ui.shrinkToFit
+import io.github.friendlyglobal.jacket.ui.spoken
 import io.github.friendlyglobal.jacket.ui.voices.VoiceChip
 import kotlinx.coroutines.delay
 
@@ -1000,7 +1001,9 @@ internal fun MiniPlayer(
                     BackToVoicePill(controller, colors, haptics)
                 }
             } else {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                // One thing to a screen reader: who is reading and what is left ("Sofia, 4 pages left in chapter").
+                val said = spoken(stringResource(R.string.list_separator), voice.label, left)
+                Row(Modifier.clearAndSetSemantics { contentDescription = said }, verticalAlignment = Alignment.CenterVertically) {
                     val style = MaterialTheme.typography.labelMedium
                     // The same voice icon for every voice; in red when the phone can't keep up with this one.
                     Icon(
