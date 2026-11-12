@@ -88,6 +88,9 @@
     <string name="library_finished_badge">Przeczytana</string>
     <string name="library_new_badge">Nowa</string>
     <string name="library_on_cover_screen">Na ekranie zewnętrznym</string>
+    <string name="library_being_read_aloud">Czytana na głos</string>
+    <string name="library_read_aloud_paused">Czytanie na głos wstrzymane</string>
+    <string name="library_resume">Wznów</string>
     <string name="library_menu_open">Otwórz</string>
     <string name="library_menu_show_on_cover">Pokaż na ekranie zewnętrznym</string>
     <string name="library_menu_mark_finished">Oznacz jako przeczytaną</string>

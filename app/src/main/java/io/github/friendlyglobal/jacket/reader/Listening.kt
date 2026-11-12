@@ -181,6 +181,9 @@ class Listening(private val app: Application) {
         )
     }
 
+    /** The book being read aloud and whether the voice is reading or paused, for the library to show (see [Aloud]); null when nothing is. */
+    fun aloud(): Aloud? = aloud(face())
+
     /** The cover to show for [bookId], once it has been read from its file. */
     internal fun artOf(bookId: String): ByteArray? = art?.takeIf { it.first == bookId }?.second
 

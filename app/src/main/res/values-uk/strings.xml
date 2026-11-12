@@ -88,6 +88,9 @@
     <string name="library_finished_badge">Прочитано</string>
     <string name="library_new_badge">Нова</string>
     <string name="library_on_cover_screen">На зовнішньому екрані</string>
+    <string name="library_being_read_aloud">Читається вголос</string>
+    <string name="library_read_aloud_paused">Читання вголос на паузі</string>
+    <string name="library_resume">Продовжити</string>
     <string name="library_menu_open">Відкрити</string>
     <string name="library_menu_show_on_cover">Показати на зовнішньому екрані</string>
     <string name="library_menu_mark_finished">Позначити як прочитану</string>

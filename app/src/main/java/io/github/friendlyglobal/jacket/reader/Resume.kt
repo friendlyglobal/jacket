@@ -93,6 +93,18 @@ internal data class PlayerFace(
 )
 
 /**
+ * What the library shows of read-aloud while it is in view: the book the voice is on, and whether
+ * it is reading (or about to) rather than paused. With a book on a shelf being read aloud (started
+ * from a headphone button, the notification, the widget or the car, no reader open), its cover
+ * says so, and the "Continue reading" card's Listen button pauses it and takes it up again.
+ */
+data class Aloud(val bookId: String, val playing: Boolean)
+
+/** The book being read aloud, as the player shows it ([face]); null when nothing is: no voice, or only a book asked for and not started. */
+internal fun aloud(face: PlayerFace): Aloud? =
+    face.bookId?.takeIf { face.playbackState != Player.STATE_IDLE }?.let { Aloud(it, face.playWhenReady) }
+
+/**
  * The player's face, from what read-aloud is doing.
  *
  * [starting] is the book being opened to be read with no reader (Play was pressed away from the

@@ -253,6 +253,7 @@ private fun JacketRoot(
     onSample: () -> Unit,
 ) {
     val library = LocalContext.current.library
+    val readAloud = LocalContext.current.listening
     val resources = LocalResources.current
     val haptics = rememberHaptics()
     val state by library.state.collectAsStateWithLifecycle()
@@ -499,6 +500,10 @@ private fun JacketRoot(
                                                 listenRequests.value = book.id
                                                 open(book.id, CoverSpot.HERO)
                                             },
+                                            // A book being read aloud with no reader open says so
+                                            // on its cover, and is paused and taken up again from here.
+                                            aloud = readAloud.aloud(),
+                                            onAloud = { play -> if (play) readAloud.play() else readAloud.pause() },
                                             organizer = library,
                                             onFreeBooks = { destination = FREE_BOOKS },
                                             onReading = { openReading(HOME) },

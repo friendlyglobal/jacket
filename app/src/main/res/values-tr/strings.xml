@@ -83,6 +83,9 @@
     <string name="library_finished_badge">Bitti</string>
     <string name="library_new_badge">Yeni</string>
     <string name="library_on_cover_screen">Kapak ekranınızda</string>
+    <string name="library_being_read_aloud">Sesli okunuyor</string>
+    <string name="library_read_aloud_paused">Sesli okuma duraklatıldı</string>
+    <string name="library_resume">Devam et</string>
     <string name="library_menu_open">Aç</string>
     <string name="library_menu_show_on_cover">Kapak ekranında göster</string>
     <string name="library_menu_mark_finished">Bitti olarak işaretle</string>

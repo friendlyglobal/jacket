@@ -95,6 +95,9 @@
     <string name="library_finished_badge">مكتمل</string>
     <string name="library_new_badge">جديد</string>
     <string name="library_on_cover_screen">على شاشة الغطاء</string>
+    <string name="library_being_read_aloud">يُقرأ بصوت عالٍ الآن</string>
+    <string name="library_read_aloud_paused">القراءة بصوت عالٍ متوقفة مؤقتًا</string>
+    <string name="library_resume">متابعة</string>
     <string name="library_menu_open">فتح</string>
     <string name="library_menu_show_on_cover">عرض على شاشة الغطاء</string>
     <string name="library_menu_mark_finished">تحديد كمكتمل</string>

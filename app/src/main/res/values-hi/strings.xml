@@ -83,6 +83,9 @@
     <string name="library_finished_badge">पूरी हुई</string>
     <string name="library_new_badge">नई</string>
     <string name="library_on_cover_screen">आपकी कवर स्क्रीन पर</string>
+    <string name="library_being_read_aloud">पढ़कर सुनाई जा रही है</string>
+    <string name="library_read_aloud_paused">पढ़कर सुनाना रुका हुआ है</string>
+    <string name="library_resume">फिर शुरू करें</string>
     <string name="library_menu_open">खोलें</string>
     <string name="library_menu_show_on_cover">कवर स्क्रीन पर दिखाएँ</string>
     <string name="library_menu_mark_finished">पूरी हुई मार्क करें</string>

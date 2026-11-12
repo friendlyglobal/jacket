@@ -82,6 +82,9 @@
     <string name="library_finished_badge">Uitgelezen</string>
     <string name="library_new_badge">Nieuw</string>
     <string name="library_on_cover_screen">Op je coverscherm</string>
+    <string name="library_being_read_aloud">Wordt voorgelezen</string>
+    <string name="library_read_aloud_paused">Voorlezen gepauzeerd</string>
+    <string name="library_resume">Hervatten</string>
     <string name="library_menu_open">Openen</string>
     <string name="library_menu_show_on_cover">Tonen op coverscherm</string>
     <string name="library_menu_mark_finished">Markeren als uitgelezen</string>

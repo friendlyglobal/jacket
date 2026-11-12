@@ -80,6 +80,9 @@
     <string name="library_finished_badge">已讀完</string>
     <string name="library_new_badge">新書</string>
     <string name="library_on_cover_screen">正在外螢幕上顯示</string>
+    <string name="library_being_read_aloud">正在朗讀</string>
+    <string name="library_read_aloud_paused">朗讀已暫停</string>
+    <string name="library_resume">繼續</string>
     <string name="library_menu_open">開啟</string>
     <string name="library_menu_show_on_cover">在外螢幕顯示</string>
     <string name="library_menu_mark_finished">標示為已讀完</string>

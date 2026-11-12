@@ -80,6 +80,9 @@
     <string name="library_finished_badge">완독</string>
     <string name="library_new_badge">새 책</string>
     <string name="library_on_cover_screen">커버 화면에 표시됨</string>
+    <string name="library_being_read_aloud">소리 내어 읽는 중</string>
+    <string name="library_read_aloud_paused">소리 내어 읽기 일시중지됨</string>
+    <string name="library_resume">이어 듣기</string>
     <string name="library_menu_open">열기</string>
     <string name="library_menu_show_on_cover">커버 화면에 표시</string>
     <string name="library_menu_mark_finished">완독으로 표시</string>

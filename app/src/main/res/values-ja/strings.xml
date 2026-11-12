@@ -80,6 +80,9 @@
     <string name="library_finished_badge">読了</string>
     <string name="library_new_badge">NEW</string>
     <string name="library_on_cover_screen">カバー画面に表示されています</string>
+    <string name="library_being_read_aloud">読み上げ中</string>
+    <string name="library_read_aloud_paused">読み上げを一時停止中</string>
+    <string name="library_resume">再開</string>
     <string name="library_menu_open">開く</string>
     <string name="library_menu_show_on_cover">カバー画面に表示</string>
     <string name="library_menu_mark_finished">読了にする</string>

@@ -82,6 +82,9 @@
     <string name="library_finished_badge">Ausgelesen</string>
     <string name="library_new_badge">Neu</string>
     <string name="library_on_cover_screen">Auf dem Cover-Display</string>
+    <string name="library_being_read_aloud">Wird vorgelesen</string>
+    <string name="library_read_aloud_paused">Vorlesen pausiert</string>
+    <string name="library_resume">Fortsetzen</string>
     <string name="library_menu_open">Öffnen</string>
     <string name="library_menu_show_on_cover">Auf Cover-Display zeigen</string>
     <string name="library_menu_mark_finished">Als ausgelesen markieren</string>

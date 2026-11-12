@@ -106,6 +106,11 @@
     <string name="library_finished_badge">Finished</string>
     <string name="library_new_badge">New</string>
     <string name="library_on_cover_screen">On your cover screen</string>
+    <!-- A book in the library that is being read aloud (started from a headphone button, the notification or the widget, with the book shut). Said by a screen reader after the book's title: "Moby Dick, being read aloud". -->
+    <string name="library_being_read_aloud">Being read aloud</string>
+    <string name="library_read_aloud_paused">Read aloud paused</string>
+    <!-- The "Continue reading" card's Listen button while read-aloud is paused in that book: has the voice read on. (While it reads, the button is "Pause".) -->
+    <string name="library_resume">Resume</string>
     <string name="library_menu_open">Open</string>
     <string name="library_menu_show_on_cover">Show on cover screen</string>
     <string name="library_menu_mark_finished">Mark as finished</string>

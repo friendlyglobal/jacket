@@ -1,5 +1,8 @@
 package io.github.friendlyglobal.jacket.ui.home
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -43,6 +46,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +55,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -68,6 +75,9 @@ import io.github.friendlyglobal.jacket.ui.CoverImage
 import io.github.friendlyglobal.jacket.ui.CoverSpot
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.JacketIcons
+import io.github.friendlyglobal.jacket.ui.decorative
+import io.github.friendlyglobal.jacket.ui.motionRemoved
+import kotlinx.coroutines.delay
 import io.github.friendlyglobal.jacket.ui.pressScale
 import io.github.friendlyglobal.jacket.ui.sharedCover
 import androidx.compose.foundation.selection.toggleable
@@ -170,6 +180,65 @@ internal fun PinBadge(modifier: Modifier = Modifier, size: Int = 28) {
         contentAlignment = Alignment.Center,
     ) {
         Icon(LibraryIcons.Pin, stringResource(R.string.library_pinned), Modifier.size((size * 0.55f).dp), tint = MaterialTheme.colorScheme.onSecondary)
+    }
+}
+
+/**
+ * The mark of a book being read aloud: three small bars, as on a sound meter. While the voice
+ * reads they rise and fall slowly, one after another, on the theme's own fades; paused, they rest
+ * low and level. With animations removed they stand still, at different heights while it reads.
+ * It is only a picture: what it means is said in words wherever it is shown.
+ */
+@Composable
+internal fun ListeningMark(playing: Boolean, color: Color, modifier: Modifier = Modifier) {
+    val motion = MaterialTheme.motionScheme
+    val swell = motion.slowEffectsSpec<Float>()
+    // How much the bars stand up: all the way while the voice reads, not at all while it is paused.
+    val standing by animateFloatAsState(if (playing) 1f else 0f, motion.defaultEffectsSpec(), label = "listening")
+    val beat = remember { Animatable(0.5f) }
+    LaunchedEffect(playing) {
+        if (!playing || motionRemoved()) return@LaunchedEffect
+        while (true) {
+            beat.animateTo(1f, swell)
+            delay(LISTENING_REST_MS)
+            beat.animateTo(0f, swell)
+            delay(LISTENING_REST_MS)
+        }
+    }
+    Canvas(modifier.decorative()) {
+        val bar = size.width / 5f
+        // Each bar's height at either end of the beat; the middle one moves against the other two.
+        val ends = listOf(0.45f to 0.85f, 1f to 0.5f, 0.6f to 0.95f)
+        ends.forEachIndexed { i, (low, high) ->
+            val moving = low + (high - low) * beat.value
+            val height = size.height * (LISTENING_AT_REST + (moving - LISTENING_AT_REST) * standing)
+            drawRoundRect(
+                color = color,
+                topLeft = Offset(i * 2f * bar, size.height - height),
+                size = Size(bar, height),
+                cornerRadius = CornerRadius(bar / 2f),
+            )
+        }
+    }
+}
+
+/** How tall the mark's bars stand while the voice is paused, of the mark's height. */
+private const val LISTENING_AT_REST = 0.3f
+
+/** How long the mark's bars rest between swells: slow enough to sit quietly beside a cover. */
+private const val LISTENING_REST_MS = 260L
+
+/**
+ * [ListeningMark] as a badge on a cover, beside the pin and the cover-screen badge: it comes and
+ * goes on the theme's springs, like them.
+ */
+@Composable
+internal fun ListeningBadge(playing: Boolean, modifier: Modifier = Modifier, size: Int = 28) {
+    Box(
+        modifier.size(size.dp).clip(CircleShape).background(MaterialTheme.colorScheme.tertiaryContainer),
+        contentAlignment = Alignment.Center,
+    ) {
+        ListeningMark(playing, MaterialTheme.colorScheme.onTertiaryContainer, Modifier.size((size * 0.46f).dp))
     }
 }
 

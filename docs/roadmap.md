@@ -183,10 +183,12 @@ Jacket. Opening the book finds the same voice at the sentence it is on, reading 
   Previous on a headset, the notification and the lock screen move a sentence (they did nothing).
 - Closing a book still stops its voice, and so does opening another book or swiping Jacket away
   from Recents.
-- Still open: with no reader open the voice's place is counted from the text alone, so opening
-  the book can correct the percent by up to a page; the library itself doesn't show that a book
-  is being read aloud (the notification and the widget do); and it has only been on the emulator,
-  with `cmd media_session` standing in for a headset.
+- The percent never goes down by itself: a place counted again (the book opened after listening
+  with it shut, its pages laid out anew by a fold) keeps the number it had, and only going back
+  through the book lowers it. The library marks the book being read aloud, and the "Continue
+  reading" pane's Listen button pauses it and takes it up again.
+- Still open: it has only been on the emulator, with `cmd media_session` standing in for a
+  headset.
 
 ## Next
 

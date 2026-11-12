@@ -85,6 +85,9 @@
     <string name="library_finished_badge">Terminato</string>
     <string name="library_new_badge">Nuovo</string>
     <string name="library_on_cover_screen">Sul tuo schermo esterno</string>
+    <string name="library_being_read_aloud">Lettura ad alta voce in corso</string>
+    <string name="library_read_aloud_paused">Lettura ad alta voce in pausa</string>
+    <string name="library_resume">Riprendi</string>
     <string name="library_menu_open">Apri</string>
     <string name="library_menu_show_on_cover">Mostra sullo schermo esterno</string>
     <string name="library_menu_mark_finished">Segna come terminato</string>

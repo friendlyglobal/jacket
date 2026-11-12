@@ -80,6 +80,9 @@
     <string name="library_finished_badge">Selesai</string>
     <string name="library_new_badge">Baru</string>
     <string name="library_on_cover_screen">Di layar depan Anda</string>
+    <string name="library_being_read_aloud">Sedang dibacakan</string>
+    <string name="library_read_aloud_paused">Pembacaan dijeda</string>
+    <string name="library_resume">Lanjutkan</string>
     <string name="library_menu_open">Buka</string>
     <string name="library_menu_show_on_cover">Tampilkan di layar depan</string>
     <string name="library_menu_mark_finished">Tandai selesai</string>

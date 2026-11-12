@@ -182,4 +182,37 @@ class ResumeTest {
         assertNull(carriedLead(sameFile = true, counted = 0.52, own = 0.60, within = 0.40, told = 0.90))
         assertEquals(0.90, spokenWithin(told = 0.90, page = null, lead = null, pages = null), 1e-9)
     }
+
+    // ---- What the library shows of it --------------------------------------------------------------
+
+    @Test
+    fun `a book being read aloud with no reader open is marked in the library`() {
+        // Reading: the mark moves, and the "Continue reading" card's Listen button is Pause.
+        val reading = playerFace(starting = null, reading = "moby", playing = true, preparing = false, asked = null, wanted = null)
+        assertEquals(Aloud("moby", playing = true), aloud(reading))
+        // Paused: the mark rests, and the button takes it up again.
+        val paused = playerFace(starting = null, reading = "moby", playing = false, preparing = false, asked = null, wanted = null)
+        assertEquals(Aloud("moby", playing = false), aloud(paused))
+    }
+
+    @Test
+    fun `a book being opened for a Play is marked from the press, not from the first word`() {
+        // The file is still being opened, or a natural voice is making its first sentence.
+        val opening = playerFace(starting = "moby", reading = null, playing = false, preparing = false, asked = null, wanted = null)
+        assertEquals(Aloud("moby", playing = true), aloud(opening))
+        val gettingReady = playerFace(starting = null, reading = "moby", playing = true, preparing = true, asked = null, wanted = null)
+        assertEquals(Aloud("moby", playing = true), aloud(gettingReady))
+        // And a press shows at once: Pause on a voice that hasn't stopped speaking yet, Resume on one that hasn't started.
+        val pausing = playerFace(starting = null, reading = "moby", playing = true, preparing = false, asked = null, wanted = false)
+        assertEquals(Aloud("moby", playing = false), aloud(pausing))
+        val resuming = playerFace(starting = null, reading = "moby", playing = false, preparing = false, asked = null, wanted = true)
+        assertEquals(Aloud("moby", playing = true), aloud(resuming))
+    }
+
+    @Test
+    fun `nothing is marked when nothing is being read aloud`() {
+        assertNull(aloud(playerFace(starting = null, reading = null, playing = false, preparing = false, asked = null, wanted = null)))
+        // A book only asked for (chosen in the car, Play not pressed yet) isn't being read.
+        assertNull(aloud(playerFace(starting = null, reading = null, playing = false, preparing = false, asked = "moby", wanted = null)))
+    }
 }
