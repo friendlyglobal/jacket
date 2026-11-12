@@ -11,6 +11,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
@@ -77,6 +78,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -90,6 +92,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -128,6 +132,8 @@ import io.github.friendlyglobal.jacket.ui.shrinkToFit
 import io.github.friendlyglobal.jacket.ui.spoken
 import io.github.friendlyglobal.jacket.ui.voices.VoiceChip
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 /** When read-aloud stops by itself. */
 enum class SleepTimer(val minutes: Int, @StringRes val label: Int) {
@@ -303,7 +309,7 @@ internal class ListeningPace {
 }
 
 /** The player's parts follow one another in by this much. */
-private const val ARRIVAL_STAGGER_MS = 70L
+internal const val ARRIVAL_STAGGER_MS = 70L
 
 /** The toolbar that's up drops away this far ahead of the other hopping in. */
 private const val HOP_GAP_MS = 60L
@@ -366,9 +372,8 @@ internal fun PlayerLine(
     haptics: Haptics,
     visible: Boolean,
     line: Boolean = true,
+    /** The chapter steps, for a window too narrow for them on the bar; null where the screen has them in a control of its own (see ChapterControl). */
     chapters: ChapterSteps? = null,
-    /** Names the chapter between its two steps; off where the screen names it just above. */
-    chapterTitle: Boolean = true,
 ) {
     val playing = listen.playing
     val preparing = listen.preparing && playing
@@ -413,7 +418,7 @@ internal fun PlayerLine(
                     slideInVertically(motion.fastSpatialSpec()) { it / 2 } + expandVertically(motion.defaultSpatialSpec()),
                 exit = leave,
             ) {
-                ChapterPill(chapters, chapterTitle, haptics, Modifier.widthIn(max = 320.dp).padding(bottom = 10.dp))
+                ChapterPill(chapters, haptics, Modifier.widthIn(max = 320.dp).padding(bottom = 10.dp))
             }
         }
         AnimatedVisibility(
@@ -507,16 +512,54 @@ internal fun ReaderToolbar(
     val dropOut = slideOutVertically(motion.fastSpatialSpec()) { it } +
         scaleOut(motion.fastSpatialSpec(), targetScale = 0.6f, transformOrigin = BottomMiddle) +
         fadeOut(motion.defaultEffectsSpec())
-    Box(modifier, contentAlignment = Alignment.BottomCenter) {
-        AnimatedVisibility(readingBar, enter = hopIn, exit = dropOut, label = "reading-bar") {
+    BarStand(up = if (player) Bar.PLAYER else Bar.READING, modifier = modifier) {
+        AnimatedVisibility(readingBar, Modifier.layoutId(Bar.READING), enter = hopIn, exit = dropOut, label = "reading-bar") {
             ReadingToolbar(reading, haptics)
         }
         if (controller != null) {
-            AnimatedVisibility(playerBar, enter = hopIn, exit = dropOut, label = "player-bar") {
+            AnimatedVisibility(playerBar, Modifier.layoutId(Bar.PLAYER), enter = hopIn, exit = dropOut, label = "player-bar") {
                 PlayerToolbar(listen, controller, rate, onRate, haptics, hasChapters, voice, chapters = chapters)
             }
         }
     }
+}
+
+/** The two bars the reader's toolbar is. */
+private enum class Bar { READING, PLAYER }
+
+/**
+ * Where the two bars stand, one over the other on the same foot: as tall as the one that is [up].
+ * The two aren't always the same height (on a narrow screen the player's six buttons are drawn a
+ * little smaller to fit). Whatever rides above the toolbar settles onto the new bar on the spring
+ * it hops in on, instead of dropping the difference at the moment the old one has gone.
+ */
+@Composable
+private fun BarStand(up: Bar, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    val spring = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
+    val scope = rememberCoroutineScope()
+    val stand = remember { Stand() }
+    Layout(content, modifier) { measurables, constraints ->
+        val bars = measurables.map { it.layoutId to it.measure(constraints.copy(minWidth = 0, minHeight = 0)) }
+        // Until the bar on its way in is there to be measured, the one on its way out is the height to keep.
+        val standing = (bars.firstOrNull { it.first == up } ?: bars.firstOrNull())?.second?.height ?: 0
+        val height = if (bars.isEmpty()) {
+            0
+        } else {
+            val tall = stand.height ?: Animatable(standing.toFloat()).also { stand.height = it }
+            if (tall.targetValue != standing.toFloat()) scope.launch { tall.animateTo(standing.toFloat(), spring) }
+            tall.value.roundToInt().coerceAtLeast(0)
+        }
+        val width = (bars.maxOfOrNull { it.second.width } ?: 0).coerceIn(constraints.minWidth, constraints.maxWidth)
+        layout(width, height.coerceIn(constraints.minHeight, constraints.maxHeight)) {
+            // On the same foot, in the middle: a taller bar on its way out stands a little proud of the slot.
+            bars.forEach { (_, bar) -> bar.place((width - bar.width) / 2, height - bar.height) }
+        }
+    }
+}
+
+/** How tall the bars' stand is, on its way to the bar that is up; null until the first bar has been measured. */
+private class Stand {
+    var height: Animatable<Float, AnimationVector1D>? = null
 }
 
 /** The toolbar while you read: contents, read-aloud, the chapter steps, and the text settings. */
@@ -728,9 +771,13 @@ private val CHAPTERS_ON_BAR_FROM = 500.dp
 @Composable
 internal fun chaptersFitOnBar(): Boolean = controlsWidth() >= CHAPTERS_ON_BAR_FROM
 
-/** The steps to the previous and the next chapter, around the name of the one being read: above the player on a narrow window. */
+/**
+ * The steps to the previous and the next chapter, around the name of the one being read: above the
+ * player on a narrow window, where the player is laid out by itself (the desk, the cover). Over the
+ * page the same pill is one form of the chapter control (see ChapterControl), which draws it alike.
+ */
 @Composable
-private fun ChapterPill(chapters: ChapterSteps, named: Boolean, haptics: Haptics, modifier: Modifier = Modifier) {
+private fun ChapterPill(chapters: ChapterSteps, haptics: Haptics, modifier: Modifier = Modifier) {
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.secondaryContainer,
@@ -741,7 +788,7 @@ private fun ChapterPill(chapters: ChapterSteps, named: Boolean, haptics: Haptics
             IconButton(onClick = { haptics.tick(); chapters.onStep(-1) }, enabled = chapters.canStep(-1)) {
                 Icon(JacketIcons.ChapterBack, stringResource(chapters.previousLabel))
             }
-            if (named && chapters.title.isNotBlank()) {
+            if (chapters.title.isNotBlank()) {
                 Text(
                     chapters.title, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center, modifier = Modifier.weight(1f, fill = false).padding(horizontal = 4.dp),
