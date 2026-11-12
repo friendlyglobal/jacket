@@ -80,6 +80,9 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
   and its right edge for warmth; light pages that turn dark with the phone's dark theme; and a
   tabletop mode that, half-folded on a table, puts the page above the fold and page-turn buttons
   (or the read-aloud player) below it.
+- **Book posture:** held half-open like a paperback, the fold is the spine. A page sits on each
+  side of it at any text size, the words keep clear of it, and the controls move onto the
+  right-hand page instead of lying across the fold.
 - **Typography:** Literata (Google's typeface for long reading), Atkinson Hyperlegible and
   OpenDyslexic, alongside the system serif and sans and the book's own fonts. Text size, line
   spacing, margins, justified text with hyphenation, and Book, Paper, Dark or Black pages.
@@ -134,6 +137,10 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
 - Play/pause, skip by sentence (EPUB) or paragraph (text), skip to the next or previous chapter,
   and 0.5× to 3× speed. After a pause of a couple of minutes it picks up a sentence back, so you
   find the thread. It pauses when another app plays audio or your headphones come out.
+- **Say it this way:** select a name the voice gets wrong and write it the way it sounds
+  ("Hermione" as "her-MY-oh-nee"), for that book or for every book, and hear it before you save.
+  It works with every voice, and the words still light up on the page as they're spoken. The small
+  numbers that point to footnotes are skipped when a book is read aloud (there's a switch).
 
 ### For every reader
 - **TalkBack:** the reader's controls stay put under a screen reader, the line under the page
@@ -272,10 +279,8 @@ The details, the reasons and the size of each item are in [docs/roadmap.md](docs
 
 **Next**
 - Plain and shared text work like full books: listening with the screen off, highlights, search
-- Fix how a name is pronounced, and skip note numbers when reading aloud
 - Skip and sleep buttons on the Galaxy Z Flip cover-screen player
 - A "your reading" page: week, month, year, books finished and a calendar
-- Book posture: read half-open like a paperback, with the fold as the spine
 - Resume listening from your headphones without opening the book, then Android Auto
 - Read-aloud for PDFs (Android 15's PdfRenderer text API)
 - Keep your place across two devices through a shared backup file
