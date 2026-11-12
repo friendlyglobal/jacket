@@ -1,0 +1,4 @@
+Jacket 1.4.1
+• Beim Zuhören auf schmalem Bildschirm sitzen die Kapitel-Tasten jetzt im Schieberegler, wenn die Steuerung erscheint, statt darunter
+• Natürliche Stimmen klingen wieder bestmöglich, sobald das Smartphone hinterherkommt, und ein kurzer Engpass macht sie nicht mehr rauer
+• Weniger Arbeit für das Smartphone beim Vorlesen mit ausgeschaltetem Bildschirm

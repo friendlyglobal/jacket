@@ -1,0 +1,4 @@
+Jacket 1.4.1
+• Listening on a narrow screen, the chapter buttons now join the slider when the controls come up, instead of sitting under it
+• Natural voices go back to their best sound as soon as your phone catches up, and one busy moment no longer makes them rougher
+• Less work for your phone while it reads aloud with the screen off

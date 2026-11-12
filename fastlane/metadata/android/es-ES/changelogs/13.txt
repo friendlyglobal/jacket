@@ -1,0 +1,4 @@
+Jacket 1.4.1
+• Al escuchar en una pantalla estrecha, los botones de capítulo se unen ahora al deslizador cuando aparecen los controles, en vez de quedar debajo
+• Las voces naturales vuelven a su mejor sonido en cuanto el móvil se pone al día, y un momento de carga ya no las vuelve más ásperas
+• Menos trabajo para el móvil al leer en voz alta con la pantalla apagada

@@ -410,6 +410,26 @@ a PDF takes highlights and notes as other books do (`reader/PdfHighlights.kt`,
   - The selection menu can't be reached with a keyboard alone (nor can a press and hold): a
     keyboard has the top bar's button.
 
+## Shipped in 1.4.1 (12 November 2026)
+
+Two things heard from the first phone it was tried on.
+
+### One chapter control while listening (S)
+On a window too narrow for the chapter steps on the player's bar, they sat above it as a pill
+with the chapter's name; with the full controls up, a second, nameless pill sat under the
+slider's card. Now the pill and the card are one surface (`reader/ChapterControl.kt`): the pill
+while the controls are down, growing into the card when they come up, with the steps at either
+end of its title row.
+
+### The natural voice keeps its best sound (S)
+A phone that falls behind gets a voice refined three times instead of five, a little rougher,
+rather than gaps. One slow sentence was enough for that, and the passes only came back on a
+phone well ahead of the voice, so a passing hold-up (a page loading, another app) could leave a
+whole session rougher. Now two of the last three sentences must agree before it eases off, and a
+pass comes back as soon as the phone has room for it, one at a time (`voice/QualityGuard.kt`).
+With the screen off, the words aren't inked in one by one either; the sentence is, and the
+words catch up when the page is looked at again.
+
 ## Next
 
 ### Android Auto (M)
