@@ -165,15 +165,43 @@ side of it, nothing of the reader's across it.
   28dp); a book read by scrolling, a PDF and a comic are left as they are, across the fold; and the
   small dialogs (the sleep timer's length, "Say it this way") still open in the middle.
 
-## Next
+## Coming in 1.3
 
-### Resume listening without opening the book, then Android Auto (L)
-A headphone button or the car resumes the current book even after Android has closed Jacket.
-- The player lives in the reader screen (`reader/ListenService.kt:32`), so after Android closes
-  Jacket the button has nothing to play.
+### Resume listening without opening the book (L)
+A headphone button, the notification, the lock screen or the player widget starts the voice in the
+book being read, at the place it was left at, without opening it: also after Android has closed
+Jacket. Opening the book finds the same voice at the sentence it is on, reading on.
 - Asked for [for the car](https://discuss.grapheneos.org/d/22043-any-android-auto-compatible-ebook-reader-that-uses-installed-tts-engine),
   and [Librera added it](https://newreleases.io/project/github/foobnix/LibreraReader/release/9.5.7).
-- Risk: it's the biggest refactor on this list, and Android Auto apps get their own Play review.
+- The player used to live in the reader's screen: once Android had closed Jacket a headphone
+  button had nothing to play, and the widget's Play had to open the book.
+- Now the voice belongs to the app (`reader/Listening.kt`, `reader/ReadAloud.kt`). It reads with
+  or without pages, and a reader that opens the book hands it its pages to turn and mark. The
+  phone sees one player (`reader/BookPlayer.kt`) behind `reader/ListenService.kt`, which Media3
+  can start with nothing playing and ask to resume.
+- The sleep timer and the widget's skip and sleep buttons work with no reader open. Next and
+  Previous on a headset, the notification and the lock screen move a sentence (they did nothing).
+- Closing a book still stops its voice, and so does opening another book or swiping Jacket away
+  from Recents.
+- Still open: with no reader open the voice's place is counted from the text alone, so opening
+  the book can correct the percent by up to a page; the library itself doesn't show that a book
+  is being read aloud (the notification and the widget do); and it has only been on the emulator,
+  with `cmd media_session` standing in for a headset.
+
+## Next
+
+### Android Auto (M)
+Choose a book on the car's screen and have it read from where it was left.
+- The groundwork is in 1.3: `reader/ListenService.kt` lists "Continue listening" and "Recent
+  books", choosing one plays it from its saved place, and a book can be asked for by name. Only
+  the system, a car and apps allowed to see notifications are given the lists.
+- Debug builds declare it to Android Auto (`app/src/debug/AndroidManifest.xml`), to try it. A
+  build that isn't from Google Play only shows in Android Auto with its "Unknown sources"
+  developer setting switched on.
+- Left before release builds declare it: an activity that takes "play ... on Jacket" from the
+  phone's assistant (`android.media.action.MEDIA_PLAY_FROM_SEARCH`), covers in the car's lists
+  (they need a content provider), and a run in a real car or the Desktop Head Unit.
+- Risk: Android Auto apps get their own Play review, on every release from then on.
 
 ### Read PDFs aloud (L)
 - Read-aloud rivals lead with PDFs
