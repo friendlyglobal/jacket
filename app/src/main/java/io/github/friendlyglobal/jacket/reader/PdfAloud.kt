@@ -41,6 +41,7 @@ import io.github.friendlyglobal.jacket.importer.PdfPlace
 import io.github.friendlyglobal.jacket.importer.PdfSpot
 import io.github.friendlyglobal.jacket.importer.PdfWords
 import io.github.friendlyglobal.jacket.importer.PdfWordsFile
+import io.github.friendlyglobal.jacket.importer.PdfWordsUnavailable
 import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.listening
 import io.github.friendlyglobal.jacket.ui.PageColors
@@ -49,6 +50,7 @@ import io.github.friendlyglobal.jacket.voice.Respelling
 import io.github.friendlyglobal.jacket.voices
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -239,7 +241,7 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
     // so that Listen finds them ready. Until they are, Listen waits for them.
     val opened by produceState<Result<OpenBook>?>(null, book.id) {
         if (!PdfWords.available) {
-            value = Result.failure(io.github.friendlyglobal.jacket.importer.PdfWordsUnavailable())
+            value = Result.failure(PdfWordsUnavailable())
             return@produceState
         }
         var open: OpenBook? = null
@@ -251,7 +253,7 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
             } catch (e: Exception) {
                 Result.failure(e)
             }
-            kotlinx.coroutines.awaitCancellation()
+            awaitCancellation()
         } finally {
             open?.let(listening.books::releaseSoon)
         }
@@ -265,7 +267,7 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
     var wanted by remember(book.id) { mutableStateOf(false) }
     fun explain(failure: Throwable) {
         val message = when (failure) {
-            is io.github.friendlyglobal.jacket.importer.PdfWordsUnavailable -> resources.getString(R.string.pdf_listen_unavailable)
+            is PdfWordsUnavailable -> resources.getString(R.string.pdf_listen_unavailable)
             is NoWordsInPdf -> resources.getString(R.string.pdf_listen_no_text)
             else -> resources.getString(R.string.reader_error_open_book, failure.message.orEmpty())
         }

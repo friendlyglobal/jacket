@@ -195,6 +195,54 @@ Jacket. Opening the book finds the same voice at the sentence it is on, reading 
 - Still open: it has only been on the emulator, with `cmd media_session` standing in for a
   headset.
 
+### Read PDFs aloud (L)
+A PDF is read aloud like any other book: by a natural voice or the phone's, at any speed, with
+the sleep timer, a sentence on and back, "Say it this way", the screen off or the book shut, from
+a headphone button, the notification and the widget. The pages turn with the voice, and the
+sentence it is on is marked where it is drawn, each word coming up dark as it is spoken. A tap on
+a line has the voice read on from there.
+- Read-aloud rivals lead with PDFs
+  ([comparison](https://www.audeus.com/blog/speechify-alternatives-pdf-epub)).
+- The words come from Android's own PDF reader, which hands over a page's text and says where
+  any stretch of it is drawn (`PdfRenderer.Page.getTextContents()` and `selectContent()`): on
+  Android 15 and later, and on Android 12 to 14 where a Google Play system update has brought the
+  same reader (`PdfRendererPreV`, SDK extension 13). Nothing is added to the app for it, and
+  nothing needs the internet (`importer/PdfWords.kt`).
+- On Android 8 to 11, and on a 12 to 14 that never had that update, there is no way to a PDF's
+  words short of carrying a PDF reader inside Jacket. There, Listen stays on the toolbar and
+  says so when it is pressed. `androidx.pdf` (Apache-2.0, no internet permission) was looked at
+  and is no help: it is a wrapper for the same two readers, and refuses text on older phones.
+- The lines are put in reading order from where they are drawn (`importer/PdfText.kt`): running
+  titles and page numbers are left out, columns are read one after the other, a word broken at
+  a line's end is one word, a paragraph that runs over a column or a page is one paragraph (no
+  sentence is cut at a page's edge), and a caption that sits in the middle of a sentence is read
+  after the paragraph.
+- The voice reads plain pages made of those paragraphs (a small EPUB, as for a text file; kept
+  on the phone and out of backups), which is why it is the same voice and the same player.
+  `importer/PdfLayout.kt` goes from a sentence back to the page and the line it is drawn on.
+- The place is kept as the page the sentence is on and how far down it. The percent goes up as
+  the voice reads and never falls unless the listener went back.
+- A PDF with an outline gets its contents: the list to choose from, the player's steps by
+  chapter, and "end of chapter" for the sleep timer. Without one, the player steps by page.
+  (Android doesn't hand over the outline. It is read from the file: `importer/PdfOutline.kt`.)
+- Pages with no words (scans) are passed over. A PDF with none says so when Listen is pressed,
+  and a Play from a headphone button goes to the next book that can be read aloud.
+- Still open:
+  - It has only been on the emulator, on Android 15. The Android 12 to 14 way has been
+    compiled and never run.
+  - Reading order goes by the page's geometry, not its meaning. A table, a sidebar, a footnote
+    in the middle of a sentence and columns that the file draws row by row are read as they come.
+    A caption is only known by how it opens ("Figure 3."). A compound word broken at its own
+    hyphen loses the hyphen ("well-" "known" is read "wellknown").
+  - Scans are not read: that would take text recognition, which Jacket doesn't have.
+  - A PDF's contents list only shows where its words can be read (Android 12+, as above), though
+    the outline itself could be read on any phone.
+  - Reading a long PDF's words takes a moment the first time it is opened (about 3 seconds for
+    440 pages on the emulator). Listen pressed before then says it is getting ready.
+  - Highlights, notes and search are still not there for PDFs, and a page saved by scrolling is
+    counted as before (only the voice's place goes through the rule that the percent never falls).
+  - Text that runs right to left, and vertical text, haven't been tried.
+
 ## Next
 
 ### Android Auto (M)
@@ -209,12 +257,6 @@ Choose a book on the car's screen and have it read from where it was left.
   phone's assistant (`android.media.action.MEDIA_PLAY_FROM_SEARCH`), covers in the car's lists
   (they need a content provider), and a run in a real car or the Desktop Head Unit.
 - Risk: Android Auto apps get their own Play review, on every release from then on.
-
-### Read PDFs aloud (L)
-- Read-aloud rivals lead with PDFs
-  ([comparison](https://www.audeus.com/blog/speechify-alternatives-pdf-epub)).
-- Android 15's PdfRenderer can return a page's text.
-- Risks: that API is Android 15+ only, and reading order, page headers and scanned pages are hard.
 
 ### Catch up on a second device (M)
 Two devices share one backup file in a folder the user picks (for example, one synced by Drive),
