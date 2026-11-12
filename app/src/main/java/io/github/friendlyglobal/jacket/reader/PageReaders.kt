@@ -78,6 +78,7 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
+import androidx.core.graphics.get
 import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.Settings
@@ -519,7 +520,7 @@ private fun looksLikePaper(image: ImageBitmap): Boolean = runCatching {
     val h = bitmap.height
     if (w < 8 || h < 8) return false
     val spots = listOf(2 to 2, w / 2 to 2, w - 3 to 2, 2 to h / 2, w - 3 to h / 2, 2 to h - 3, w / 2 to h - 3, w - 3 to h - 3)
-    spots.count { (x, y) -> Color(bitmap.getPixel(x, y)).luminance() > 0.85f } >= spots.size - 2
+    spots.count { (x, y) -> Color(bitmap[x, y]).luminance() > 0.85f } >= spots.size - 2
 }.getOrDefault(false)
 
 /**
@@ -533,10 +534,20 @@ private fun looksLikePaper(image: ImageBitmap): Boolean = runCatching {
 @Composable
 private fun FollowVoice(listState: LazyListState, aloud: PdfAloud, nav: ReaderNav, frames: Map<Int, Rect>, zoomed: () -> Float) {
     val spring = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+    val scope = rememberCoroutineScope()
     SideEffect {
         aloud.top = {
-            listState.layoutInfo.visibleItemsInfo.firstOrNull()?.let { first ->
-                PdfPlace(first.index, (listState.firstVisibleItemScrollOffset.toFloat() / first.size.coerceAtLeast(1)).coerceIn(0f, 1f))
+            // (The page the list counts as its first, which is not always the first it has laid
+            // out: the foot of the page before can show in the room kept clear above it.)
+            val index = listState.firstVisibleItemIndex
+            val size = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }?.size ?: 0
+            PdfPlace(index, if (size > 0) (listState.firstVisibleItemScrollOffset.toFloat() / size).coerceIn(0f, 1f) else 0f)
+        }
+        // To a place on a page (a chapter that opens part of the way down one), as a jump from the contents goes.
+        aloud.goTo = { place ->
+            scope.launch {
+                val size = listState.layoutInfo.visibleItemsInfo.maxOfOrNull { it.size } ?: 0
+                listState.animateScrollToItem(place.page, (place.within * size).toInt())
             }
         }
         aloud.inView = { place ->

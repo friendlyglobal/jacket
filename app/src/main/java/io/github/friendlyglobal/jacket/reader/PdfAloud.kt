@@ -35,6 +35,7 @@ import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.importer.DocumentCloser
 import io.github.friendlyglobal.jacket.importer.NoWordsInPdf
+import io.github.friendlyglobal.jacket.importer.PdfChapter
 import io.github.friendlyglobal.jacket.importer.PdfLayout
 import io.github.friendlyglobal.jacket.importer.PdfPlace
 import io.github.friendlyglobal.jacket.importer.PdfSpot
@@ -98,6 +99,7 @@ internal class PdfAloud(val listen: ListenState) {
 
     /** The pages answer for themselves: what is at the top of the screen, whether a place is in view, and where a line is in the window. */
     var top: () -> PdfPlace? = { null }
+    var goTo: (PdfPlace) -> Unit = {}
     var inView: (PdfPlace) -> Boolean = { false }
     var lineInWindow: (MarkedLine) -> Rect? = { null }
 
@@ -324,7 +326,14 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
         val current = layout?.chapterAt(nav.section) ?: -1
         nav.tocIndex = current
         nav.chapter = chapters.getOrNull(current)?.title.orEmpty()
-        nav.openToc = { item -> chapters.getOrNull(item.index)?.let { nav.jumpTo(it.page) } }
+        // A chapter opens where its first words are: part of the way down a page, as often as not.
+        fun show(chapter: PdfChapter) {
+            val place = chapter.paragraph.takeIf { it >= 0 }?.let { layout?.placeOf(it) }?.takeIf { it.page == chapter.page }
+            // (Through the pages' own jump first: it keeps the way back to where the reader was.)
+            nav.jumpTo(chapter.page)
+            if (place != null && place.within > 0.02f) aloud.goTo(place)
+        }
+        nav.openToc = { item -> chapters.getOrNull(item.index)?.let(::show) }
         nav.sectionGroup = { step -> layout?.chapterAt(step) ?: step }
         nav.marks = if (layout == null || layout.pageCount < 2) emptyList() else chapters.filter { it.level == 0 }.map { it.page / (layout.pageCount - 1f) }.distinct()
         // Read aloud, the steps are the voice's: it goes to the next chapter (or page), and the pages follow.
@@ -342,6 +351,13 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
             val next = if (delta > 0) chapters.drop(from + 1).firstOrNull { it.paragraph > here } else chapters.take(from.coerceAtLeast(0)).lastOrNull { it.paragraph in 0 until here }
             return next?.takeIf { it.paragraph >= 0 }?.let { PdfSpot(it.paragraph, 0) }
         }
+        // Read by eye: the chapter after the one the top of the screen is in, or the start of that one (and then the one before).
+        fun stepFrom(delta: Int): PdfChapter? {
+            val top = aloud.top() ?: PdfPlace(nav.section, 0f)
+            fun placeOf(chapter: PdfChapter): PdfPlace = chapter.paragraph.takeIf { it >= 0 }?.let { layout?.placeOf(it) }?.takeIf { it.page == chapter.page } ?: PdfPlace(chapter.page, 0f)
+            fun before(a: PdfPlace, b: PdfPlace) = a.page < b.page || (a.page == b.page && a.within < b.within - 0.02f)
+            return if (delta > 0) chapters.firstOrNull { before(top, placeOf(it)) } else chapters.lastOrNull { before(placeOf(it), top) }
+        }
         nav.step = step@{ delta ->
             val listened = voice?.takeIf { nav.listen.active && it.pdfSentence != null }
             if (listened != null && open != null) {
@@ -351,16 +367,14 @@ internal fun rememberPdfAloud(book: Book, settings: Settings, page: PageColors, 
                 nav.jumpTo(nav.section + delta)
             } else {
                 // From before the first chapter, the first; from in between, the one before or after.
-                val to = if (delta > 0) chapters.firstOrNull { it.page > nav.section } else chapters.lastOrNull { it.page < nav.section }
-                to?.let { nav.jumpTo(it.page) }
+                stepFrom(delta)?.let(::show)
             }
         }
         nav.canStep = { delta ->
             when {
                 voice != null && nav.listen.active && voice.pdfSentence != null -> target(delta) != null
                 chapters.isEmpty() -> nav.section + delta in 0 until nav.sectionCount
-                delta > 0 -> chapters.any { it.page > nav.section }
-                else -> chapters.any { it.page < nav.section }
+                else -> stepFrom(delta) != null
             }
         }
     }

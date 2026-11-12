@@ -96,10 +96,10 @@ class PdfReadingTest {
     @Test
     fun aSoftHyphenAlwaysJoins() {
         val page = page {
-            line("An extra­ordinary thing hap­", 40f, 60f)
+            line("An extra\u00ADordinary thing hap\u00AD", 40f, 60f)
             line("pened that morning in the garden.", 40f, 74f)
         }
-        assertEquals("An extra­ordinary thing happened that morning in the garden.", texts(page).single())
+        assertEquals("An extra\u00ADordinary thing happened that morning in the garden.", texts(page).single())
     }
 
     @Test

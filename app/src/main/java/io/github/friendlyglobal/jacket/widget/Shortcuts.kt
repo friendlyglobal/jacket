@@ -45,7 +45,7 @@ object AppShortcuts {
                 )
             }
             // Formats that can be read aloud.
-            current?.takeIf { it.canListen }?.let { book ->
+            current?.takeIf { it.canListen && it.id !in library.wordless.value }?.let { book ->
                 add(
                     ShortcutInfoCompat.Builder(app, "listen")
                         .setShortLabel(app.getString(R.string.reader_listen))

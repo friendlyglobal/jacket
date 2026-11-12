@@ -550,15 +550,15 @@ internal object PdfOutline {
                 }
             }
         }
-        return raw.map { if (it < ' ' || it == '�' || it == '­') ' ' else it }.joinToString("").replace(SPACES, " ").trim()
+        return raw.map { if (it < ' ' || it == '\uFFFD' || it == '\u00AD') ' ' else it }.joinToString("").replace(SPACES, " ").trim()
     }
 
     private val SPACES = Regex("\\s+")
 
     /** Where a PDF's own alphabet differs from Latin-1: the accents at 0x18, and the punctuation and letters from 0x80. */
-    private const val LOW = "˘ˇˆ˙˝˛˚˜"
-    private const val HIGH = "•†‡…—–ƒ⁄‹›−‰„“”‘’‚™ﬁﬂ" +
-        "ŁŒŠŸŽıłœšž €"
+    private const val LOW = "\u02D8\u02C7\u02C6\u02D9\u02DD\u02DB\u02DA\u02DC"
+    private const val HIGH = "\u2022\u2020\u2021\u2026\u2014\u2013\u0192\u2044\u2039\u203A\u2212\u2030\u201E\u201C\u201D\u2018\u2019\u201A\u2122\uFB01\uFB02" +
+        "\u0141\u0152\u0160\u0178\u017D\u0131\u0142\u0153\u0161\u017E \u20AC"
 
     private const val DEEPEST = 64
     private const val DEEPEST_OUTLINE = 8

@@ -131,6 +131,17 @@ class Library(private val context: Context) : LibraryOrganizer {
     private val pdfPagesDir = File(context.noBackupFilesDir, "pdf-books")
     private val pdfPagesLock = Mutex()
 
+    /**
+     * PDFs found to have no words in them (scans). Their format can be read aloud, they can't: a
+     * Play from a headphone button passes them over for a book that can. Known from the pages
+     * kept of them, so it is still known the next time Jacket starts.
+     */
+    private val _wordless = MutableStateFlow<Set<String>>(emptySet())
+    val wordless: StateFlow<Set<String>> = _wordless.asStateFlow()
+
+    /** The books a Play can't read: their file isn't on this phone, or they are PDFs with no words. */
+    val unreadable: Set<String> get() = _missing.value + _wordless.value
+
     private val _state = MutableStateFlow(readState())
     val state: StateFlow<LibraryState> = _state.asStateFlow()
 
@@ -181,6 +192,8 @@ class Library(private val context: Context) : LibraryOrganizer {
             pdfPagesLock.withLock {
                 val kept = _state.value.books.mapTo(HashSet()) { pdfPagesOf(it.id).name }
                 pdfPagesDir.listFiles()?.filter { it.name !in kept }?.forEach { it.delete() }
+                val scans = _state.value.books.filter { it.format == BookFormat.PDF && PdfSpokenBook.wordless(pdfPagesOf(it.id)) }.map { it.id }
+                _wordless.update { it + scans }
             }
         }
         // Widgets placed before this process started (after an update, a restart) redraw now, rather
@@ -265,7 +278,10 @@ class Library(private val context: Context) : LibraryOrganizer {
                     partial.delete()
                 }
             }
-            if (layout.paragraphs == 0) throw NoWordsInPdf(book.sourceName)
+            if (layout.paragraphs == 0) {
+                _wordless.update { it + book.id }
+                throw NoWordsInPdf(book.sourceName)
+            }
             PdfPages(pages, layout)
         }
     }

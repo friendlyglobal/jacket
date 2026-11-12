@@ -214,7 +214,7 @@ class Listening(private val app: Application) {
      */
     internal fun toResume(): Book? {
         val state = library.state.value
-        return voice?.takeIf { it.attached }?.let { state.find(it.bookId) } ?: resumeBook(state, library.missing.value)
+        return voice?.takeIf { it.attached }?.let { state.find(it.bookId) } ?: resumeBook(state, library.unreadable)
     }
 
     /** A Play would have something to read. */
@@ -240,7 +240,7 @@ class Listening(private val app: Application) {
             return
         }
         val state = library.state.value
-        val book = chosen?.let(state::find)?.takeIf { it.canListen && it.id !in library.missing.value } ?: toResume()
+        val book = chosen?.let(state::find)?.takeIf { it.canListen && it.id !in library.unreadable } ?: toResume()
         asked = null
         if (book == null) {
             // Nothing here can be read aloud: no book at all, or only comics (and PDFs, on a phone
@@ -267,6 +267,8 @@ class Listening(private val app: Application) {
         startJob?.cancel()
         starting = book
         startJob = scope.launch {
+            // A PDF that turns out to have no words (a scan): the book that is read instead.
+            var instead: Book? = null
             try {
                 val open = books.acquire(book)
                 try {
@@ -295,17 +297,25 @@ class Listening(private val app: Application) {
                 throw e
             } catch (e: Exception) {
                 Log.w(TAG, "Couldn't open ${book.sourceName} to read it aloud", e)
-                val message = when (e) {
-                    is NothingToRead -> app.getString(R.string.reader_error_text)
-                    // A PDF that can't be read aloud says which of the two reasons it is.
-                    is NoWordsInPdf -> app.getString(R.string.pdf_listen_no_text)
-                    is PdfWordsUnavailable -> app.getString(R.string.pdf_listen_unavailable)
-                    else -> app.getString(R.string.reader_error_open_book, e.message.orEmpty())
+                // Whether a PDF has any words is only known once it has been read through. One
+                // that has none is passed over from now on (see Library.wordless), and this Play
+                // goes to the book that would have been read had that been known: a headphone
+                // button is not left with nothing to do because the book on top is a scan.
+                instead = if (e is NoWordsInPdf) toResume()?.takeIf { it.id != book.id } else null
+                if (instead == null) {
+                    val message = when (e) {
+                        is NothingToRead -> app.getString(R.string.reader_error_text)
+                        // A PDF that can't be read aloud says which of the two reasons it is.
+                        is NoWordsInPdf -> app.getString(R.string.pdf_listen_no_text)
+                        is PdfWordsUnavailable -> app.getString(R.string.pdf_listen_unavailable)
+                        else -> app.getString(R.string.reader_error_open_book, e.message.orEmpty())
+                    }
+                    Toast.makeText(app, message, Toast.LENGTH_LONG).show()
                 }
-                Toast.makeText(app, message, Toast.LENGTH_LONG).show()
             } finally {
                 if (starting?.id == book.id) starting = null
             }
+            instead?.let(::start)
         }
     }
 

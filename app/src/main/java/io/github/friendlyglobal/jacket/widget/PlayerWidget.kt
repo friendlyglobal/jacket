@@ -501,7 +501,9 @@ class SleepTimerAction : ActionCallback {
 @Composable
 private fun PlayButton(context: Context, book: Book, model: PlayerModel, size: Dp) {
     val (icon, label, action) = when {
-        !book.canListen -> Triple(R.drawable.ic_widget_open, R.string.library_menu_open, actionStartActivity(openIntent(context, book)))
+        // (A PDF with no words in it is opened, like a comic: there is nothing of it to play.)
+        !book.canListen || book.id in context.library.wordless.value ->
+            Triple(R.drawable.ic_widget_open, R.string.library_menu_open, actionStartActivity(openIntent(context, book)))
         model.playing -> Triple(
             R.drawable.ic_widget_pause, R.string.listen_pause,
             actionStartService(mediaButtonIntent(context, KeyEvent.KEYCODE_MEDIA_PAUSE), isForegroundService = false),

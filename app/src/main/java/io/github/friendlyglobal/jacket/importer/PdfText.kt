@@ -489,15 +489,15 @@ internal object PdfReading {
     fun isCaption(text: CharSequence): Boolean = text.length <= LONGEST_CAPTION && CAPTION.containsMatchIn(text)
 
     /** A space, a line break, or one of the marks the PDF reader puts where a line ends. */
-    private fun blank(c: Char): Boolean = c.isWhitespace() || c == ' ' || c == ' ' || c == ' ' || c == '﻿'
+    private fun blank(c: Char): Boolean = c.isWhitespace() || c == '\u00A0' || c == '\u2007' || c == '\u202F' || c == '\uFEFF'
 
     /** A character with nothing to show or say: a control character, half a character, a mark of the PDF reader's own. */
-    private fun unseen(c: Char): Boolean = (c < ' ' && !c.isWhitespace()) || c == '￾' || c == '￿' || c == '​' || c.isSurrogate()
+    private fun unseen(c: Char): Boolean = (c < ' ' && !c.isWhitespace()) || c == '\uFFFE' || c == '\uFFFF' || c == '\u200B' || c.isSurrogate()
 
     /** Chinese, Japanese and Thai are written without spaces between words. */
     private fun unspaced(c: Char): Boolean = when (Character.UnicodeScript.of(c.code)) {
         Character.UnicodeScript.HAN, Character.UnicodeScript.HIRAGANA, Character.UnicodeScript.KATAKANA, Character.UnicodeScript.THAI -> true
-        else -> c in '　'..'〿' || c in '＀'..'｠'
+        else -> c in '\u3000'..'\u303F' || c in '\uFF00'..'\uFF60'
     }
 
     /** How near the top or the foot a line is looked at as a running title (of the page's height), and as a lone page number. */

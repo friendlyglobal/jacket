@@ -232,7 +232,9 @@ internal object PdfSpokenBook {
     private const val LANGUAGE_SAMPLE = 20_000
 
     /** What tells that pages kept in a file were made from [source] as it is now, by this version. */
-    private fun stamp(source: File): String = "jacket-pdf-book $VERSION.${PdfLayout.VERSION} ${source.length()}"
+    private fun stamp(source: File): String = "$STAMP $VERSION.${PdfLayout.VERSION} ${source.length()}"
+
+    private const val STAMP = "jacket-pdf-book"
 
     /** The layout kept in [pages], if they were made from [source] by this version; null if they must be made again. */
     fun kept(pages: File, source: File): PdfLayout? = runCatching {
@@ -241,6 +243,11 @@ internal object PdfSpokenBook {
             DataInputStream(zip.getInputStream(zip.getEntry(LAYOUT)).buffered()).use(PdfLayout::read)
         }
     }.getOrNull()
+
+    /** Whether the pages kept in [pages] say that their PDF has no words: they were made, and came out empty. */
+    fun wordless(pages: File): Boolean = runCatching {
+        ZipFile(pages).use { zip -> zip.comment?.startsWith(STAMP) == true && zip.getEntry(LAYOUT) != null && zip.getEntry(PACKAGE) == null }
+    }.getOrDefault(false)
 
     /**
      * Reads the words of the PDF [source] and writes the pages made of them to [out] (and closes
