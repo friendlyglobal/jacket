@@ -6,7 +6,7 @@
     <string name="jump_back_to_page">Volver a la página %1$d</string>
     <string name="jump_back_to_start">Volver al principio</string>
     <string name="widget_player_name">Reproductor de Jacket</string>
-    <string name="widget_player_description">Tu libro con un botón de reproducir: escúchalo, páusalo o reanúdalo desde la pantalla de inicio.</string>
+    <string name="widget_player_description">Tu libro con un reproductor: reproduce o pausa, retrocede o avanza una frase y pon el temporizador de apagado desde la pantalla de inicio.</string>
     <string name="widget_shelf_name">Estante de Jacket</string>
     <string name="widget_shelf_description">Los libros que estás leyendo, uno al lado del otro. Toca uno para abrirlo.</string>
     <string name="widget_streak_name">Racha de lectura</string>

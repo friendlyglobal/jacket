@@ -6,7 +6,7 @@
     <string name="jump_back_to_page">Wróć do strony %1$d</string>
     <string name="jump_back_to_start">Wróć na początek</string>
     <string name="widget_player_name">Odtwarzacz Jacket</string>
-    <string name="widget_player_description">Twoja książka z przyciskiem odtwarzania: czytaj na głos, wstrzymuj i wznawiaj z ekranu głównego.</string>
+    <string name="widget_player_description">Twoja książka z odtwarzaczem: odtwarzaj lub wstrzymuj, cofaj i przewijaj o zdanie oraz ustawiaj wyłącznik czasowy z ekranu głównego.</string>
     <string name="widget_shelf_name">Półka Jacket</string>
     <string name="widget_shelf_description">Książki, które czytasz, obok siebie. Kliknij jedną, aby ją otworzyć.</string>
     <string name="widget_streak_name">Seria czytania</string>

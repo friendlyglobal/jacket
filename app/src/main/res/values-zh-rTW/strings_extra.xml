@@ -6,7 +6,7 @@
     <string name="jump_back_to_page">返回第 %1$d 頁</string>
     <string name="jump_back_to_start">返回開頭</string>
     <string name="widget_player_name">Jacket 播放器</string>
-    <string name="widget_player_description">附播放按鈕的書：在主畫面上就能朗讀、暫停或繼續。</string>
+    <string name="widget_player_description">附播放器的書：在主畫面上就能播放或暫停、跳到上一句或下一句，並設定睡眠定時器。</string>
     <string name="widget_shelf_name">Jacket 書架</string>
     <string name="widget_shelf_description">你正在讀的書並排擺放。輕觸即可開啟。</string>
     <string name="widget_streak_name">連續閱讀</string>

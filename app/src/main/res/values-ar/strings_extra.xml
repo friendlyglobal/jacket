@@ -6,7 +6,7 @@
     <string name="jump_back_to_page">رجوع إلى الصفحة %1$d</string>
     <string name="jump_back_to_start">رجوع إلى البداية</string>
     <string name="widget_player_name">مشغّل Jacket</string>
-    <string name="widget_player_description">كتابك مع زر تشغيل: استمع إليه أو أوقفه مؤقتًا أو تابعه من الشاشة الرئيسية.</string>
+    <string name="widget_player_description">كتابك مع مشغّل: شغّله أو أوقفه مؤقتًا، وارجع جملة أو تقدّم جملة، واضبط مؤقت النوم من الشاشة الرئيسية.</string>
     <string name="widget_shelf_name">رف Jacket</string>
     <string name="widget_shelf_description">الكتب التي تقرؤها جنبًا إلى جنب. انقر على أحدها لفتحه.</string>
     <string name="widget_streak_name">تتابع القراءة</string>

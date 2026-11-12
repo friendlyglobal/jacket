@@ -6,7 +6,7 @@
     <string name="jump_back_to_page">पेज %1$d पर वापस</string>
     <string name="jump_back_to_start">शुरुआत पर वापस</string>
     <string name="widget_player_name">Jacket प्लेयर</string>
-    <string name="widget_player_description">प्ले बटन के साथ आपकी किताब: होम स्क्रीन से ही सुनें, रोकें या फिर से चलाएं।</string>
+    <string name="widget_player_description">प्लेयर के साथ आपकी किताब: होम स्क्रीन से ही चलाएँ या रोकें, एक वाक्य पीछे या आगे जाएँ और स्लीप टाइमर लगाएँ।</string>
     <string name="widget_shelf_name">Jacket शेल्फ़</string>
     <string name="widget_shelf_description">जो किताबें आप पढ़ रहे हैं, साथ-साथ। खोलने के लिए किसी पर टैप करें।</string>
     <string name="widget_streak_name">पढ़ने का सिलसिला</string>
