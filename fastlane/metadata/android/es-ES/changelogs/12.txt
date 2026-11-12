@@ -1,0 +1,5 @@
+Jacket 1.4
+• Subraya y añade notas en PDF: mantén pulsado y elige un color
+• Los subrayados siguen el zoom y el desplazamiento, y un toque los edita
+• Subraya la frase que se lee, o el primer párrafo, desde la barra superior
+• Los subrayados de PDF van a las copias, a "Guardar como archivo" y a Continuar entre dispositivos

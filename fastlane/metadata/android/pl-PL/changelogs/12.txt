@@ -1,0 +1,5 @@
+Jacket 1.4
+• Zakreślenia i notatki w PDF-ach: przytrzymaj i wybierz kolor
+• Zakreślenia podążają za powiększeniem i przewijaniem, dotknięcie je edytuje
+• Zakreśl czytane zdanie albo pierwszy akapit z górnego paska
+• Zakreślenia z PDF-ów trafiają do kopii, „Zapisz jako plik” i Kontynuuj między urządzeniami

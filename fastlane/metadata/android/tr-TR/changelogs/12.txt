@@ -1,0 +1,5 @@
+Jacket 1.4
+• PDF'lerde vurgu ve not: basılı tutun, sonra bir renk seçin
+• Vurgular yakınlaştırma ve kaydırmayla birlikte hareket eder, dokunarak düzenlenir
+• Okunan cümleyi ya da ilk paragrafı üst çubuktan vurgulayın
+• PDF vurguları yedeklere, "Dosya olarak kaydet"e ve cihazlar arasında devam etmeye dahil

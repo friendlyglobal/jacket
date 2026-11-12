@@ -1,0 +1,5 @@
+Jacket 1.4
+• Surlignez et annotez les PDF : appui long, puis une couleur
+• Les surlignages suivent le zoom et le défilement, un appui les modifie
+• Surlignez la phrase lue, ou le premier paragraphe, depuis la barre du haut
+• Les surlignages PDF vont dans les sauvegardes, « Enregistrer dans un fichier » et Continuer d'un appareil à l'autre
