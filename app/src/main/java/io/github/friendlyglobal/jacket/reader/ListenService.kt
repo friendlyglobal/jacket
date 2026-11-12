@@ -71,8 +71,22 @@ class ListenService : MediaSessionService() {
 
     companion object {
         private const val STALE_NOTIFICATION_ID = 2001
+
+        /** The id Media3 posts the read-aloud notification under (its DefaultMediaNotificationProvider's own). */
+        private const val MEDIA_NOTIFICATION_ID = 1001
         private var instance: ListenService? = null
         private var current: MediaSession? = null
+
+        /**
+         * Takes away the read-aloud notification an earlier run of Jacket left behind. Paused for
+         * ten minutes, the service leaves the foreground and its notification stays up; if Android
+         * then closes Jacket there is nothing behind it. Before Android 11 it sits in the shade
+         * with a Play button that can't play: the voice it paused is gone. For when Jacket starts,
+         * by whatever means (that button included): a notification from before then is that one.
+         */
+        fun clearLeftover(context: Context) {
+            if (current == null) runCatching { NotificationManagerCompat.from(context).cancel(MEDIA_NOTIFICATION_ID) }
+        }
 
         /** Publishes [player] as the book being read aloud; tapping the notification opens [bookId]. */
         fun attach(context: Context, player: Player, bookId: String): MediaSession {

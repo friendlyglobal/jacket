@@ -1,6 +1,7 @@
 package io.github.friendlyglobal.jacket.data
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -46,6 +47,67 @@ class BackupTest {
         assertEquals(0.6f, merged.books[0].progress)
         // The highlight follows its book to the new id.
         assertEquals("new", merged.annotations.single().bookId)
+    }
+
+    @Test
+    fun mergeKnowsTheSameFileUnderAnotherName() {
+        // Downloaded again on the new phone as "one (1).epub": the same bytes, so the same book.
+        val here = LibraryState(books = listOf(book("new", "one (1).epub", opened = 5, progress = 0.1f).copy(sha256 = "abc123")))
+        val saved = LibraryState(
+            books = listOf(
+                book("b1", "one.epub", opened = 50, progress = 0.6f).copy(sha256 = "abc123"),
+                // Another book that happens to be the same size isn't.
+                book("b2", "two.epub").copy(sha256 = "def456"),
+            ),
+            annotations = listOf(highlight),
+        )
+        val merged = Backup.merge(here, saved)
+        assertEquals(listOf("new", "b2"), merged.books.map { it.id })
+        assertEquals(0.6f, merged.books[0].progress)
+        assertEquals("new", merged.annotations.single().bookId)
+    }
+
+    @Test
+    fun aBooksSha256IsKeptInBackupsAndOlderOnesHaveNone() {
+        val state = LibraryState(books = listOf(book("b1", "one.epub").copy(sha256 = "abc123"), book("b2", "two.epub")))
+        val text = Backup.write(state)
+        assertEquals(listOf("abc123", null), Backup.read(text).books.map { it.sha256 })
+        // A backup from before it was kept has no such field at all.
+        val older = org.json.JSONObject(text).apply {
+            val books = getJSONArray("books")
+            for (i in 0 until books.length()) books.getJSONObject(i).remove("sha256")
+        }.toString()
+        assertEquals(listOf(null, null), Backup.read(older).books.map { it.sha256 })
+    }
+
+    @Test
+    fun anEmptyLibraryNeverReplacesAnAutomaticBackupThatHasBooks() {
+        val good = Backup.write(LibraryState(books = listOf(book("b1", "one.epub", opened = 10, progress = 0.5f)), annotations = listOf(highlight)))
+        // The library couldn't be read when Jacket started (or this is a new phone): no books.
+        assertFalse(Backup.mayReplace(LibraryState()) { good })
+        assertFalse(Backup.mayReplace(LibraryState(settings = Settings(volumeKeys = true), reading = mapOf("2026-11-11" to 60_000L))) { good })
+        // The same backup with spaces after it, as an app that won't empty files leaves it.
+        assertFalse(Backup.mayReplace(LibraryState()) { "$good     " })
+    }
+
+    @Test
+    fun aLibraryWithBooksReplacesAnyAutomaticBackupWithoutReadingIt() {
+        val state = LibraryState(books = listOf(book("b2", "two.epub")))
+        assertTrue(Backup.mayReplace(state) { throw AssertionError("the file was read") })
+    }
+
+    @Test
+    fun anEmptyLibraryMayBeWrittenWhereThereAreNoBooksToLose() {
+        val empty = LibraryState()
+        // The file just made for the backup.
+        assertTrue(Backup.mayReplace(empty) { "" })
+        assertTrue(Backup.mayReplace(empty) { null })
+        // A backup of an empty library, some other file, and a backup cut short.
+        assertTrue(Backup.mayReplace(empty) { Backup.write(LibraryState(settings = Settings(volumeKeys = true))) })
+        assertTrue(Backup.mayReplace(empty) { "{\"books\":[{\"id\":\"x\"}]}" })
+        assertTrue(Backup.mayReplace(empty) { "not json" })
+        val good = Backup.write(LibraryState(books = listOf(book("b1", "one.epub"))))
+        assertTrue(Backup.mayReplace(empty) { good.take(good.length / 2) })
     }
 
     @Test

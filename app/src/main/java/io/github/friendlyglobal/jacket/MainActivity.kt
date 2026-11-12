@@ -183,7 +183,7 @@ class MainActivity : AppCompatActivity() {
     private fun sharedTextFile(text: String, subject: String?): Uri {
         val name = subject?.takeIf { it.isNotBlank() }
             ?.replace(Regex("[\\\\/:*?\"<>|\\n]"), " ")?.take(80)?.trim()
-            ?: "Shared text"
+            ?: getString(R.string.shared_text_title)
         val file = File(File(cacheDir, "shared").apply { mkdirs() }, "$name.txt")
         file.writeText(text)
         return Uri.fromFile(file)

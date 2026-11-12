@@ -20,6 +20,7 @@
     <string name="cover_almost_done">거의 다 읽었어요</string>
     <string name="cover_listening">듣는 중</string>
     <string name="book_untitled">제목 없음</string>
+    <string name="shared_text_title">공유된 텍스트</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">책장</string>
@@ -53,6 +54,10 @@
     </plurals>
     <string name="import_failed">읽을 수 없는 파일: %1$s</string>
     <string name="import_added_and_failed">%1$s. %2$s</string>
+    <string name="import_already_one">“%1$s” 이미 서재에 있음</string>
+    <plurals name="import_already_books">
+        <item quantity="other">책 %1$d권 이미 서재에 있음</item>
+    </plurals>
 
     <string name="library_profile_and_settings">프로필 및 설정</string>
     <string name="library_add_books">책 추가</string>

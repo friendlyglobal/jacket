@@ -20,6 +20,7 @@
     <string name="cover_almost_done">اقتربت النهاية</string>
     <string name="cover_listening">قيد الاستماع</string>
     <string name="book_untitled">بلا عنوان</string>
+    <string name="shared_text_title">نص مُشارَك</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">رف</string>
@@ -58,6 +59,15 @@
     </plurals>
     <string name="import_failed">تعذّرت قراءة %1$s</string>
     <string name="import_added_and_failed">%1$s. %2$s</string>
+    <string name="import_already_one">«%1$s» موجود في مكتبتك بالفعل</string>
+    <plurals name="import_already_books">
+        <item quantity="zero">%1$d كتاب موجود في مكتبتك بالفعل</item>
+        <item quantity="one">%1$d كتاب موجود في مكتبتك بالفعل</item>
+        <item quantity="two">%1$d كتاب موجودان في مكتبتك بالفعل</item>
+        <item quantity="few">%1$d كتب موجودة في مكتبتك بالفعل</item>
+        <item quantity="many">%1$d كتابًا موجودة في مكتبتك بالفعل</item>
+        <item quantity="other">%1$d كتاب موجودة في مكتبتك بالفعل</item>
+    </plurals>
 
     <string name="library_profile_and_settings">الملف الشخصي والإعدادات</string>
     <string name="library_add_books">إضافة كتب</string>

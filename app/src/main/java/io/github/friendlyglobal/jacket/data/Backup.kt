@@ -25,6 +25,17 @@ object Backup {
     }
 
     /**
+     * Whether the backup that keeps itself up to date may write [state] over a file that now holds
+     * [existing] (read only if it has to be: null when the file has nothing to give). Any library
+     * with a book in it may. A library with none must not take the place of a backup that has
+     * some: an empty library can be a library that couldn't be read, and that backup is then the
+     * only copy of the reader's places and notes. An empty file, one that isn't a backup, and a
+     * backup with no books are nothing to lose.
+     */
+    fun mayReplace(state: LibraryState, existing: () -> String?): Boolean =
+        state.books.isNotEmpty() || existing()?.let { text -> runCatching { read(text).books.isEmpty() }.getOrDefault(true) } ?: true
+
+    /**
      * Folds a backup into the current library: books already here keep their files and take the
      * backup's place in them if it's further along; books not here come back as entries waiting
      * for their file. Bookmarks and highlights are merged by id; settings come from the backup,
@@ -33,7 +44,10 @@ object Backup {
      * stays pinned if it was pinned in either. Reading time comes back with them (see [mergeReading]).
      */
     fun merge(current: LibraryState, backup: LibraryState): LibraryState {
-        fun sameBook(a: Book, b: Book) = a.id == b.id || (a.sourceName == b.sourceName && a.sizeBytes == b.sizeBytes)
+        // The same book: the same entry, or one made from the same file (by its name and size, or
+        // by its bytes when both kept their SHA-256, which is how "book (1).epub" is known).
+        fun sameBook(a: Book, b: Book) = a.id == b.id || (a.sourceName == b.sourceName && a.sizeBytes == b.sizeBytes) ||
+            (a.sha256 != null && a.sha256 == b.sha256 && a.sizeBytes == b.sizeBytes)
         val (collections, collectionIds) = mergeCollections(current.collections, backup.collections)
         // A backup's collection ids, as they are here; ones it never listed are dropped.
         fun Set<String>.here() = mapNotNullTo(HashSet()) { collectionIds[it] }

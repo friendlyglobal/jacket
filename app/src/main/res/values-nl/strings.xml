@@ -19,6 +19,7 @@
     <string name="cover_almost_done">Bijna uit</string>
     <string name="cover_listening">Ik luister</string>
     <string name="book_untitled">Zonder titel</string>
+    <string name="shared_text_title">Gedeelde tekst</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">Plank</string>
@@ -53,6 +54,11 @@
     </plurals>
     <string name="import_failed">Kan %1$s niet lezen</string>
     <string name="import_added_and_failed">%1$s. %2$s</string>
+    <string name="import_already_one">“%1$s” staat al in je bibliotheek</string>
+    <plurals name="import_already_books">
+        <item quantity="one">%1$d boek staat al in je bibliotheek</item>
+        <item quantity="other">%1$d boeken staan al in je bibliotheek</item>
+    </plurals>
 
     <string name="library_profile_and_settings">Profiel en instellingen</string>
     <string name="library_add_books">Boeken toevoegen</string>

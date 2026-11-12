@@ -20,6 +20,7 @@
     <string name="cover_almost_done">あと少し</string>
     <string name="cover_listening">読み上げ中</string>
     <string name="book_untitled">無題</string>
+    <string name="shared_text_title">共有されたテキスト</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">本棚</string>
@@ -53,6 +54,10 @@
     </plurals>
     <string name="import_failed">%1$s を読み込めませんでした</string>
     <string name="import_added_and_failed">%1$s。%2$s</string>
+    <string name="import_already_one">「%1$s」はすでにライブラリにあります</string>
+    <plurals name="import_already_books">
+        <item quantity="other">%1$d 冊はすでにライブラリにあります</item>
+    </plurals>
 
     <string name="library_profile_and_settings">プロフィールと設定</string>
     <string name="library_add_books">本を追加</string>

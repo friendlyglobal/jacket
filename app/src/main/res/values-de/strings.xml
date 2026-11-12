@@ -19,6 +19,7 @@
     <string name="cover_almost_done">Fast geschafft</string>
     <string name="cover_listening">Ich höre</string>
     <string name="book_untitled">Ohne Titel</string>
+    <string name="shared_text_title">Geteilter Text</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">Regal</string>
@@ -53,6 +54,11 @@
     </plurals>
     <string name="import_failed">Nicht lesbar: %1$s</string>
     <string name="import_added_and_failed">%1$s. %2$s</string>
+    <string name="import_already_one">„%1$s“ ist schon in deiner Bibliothek</string>
+    <plurals name="import_already_books">
+        <item quantity="one">%1$d Buch ist schon in deiner Bibliothek</item>
+        <item quantity="other">%1$d Bücher sind schon in deiner Bibliothek</item>
+    </plurals>
 
     <string name="library_profile_and_settings">Profil und Einstellungen</string>
     <string name="library_add_books">Bücher hinzufügen</string>

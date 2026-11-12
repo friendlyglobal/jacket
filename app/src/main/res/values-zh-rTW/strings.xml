@@ -20,6 +20,7 @@
     <string name="cover_almost_done">快讀完了</string>
     <string name="cover_listening">聆聽中</string>
     <string name="book_untitled">無標題</string>
+    <string name="shared_text_title">分享的文字</string>
 
     <string name="cover_style_jacket">Jacket</string>
     <string name="cover_style_shelf">書架</string>
@@ -53,6 +54,10 @@
     </plurals>
     <string name="import_failed">無法讀取 %1$s</string>
     <string name="import_added_and_failed">%1$s。%2$s</string>
+    <string name="import_already_one">《%1$s》已在你的書庫中</string>
+    <plurals name="import_already_books">
+        <item quantity="other">%1$d 本書已在你的書庫中</item>
+    </plurals>
 
     <string name="library_profile_and_settings">個人資料和設定</string>
     <string name="library_add_books">新增書籍</string>

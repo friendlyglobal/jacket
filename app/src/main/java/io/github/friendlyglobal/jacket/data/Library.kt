@@ -7,7 +7,10 @@ import android.provider.DocumentsContract
 import android.util.Log
 import androidx.core.util.AtomicFile
 import io.github.friendlyglobal.jacket.R
+import io.github.friendlyglobal.jacket.importer.AlreadyInLibrary
 import io.github.friendlyglobal.jacket.importer.BookImporter
+import io.github.friendlyglobal.jacket.importer.FileContent
+import io.github.friendlyglobal.jacket.importer.NothingToRead
 import io.github.friendlyglobal.jacket.widget.WidgetSync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,19 +30,55 @@ import io.github.friendlyglobal.jacket.importer.Bitmaps
 import java.io.File
 import java.io.FileOutputStream
 
-data class ImportReport(val imported: List<Book>, val failed: List<String>) {
+/**
+ * What came of adding files: the books they are ([imported]), and the names of the files that
+ * couldn't be read ([failed]). Some of [imported] may have been in the library before, their
+ * files with them ([already]): they are there to be opened, and nothing was added for them.
+ * And some of [failed] may be text files with nothing in them ([empty]).
+ */
+data class ImportReport(
+    val imported: List<Book>,
+    val failed: List<String>,
+    val already: List<Book> = emptyList(),
+    val empty: List<String> = emptyList(),
+) {
     /** What happened, for a snackbar; empty when nothing was imported or failed. */
     fun message(resources: Resources): String {
-        val added = when (imported.size) {
+        val here = already.distinctBy { it.id }
+        val new = imported.filter { book -> here.none { it.id == book.id } }
+        val added = when (new.size) {
             0 -> ""
-            1 -> resources.getString(R.string.import_added_one, imported[0].title)
-            else -> resources.getQuantityString(R.plurals.import_added_books, imported.size, imported.size)
+            1 -> resources.getString(R.string.import_added_one, new[0].title)
+            else -> resources.getQuantityString(R.plurals.import_added_books, new.size, new.size)
         }
-        if (failed.isEmpty()) return added
-        val couldNotRead = resources.getString(R.string.import_failed, failed.joinToString())
-        return if (added.isEmpty()) couldNotRead else resources.getString(R.string.import_added_and_failed, added, couldNotRead)
+        val alreadyHere = when (here.size) {
+            0 -> ""
+            1 -> resources.getString(R.string.import_already_one, here[0].title)
+            else -> resources.getQuantityString(R.plurals.import_already_books, here.size, here.size)
+        }
+        val couldNotRead = when {
+            failed.isEmpty() -> ""
+            // One file with nothing in it, and nothing else to say: what the reader says of such a file.
+            imported.isEmpty() && failed.size == 1 && empty.size == 1 -> resources.getString(R.string.reader_error_text)
+            else -> resources.getString(R.string.import_failed, failed.joinToString())
+        }
+        // Each is a sentence of its own; whichever there are, are said one after another.
+        return listOf(added, alreadyHere, couldNotRead).filter { it.isNotEmpty() }
+            .reduceOrNull { said, next -> resources.getString(R.string.import_added_and_failed, said, next) }.orEmpty()
     }
 }
+
+/**
+ * The book among [books] that was made from a file with this [content], if there is one: the same
+ * number of bytes and the same SHA-256, whatever the file was called. A book added before Jacket
+ * kept its SHA-256 has its file read for it ([read]; null when the file isn't on this phone), and
+ * only if its size is right: no other file is read. So a book restored from a backup, still
+ * waiting for its file, is known by its bytes only if the backup kept their SHA-256.
+ *
+ * Books that are in the library twice already stay as they are: the first is the one found.
+ */
+internal fun bookMadeFrom(books: List<Book>, content: FileContent, read: (Book) -> FileContent?): Book? =
+    books.firstOrNull { book -> book.sizeBytes == content.size && (book.sha256 ?: read(book)?.sha256) == content.sha256 }
 
 /**
  * The on-device library: imported files live in app storage, metadata in one JSON file.
@@ -121,6 +160,8 @@ class Library(private val context: Context) : LibraryOrganizer {
     private suspend fun importNow(uris: List<Uri>): ImportReport = withContext(Dispatchers.IO) {
         val imported = mutableListOf<Book>()
         val failed = mutableListOf<String>()
+        val already = mutableListOf<Book>()
+        val empty = mutableListOf<String>()
         // Imports come one at a time (see [import]), so any half-copied file here is an old one.
         BookImporter.clearUnfinished(booksDir)
         for (uri in uris) {
@@ -130,34 +171,52 @@ class Library(private val context: Context) : LibraryOrganizer {
             if (existing != null) {
                 // Restored from a backup without its file: adding the same file again brings it back,
                 // with its place, bookmarks and highlights.
-                val relinked = fileOf(existing).exists() ||
+                val here = fileOf(existing).exists()
+                val relinked = here ||
                     runCatching { BookImporter.copyInto(context, uri, fileOf(existing)) }
                         .onFailure { e -> Log.w(TAG, "Re-linking $name failed", e) }
                         .isSuccess
                 if (relinked) {
                     if (coverOf(existing) == null) runCatching { BookImporter.restoreCover(existing, this@Library) }
                     imported += existing
+                    // Nothing was added or brought back: the reader is told the book is here.
+                    if (here) already += existing
                 } else {
                     failed += name
                 }
                 continue
             }
-            runCatching { BookImporter.import(context, uri, name, this@Library) }
+            // Under another name, or from an app that doesn't give its size, the same file is
+            // only known once it has been copied in and its bytes can be compared (see bookWith).
+            runCatching { BookImporter.import(context, uri, name, this@Library, ::bookWith) }
                 .onSuccess { book ->
                     imported += book
-                    _state.update { s -> s.copy(books = s.books + book, currentId = s.currentId ?: book.id) }
+                    // A book that was waiting for its file is here already, and has it back now.
+                    if (_state.value.find(book.id) == null) {
+                        _state.update { s -> s.copy(books = s.books + book, currentId = s.currentId ?: book.id) }
+                    }
                 }
                 .onFailure { e ->
-                    Log.w(TAG, "Import failed for $name", e)
-                    failed += name
+                    if (e is AlreadyInLibrary) {
+                        imported += e.book
+                        already += e.book
+                    } else {
+                        Log.w(TAG, "Import failed for $name", e)
+                        failed += name
+                        if (e is NothingToRead) empty += name
+                    }
                 }
         }
         if (imported.isNotEmpty()) {
             _missing.value = scanMissing(_state.value)
             changed(saveNow = true)
         }
-        ImportReport(imported, failed)
+        ImportReport(imported, failed, already, empty)
     }
+
+    /** The book the library has for a file with this [content], if it has one (see [bookMadeFrom]). */
+    private fun bookWith(content: FileContent): Book? =
+        bookMadeFrom(_state.value.books, content) { BookImporter.contentOf(fileOf(it)) }
 
     fun setCurrent(id: String) {
         _state.update { it.copy(currentId = id) }
@@ -264,7 +323,12 @@ class Library(private val context: Context) : LibraryOrganizer {
         changed()
         // Books added by hand before the folder was watched are already here.
         val missing = fresh.filter { (_, name, size) -> _state.value.books.none { it.sourceName == name && it.sizeBytes == size } }
-        if (missing.isEmpty()) null else import(missing.map { it.first })
+        if (missing.isEmpty()) return@withContext null
+        // So are ones only their bytes give away (added under another name): no news, for a folder
+        // nobody is looking at.
+        val report = import(missing.map { it.first })
+        val news = report.copy(imported = report.imported.filter { book -> report.already.none { it.id == book.id } }, already = emptyList())
+        news.takeIf { it.imported.isNotEmpty() || it.failed.isNotEmpty() }
     }
 
     /** The language [id] is read aloud in: what the book says of itself, or what the listener chose instead. */
@@ -379,8 +443,9 @@ class Library(private val context: Context) : LibraryOrganizer {
     /** Writes a backup of the library (not the book files) to [uri]. */
     suspend fun exportBackup(uri: Uri) = withContext(Dispatchers.IO) {
         val text = Backup.write(_state.value)
-        val out = context.contentResolver.openOutputStream(uri, "wt") ?: error(context.getString(R.string.settings_backup_cant_write))
-        out.use { it.write(text.toByteArray(Charsets.UTF_8)) }
+        // Some apps holding files won't empty one as it is opened: see [WholeFile].
+        val written = context.contentResolver.writeWhole(uri, text.toByteArray(Charsets.UTF_8))
+        if (written == null) error(context.getString(R.string.settings_backup_cant_write))
     }
 
     /**

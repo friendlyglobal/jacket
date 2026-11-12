@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import io.github.friendlyglobal.jacket.data.AutoBackup
 import io.github.friendlyglobal.jacket.data.Library
+import io.github.friendlyglobal.jacket.reader.ListenService
 import io.github.friendlyglobal.jacket.reader.ReadiumBooks
 import io.github.friendlyglobal.jacket.voice.Voices
 
@@ -17,6 +18,8 @@ class JacketApp : Application() {
         super.onCreate()
         // Watching the library from the start, so a backup the reader keeps up to date stays so.
         autoBackup
+        // A read-aloud notification still up from before Jacket was closed has nothing to control.
+        ListenService.clearLeftover(this)
     }
 }
 

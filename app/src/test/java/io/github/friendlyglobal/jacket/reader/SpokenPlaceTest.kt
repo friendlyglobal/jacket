@@ -229,4 +229,32 @@ class SpokenPlaceTest {
         // Nothing heard out of sight: the page.
         assertEquals("page 20", placeKept(spoken = null, unseen = true) { "page 20" })
     }
+
+    // ---- The end of the book --------------------------------------------------------------------
+
+    @Test
+    fun `on the last page the voice counts all of the book, as the page does`() {
+        // Caught on the emulator, in a book of three one-page chapters: the last page read by eye
+        // is 100%, and with the voice on it the book stayed at 67%, where that page starts.
+        assertTrue(spokenIsAllOfTheBook(ended = false, onPage = true, lastPage = true))
+        // Any other page in front of the listener is counted from where it starts.
+        assertFalse(spokenIsAllOfTheBook(ended = false, onPage = true, lastPage = false))
+    }
+
+    @Test
+    fun `the last page says nothing of a voice that isn't on it`() {
+        // The listener has gone to look at the last page while the voice reads chapter one, or the
+        // phone was shut on the last page and the voice started again from somewhere else.
+        assertFalse(spokenIsAllOfTheBook(ended = false, onPage = false, lastPage = true))
+        assertFalse(spokenIsAllOfTheBook(ended = false, onPage = false, lastPage = false))
+    }
+
+    @Test
+    fun `a voice that has read the book to its end has read all of it, seen or not`() {
+        // In a pocket there is no page to ask.
+        assertTrue(spokenIsAllOfTheBook(ended = true, onPage = false, lastPage = false))
+        // Nor does it matter where the last words fall: a picture may have the last page to itself.
+        assertTrue(spokenIsAllOfTheBook(ended = true, onPage = true, lastPage = false))
+        assertTrue(spokenIsAllOfTheBook(ended = true, onPage = true, lastPage = true))
+    }
 }
