@@ -366,7 +366,7 @@ fun ReaderScreen(
     val voices = context.voices
     val phoneLanguage = LocalConfiguration.current.locales[0]?.toLanguageTag()
     // (So is a PDF whose language couldn't be told from its words.)
-    val readIn = book.language ?: if (book.format == BookFormat.TXT || book.format == BookFormat.PDF) phoneLanguage else null
+    val readIn = book.language ?: if (book.format == BookFormat.TXT || book.format == BookFormat.PDF || book.format == BookFormat.FB2) phoneLanguage else null
     val voice = remember(settings.voice, settings.voices, readIn) { voices.choose(readIn, settings) }
     // On the player: who is reading, and whether the phone is keeping up with them.
     val health by voices.health.collectAsStateWithLifecycle()
@@ -761,7 +761,7 @@ fun ReaderScreen(
     // of the spread (see BookPosture). The pages keep clear of it, and so do the controls: they
     // sit on the right-hand page, as they would on a phone of that width. Only where there are
     // two pages to part: a book of pages, not one scrolled, nor a PDF's or a comic's single page.
-    val pagedBook = (book.format == BookFormat.EPUB || book.format == BookFormat.TXT) && settings.layout == PageLayout.PAGES
+    val pagedBook = book.format.isWords && settings.layout == PageLayout.PAGES
     val bookFold by rememberBookFold(watch = pagedBook)
     val spine = remember(bookFold, windowWidth, windowHeight, density, coverUp) {
         if (coverUp) null else BookPosture.spine(bookFold, windowWidth, windowHeight, with(density) { BookPosture.OFF_CENTRE.dp.toPx() })
@@ -889,8 +889,8 @@ fun ReaderScreen(
             if (staged) {
                 CompositionLocalProvider(LocalReaderNav provides nav) {
                     when (book.format) {
-                        // A text file is read through pages made of it, the same way as an EPUB.
-                        BookFormat.EPUB, BookFormat.TXT -> EpubReader(book, settings, page, nav, haptics, annotations, respellings, spine, toggleChrome)
+                        // A text file and an FB2 book are read through pages made of them, the same way as an EPUB.
+                        BookFormat.EPUB, BookFormat.TXT, BookFormat.FB2 -> EpubReader(book, settings, page, nav, haptics, annotations, respellings, spine, toggleChrome)
                         BookFormat.PDF -> PdfReader(book, settings, page, nav, haptics, respellings, onProgress, toggleChrome)
                         BookFormat.CBZ -> ComicReader(book, page, nav, haptics, onProgress, toggleChrome)
                     }
@@ -1109,7 +1109,7 @@ fun ReaderScreen(
             ReadingControls(
                 settings, onSettings,
                 Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
-                forEpub = book.format == BookFormat.EPUB || book.format == BookFormat.TXT,
+                forEpub = book.format.isWords,
                 lightLevels = true,
             )
         }

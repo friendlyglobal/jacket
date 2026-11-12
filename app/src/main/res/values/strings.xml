@@ -15,6 +15,7 @@
     <!-- Book formats -->
     <string name="format_epub" translatable="false">EPUB</string>
     <string name="format_pdf" translatable="false">PDF</string>
+    <string name="format_fb2" translatable="false">FB2</string>
     <string name="format_comic">Comic</string>
     <string name="format_text">Text</string>
 

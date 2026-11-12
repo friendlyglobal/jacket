@@ -129,6 +129,7 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     testImplementation(libs.junit)
     testImplementation(libs.org.json)
+    testImplementation(libs.kxml2)
 }
 
 // ---------------------------------------------------------------------------------------------

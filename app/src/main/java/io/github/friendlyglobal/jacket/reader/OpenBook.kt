@@ -30,7 +30,7 @@ import java.io.File
  */
 internal class OpenBook(
     val bookId: String,
-    /** The file Readium reads: the book's own, or the pages made of a text file or of a PDF's words. */
+    /** The file Readium reads: the book's own, or the pages made of a text file, of an FB2 book or of a PDF's words. */
     val file: File,
     val publication: Publication,
     /** For a text file: its pages, and where its paragraphs are in them. */
@@ -120,7 +120,9 @@ internal class OpenBooks(private val context: Context) {
         if (text != null && text.layout.paragraphs == 0) throw NothingToRead(book.sourceName)
         // (Throws for a PDF with no words in it, and on a phone that can't get at them.)
         val pdf = if (book.format == BookFormat.PDF) library.pdfPages(book) else null
-        val file = pdf?.file ?: text?.file ?: library.fileOf(book)
+        // (Throws for an FB2 file that can't be read as one.)
+        val fb2 = if (book.format == BookFormat.FB2) library.fb2Pages(book) else null
+        val file = pdf?.file ?: text?.file ?: fb2 ?: library.fileOf(book)
         return OpenBook(book.id, file, context.readium.open(file), text, pdf)
     }
 

@@ -582,7 +582,7 @@ internal class TextBook private constructor(
         /** The same for every book, so the same text always gives the same file. */
         private const val WRITTEN = 1_767_225_600_000L
 
-        private val RIGHT_TO_LEFT = setOf("ar", "he", "iw", "fa", "ur", "yi", "ps", "sd", "ug")
+        internal val RIGHT_TO_LEFT = setOf("ar", "he", "iw", "fa", "ur", "yi", "ps", "sd", "ug")
 
         /** The chapter file numbered [index] (from 0), as the book's own files name it. */
         fun hrefOf(index: Int): String = "text/part%04d.xhtml".format(java.util.Locale.ROOT, index + 1)

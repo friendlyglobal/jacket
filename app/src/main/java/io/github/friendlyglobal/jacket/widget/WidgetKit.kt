@@ -128,7 +128,7 @@ internal fun mediaButtonIntent(context: Context, keyCode: Int) = Intent(context,
  * [PdfWords]); whether a given PDF has any is only known once it has been read through.
  */
 internal val Book.canListen: Boolean
-    get() = format == BookFormat.EPUB || format == BookFormat.TXT || (format == BookFormat.PDF && PdfWords.available)
+    get() = format.isWords || (format == BookFormat.PDF && PdfWords.available)
 
 /** The books you're reading, most recent first, with the current one leading; none finished or missing. */
 internal fun readingNow(state: LibraryState, missing: Set<String>): List<Book> {
