@@ -85,7 +85,7 @@ internal object DeviceFiles {
     private const val KIND = "jacket-catch-up"
 
     /** A file bigger than this isn't one of Jacket's: it isn't read. (A library of a thousand books makes about 1 MB.) */
-    const val MAX_BYTES = 16L * 1024 * 1024
+    const val MAX_BYTES = 8L * 1024 * 1024
 
     /** The name a device's file is given: "Jacket – Tablet.json". */
     fun nameFor(device: String): String = "Jacket \u2013 ${tidyName(device).ifEmpty { "device" }}.json"

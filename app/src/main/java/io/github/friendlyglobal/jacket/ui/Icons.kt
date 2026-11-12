@@ -24,6 +24,9 @@ object JacketIcons {
     val Book = icon("M7 2h11a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3zm0 2a1 1 0 0 0-1 1v11.2c.3-.1.6-.2 1-.2h11V4zm0 14a1 1 0 1 0 0 2h11v-2z")
     val OuterScreen = icon("M5 3h6v18H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm8 0h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6zm2 2.5v13h3.5v-13z")
     val Play = icon("M8 5.5v13l10.5-6.5z")
+    // Two devices side by side, and one of them: catching up between the reader's devices.
+    val Devices = icon("M4 6h18V4H4c-1.1 0-2 .9-2 2v11H0v3h14v-3H4V6zm19 2h-6c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h6c.55 0 1-.45 1-1V9c0-.55-.45-1-1-1zm-1 9h-4v-7h4v7z")
+    val Device = icon("M17 1.01 7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z")
     val Pin = icon("M16 3v2h-1v6l2 3v2h-4.2v5h-1.6v-5H7v-2l2-3V5H8V3z")
     val Headphones = icon(HEADPHONES_PATH)
     val Pause = icon("M6 19h4V5H6v14zm8-14v14h4V5h-4z")

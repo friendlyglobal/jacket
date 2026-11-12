@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: each offers to go to the page the reader reached on the other. -->
+<resources>
+    <!-- Settings: the group, its switch, and what the switch does. "Devices" are the reader's own phone, foldable or tablet. -->
+    <string name="catch_up_group">Your other devices</string>
+    <string name="catch_up_title">Catch up between devices</string>
+    <string name="catch_up_description">Read on two devices, and pick up on one where you left off on the other.</string>
+    <!-- Shown before the folder is chosen. Keep the two blank lines (\n\n) between the paragraphs. -->
+    <string name="catch_up_setup_body">Choose a folder that all your devices share: one that an app like Google Drive, Dropbox or Syncthing keeps the same on each of them, or a USB stick you carry between them.\n\nJacket keeps a small file there with your places, bookmarks, highlights, notes and collections, and reads the files your other devices keep there. Jacket itself never goes online: the app that shares the folder does that. Your books, covers and settings stay on each device.\n\nThen do the same on your other device, with the same folder.</string>
+    <!-- The label of a text field: what this device is called on the reader's other devices, e.g. "Tablet". -->
+    <string name="catch_up_device_name">This device\'s name</string>
+    <string name="catch_up_choose_folder">Choose a folder</string>
+    <!-- For apps that only let single files be chosen, not folders. The button, and the line above it. -->
+    <string name="catch_up_setup_files_hint">Can\'t choose the folder you want? Save this device\'s file in it instead, then add the other devices\' files one by one.</string>
+    <string name="catch_up_setup_files">Save a file instead</string>
+    <string name="catch_up_failed">Jacket can\'t save there any more. Tap to choose again.</string>
+    <!-- The row that lists the reader's other devices by name, and what it says while there are none. -->
+    <string name="catch_up_others">Devices found</string>
+    <string name="catch_up_others_none_folder">None yet. Turn this on on your other device too, with the same folder.</string>
+    <string name="catch_up_others_none_files">None yet. Turn this on on your other device too, then tap here to choose the file it saved.</string>
+    <!-- %1$s is the names of the devices found, e.g. "Tablet, Phone". -->
+    <string name="catch_up_others_add">%1$s. Tap to add another device\'s file.</string>
+    <string name="catch_up_hint">Jacket asks before taking you to the page another device reached: your place never changes by itself. Bookmarks, highlights, notes and collections are kept the same on every device, and what you delete on one is deleted on the others.</string>
+
+    <!-- The offer, when another device is further on in a book. %1$s is that device's name ("Tablet"). -->
+    <!-- %2$d is a page number. -->
+    <string name="catch_up_offer_page">On %1$s you\'re on page %2$d.</string>
+    <!-- %2$d is a page number, %3$s the chapter's name. -->
+    <string name="catch_up_offer_page_chapter">On %1$s you\'re on page %2$d, in %3$s.</string>
+    <!-- %2$d is how far through the book, as a percentage. -->
+    <string name="catch_up_offer_percent">On %1$s you\'re %2$d%% through.</string>
+    <!-- %2$d is how far through the book, as a percentage, %3$s the chapter's name. -->
+    <string name="catch_up_offer_percent_chapter">On %1$s you\'re %2$d%% through, in %3$s.</string>
+    <!-- The offer as the library makes it. %1$s is the device's name, %2$s the book's title. -->
+    <string name="catch_up_offer_book">On %1$s you\'re further on in %2$s.</string>
+    <!-- The button that takes the reader to that page. -->
+    <string name="catch_up_go">Go there</string>
+</resources>

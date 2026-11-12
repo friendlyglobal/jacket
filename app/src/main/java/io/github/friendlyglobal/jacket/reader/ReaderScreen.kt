@@ -935,6 +935,11 @@ fun ReaderScreen(
                 nav, haptics, visible = opening.settled,
                 modifier = Modifier.align(Alignment.TopCenter).absolutePadding(left = besideSpine).keyboardControls(controlFocus, "jump-back"),
             )
+            // Another of the reader's devices is further on in this book: the offer to go there.
+            CatchUpOffer(
+                book, nav, haptics, visible = opening.settled && !closing,
+                modifier = Modifier.align(Alignment.TopCenter).absolutePadding(left = besideSpine).keyboardControls(controlFocus, "catch-up"),
+            )
             EdgeLevel(levels)
 
             AnimatedVisibility(

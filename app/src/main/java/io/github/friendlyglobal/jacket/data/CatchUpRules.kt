@@ -258,6 +258,19 @@ internal object CatchUpRules {
         return theirs - ours > minOf(page, MOST)
     }
 
+    /**
+     * [book] at the [place] another device reached, when the reader asks to go there. A place
+     * that came without the exact spot (a Readium locator) leaves none here either: the book
+     * then opens as far through as the place says, not where this device last was.
+     */
+    fun caughtUp(book: Book, place: SharedPlace): Book = book.copy(
+        locator = place.locator ?: book.locator?.let { NO_LOCATOR },
+        position = place.position.coerceAtLeast(0),
+        positionOffset = place.offset.takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: 0f,
+        progress = place.progress.takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: book.progress,
+        sectionCount = if (place.sections > 0) place.sections else book.sectionCount,
+    )
+
     /** Where this device is in [book], as it tells the others; null for a book never opened here. */
     private fun placeOf(book: Book, told: SharedPlace?, chapter: String?, rev: Long): SharedPlace? {
         val progress = book.progress.takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: 0f
@@ -305,9 +318,15 @@ internal object CatchUpRules {
         settings = if (settings.collection == old) settings.copy(collection = now.id) else settings,
     )
 
+    /** A saved locator that names no place: the reader falls back on the progress saved beside it (see the reader's reopen). */
+    private const val NO_LOCATOR = "{}"
+
     /** The most of a book that "about a page" is ever taken to be. */
     private const val MOST = 0.02f
 
     /** A place counted this close to the one already told hasn't moved. */
     private const val SAME_PLACE = 0.0001f
 }
+
+/** [this] book at the place another device reached in it (see [CatchUpRules.caughtUp]). */
+internal fun Book.caughtUpTo(place: SharedPlace): Book = CatchUpRules.caughtUp(this, place)
