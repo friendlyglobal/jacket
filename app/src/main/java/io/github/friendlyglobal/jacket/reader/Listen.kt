@@ -99,6 +99,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
@@ -395,7 +396,9 @@ internal fun PlayerLine(
             exit = leave,
         ) {
             // The line runs on its own while the voice gets ready, then shows the place in the book.
-            Crossfade(preparing, animationSpec = motion.defaultEffectsSpec(), label = "line") { busy ->
+            // For the eye only: the play button says when the voice is getting ready, and a bare
+            // "42 percent" read out here would be of nothing in particular.
+            Crossfade(preparing, animationSpec = motion.defaultEffectsSpec(), modifier = Modifier.clearAndSetSemantics {}, label = "line") { busy ->
                 if (busy) {
                     LinearWavyProgressIndicator(Modifier.width(240.dp).padding(bottom = 10.dp))
                 } else {
@@ -598,12 +601,15 @@ private fun PlayButton(listen: ListenState, controller: ListenController, haptic
     val turn = rememberTurn(playing)
     val progress = shapeProgress.value
     val shape = remember(morph, progress) { MorphShape(morph, progress) }
+    // One thing to a screen reader, whatever is drawn on it: a button that says what a press does,
+    // or that the voice is on its way.
+    val label = stringResource(if (preparing) R.string.listen_preparing else if (playing) R.string.listen_pause else R.string.listen_play)
     FloatingToolbarDefaults.VibrantFloatingActionButton(
         onClick = {
             haptics.toggle(!listen.playing)
             controller.toggle()
         },
-        modifier = Modifier.graphicsLayer { rotationZ = turn.value },
+        modifier = Modifier.graphicsLayer { rotationZ = turn.value }.semantics { contentDescription = label },
         shape = shape,
     ) {
         val effects = motion.fastEffectsSpec<Float>()
@@ -616,19 +622,13 @@ private fun PlayButton(listen: ListenState, controller: ListenController, haptic
             },
             transitionSpec = { (scaleIn(spatial, initialScale = 0.6f) + fadeIn(effects)) togetherWith (scaleOut(spatial, targetScale = 0.6f) + fadeOut(effects)) },
             // The icon stays upright inside the turning button.
-            modifier = Modifier.graphicsLayer { rotationZ = -turn.value },
+            modifier = Modifier.graphicsLayer { rotationZ = -turn.value }.clearAndSetSemantics {},
             label = "action",
         ) { face ->
             when (face) {
-                Face.PREPARING -> {
-                    val label = stringResource(R.string.listen_preparing)
-                    LoadingIndicator(
-                        Modifier.size(28.dp).semantics { contentDescription = label },
-                        color = LocalContentColor.current,
-                    )
-                }
-                Face.PAUSE -> Icon(JacketIcons.Pause, stringResource(R.string.listen_pause))
-                Face.PLAY -> Icon(JacketIcons.Play, stringResource(R.string.listen_play))
+                Face.PREPARING -> LoadingIndicator(Modifier.size(28.dp), color = LocalContentColor.current)
+                Face.PAUSE -> Icon(JacketIcons.Pause, null)
+                Face.PLAY -> Icon(JacketIcons.Play, null)
             }
         }
     }
@@ -668,6 +668,8 @@ private fun RateButton(listen: ListenState, rate: Float, onRate: (Float) -> Unit
                         onRate(choice)
                         open = false
                     },
+                    // The tick is for the eye; a screen reader is told which speed is the one in use.
+                    modifier = Modifier.semantics { selected = choice == rate },
                 )
             }
         }
@@ -833,7 +835,8 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
         IconButton(onClick = { haptics.tick(); open = true }) {
             BadgedBox(badge = {
                 if (minutesLeft != null) {
-                    Badge { Text("$minutesLeft") }
+                    // The moon's own name says the minutes left: the number isn't read a second time.
+                    Badge(Modifier.clearAndSetSemantics {}) { Text("$minutesLeft") }
                 } else if (listen.sleep == SleepTimer.CHAPTER) {
                     Badge()
                 }
@@ -853,6 +856,7 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
                         start(option, option.minutes)
                         open = false
                     },
+                    modifier = Modifier.semantics { selected = option == running },
                 )
             }
             SleepTimer.entries.filter { it == SleepTimer.OFF || it.minutes > 0 }.forEach { preset(it) }
@@ -866,6 +870,7 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
                         start(SleepTimer.OTHER, own)
                         open = false
                     },
+                    modifier = Modifier.semantics { selected = running == SleepTimer.OTHER },
                 )
             }
             if (hasChapters) preset(SleepTimer.CHAPTER)
@@ -877,6 +882,7 @@ private fun SleepButton(listen: ListenState, hasChapters: Boolean, haptics: Hapt
                     open = false
                     choosing = true
                 },
+                modifier = Modifier.semantics { selected = running == SleepTimer.OTHER && own == null },
             )
         }
     }
