@@ -60,13 +60,29 @@ Shipped: TalkBack, keyboard-only use, large text up to 300% and AA contrast. Sti
 highlight or note without press-and-hold, PDF and comic zoom without pinching, and reading the
 page's own text with TalkBack inside the paginated view (Listen is the dependable route).
 
-## Next
+## Done since 1.1, not yet released
 
 ### Plain and shared text work like full books (M)
-Shared text plays with the screen off, skips by sentence, and can be highlighted and searched.
-- The text reader's player (`reader/PageReaders.kt:564`) has no media session, highlights or search.
-- One approach is to turn text into a small EPUB when it's imported (`importer/`).
-- Risk: places already saved in existing text books would need to move to the new format.
+A text file, and text shared from another app, is read in the same reader as an EPUB: pages or
+scrolling, read-aloud that keeps going with the screen off and answers to the lock screen and
+headphones, the sleep timer, speeds, skipping by sentence and chapter, highlights and notes,
+search, and bookmarks.
+- The text file stays the book. Jacket makes pages of it (a small EPUB, `importer/TextBook.kt`)
+  when it is opened, and makes them again whenever they are missing.
+- A place is kept as the page and, as before, as the paragraph: books, bookmarks and backups from
+  1.1 and earlier open where they were left, and nothing in them is rewritten.
+- Chapter headings ("Chapter 4", "Capítulo 12", "第三章", a Markdown file's `#` lines) become the
+  contents. Files saved as UTF-16, Windows-1252, Windows-1251, KOI8-R, Shift-JIS, EUC-JP, GBK, Big5
+  and EUC-KR are read as such.
+- Read-aloud, for every kind of book, now pauses while a call rings or a direction is spoken and
+  goes on afterwards (`reader/VoiceFocus.kt`). Before, an EPUB's voice talked over it and a text
+  file's stopped for good.
+- Still open: a text book's percent is now counted by length, not by paragraphs, so it can change
+  once after the update; verse and lists inside a text file are still run together as paragraphs;
+  and with TalkBack a text file is now read through Listen, like an EPUB, where the old reader's
+  paragraphs could be swiped through one by one.
+
+## Next
 
 ### Say it this way (M)
 Fix how a name is pronounced, and skip note numbers when reading aloud.
