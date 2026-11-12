@@ -210,6 +210,42 @@ class CatchUpRulesTest {
     }
 
     @Test
+    fun `going there puts the book at the other device's place, and only then`() {
+        val fold = fold(dune = 0.30f)
+        val tablet = tablet(dune = 0.53f).also { it.round(chapters = mapOf("t-dune" to "Chapter 9")) }
+        val place = fold.offers(tablet).getValue("f-dune").place
+        val there = fold.book("f-dune").caughtUpTo(place)
+        assertEquals(place.locator, there.locator)
+        assertEquals(place.position, there.position)
+        assertEquals(0.53f, there.progress, 0f)
+        assertEquals(400, there.sectionCount)
+        // Everything else about the book is this device's own.
+        assertEquals(fold.book("f-dune").copy(locator = there.locator, position = there.position, progress = there.progress), there)
+    }
+
+    @Test
+    fun `a place that came without the exact spot doesn't open the book where this device was`() {
+        // A PDF's place is its page; an EPUB last read in a Jacket that kept no locator has none.
+        val here = book("f-dune", "Dune.epub", 5_000, progress = 0.30f)
+        val there = here.caughtUpTo(SharedPlace(locator = null, position = 212, offset = 0.4f, sections = 400, progress = 0.53f, rev = 3))
+        // Not this device's old spot, which the reader would open at: one that names no place,
+        // so the book opens as far through as the place says.
+        assertNotEquals(here.locator, there.locator)
+        assertEquals("{}", there.locator)
+        assertEquals(212, there.position)
+        assertEquals(0.4f, there.positionOffset, 0f)
+        // A book that never had one (a PDF never read aloud) still has none.
+        val pdf = book("f-pdf", "Manual.pdf", 9_000, BookFormat.PDF, 400, 0.1f)
+        assertNull(pdf.caughtUpTo(SharedPlace(position = 212, offset = 0.4f, sections = 400, progress = 0.53f)).locator)
+        // And a place that can't be right is kept within bounds.
+        val odd = here.caughtUpTo(SharedPlace(position = -3, offset = 7f, sections = 0, progress = Float.NaN))
+        assertEquals(0, odd.position)
+        assertEquals(1f, odd.positionOffset, 0f)
+        assertEquals(here.progress, odd.progress, 0f)
+        assertEquals(here.sectionCount, odd.sectionCount)
+    }
+
+    @Test
     fun `a finished book and a book whose file isn't here are offered nothing`() {
         val tablet = tablet(dune = 0.53f, pdf = 0.5f).also { it.round() }
         val fold = fold(dune = 0.30f)
