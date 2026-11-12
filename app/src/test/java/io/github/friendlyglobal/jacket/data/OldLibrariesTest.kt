@@ -137,7 +137,7 @@ class OldLibrariesTest {
         // A book in a format this version doesn't know (a newer Jacket's), and a note of a kind it doesn't.
         val newer = """{"books":[
               {"id":"b1","title":"Known","format":"EPUB","fileName":"b1.epub","progress":0.5,"locator":"$place"},
-              {"id":"b2","title":"Unknown","format":"FB2","fileName":"b2.fb2","progress":0.9}],
+              {"id":"b2","title":"Unknown","format":"DJVU","fileName":"b2.djvu","progress":0.9}],
             "annotations":[
               {"id":"h1","bookId":"b1","kind":"HIGHLIGHT","text":"kept"},
               {"id":"x1","bookId":"b1","kind":"DRAWING"}],
@@ -149,6 +149,27 @@ class OldLibrariesTest {
         assertEquals(0.5f, read.state.books.single().progress)
         assertEquals(listOf("h1"), read.state.annotations.map { it.id })
         assertEquals(listOf("c1"), read.state.collections.map { it.id })
+    }
+
+    @Test
+    fun anFb2BookIsKeptAsTheFileItCameAs() {
+        // The .fb2 (or the zip it came in) is the book: its name, its size and its bytes' SHA-256 are what the
+        // library and a backup keep, as for any other file. The pages made of it are no part of either.
+        val fb2 = Book(
+            "b1", "Война и мир", "Лев Толстой", BookFormat.FB2, "b1.fb2", "b1.jpg", null, "war.fb2.zip", 1_014, 5,
+            position = 12, sectionCount = 80, progress = 0.15f, locator = place, language = "ru", sha256 = "ab12",
+        )
+        val state = LibraryState(books = listOf(fb2), currentId = "b1")
+        val read = LibraryJson.read(LibraryJson.encode(state))
+        assertEquals(0, read.unread)
+        assertEquals(fb2, read.state.books.single())
+        val restored = Backup.merge(LibraryState(), Backup.read(Backup.write(state))).books.single()
+        assertEquals(BookFormat.FB2, restored.format)
+        assertEquals("war.fb2.zip" to 1_014L, restored.sourceName to restored.sizeBytes)
+        assertEquals("ab12", restored.sha256)
+        assertEquals(place, restored.locator)
+        assertTrue(BookFormat.FB2.isWords)
+        assertTrue(BookFormat.FB2.isEpubLike)
     }
 
     @Test

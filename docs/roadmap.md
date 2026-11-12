@@ -228,8 +228,9 @@ a line has the voice read on from there.
 - Pages with no words (scans) are passed over. A PDF with none says so when Listen is pressed,
   and a Play from a headphone button goes to the next book that can be read aloud.
 - Still open:
-  - It has only been on the emulator, on Android 15. The Android 12 to 14 way has been
-    compiled and never run.
+  - It has only been on the emulator, on Android 15. The Android 12 to 14 way
+    (`PdfRendererPreV`) has since been run on that same emulator, which carries it too, and on
+    no Android 12 to 14 phone.
   - Reading order goes by the page's geometry, not its meaning. A table, a sidebar, a footnote
     in the middle of a sentence and columns that the file draws row by row are read as they come.
     A caption is only known by how it opens ("Figure 3."). A compound word broken at its own
@@ -239,8 +240,9 @@ a line has the voice read on from there.
     the outline itself could be read on any phone.
   - Reading a long PDF's words takes a moment the first time it is opened (about 3 seconds for
     440 pages on the emulator). Listen pressed before then says it is getting ready.
-  - Highlights, notes and search are still not there for PDFs, and a page saved by scrolling is
-    counted as before (only the voice's place goes through the rule that the percent never falls).
+  - Highlights and notes are still not there for PDFs (search is: see below), and a page saved
+    by scrolling is counted as before (only the voice's place goes through the rule that the
+    percent never falls).
   - Text that runs right to left, and vertical text, haven't been tried.
 
 ### Catch up on a second device (M)
@@ -269,6 +271,91 @@ still has no internet permission (`data/CatchUp.kt`).
 - Still to do: a run against a signed-in Drive, Dropbox and OneDrive on real devices; tidying
   away a device that is no longer used; carrying "finished" and pins.
 
+### FB2 books (M)
+FB2 is one XML file that holds a whole book, and the format most books are passed around in
+among Russian and Ukrainian readers, as often as not zipped. Jacket opens `.fb2`, `.fb2.zip` and
+`.fbz` in the full reader: pages, contents, listening, highlights, notes, search and bookmarks.
+- It is read through a small EPUB made from it, the way a text file is (`importer/Fb2.kt`,
+  `importer/Fb2Book.kt`). The file stays the book: it is what the library keeps, what a backup
+  and catch-up name (by its bytes, zipped or not), and what is added again after a restore. The
+  pages are kept where no backup looks and made again when they are missing.
+- What the file says becomes what an EPUB says: title, authors, language and annotation (on a
+  first page of its own); the cover from the picture the file carries; sections as chapters and
+  as the contents, as deep as they are nested; emphasis, epigraphs, quotations, poems, subtitles,
+  tables and pictures.
+- The notes (the body named "notes") go at the back, each marked as a note and every link to one
+  as a note's number. So a tap on the number shows the note in the pop-up, and the voice passes
+  the number over, with nothing new in the reader for either.
+- It is read with the XML reader Android already has; no library was added. UTF-8, UTF-16,
+  windows-1251, KOI8-R and anything else the file names are read; a file that names nothing and
+  isn't UTF-8 is taken for windows-1251.
+- The file is not trusted. Nothing outside it is ever fetched: the XML reader is never told to
+  act on a DOCTYPE, and a file that declares an entity is turned away before it is read. No more
+  than 96 MB is read, zipped or not, and elements nested deeper than 64 end the reading. All the
+  markup of the pages is written by Jacket from escaped words, links lead only into the book, to
+  the web or to a mail address, and only JPEG, PNG, GIF and WebP pictures are taken.
+- Android doesn't know what an `.fb2` file is: it calls it "application/octet-stream". So beside
+  FB2's own types, Jacket is offered for files of the generic types only when their name ends in
+  `.fb2`, `.fb2.zip` or `.fbz`, and stays out of every other file's "Open with". Share takes
+  FB2's own types only.
+- Still open:
+  - A link that doesn't carry the file's name (the Downloads view of Files gives
+    `…/document/msf:123`) can't be told to be FB2, so Jacket isn't offered for it: such files
+    are added with the + button, which takes them. The same goes for a share from an app that
+    calls the file "octet-stream".
+  - FB3, and FB2's rarer parts: `<style>` with a named style is set as plain words, and a
+    stylesheet in the file is ignored.
+  - A picture bigger than 32 MB is left out, and a very large book is read into memory while
+    its pages are made (once; they are kept).
+  - It has only been on the emulator, with files made for it. No shop's or library's FB2 yet.
+
+### Password-protected PDFs (S–M)
+A PDF locked with a password used to fail to import. Now it is added like any other, and the
+reader asks for its password in a small dialog; a wrong one says so (`reader/PdfLock.kt`).
+- Android opens it: `PdfRenderer` with `LoadParams` on Android 15, `PdfRendererPreV` on Android
+  12 to 14 with SDK extension 13 (the same phones that hand over a PDF's words). Reading,
+  read-aloud and search all use the one password. Older phones say plainly why they can't.
+- The password is held while Jacket runs. With "Remember on this phone" it is kept for that
+  book, sealed with a key in Android's keystore, in a file under the app's no-backup storage
+  (`data/PdfPasswords.kt`): not in the library, so not in a backup or a catch-up file, and not
+  in Android's own backup or a phone-to-phone transfer. "Forget password" in the book's menu
+  removes it.
+- The words kept of a PDF for reading it aloud are its text unlocked. For a locked PDF they are
+  kept only while its password is remembered, and nothing of it is read aloud without the
+  password to hand: a Play from a headphone button passes over a locked PDF nobody has opened.
+- Still open:
+  - A locked PDF has no contents list and no title or cover of its own in the library: its
+    outline and its title are encrypted in the file, and Android hands over neither. (The cover
+    could be drawn from the first page once it has been opened.)
+  - On Android 12 to 14 it has only been run on the Android 15 emulator, made to take that way.
+  - Tried with one PDF, made by LibreOffice. Other makers' encryption (AES-256 from Acrobat,
+    certificates) hasn't been.
+
+### Search inside PDFs (S–M)
+Where Android hands over a PDF's words, they are searched as an EPUB's are: results stream in
+with the page they are on and the words around them, and choosing one goes to its page and marks
+the match where it is drawn (`reader/PdfSearch.kt`, `reader/TextSearch.kt`).
+- What is searched is what is read aloud: paragraphs in reading order. So a word broken at a
+  line's end and a phrase that runs over a page are found whole, and running titles and page
+  numbers are not. The mark is drawn from the boxes Android gives for those letters, as the
+  sentence being read aloud is.
+- Typing is forgiving: any case, with or without Latin and Greek accents, plain quotes and
+  hyphens for curled ones and dashes, "е" for "ё". Letters that are letters of their own stay so.
+- The way back to where the reader was is on offer after the jump, as after any other.
+- Still open:
+  - A match is found inside one paragraph: words that end one paragraph and begin the next are not.
+  - On phones that can't get at a PDF's words (Android 8 to 11) there is no search, and no
+    Search button, as before.
+  - Highlights and notes on PDFs. What they need: (1) a way to choose words on a page that is a
+    picture: press-and-hold with handles (Android's `selectContent` takes points as well as
+    counts) and the menu EPUBs have; the top bar's "highlight the sentence being read" could
+    come first, since that sentence's letters are known already. (2) A place that means the same
+    on another device: today a PDF's mark is only a page. It would be kept as the page, the
+    words, and a little of what stands around them, and found again in the page's text, because
+    paragraph numbers change when the reading order gets better and catch-up shares marks
+    between devices. (3) Drawing each mark of the pages in view (the search mark shows how) and
+    a tap on one to change it. About a week.
+
 ## Next
 
 ### Android Auto (M)
@@ -290,7 +377,6 @@ Choose a book on the car's screen and have it read from where it was left.
 - "Currently reading" from Hardcover and Open Library. Jacket has no internet permission, so this
   would have to come through a file or another app, not a direct connection.
 - ISBN barcode scanning to set a cover for a paper book.
-- More formats (FB2) and password-protected PDFs.
 
 ## Not planned
 - **Cloud sync, accounts, online catalogues (OPDS), fetching web articles:** all need the internet.

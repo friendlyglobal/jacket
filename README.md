@@ -34,7 +34,7 @@ Google Play: coming soon ·
   two-page spread.
 - **Or just listen.** Natural voices come with the app and speak 31 languages, with no internet.
   Each word lights up as it's read, and the page turns with the voice.
-- **Your own books, and free ones.** EPUB, PDF, CBZ comics and plain text, plus 114 classics in
+- **Your own books, and free ones.** EPUB, PDF, FB2, CBZ comics and plain text, plus 114 classics in
   16 languages to download for free.
 - **Nothing leaves your phone.** Jacket has no internet permission: no accounts, no ads, no
   analytics, no tracking.
@@ -59,7 +59,7 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
 ## Everything it does
 
 ### Reading
-- **Your own files:** EPUB, PDF, CBZ comics and plain text. Use **Add books**, or *Open with* /
+- **Your own files:** EPUB, PDF, FB2, CBZ comics and plain text. Use **Add books**, or *Open with* /
   *Share* from any app (shared text becomes a book too). Jacket keeps a private copy and pulls out
   the title, author and cover, generating a typographic cover when a file has none.
 - **Real pages for EPUB**, rendered by [Readium](https://readium.org), the open-source toolkit
@@ -97,14 +97,23 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
   text apps. With TalkBack or a keyboard, the highlighter button on the top bar marks the sentence
   being read aloud, or the first paragraph on the page, and takes a note for it. Everything is listed next to the contents. A book's highlights and notes can be
   shared as text in one go or saved as a Markdown file, and Settings saves every book's at once.
-- **Search inside EPUBs**, with results streaming in and the match marked on the page.
+- **Search inside the book**, with results streaming in and the match marked on the page: in
+  EPUBs, FB2 books and text files, and in PDFs on Android 15 (or Android 12 to 14 with the
+  latest Google Play system update), where a result is marked on the PDF's own page.
 - **Finishing a book:** the last page offers to mark it finished and suggests what to read next;
   finished books move to their own shelf.
 - **Text files and shared text** open in the same reader as EPUBs: real pages, contents from
   their chapter headings, highlights and notes, search and bookmarks. Old encodings (Windows,
   Russian, Japanese, Chinese, Korean) are read correctly.
+- **FB2 books** (`.fb2`, and zipped as `.fb2.zip`) open in that reader too. Their sections are
+  the contents, their notes open in the pop-up, and epigraphs, poems, tables and pictures are set
+  as such. Files saved as windows-1251 are read correctly.
 - PDFs render with Android's `PdfRenderer`, comics page by page.
   Pinch or double-tap to zoom PDFs and comics. Your place is saved as you read.
+- **Password-protected PDFs** ask for their password, then open to be read and read aloud like
+  any other. Jacket can remember the password for that book, on the phone only and never in a
+  backup, and forget it again from the book's menu. (Android 15, or Android 12 to 14 with the
+  latest Google Play system update; older phones say why they can't.)
 
 ### Listening
 - **Natural voices, on the phone.** Ten voices that sound like a person reading come with the
@@ -264,7 +273,7 @@ and use the emulator's extended controls to view the rear display.
 ```
 app/src/main/java/io/github/friendlyglobal/jacket/
 ├── data/        Book model, JSON-backed library, settings
-├── importer/    EPUB / PDF / CBZ / TXT import: metadata, covers, title cards
+├── importer/    EPUB / PDF / FB2 / CBZ / TXT import: metadata, covers, title cards
 ├── reader/      Reader screen, EPUB on Readium, per-format views, read-aloud, reading controls
 ├── outer/       Outer-display session (WindowAreaController) and the cover shown on it
 ├── voice/       Natural voices: the engine, sentence look-ahead, gapless audio, word timing
@@ -288,7 +297,7 @@ The details, the reasons and the size of each item are in [docs/roadmap.md](docs
 - Pick up on one device where you left off on another, through a folder your devices share
 - A natural voice for Chinese, and listening to a book in another language (translated on the phone)
 - ISBN barcode scanning to set a cover for a paper book
-- More formats (FB2), password-protected PDFs
+- Highlights and notes on PDFs
 
 Kindle, Google Play Books and other stores don't expose what you're reading, and DRM-protected
 files can't be opened. Jacket won't try to work around either.

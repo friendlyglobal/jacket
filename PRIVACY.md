@@ -14,11 +14,16 @@ are no analytics, no ads and no accounts. Jacket sends the developer nothing.
 
 ## What Jacket stores on your device
 
-- **Books.** When you import a book (EPUB, PDF, CBZ or TXT) with *Add books*, *Open with* or
+- **Books.** When you import a book (EPUB, PDF, FB2, CBZ or TXT) with *Add books*, *Open with* or
   *Share*, Jacket copies the file into its private storage on your device, along with a cover
   image that it extracts or generates. Text you share to Jacket is saved as a book the same way.
 - **Your reading data.** Reading positions, bookmarks, highlights, notes and settings are stored
   on your device.
+- **PDF passwords.** A PDF that is locked with a password asks you for it. Jacket keeps the
+  password only while it is running, unless you tick *Remember on this phone*. A remembered
+  password is stored encrypted on your device, with a key that Android keeps on that device. It
+  is not part of Android's device backup, a phone-to-phone transfer, a backup file you export or
+  the "Catch up between devices" file. *Forget password* in the book's menu removes it.
 
 Android keeps this storage private to Jacket; other apps cannot read it.
 

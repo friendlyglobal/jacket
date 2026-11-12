@@ -547,6 +547,8 @@ class Library(private val context: Context) : LibraryOrganizer {
     fun forgetPassword(id: String) {
         passwords.forget(id)
         scope.launch(disk) { pdfPagesLock.withLock { pdfPagesOf(id).takeIf(PdfSpokenBook::locked)?.delete() } }
+        // (The player widget offers to open it now, not to play it.)
+        WidgetSync.request(context)
     }
 
     /** Marks a book finished (or back to reading). */
