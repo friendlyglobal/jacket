@@ -46,6 +46,12 @@ internal object TextDecoding {
     }
 
     /**
+     * Whether [bytes] are plain UTF-8: the one kind of file Jacket 1.1 and earlier were sure to
+     * read as it was written. Anything else they took for Latin-1, whatever it was.
+     */
+    fun isUtf8(bytes: ByteArray): Boolean = unmarkedUtf16(bytes) == null && strictly(bytes, Charsets.UTF_8) != null
+
+    /**
      * Which of the encodings from before UTF-8 a file was saved in, where its bytes make that
      * plain: the ones still met in novels passed around as text files, in Japanese (Shift-JIS,
      * EUC-JP), Chinese (GBK, Big5), Korean (EUC-KR) and Russian or Ukrainian (Windows-1251,

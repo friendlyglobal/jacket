@@ -191,16 +191,25 @@ class Library(private val context: Context) : LibraryOrganizer {
     internal suspend fun textPages(book: Book): TextPages = withContext(Dispatchers.IO) {
         textPagesLock.withLock {
             val source = fileOf(book)
-            val text = TextBook.of(TextDecoding.decode(source.readBytes()), TextBook.isMarkdown(book.sourceName))
+            val bytes = source.readBytes()
+            val text = TextBook.of(TextDecoding.decode(bytes), TextBook.isMarkdown(book.sourceName))
             val pages = textPagesOf(book.id)
             // As it is now: the title may have been put right since the book was handed over.
-            val now = _state.value.find(book.id) ?: book
+            var now = _state.value.find(book.id) ?: book
             if (text.parts.isNotEmpty() && (pages.lastModified() < source.lastModified() || !TextBook.isCurrent(pages))) {
                 textPagesDir.mkdirs()
                 // Whole or not at all: pages cut short would open as a damaged book.
                 val partial = File(textPagesDir, "${pages.name}.part")
                 try {
-                    val language = now.language ?: runCatching { guessLanguage(text.paragraphs.asSequence().take(200).joinToString("\n")) }.getOrNull()
+                    val told = runCatching { guessLanguage(text.paragraphs.asSequence().take(200).joinToString("\n")) }.getOrNull()
+                    // A file an older Jacket misread (UTF-16, Cyrillic, Japanese...) had its language
+                    // told from the wrong letters, and would be read aloud in it. It is told again
+                    // from the right ones, once: the first time such a book is given pages.
+                    if (told != null && told != now.language && now.locator == null && !pages.exists() && !TextDecoding.isUtf8(bytes)) {
+                        setLanguage(now.id, told)
+                        now = now.copy(language = told)
+                    }
+                    val language = now.language ?: told
                     partial.outputStream().buffered().use { text.write(it, TextBook.About(now.id, now.title, now.author, language)) }
                     check(partial.renameTo(pages)) { "Couldn't store the pages of ${book.sourceName}" }
                 } finally {

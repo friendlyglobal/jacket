@@ -3,6 +3,7 @@ package io.github.friendlyglobal.jacket.importer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.nio.charset.Charset
 
@@ -88,6 +89,18 @@ class TextDecodingTest {
     fun `only the first pages of a long file are looked at, and no character is cut in two`() {
         val long = (1..3_000).joinToString("\n") { japanese }
         assertEquals(long, TextDecoding.decode(long.toByteArray(Charset.forName("Shift_JIS"))))
+    }
+
+    @Test
+    fun `only plain UTF-8 was sure to be read right by older Jackets`() {
+        assertTrue(TextDecoding.isUtf8(words.toByteArray(Charsets.UTF_8)))
+        assertTrue(TextDecoding.isUtf8("plain".toByteArray()))
+        assertTrue(TextDecoding.isUtf8(byteArrayOf(0xEF.toByte(), 0xBB.toByte(), 0xBF.toByte()) + japanese.toByteArray(Charsets.UTF_8)))
+        // These they took for Latin-1, and guessed a language from the letters that made.
+        assertFalse(TextDecoding.isUtf8(words.toByteArray(Charsets.UTF_16LE)))
+        assertFalse(TextDecoding.isUtf8(russian.toByteArray(Charset.forName("windows-1251"))))
+        assertFalse(TextDecoding.isUtf8(japanese.toByteArray(Charset.forName("Shift_JIS"))))
+        assertFalse(TextDecoding.isUtf8(words.toByteArray(Charset.forName("windows-1252"))))
     }
 
     @Test
