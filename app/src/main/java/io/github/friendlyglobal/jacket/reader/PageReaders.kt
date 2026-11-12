@@ -518,7 +518,12 @@ private fun PageImage(
                     // The sentence being read aloud, marked where it is drawn (only what is drawn changes as it is read).
                     .drawWithContent {
                         drawContent()
-                        aloud?.run { layout?.widthOf(index)?.let { width -> drawMarks(index, width, paper) } }
+                        aloud?.run {
+                            layout?.widthOf(index)?.let { width ->
+                                drawMarks(index, width, paper)
+                                drawFound(index, width)
+                            }
+                        }
                     },
                 contentScale = ContentScale.Fit,
             )
@@ -561,6 +566,19 @@ private fun FollowVoice(listState: LazyListState, aloud: PdfAloud, nav: ReaderNa
             scope.launch {
                 val size = listState.layoutInfo.visibleItemsInfo.maxOfOrNull { it.size } ?: 0
                 listState.animateScrollToItem(place.page, (place.within * size).toInt())
+            }
+        }
+        // To a line of a page (a search result), set where the line being read aloud is kept:
+        // clear of the controls, with what leads up to it in sight.
+        aloud.show = { place ->
+            scope.launch {
+                val info = listState.layoutInfo
+                val size = info.visibleItemsInfo.firstOrNull { it.index == place.page }?.size ?: info.visibleItemsInfo.maxOfOrNull { it.size } ?: 0
+                val above = (info.viewportSize.height / zoomed() * LINE_AT).toInt()
+                listState.scrollToItem(place.page, (place.within * size).toInt() - above)
+                // (A page not yet laid out is another height than the ones in view: once it is, the line is put right.)
+                val laid = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == place.page }?.size ?: return@launch
+                if (laid != size) listState.scrollToItem(place.page, (place.within * laid).toInt() - above)
             }
         }
         aloud.inView = { place ->
