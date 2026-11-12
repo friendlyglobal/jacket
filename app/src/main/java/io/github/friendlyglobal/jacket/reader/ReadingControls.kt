@@ -429,7 +429,8 @@ private fun ToggleRow(title: String, description: String?, checked: Boolean, onC
     }
 }
 
-private fun step(scale: Float, direction: Int) =
+/** The text size a tenth larger ([direction] +1) or smaller (-1) than [scale], within the sizes there are. */
+internal fun step(scale: Float, direction: Int) =
     ((scale * 10).roundToInt() + direction).div(10f).coerceIn(MIN_SCALE, MAX_SCALE)
 
 /** The name of a group of choices: a heading, so each "Book" and "Normal" below is heard under what it is a choice of. */
