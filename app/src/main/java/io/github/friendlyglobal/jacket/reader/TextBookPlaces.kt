@@ -1,20 +1,15 @@
 package io.github.friendlyglobal.jacket.reader
 
-import androidx.core.net.toUri
-import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.importer.TextLayout
 import io.github.friendlyglobal.jacket.importer.TextPlace
 import io.github.friendlyglobal.jacket.importer.TextSpot
 import org.json.JSONObject
-import org.readium.navigator.media.common.DefaultMediaMetadataProvider
-import org.readium.navigator.media.common.MediaMetadataProvider
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.html.cssSelector
 import org.readium.r2.shared.util.mediatype.MediaType
-import java.io.File
 
 /*
  * A text file read through pages (see TextBook.kt): telling a place on those pages as the
@@ -98,10 +93,3 @@ private val STARTING_HERE_SCRIPT = """
       return { first: first, last: last };
     })
 """.trimIndent()
-
-/**
- * What the lock screen and the notification show while a text book is read aloud: its title and
- * author as the library has them, and the library's cover (the pages made of a text file carry none).
- */
-internal fun textBookMetadata(book: Book, cover: File?): MediaMetadataProvider =
-    DefaultMediaMetadataProvider(title = book.title, author = book.author.takeIf { it.isNotBlank() }, cover = cover?.toUri())

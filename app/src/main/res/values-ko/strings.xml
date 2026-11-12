@@ -287,6 +287,8 @@
     <string name="widget_reading">읽는 중</string>
     <string name="widget_empty">책을 추가해 표지를 입혀 보세요</string>
     <string name="listen_notification_channel">소리 내어 읽기</string>
+    <string name="listen_browse_continue">이어서 듣기</string>
+    <string name="listen_browse_recent">최근 책</string>
     <string name="reader_footer_time_left">이 챕터 %1$d분 남음</string>
     <string name="reading_time_left">챕터 남은 시간</string>
     <string name="reading_edge_swipes">스와이프로 밝기와 따뜻함 조절</string>

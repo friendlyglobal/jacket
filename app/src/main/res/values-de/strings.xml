@@ -296,6 +296,8 @@
     <string name="widget_reading">Ich lese</string>
     <string name="widget_empty">Füge ein Buch hinzu, um sein Cover zu tragen</string>
     <string name="listen_notification_channel">Vorlesen</string>
+    <string name="listen_browse_continue">Weiterhören</string>
+    <string name="listen_browse_recent">Letzte Bücher</string>
     <string name="reader_footer_time_left">Noch %1$d Min. im Kapitel</string>
     <string name="reading_time_left">Restzeit im Kapitel</string>
     <string name="reading_edge_swipes">Helligkeit und Wärme per Wischen</string>

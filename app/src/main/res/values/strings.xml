@@ -346,6 +346,9 @@
     <string name="widget_reading">Reading</string>
     <string name="widget_empty">Add a book to wear its cover</string>
     <string name="listen_notification_channel">Read aloud</string>
+    <!-- What can be listened to, as a car's screen lists it: the book being read, and the ones read lately. -->
+    <string name="listen_browse_continue">Continue listening</string>
+    <string name="listen_browse_recent">Recent books</string>
 
     <!-- Day-to-day comforts: time left, edge swipes, night pages, tabletop, a watched folder, reading time, highlights on the dimmed cover. "min" is the abbreviation for minutes. "Day 5" is the fifth day in a row with some reading. -->
     <string name="reader_footer_time_left">%1$d min left in chapter</string>

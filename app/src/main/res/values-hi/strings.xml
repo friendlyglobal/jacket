@@ -297,6 +297,8 @@
     <string name="widget_reading">पढ़ी जा रही</string>
     <string name="widget_empty">कवर पहनाने के लिए कोई किताब जोड़ें</string>
     <string name="listen_notification_channel">पढ़कर सुनाना</string>
+    <string name="listen_browse_continue">सुनना जारी रखें</string>
+    <string name="listen_browse_recent">हाल की किताबें</string>
     <string name="reader_footer_time_left">अध्याय में %1$d मिनट बाकी</string>
     <string name="reading_time_left">अध्याय में बचा समय</string>
     <string name="reading_edge_swipes">स्वाइप से चमक और गर्माहट</string>

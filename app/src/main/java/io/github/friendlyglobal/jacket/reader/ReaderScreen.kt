@@ -151,6 +151,7 @@ import io.github.friendlyglobal.jacket.data.BookFormat
 import io.github.friendlyglobal.jacket.data.ReadingMoment
 import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.library
+import io.github.friendlyglobal.jacket.listening
 import io.github.friendlyglobal.jacket.voices
 import androidx.compose.ui.platform.LocalConfiguration
 import io.github.friendlyglobal.jacket.ui.voices.SayItDialog
@@ -178,7 +179,6 @@ import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import io.github.friendlyglobal.jacket.ui.rememberPageColors
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -192,7 +192,13 @@ data class TocItem(val title: String, val level: Int, val index: Int)
  * steps through the whole book for EPUB and text, pages for PDF and comics.
  */
 @Stable
-class ReaderNav {
+class ReaderNav(
+    /**
+     * Audiobook mode: the player's state. It is the voice's own, which the app keeps (see
+     * [Listening]): a book opened while it is being read aloud shows the player as it is.
+     */
+    val listen: ListenState = ListenState(),
+) {
     var section by mutableIntStateOf(0)
     var sectionCount by mutableIntStateOf(1)
     /** Where you are, e.g. the chapter title or "Page 3 of 40". */
@@ -221,8 +227,7 @@ class ReaderNav {
     /** Chapter starts as fractions of the book (0..1), drawn as marks on the scrubber. */
     var marks by mutableStateOf<List<Float>>(emptyList())
 
-    /** Audiobook mode; [listenController] is null for formats that can't be read aloud. */
-    val listen = ListenState()
+    /** The voice, to start and steer; null for formats that can't be read aloud. */
     var listenController by mutableStateOf<ListenController?>(null)
 
     /** Bookmarks: the page on screen, whether a mark falls on it, and going to one. */
@@ -327,7 +332,16 @@ fun ReaderScreen(
     val voiceLabel = voiceLabel(readIn, settings)
     val outerAvailable by outer.available.collectAsStateWithLifecycle()
     val outerActive by outer.active.collectAsStateWithLifecycle()
-    val nav = remember(book.id) { ReaderNav() }
+    // The voice is the app's, and may be reading this book already (started from a headphone
+    // button, the notification, the widget or the car): the reader then opens on that player.
+    val readAloud = context.listening
+    val nav = remember(book.id) { ReaderNav(readAloud.stateFor(book.id)) }
+    // Opening a book ends listening to any other; a voice still reading this one when its screen
+    // goes (closing the book stops it first) reads on without it.
+    DisposableEffect(book.id) {
+        readAloud.entered(book.id)
+        onDispose { readAloud.left(book.id, nav.listen) }
+    }
     // "Dark pages at night": with the phone in dark theme, Paper gives way to Dark.
     val page = rememberPageColors(
         if (settings.nightPages && settings.pageColor == PageColor.PAPER && isSystemInDarkTheme()) PageColor.DARK else settings.pageColor,
@@ -551,56 +565,9 @@ fun ReaderScreen(
         onDispose { if (ReaderKeys.target === target) ReaderKeys.target = null }
     }
 
-    // Sleep timer: pause after the chosen time, or when the chapter changes. The timer is watched
-    // here, not waited for in recomposition: set from the widget while Jacket is behind another
-    // app, or on the cover screen of a phone folded shut, nothing on this screen is recomposed,
-    // and the timer has to start all the same.
+    // (The sleep timer runs with the voice, and the widget's skip and sleep buttons reach it there,
+    // whether or not this screen is open: see ReadAloud and Listening.)
     val listen = nav.listen
-    LaunchedEffect(nav) {
-        snapshotFlow { Triple(listen.sleep, listen.sleepEndsAt, listen.chapterSkips) }.collectLatest { (timer, endsAt, _) ->
-            if (!timer.timed) listen.sleepLeft = 0
-            if (timer == SleepTimer.OFF) return@collectLatest
-            if (timer == SleepTimer.CHAPTER) {
-                // A chapter skipped to from the player is the one whose end is waited for: once the
-                // voice has arrived in it, and the page has said which chapter that is.
-                if (listen.chapterSkips > 0) {
-                    snapshotFlow { listen.skippingChapter }.first { !it }
-                    delay(CHAPTER_SKIP_SETTLE_MS)
-                }
-                // Whichever comes first: the voice moving into the next chapter file, or the page
-                // (following the voice) reaching the next chapter in the contents.
-                val start = listen.spokenFile to nav.tocIndex
-                snapshotFlow { listen.spokenFile to nav.tocIndex }.first { (file, chapter) ->
-                    (file != start.first && file >= 0 && start.first >= 0) || chapter != start.second
-                }
-            } else {
-                // Counted down a minute at a time: the widget's moon says how many are left.
-                while (true) {
-                    val left = endsAt - SystemClock.uptimeMillis()
-                    if (left <= 0L) break
-                    listen.sleepLeft = sleepMinutesShown(left)
-                    delay(sleepMinuteEndsIn(left))
-                }
-            }
-            if (listen.playing) nav.listenController?.toggle()
-            listen.sleepLeft = 0
-            listen.sleep = SleepTimer.OFF
-        }
-    }
-    // Stopping read-aloud clears the timer.
-    LaunchedEffect(nav) { snapshotFlow { listen.active }.collect { active -> if (!active) listen.sleep = SleepTimer.OFF } }
-    // The widget's skip and sleep buttons reach this book's player through here (see ListenRemote).
-    DisposableEffect(nav) {
-        val player = ListenRemote.Player(
-            listen = nav.listen,
-            controller = { nav.listenController },
-            hasChapters = { nav.toc.isNotEmpty() },
-            ownSleepMinutes = { library.state.value.settings.sleepMinutes },
-        )
-        ListenRemote.player = player
-        // Only clear our own: opening the next book briefly overlaps the outgoing reader.
-        onDispose { if (ListenRemote.player === player) ListenRemote.player = null }
-    }
 
     // While the book is read aloud, the controls don't stay over the text. They tuck away into the
     // footer's mini player a few seconds after the last touch, and sooner than that when they sit
@@ -1404,8 +1371,6 @@ private class ControlsWatch {
     var covering = false
 }
 
-/** How long after the voice arrives in a chapter skipped to "end of chapter" starts watching for its end: the page takes a moment to say where it is. */
-private const val CHAPTER_SKIP_SETTLE_MS = 1_500L
 
 /** While listening, the controls tuck away this long after their last touch... */
 private const val LISTEN_CONTROLS_MS = 4_000L

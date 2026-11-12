@@ -297,6 +297,8 @@
     <string name="widget_reading">Okunuyor</string>
     <string name="widget_empty">Kapağını giymek için bir kitap ekleyin</string>
     <string name="listen_notification_channel">Sesli okuma</string>
+    <string name="listen_browse_continue">Dinlemeye devam et</string>
+    <string name="listen_browse_recent">Son kitaplar</string>
     <string name="reader_footer_time_left">Bölümde %1$d dk kaldı</string>
     <string name="reading_time_left">Bölümde kalan süre</string>
     <string name="reading_edge_swipes">Kaydırarak parlaklık ve sıcaklık</string>

@@ -287,6 +287,8 @@
     <string name="widget_reading">閱讀中</string>
     <string name="widget_empty">新增一本書，穿上它的封面</string>
     <string name="listen_notification_channel">朗讀</string>
+    <string name="listen_browse_continue">繼續聆聽</string>
+    <string name="listen_browse_recent">最近的書</string>
     <string name="reader_footer_time_left">本章還剩 %1$d 分鐘</string>
     <string name="reading_time_left">本章剩餘時間</string>
     <string name="reading_edge_swipes">滑動調整亮度和色溫</string>

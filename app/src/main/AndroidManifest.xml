@@ -68,16 +68,31 @@
         </activity>
 
         <!-- Read-aloud in the background: Media3 posts the media notification and lock-screen
-             controls, and keeps the voice going with the screen off. -->
+             controls, and keeps the voice going with the screen off. It can be started with
+             nothing playing and asked to play: it resumes the book being read. As a library
+             service it also says what can be listened to (the book being read, and recent ones),
+             which is what a car's screen shows; only the system, a car and apps allowed to see
+             notifications are told (see ListenService). -->
         <service
             android:name=".reader.ListenService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback"
             tools:ignore="ExportedService">
             <intent-filter>
-                <action android:name="androidx.media3.session.MediaSessionService" />
+                <action android:name="androidx.media3.session.MediaLibraryService" />
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
+
+        <!-- A headphone button pressed when nothing is playing, even after Android has closed
+             Jacket: Android sends it here, and read-aloud resumes the book being read. -->
+        <receiver
+            android:name=".reader.ResumeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
 
         <!-- Home-screen widget; the Samsung meta-data also offers it on the Galaxy Z Flip cover screen (Flex Window). -->
         <receiver

@@ -306,6 +306,8 @@
     <string name="widget_reading">In lettura</string>
     <string name="widget_empty">Aggiungi un libro per indossarne la copertina</string>
     <string name="listen_notification_channel">Lettura ad alta voce</string>
+    <string name="listen_browse_continue">Continua ad ascoltare</string>
+    <string name="listen_browse_recent">Libri recenti</string>
     <string name="reader_footer_time_left">%1$d min alla fine del capitolo</string>
     <string name="reading_time_left">Tempo rimasto nel capitolo</string>
     <string name="reading_edge_swipes">Luminosità e calore con lo scorrimento</string>
