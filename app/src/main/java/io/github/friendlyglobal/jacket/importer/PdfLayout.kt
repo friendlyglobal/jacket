@@ -137,6 +137,52 @@ internal class PdfLayout private constructor(
         return later
     }
 
+    /**
+     * The words at ([x], [y]) on [page], in the page's units: the line there, and about how far
+     * along it. Null where there is no line (a margin, a picture, the white between paragraphs).
+     */
+    fun spotNear(page: Int, x: Float, y: Float): PdfSpot? {
+        for (paragraph in 0 until paragraphs) {
+            var run = first[paragraph]
+            while (run < first[paragraph + 1]) {
+                val left = boxes[run * 4]; val top = boxes[run * 4 + 1]; val right = boxes[run * 4 + 2]; val bottom = boxes[run * 4 + 3]
+                // The stretches of one line come one after the other, with the line's box each.
+                var last = run
+                while (last + 1 < first[paragraph + 1] && runPage[last + 1] == runPage[run] && boxes[(last + 1) * 4 + 1] == top && boxes[(last + 1) * 4] == left) last++
+                val on = runPage[run] == page && runCount[run] != PdfLine.UNPLACED && right > left &&
+                    x >= left - TAP_SLACK && x <= right + TAP_SLACK && y >= top - TAP_SLACK && y <= bottom + TAP_SLACK
+                if (on) {
+                    val letters = (run..last).sumOf { runLength[it] }
+                    var along = (((x - left) / (right - left)).coerceIn(0f, 1f) * letters).toInt().coerceAtMost(letters - 1)
+                    for (part in run..last) {
+                        if (along < runLength[part]) return PdfSpot(paragraph, runAt[part] + along)
+                        along -= runLength[part]
+                    }
+                }
+                run = last + 1
+            }
+        }
+        return null
+    }
+
+    /** How many letters [paragraph] has. */
+    fun lengthOf(paragraph: Int): Int =
+        if (paragraph !in 0 until paragraphs) 0 else (first[paragraph + 1] - 1).let { runAt[it] + runLength[it] }
+
+    /**
+     * The words the voice goes to for "next page", when it is on the letters [from] until [to] of
+     * [paragraph]: the first on the next page that has any. A sentence that runs over onto that
+     * page is the one being read already, so then it is the sentence after it. Null on the last
+     * page with words.
+     */
+    fun nextPageFrom(paragraph: Int, from: Int, to: Int): PdfSpot? {
+        val page = placeOf(paragraph, from)?.page ?: return null
+        val spot = firstOn(page + 1) ?: return null
+        if (placeOf(spot.paragraph, spot.offset)?.page == page) return null
+        if (spot.paragraph != paragraph || spot.offset !in from until to) return spot
+        return if (to < lengthOf(paragraph)) PdfSpot(paragraph, to) else PdfSpot(paragraph + 1, 0).takeIf { paragraph + 1 < paragraphs }
+    }
+
     /** The first words on [page], or on the next page that has any. */
     fun firstOn(page: Int): PdfSpot? = spotAt(PdfPlace(page, 0f))
 
@@ -155,6 +201,8 @@ internal class PdfLayout private constructor(
             val end = minOf(to, runAt[run] + runLength[run])
             if (start >= end) continue
             val counted = runCount[run]
+            // A line the PDF reader couldn't place is read, and not marked.
+            if (counted == PdfLine.UNPLACED) continue
             out += PdfMark(
                 page = runPage[run], start = start, end = end,
                 from = if (counted < 0) -1 else counted + (start - runAt[run]),
@@ -190,6 +238,9 @@ internal class PdfLayout private constructor(
 
         private const val LONGEST_TITLE = 300
 
+        /** A tap this near a line (in the page's units) is on it. */
+        private const val TAP_SLACK = 3f
+
         /** A line this little above a place (in the page's units) is still at it: a place is kept as a fraction, and comes back a hair off. */
         private const val LINE_SLACK = 1f
         private const val MOST = 50_000_000
@@ -223,7 +274,7 @@ internal class PdfLayout private constructor(
                     runAt[at] = run.at
                     runLength[at] = run.length
                     runPage[at] = run.page
-                    runCount[at] = if (line.start < 0) -1 else line.start + run.from
+                    runCount[at] = if (line.start < 0) line.start else line.start + run.from
                     boxes[at * 4] = line.left; boxes[at * 4 + 1] = line.top; boxes[at * 4 + 2] = line.right; boxes[at * 4 + 3] = line.bottom
                     at++
                 }

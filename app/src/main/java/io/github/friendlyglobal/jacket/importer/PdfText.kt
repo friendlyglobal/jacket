@@ -29,7 +29,8 @@ import kotlin.math.min
  * One line of a page, as the PDF reader gives it: its words and the box they are drawn in, in the
  * page's own units from its top left corner. [start] is where the line begins in the page's text
  * as the PDF reader counts it (it is asked where a few letters are drawn by that count); -1 where
- * the count couldn't be made out, and only the line's box is known.
+ * the count couldn't be made out, and only the line's box is known ([PdfLine.UNPLACED] where not
+ * even that is).
  */
 internal class PdfLine(
     val text: String,
@@ -40,6 +41,11 @@ internal class PdfLine(
     val start: Int = -1,
 ) {
     val middle: Float get() = (top + bottom) / 2f
+
+    companion object {
+        /** For [start]: not even the line's box is known (it is a guess, under the line before it), so it is read and never marked. */
+        const val UNPLACED = -2
+    }
 }
 
 /** The text of one page: its size, and its lines in the order the file draws them. A scanned page has none. */
@@ -261,6 +267,12 @@ internal object PdfReading {
         val indent = max(height * 0.6f, width * 0.012f)
         fun full(line: PdfLine) = line.right >= rightEdge - width * SHORT_BY
         fun short(line: PdfLine) = line.right < leftEdge + width * VERY_SHORT
+        // Set in the middle: well clear of both margins, and as far from one as from the other.
+        fun centred(line: PdfLine): Boolean {
+            val before = line.left - leftEdge
+            val after = rightEdge - line.right
+            return before >= width * CENTRED_CLEAR && after >= width * CENTRED_CLEAR && abs(before - after) <= max(width * CENTRED_EVEN, 4f)
+        }
 
         val out = ArrayList<Block>()
         var start = 0
@@ -298,6 +310,8 @@ internal object PdfReading {
                 line.left - before.left >= indent && (ended || !full(before)) -> true
                 // A short last line.
                 ended && !full(before) -> true
+                // A line set in the middle, over one that isn't: a title, a byline.
+                centred(before) && !centred(line) -> true
                 // A line that stops well short and is followed by a capital: a heading, a line of verse, an address.
                 short(before) && opening != null && (opening.isUpperCase() || opening.isDigit()) && hyphenAt(before.text.trimEnd()) == null -> true
                 opening != null && opening in BULLETS && (ended || !full(before)) -> true
@@ -315,7 +329,8 @@ internal object PdfReading {
      * The blocks as paragraphs. One that begins a column or a page carries on the paragraph before
      * it where that one was left open: its last line ran to the margin (or broke a word) and ended
      * no sentence. And a caption that follows an open paragraph waits until the paragraph is done:
-     * the sentence it sits in the middle of is finished first.
+     * the sentence it sits in the middle of is finished first. So a picture in the middle of a
+     * paragraph, with or without a caption, doesn't cut the paragraph in two.
      */
     private fun joined(blocks: List<Block>): List<PdfParagraph> {
         val out = ArrayList<PdfParagraph>()
@@ -333,7 +348,10 @@ internal object PdfReading {
                 waiting += block
                 continue
             }
-            if (before != null && !block.caption && !before.caption && (block.first || waiting.isNotEmpty()) && carriesOn(before, block)) {
+            // (Or, further down the same column, takes up in small letters what was left open
+            // above it: a picture stood between them, whose caption the file may draw elsewhere.)
+            val interrupted = before != null && open(before) && block.words.first().isLowerCase()
+            if (before != null && !block.caption && !before.caption && (block.first || waiting.isNotEmpty() || interrupted) && carriesOn(before, block)) {
                 join(before, block.words.first())
                 val shift = before.words.length
                 before.words.append(block.words)
@@ -507,6 +525,10 @@ internal object PdfReading {
     /** A line that stops this much of the width short of the margin is a short one; one that ends before this much of it, very short. */
     private const val SHORT_BY = 0.08f
     private const val VERY_SHORT = 0.6f
+
+    /** A line is set in the middle if it keeps this much of the width clear on both sides, the two alike to within this much. */
+    private const val CENTRED_CLEAR = 0.1f
+    private const val CENTRED_EVEN = 0.03f
 
     /** A block with no paragraph breaks to be seen is cut at a sentence's end once it is this long; and no paragraph is joined past this. */
     private const val LONG_BLOCK = 2_500

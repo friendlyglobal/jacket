@@ -148,6 +148,30 @@ class PdfLayoutTest {
     }
 
     @Test
+    fun nextPageGoesToTheFirstSentenceThatBeginsThere() {
+        // From the first page: the second page's first words.
+        assertEquals(PdfSpot(2, 0), layout.nextPageFrom(0, 0, 20))
+        // From the second: over the scan, to the fourth.
+        assertEquals(PdfSpot(3, 0), layout.nextPageFrom(2, 0, 20))
+        assertNull(layout.nextPageFrom(3, 0, 20))
+
+        // A sentence that runs over the page is already being read when the page turns: the one after it.
+        val whole = "$one $two $three"
+        val set = PageBuilder().apply { column(listOf(whole), left = 40f, right = 380f, top = 60f) }.build()
+        val first = page { set.lines.take(2).forEach { line(it.text, it.left, 500f + (it.top - 60f)) } }
+        val second = page { set.lines.drop(2).forEachIndexed { i, it -> line(it.text, it.left, 60f + i * PITCH) } }
+        val paragraphs = PdfReading.paragraphs(listOf(first, second))
+        val layout = PdfLayout.of(listOf(first, second), paragraphs)
+        assertEquals(whole.length, layout.lengthOf(0))
+        val sentence = whole.indexOf("So she")
+        val after = whole.indexOf("There was")
+        // (Its end is the space before the next sentence, which is where that one is found from.)
+        assertEquals(PdfSpot(0, after - 1), layout.nextPageFrom(0, sentence, after - 1))
+        // A sentence wholly on the first page: the first words on the second, though they are the middle of a sentence.
+        assertEquals(1, layout.placeOf(0, layout.nextPageFrom(0, 0, sentence - 1)!!.offset)!!.page)
+    }
+
+    @Test
     fun aLineWhoseCountIsNotKnownIsMarkedWhole() {
         val page = PdfPageText(PAGE_WIDTH, PAGE_HEIGHT, listOf(PdfLine("A line the reader couldn't count.", 40f, 60f, 300f, 70f, start = -1)))
         val layout = PdfLayout.of(listOf(page), PdfReading.paragraphs(listOf(page)))

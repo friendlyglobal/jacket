@@ -10,7 +10,12 @@ import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.importer.AlreadyInLibrary
 import io.github.friendlyglobal.jacket.importer.BookImporter
 import io.github.friendlyglobal.jacket.importer.FileContent
+import io.github.friendlyglobal.jacket.importer.NoWordsInPdf
 import io.github.friendlyglobal.jacket.importer.NothingToRead
+import io.github.friendlyglobal.jacket.importer.PdfPages
+import io.github.friendlyglobal.jacket.importer.PdfSpokenBook
+import io.github.friendlyglobal.jacket.importer.PdfWords
+import io.github.friendlyglobal.jacket.importer.PdfWordsUnavailable
 import io.github.friendlyglobal.jacket.importer.TextBook
 import io.github.friendlyglobal.jacket.importer.TextDecoding
 import io.github.friendlyglobal.jacket.importer.TextLayout
@@ -122,6 +127,10 @@ class Library(private val context: Context) : LibraryOrganizer {
     private val textPagesDir = File(context.noBackupFilesDir, "text-books")
     private val textPagesLock = Mutex()
 
+    /** The pages PDFs are read aloud from (see PdfWords.kt): made from the PDFs, and made again whenever they are missing. */
+    private val pdfPagesDir = File(context.noBackupFilesDir, "pdf-books")
+    private val pdfPagesLock = Mutex()
+
     private val _state = MutableStateFlow(readState())
     val state: StateFlow<LibraryState> = _state.asStateFlow()
 
@@ -166,6 +175,12 @@ class Library(private val context: Context) : LibraryOrganizer {
             textPagesLock.withLock {
                 val kept = _state.value.books.mapTo(HashSet()) { textPagesOf(it.id).name }
                 textPagesDir.listFiles()?.filter { it.name !in kept }?.forEach { it.delete() }
+            }
+        }
+        scope.launch(disk) {
+            pdfPagesLock.withLock {
+                val kept = _state.value.books.mapTo(HashSet()) { pdfPagesOf(it.id).name }
+                pdfPagesDir.listFiles()?.filter { it.name !in kept }?.forEach { it.delete() }
             }
         }
         // Widgets placed before this process started (after an update, a restart) redraw now, rather
@@ -219,6 +234,39 @@ class Library(private val context: Context) : LibraryOrganizer {
             }
             val layout = text.layout()
             TextPages(pages, layout, layout.saved(now.position, now.positionOffset, now.sectionCount)?.let(text::spotOf))
+        }
+    }
+
+    private fun pdfPagesOf(id: String) = File(pdfPagesDir, "$id.epub")
+
+    /**
+     * The pages [book], a PDF, is read aloud from: made now (its words are read out of every
+     * page, which takes a moment for a long one) if they aren't there, or were made by an older
+     * Jacket or from another file. The PDF itself is never touched. Throws [PdfWordsUnavailable]
+     * on a phone whose Android can't get at a PDF's words, [NoWordsInPdf] for a PDF that has
+     * none (a scan), and whatever reading the file throws.
+     */
+    internal suspend fun pdfPages(book: Book): PdfPages = withContext(Dispatchers.IO) {
+        if (!PdfWords.available) throw PdfWordsUnavailable()
+        pdfPagesLock.withLock {
+            val source = fileOf(book)
+            val pages = pdfPagesOf(book.id)
+            val layout = PdfSpokenBook.kept(pages, source) ?: run {
+                pdfPagesDir.mkdirs()
+                // Whole or not at all: pages cut short would open as a damaged book.
+                val partial = File(pdfPagesDir, "${pages.name}.part")
+                try {
+                    // As it is now: the title may have been put right since the book was added.
+                    val now = _state.value.find(book.id) ?: book
+                    val made = partial.outputStream().buffered().let { PdfSpokenBook.make(source, it, now.id, now.title, now.author, now.language) }
+                    check(partial.renameTo(pages) || run { pages.delete(); partial.renameTo(pages) }) { "Couldn't store the pages of ${book.sourceName}" }
+                    made
+                } finally {
+                    partial.delete()
+                }
+            }
+            if (layout.paragraphs == 0) throw NoWordsInPdf(book.sourceName)
+            PdfPages(pages, layout)
         }
     }
 
@@ -574,6 +622,7 @@ class Library(private val context: Context) : LibraryOrganizer {
         scope.launch(disk) {
             fileOf(book).delete()
             textPagesOf(book.id).delete()
+            pdfPagesOf(book.id).delete()
             coverOf(book)?.delete()
             book.originalCover?.let { File(coversDir, it).delete() }
         }

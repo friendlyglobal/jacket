@@ -42,6 +42,16 @@ class PdfReadingTest {
     }
 
     @Test
+    fun aLineSetInTheMiddleIsNotRunIntoTheParagraphUnderIt() {
+        val page = page {
+            // A byline in the middle of the column, with no more room under it than between two lines.
+            centred("A note written to try out Jacket", 60f)
+            column(listOf(first, second), left = 40f, right = 380f, top = 60f + PITCH)
+        }
+        assertEquals(listOf("A note written to try out Jacket", first, second), texts(page))
+    }
+
+    @Test
     fun aPageWithNoTextGivesNothing() {
         val scan = PdfPageText(PAGE_WIDTH, PAGE_HEIGHT, emptyList())
         assertEquals(emptyList<String>(), texts(scan, scan))
@@ -311,6 +321,22 @@ class PdfReadingTest {
         val read = PdfReading.paragraphs(listOf(page))
         assertEquals(listOf(whole, "Figure 1. A White Rabbit with pink eyes."), read.map { it.text })
         assertEquals(listOf(false, true), read.map { it.caption })
+    }
+
+    @Test
+    fun aPictureInTheMiddleOfAParagraphDoesNotCutItInTwo() {
+        // The file draws the caption somewhere else (first, here): what is left where the picture
+        // stands is a gap in the middle of a sentence.
+        val whole = "$first $second $third"
+        val set = PageBuilder().apply { column(listOf(whole), left = 40f, right = 380f, top = 60f) }.build()
+        val cut = set.lines.size / 2
+        val under = 60f + cut * PITCH + 150f
+        val page = page {
+            centred("Figure 2. The same page, read in the order it was drawn.", under - 40f, size = 8f)
+            set.lines.take(cut).forEach { line(it.text, it.left, it.top) }
+            set.lines.drop(cut).forEachIndexed { i, it -> line(it.text, it.left, under + i * PITCH) }
+        }
+        assertEquals(listOf("Figure 2. The same page, read in the order it was drawn.", whole), texts(page))
     }
 
     @Test
