@@ -162,7 +162,10 @@ On any device:
       words ink in near enough in time, a change of speed is heard at once, pausing and playing
       carries on mid-sentence, and the phone doesn't get hot over 20 minutes. On an old or cheap
       phone, check that the player says the voice is too much for it and that the phone's voice
-      then works. `adb logcat -s JacketVoice` shows how long the model takes to load.
+      then works. `adb logcat -s JacketVoice` shows how long the model takes to load, and says
+      whenever the voice is made a little rougher or finer to suit the phone ("Steps 5 to 4").
+      After `adb shell setprop log.tag.JacketVoice DEBUG` it has a line for every sentence made:
+      how long it took, the pace the phone is going by, and what a finer voice would cost.
 - [ ] A book in a language the natural voices don't speak (Chinese) is read by the phone's voice.
 - [ ] A Portuguese book on a phone set to Portuguese (Brazil) starts on the Brazilian voice, and
       one in the old spelling (a free edition of *Dom Casmurro*) is read naturally: "elle" as

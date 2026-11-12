@@ -1077,6 +1077,8 @@ private fun EpubPages(
                 resize.restoredAt = SystemClock.uptimeMillis()
             }
         }
+        // Out of sight, the words weren't inked in one by one (nobody was looking): now they are.
+        listen.seen()
     }
 
     // The voice follows the book's language by itself. A book that gives the wrong one can be

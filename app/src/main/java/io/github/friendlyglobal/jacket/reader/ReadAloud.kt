@@ -622,7 +622,8 @@ internal class ReadAloud(
                     lastSpoken = location.utteranceLocator
                     val n = navigator() ?: return@collect
                     // Turn the page to follow the voice, unless the listener has gone to look elsewhere.
-                    if (location.utteranceLocator != utterance) {
+                    val started = location.utteranceLocator != utterance
+                    if (started) {
                         utterance = location.utteranceLocator
                         // A tapped sentence is in front of the listener: no call to move the page for it.
                         if (!listen.offPage && !stay && location.utteranceLocator != tappedSentence) {
@@ -632,7 +633,11 @@ internal class ReadAloud(
                         }
                         stay = false
                     }
-                    n.applyDecorations(decorationsFor(location), GROUP)
+                    // With the pages out of sight (the screen off, another app in front) nobody
+                    // watches the words ink in, and each word laid out there is work taken from
+                    // the voice: the sentence is marked as it starts, and its words again once
+                    // the pages are looked at (see [seen]).
+                    if (started || page?.inSight?.invoke() != false) n.applyDecorations(decorationsFor(location), GROUP)
                 }
             }
             if (playing) tts.play()
@@ -1270,6 +1275,17 @@ internal class ReadAloud(
             followedAt = SystemClock.uptimeMillis()
             tts?.location?.value?.let { n.applyDecorations(decorationsFor(it), GROUP) }
         }
+    }
+
+    /**
+     * The pages are in front of the listener again, after the voice read on with them out of
+     * sight: the sentence it is on is inked as far as it has got, at once rather than at its next word.
+     */
+    fun seen() {
+        if (!listen.active || jumping) return
+        val n = navigator() ?: return
+        val at = tts?.location?.value ?: return
+        scope.launch { n.applyDecorations(decorationsFor(at), GROUP) }
     }
 
     /**

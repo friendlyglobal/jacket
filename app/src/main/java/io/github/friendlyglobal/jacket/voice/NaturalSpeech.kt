@@ -43,11 +43,11 @@ internal class Synthesizer(private val host: ModelHost, private val model: Natur
     private var running: Job? = null
     private var closed = false
 
-    /** How many times the model refines its sound: fewer is quicker and a little rougher. */
-    var steps = FULL_STEPS
+    /** How many times the model refines its sound: fewer is quicker and a little rougher (see [QualityGuard]). */
+    var steps = QualityGuard.FULL_STEPS
 
-    /** Each clip as it's made, for keeping an eye on the pace. */
-    var onMade: (Clip) -> Unit = {}
+    /** Each clip as it's made, and how many times its sound was refined: for keeping an eye on the pace. */
+    var onMade: (Clip, Int) -> Unit = { _, _ -> }
 
     fun find(text: String, language: String, speed: Float): Job? =
         jobs.lastOrNull { it.text == text && it.language == language && it.speed == speed && it.state != State.FAILED && !it.cancelled }
@@ -90,15 +90,16 @@ internal class Synthesizer(private val host: ModelHost, private val model: Natur
                     Clip(next.text, pcm, model.sampleRate, next.speed, timed, SystemClock.elapsedRealtime() - started)
                 }
             }.onFailure { Log.w(TAG, "Couldn't speak a sentence", it) }.getOrNull()
-            main.post { finish(next, clip) }
+            main.post { finish(next, clip, steps) }
         }
     }
 
-    private fun finish(job: Job, clip: Clip?) {
+    private fun finish(job: Job, clip: Clip?, madeWith: Int) {
         running = null
         job.clip = clip
         job.state = if (clip != null) State.DONE else State.FAILED
-        if (clip != null && !job.cancelled) onMade(clip)
+        // (Before the next is started: it is made at whatever quality this one's pace calls for.)
+        if (clip != null && !job.cancelled) onMade(clip, madeWith)
         val waiting = job.waiting.toList()
         job.waiting.clear()
         waiting.forEach { it(clip) }
@@ -109,8 +110,6 @@ internal class Synthesizer(private val host: ModelHost, private val model: Natur
     private fun clean(text: String): String = text.replace(WHITESPACE, " ").trim()
 
     companion object {
-        const val FULL_STEPS = 5
-        const val FEWEST_STEPS = 3
         private const val TAG = "JacketVoice"
         private val WHITESPACE = Regex("\\s+")
     }
@@ -148,9 +147,10 @@ internal class NaturalSpeech(
     private var paused: Paused? = null
     private var ahead: List<Synthesizer.Job> = emptyList()
     private var failures = 0
-    private var pace = 0f
     private var made = 0
-    private var measured = 0
+
+    /** The quality the voice is made at, and how the phone has been keeping up with it. */
+    private var guard = QualityGuard()
     private var closed = false
 
     /** 1 is the voice's own pace. Takes effect at once, on the sentence being spoken too. */
@@ -330,29 +330,46 @@ internal class NaturalSpeech(
 
     /**
      * Watches the pace. A phone that struggles gets a slightly rougher, quicker voice before it
-     * gets gaps; one that can't keep up even so is reported as [VoiceHealth.slow], for the reader
-     * to suggest another voice.
+     * gets gaps, and its full voice back once it has room again (see [QualityGuard]); one that
+     * can't keep up even so is reported as [VoiceHealth.slow], for the reader to suggest another
+     * voice.
+     *
+     * To see it at work on a phone: `adb shell setprop log.tag.JacketVoice DEBUG`.
      */
-    private fun measure(clip: Clip) {
+    private fun measure(clip: Clip, madeWith: Int) {
         made++
         // The first sentence after loading pays for the model warming up, and a very short one is
         // mostly overhead: neither says how the phone will fare.
-        if (made == 1 || !tellsThePace(clip.millis, clip.speed)) return
-        val sample = clip.synthMillis / clip.millis.toFloat()
-        pace = if (measured == 0) sample else pace * 0.6f + sample * 0.4f
-        measured++
-        val warm = hot()
-        synth.steps = when {
-            warm || pace > 0.8f -> Synthesizer.FEWEST_STEPS
-            pace > 0.6f -> minOf(synth.steps, Synthesizer.FULL_STEPS - 1)
-            pace < 0.35f -> Synthesizer.FULL_STEPS
-            else -> synth.steps
+        val untold = when {
+            made == 1 -> "the first one"
+            !tellsThePace(clip.millis, clip.speed) -> "too short to tell"
+            // (Made before the quality last changed: it says nothing of the one in use.)
+            madeWith != guard.steps -> "made at another quality"
+            else -> null
         }
-        // Only after a few sentences, and only if the lightest setting still can't keep up.
-        val slow = measured >= 3 && pace > 0.95f && synth.steps == Synthesizer.FEWEST_STEPS
-        health.value = VoiceHealth(pace, slow = slow, hot = warm)
+        if (untold != null) {
+            if (Log.isLoggable(TAG, Log.DEBUG)) {
+                Log.d(TAG, "Made ${clip.millis} ms of speech in ${clip.synthMillis} ms with $madeWith steps (not counted: $untold)")
+            }
+            return
+        }
+        val sample = clip.synthMillis / clip.millis.toFloat()
+        val warm = hot()
+        val before = guard
+        guard = before.after(sample, warm)
+        synth.steps = guard.steps
+        health.value = VoiceHealth(guard.pace, slow = guard.slow, hot = warm)
+        if (guard.steps != before.steps) {
+            // Rare, and the one thing to know when a voice sounds rougher than it did: said without being asked.
+            Log.i(TAG, "Steps ${before.steps} to ${guard.steps}: pace ${"%.2f".format(guard.pace)}" + if (warm) ", the phone is hot" else "")
+        }
         if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, "Made ${clip.millis} ms of speech in ${clip.synthMillis} ms (pace ${"%.2f".format(pace)}, steps ${synth.steps})")
+            val up = if (guard.oneStepUp > 0f) ", one step up about ${"%.2f".format(guard.oneStepUp)}" else ""
+            Log.d(
+                TAG,
+                "Made ${clip.millis} ms of speech in ${clip.synthMillis} ms with $madeWith steps: pace ${"%.2f".format(sample)}, " +
+                    "going by ${"%.2f".format(guard.pace)}$up; steps now ${guard.steps}" + (if (warm) ", hot" else "") + (if (guard.slow) ", can't keep up" else ""),
+            )
         }
     }
 

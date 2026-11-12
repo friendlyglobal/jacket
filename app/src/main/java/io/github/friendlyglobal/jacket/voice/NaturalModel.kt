@@ -154,8 +154,10 @@ internal class ModelHost(private val context: Context) {
         val entry = entries.firstOrNull { it.model.pack.id == pack.id } ?: run {
             dropIdle()
             val started = SystemClock.elapsedRealtime()
-            val model = NaturalModel(context, pack, threads())
-            Log.i(TAG, "Loaded ${pack.id} in ${SystemClock.elapsedRealtime() - started} ms")
+            val threads = threads()
+            val model = NaturalModel(context, pack, threads)
+            // (How many cores it was given is kept for as long as it is in memory: fewer in battery saver.)
+            Log.i(TAG, "Loaded ${pack.id} in ${SystemClock.elapsedRealtime() - started} ms, on $threads threads")
             Entry(model).also(entries::add)
         }
         entry.users++
