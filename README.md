@@ -157,7 +157,8 @@ are a first pass; corrections from native speakers are welcome (`app/src/main/re
 - **No duplicates:** adding a file that's already in your library, even under another name,
   tells you it's there instead of making a second copy.
 - **Reading time and streak:** today's minutes and the run of days read, under the library's
-  title (off in Settings if you'd rather not count).
+  title (off in Settings if you'd rather not count). Tap it for "Your reading": this week, this
+  month and this year, a calendar of the days you read, and the books you finished.
 - **Shortcuts:** long-press Jacket's icon for the book you're reading, the one before it, and
   "Listen".
 

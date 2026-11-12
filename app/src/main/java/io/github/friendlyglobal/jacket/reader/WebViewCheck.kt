@@ -75,8 +75,12 @@ internal object WebViewCheck {
      *    without a prefix: Chrome 50.
      * Jacket's own page scripts are ES5 and ask for nothing newer.
      *
-     * Checked on a real web view at 58 (fails) and 91 (works); between 64 and 90 it rests on the
-     * reading above.
+     * Checked on a real web view at 58 (fails) and 91 (works). In between it rests on the reading
+     * above and on a current web view with parts taken away by a test book's own script: without
+     * `ResizeObserver` alone, a chapter stays on its first page with the error 58 gives; with it,
+     * and without everything that came from 66 to 90 (`flatMap` among it), pages turn and
+     * read-aloud starts on the page in view. That takes away what the scripts can call, not how an
+     * old web view lays a page out: no web view from 64 to 90 itself has been run.
      */
     const val OLDEST = 64
 
