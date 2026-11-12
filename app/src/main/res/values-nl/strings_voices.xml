@@ -43,4 +43,17 @@
     <string name="library_empty_message_phone">Voeg een EPUB, pdf, CBZ-strip of tekstbestand toe. Jacket bewaart een privékopie, geeft het echte pagina\'s om om te slaan en kan het voorlezen met een natuurlijke stem.</string>
     <string name="library_try_sample">Een voorbeeldboek proberen</string>
     <string name="sample_failed">Het voorbeeldboek kon niet worden geopend.</string>
+    <string name="say_title">Zeg het zo</string>
+    <string name="say_hint">Vertel de stem hoe een naam of een woord klinkt.</string>
+    <string name="say_word">Woord in het boek</string>
+    <string name="say_sounds">Klinkt als</string>
+    <string name="say_sounds_example">Schrijf het zoals het klinkt, bijvoorbeeld: hur-MAAI-o-nie</string>
+    <string name="say_hear">Beluisteren</string>
+    <string name="say_every_book">In elk boek gebruiken</string>
+    <string name="say_scope_all">Elk boek</string>
+    <string name="say_add">Woord toevoegen</string>
+    <string name="say_remove">%1$s verwijderen</string>
+    <string name="say_empty">Nog geen woorden. Houd een woord op de pagina ingedrukt en kies ‘Zeg het zo’, of voeg er hier een toe.</string>
+    <string name="listen_skip_notes">Nootnummers overslaan</string>
+    <string name="listen_skip_notes_description">De stem leest de kleine cijfers die naar noten verwijzen niet voor.</string>
 </resources>

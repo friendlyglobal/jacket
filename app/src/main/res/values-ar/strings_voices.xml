@@ -43,4 +43,17 @@
     <string name="library_empty_message_phone">أضف ملف EPUB أو PDF أو قصة مصورة CBZ أو ملفًا نصيًا. يحتفظ Jacket بنسخة خاصة، ويمنحها صفحات حقيقية تُقلَب، ويستطيع قراءتها بصوت طبيعي.</string>
     <string name="library_try_sample">جرّب كتابًا نموذجيًا</string>
     <string name="sample_failed">تعذّر فتح الكتاب النموذجي.</string>
+    <string name="say_title">انطقها هكذا</string>
+    <string name="say_hint">علِّم الصوت كيف يُنطق اسم أو كلمة.</string>
+    <string name="say_word">الكلمة في الكتاب</string>
+    <string name="say_sounds">تُنطق هكذا</string>
+    <string name="say_sounds_example">اكتبها كما تُنطق، مثل: هير-ماي-أو-ني</string>
+    <string name="say_hear">استماع</string>
+    <string name="say_every_book">استخدامها في كل الكتب</string>
+    <string name="say_scope_all">كل الكتب</string>
+    <string name="say_add">إضافة كلمة</string>
+    <string name="say_remove">إزالة %1$s</string>
+    <string name="say_empty">لا توجد كلمات بعد. اضغط مطولًا على كلمة في الصفحة واختر «انطقها هكذا»، أو أضف كلمة هنا.</string>
+    <string name="listen_skip_notes">تخطي أرقام الحواشي</string>
+    <string name="listen_skip_notes_description">لا يقرأ الصوت الأرقام الصغيرة التي تشير إلى الحواشي.</string>
 </resources>

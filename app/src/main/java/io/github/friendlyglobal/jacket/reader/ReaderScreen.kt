@@ -13,6 +13,8 @@ import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -44,6 +46,8 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.absoluteOffset
+import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
@@ -91,6 +95,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderState
 import androidx.compose.material3.Surface
@@ -129,6 +134,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import io.github.friendlyglobal.jacket.data.PageLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.Annotation
@@ -140,7 +152,11 @@ import io.github.friendlyglobal.jacket.data.Settings
 import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.voices
 import androidx.compose.ui.platform.LocalConfiguration
+import io.github.friendlyglobal.jacket.ui.voices.SayItDialog
+import io.github.friendlyglobal.jacket.ui.voices.SayItDraft
+import io.github.friendlyglobal.jacket.ui.voices.SayItList
 import io.github.friendlyglobal.jacket.ui.voices.VoicePicker
+import io.github.friendlyglobal.jacket.ui.voices.sayingOf
 import io.github.friendlyglobal.jacket.ui.voices.voiceLabel
 import io.github.friendlyglobal.jacket.outer.OuterDisplay
 import io.github.friendlyglobal.jacket.ui.Haptics
@@ -223,6 +239,8 @@ class ReaderNav {
     var editing by mutableStateOf<String?>(null)
     /** A note of the book's whose number was tapped on the page, shown over it. */
     internal var note by mutableStateOf<ShownNote?>(null)
+    /** A word selected on the page for "Say it this way": how the voice is to say it is asked. */
+    var sayWord by mutableStateOf<String?>(null)
     /** Turns a page for the keys and the mouse wheel: +1 forward, -1 back. */
     var turnPage: (Int) -> Unit = { step(it) }
     /** The book reads right to left: the arrow keys go the other way round. */
@@ -269,7 +287,7 @@ internal val LocalReaderNav = compositionLocalOf<ReaderNav?> { null }
 
 typealias ProgressSink = (position: Int, offset: Float, progress: Float, sections: Int) -> Unit
 
-private enum class Sheet { NONE, CONTENTS, TEXT, SEARCH, VOICE }
+private enum class Sheet { NONE, CONTENTS, TEXT, SEARCH, VOICE, WORDS }
 
 @Composable
 fun ReaderScreen(
@@ -292,6 +310,10 @@ fun ReaderScreen(
     val library = context.library
     val libraryState by library.state.collectAsStateWithLifecycle()
     val annotations = remember(libraryState.annotations, book.id) { libraryState.annotations.filter { it.bookId == book.id } }
+    // "Say it this way": the words the voice says the listener's way, in this book and in every book.
+    val sayings = remember(libraryState.sayings, book.id) { libraryState.sayings.filter { it.bookId == book.id || it.bookId == null } }
+    val respellings = remember(libraryState.sayings, book.id) { libraryState.respellingsFor(book.id) }
+    var saying by remember(book.id) { mutableStateOf<SayItDraft?>(null) }
     val haptics = rememberHaptics()
     // The voice follows the book's language; a text file's was told from its words when it was
     // added (older ones go by the phone's language).
@@ -423,6 +445,7 @@ fun ReaderScreen(
         if (coverUp) {
             sheet = Sheet.NONE
             nav.note = null
+            saying = null
         }
     }
     val setRate: (Float) -> Unit = { rate ->
@@ -801,7 +824,7 @@ fun ReaderScreen(
                 CompositionLocalProvider(LocalReaderNav provides nav) {
                     when (book.format) {
                         // A text file is read through pages made of it, the same way as an EPUB.
-                        BookFormat.EPUB, BookFormat.TXT -> EpubReader(book, settings, page, nav, haptics, annotations, toggleChrome)
+                        BookFormat.EPUB, BookFormat.TXT -> EpubReader(book, settings, page, nav, haptics, annotations, respellings, toggleChrome)
                         BookFormat.PDF -> PdfReader(book, page, nav, haptics, onProgress, toggleChrome)
                         BookFormat.CBZ -> ComicReader(book, page, nav, haptics, onProgress, toggleChrome)
                     }
@@ -1000,7 +1023,7 @@ fun ReaderScreen(
                 lightLevels = true,
             )
         }
-        Sheet.VOICE -> ReaderSheet(onGone = { sheet = Sheet.NONE }) {
+        Sheet.VOICE -> ReaderSheet(onGone = { sheet = Sheet.NONE }) { leave ->
             VoicePicker(
                 language = readIn,
                 settings = settings,
@@ -1008,9 +1031,48 @@ fun ReaderScreen(
                 modifier = Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
                 bookLanguage = nav.bookLanguage,
                 onLanguage = { picked -> library.setLanguage(book.id, picked ?: nav.bookLanguage) },
+                onWords = { leave { sheet = Sheet.WORDS } },
+            )
+        }
+        Sheet.WORDS -> ReaderSheet(onGone = { sheet = Sheet.NONE }) {
+            val everyBook = stringResource(R.string.say_scope_all)
+            SayItList(
+                sayings = sayings,
+                // This book's own need no saying where they apply.
+                scope = { if (it.bookId == null) everyBook else null },
+                haptics = haptics,
+                onAdd = { saying = SayItDraft() },
+                onEdit = { saying = SayItDraft(it) },
+                onDelete = { library.deleteSaying(it.id) },
+                modifier = Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
             )
         }
         Sheet.NONE -> {}
+    }
+
+    // A word selected on the page, sent to "Say it this way": the way it is said now, if it has one, to change.
+    LaunchedEffect(nav.sayWord) {
+        val word = nav.sayWord ?: return@LaunchedEffect
+        nav.sayWord = null
+        saying = SayItDraft(sayings.sayingOf(word, book.id), word)
+    }
+    saying?.let { draft ->
+        SayItDialog(
+            draft = draft,
+            bookId = book.id,
+            voice = voice,
+            language = readIn,
+            haptics = haptics,
+            onSave = {
+                library.saveSaying(it)
+                saying = null
+            },
+            onDelete = {
+                library.deleteSaying(it.id)
+                saying = null
+            },
+            onDismiss = { saying = null },
+        )
     }
 
     if (editing != null) {

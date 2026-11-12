@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -114,6 +115,8 @@ fun VoicePicker(
     /** In the reader: what the book itself gives as its language, and how to read it in another. */
     bookLanguage: String? = null,
     onLanguage: ((String?) -> Unit)? = null,
+    /** In the reader: opens the words the voice says the listener's way ("Say it this way"). */
+    onWords: (() -> Unit)? = null,
 ) {
     val voices = LocalContext.current.voices
     val haptics = rememberHaptics()
@@ -241,6 +244,30 @@ fun VoicePicker(
                     )
                 }
                 Switch(checked = onlyHere, onCheckedChange = null)
+            }
+        }
+
+        // How the book is read aloud, whoever reads it: names said the listener's way, and the
+        // numbers of notes passed over. (In Settings these sit beside the voice, not under it.)
+        if (onWords != null) {
+            Column(Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
+                SegmentedListItem(
+                    onClick = { haptics.tick(); onWords() },
+                    shapes = ListItemDefaults.segmentedShapes(0, 2),
+                    leadingContent = { Icon(JacketIcons.Voice, null) },
+                    supportingContent = { Text(stringResource(R.string.say_hint)) },
+                ) { Text(stringResource(R.string.say_title)) }
+                SegmentedListItem(
+                    checked = settings.skipNoteNumbers,
+                    onCheckedChange = { on ->
+                        haptics.toggle(on)
+                        onSettings { it.copy(skipNoteNumbers = on) }
+                    },
+                    modifier = Modifier.semantics { role = Role.Switch },
+                    shapes = ListItemDefaults.segmentedShapes(1, 2),
+                    supportingContent = { Text(stringResource(R.string.listen_skip_notes_description)) },
+                    trailingContent = { Switch(checked = settings.skipNoteNumbers, onCheckedChange = null) },
+                ) { Text(stringResource(R.string.listen_skip_notes)) }
             }
         }
 

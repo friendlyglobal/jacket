@@ -64,4 +64,26 @@
     <!-- A free classic that comes with the app, to try the reader without having a file. -->
     <string name="library_try_sample">Try a sample book</string>
     <string name="sample_failed">The sample book couldn\'t be opened.</string>
+
+    <!-- "Say it this way": the listener tells the voice how a name or a made-up word sounds, by writing it the way it is said. Plain words: no "pronunciation dictionary", "phonetic" or "lexicon". This is also the entry in the menu over selected words. -->
+    <string name="say_title">Say it this way</string>
+    <string name="say_hint">Tell the voice how a name or a word should sound.</string>
+    <!-- Field labels: the word as the book writes it, and the same word written the way it sounds. -->
+    <string name="say_word">Word in the book</string>
+    <string name="say_sounds">Sounds like</string>
+    <!-- Under the "Sounds like" field. The example is a name written the way it sounds; use one that works in your language. -->
+    <string name="say_sounds_example">Write it the way it sounds, like: her-MY-oh-nee</string>
+    <!-- Button: says the word in the voice that reads the book. -->
+    <string name="say_hear">Hear it</string>
+    <!-- A switch: off, the word is said this way only in the book that is open. -->
+    <string name="say_every_book">Use in every book</string>
+    <!-- Beside a word in the list that is said this way in all books. -->
+    <string name="say_scope_all">Every book</string>
+    <string name="say_add">Add a word</string>
+    <!-- For screen readers, on the bin beside a word. %1$s is the word. -->
+    <string name="say_remove">Remove %1$s</string>
+    <string name="say_empty">No words yet. Press and hold a word on the page and choose “Say it this way”, or add one here.</string>
+    <!-- A switch: the voice doesn't say the small numbers in the text that point to footnotes and endnotes. -->
+    <string name="listen_skip_notes">Skip note numbers</string>
+    <string name="listen_skip_notes_description">The voice doesn\'t read out the small numbers that point to notes.</string>
 </resources>

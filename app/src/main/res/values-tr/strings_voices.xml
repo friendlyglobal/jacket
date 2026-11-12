@@ -43,4 +43,17 @@
     <string name="library_empty_message_phone">Bir EPUB, PDF, CBZ çizgi roman veya metin dosyası ekleyin. Jacket özel bir kopyasını saklar, ona çevrilecek gerçek sayfalar verir ve doğal bir sesle sesli okuyabilir.</string>
     <string name="library_try_sample">Örnek bir kitap deneyin</string>
     <string name="sample_failed">Örnek kitap açılamadı.</string>
+    <string name="say_title">Böyle söyle</string>
+    <string name="say_hint">Bir adın veya kelimenin nasıl söylendiğini sese öğretin.</string>
+    <string name="say_word">Kitaptaki kelime</string>
+    <string name="say_sounds">Şöyle okunur</string>
+    <string name="say_sounds_example">Okunduğu gibi yazın, örneğin: hör-MAY-o-ni</string>
+    <string name="say_hear">Dinle</string>
+    <string name="say_every_book">Tüm kitaplarda kullan</string>
+    <string name="say_scope_all">Tüm kitaplar</string>
+    <string name="say_add">Kelime ekle</string>
+    <string name="say_remove">%1$s kelimesini kaldır</string>
+    <string name="say_empty">Henüz kelime yok. Sayfadaki bir kelimeye basılı tutup “Böyle söyle”yi seçin veya buradan ekleyin.</string>
+    <string name="listen_skip_notes">Dipnot numaralarını atla</string>
+    <string name="listen_skip_notes_description">Ses, notlara gönderme yapan küçük rakamları okumaz.</string>
 </resources>

@@ -33,6 +33,7 @@ import org.readium.r2.navigator.html.HtmlDecorationTemplate
 import org.readium.r2.navigator.html.HtmlDecorationTemplates
 import org.readium.r2.navigator.html.toCss
 import org.readium.r2.navigator.preferences.Color
+import org.readium.r2.navigator.preferences.ColumnCount
 import org.readium.r2.navigator.preferences.FontFamily
 import org.readium.r2.navigator.preferences.Theme
 import org.readium.r2.navigator.preferences.TextAlign as ReadiumTextAlign
@@ -199,10 +200,11 @@ class Marker(@ColorInt val color: Int, val noted: Boolean = false) : Decoration.
 
 /**
  * The menu over selected text. Readium's custom menu replaces the web view's own, so it brings
- * back Copy, Share and the phone's text actions (Translate, Define, ...) next to Highlight and Note.
+ * back Copy, Share and the phone's text actions (Translate, Define, ...) next to Highlight and Note,
+ * and "Say it this way" for a name the voice gets wrong.
  */
 class SelectionMenu(private val context: Context) : ActionMode.Callback {
-    enum class Action { HIGHLIGHT, NOTE, COPY, SHARE, PROCESS }
+    enum class Action { HIGHLIGHT, NOTE, COPY, SAY, SHARE, PROCESS }
 
     /** Called with the action and, for [Action.PROCESS], the text-processing activity to send to. */
     var onAction: (Action, ResolveInfo?) -> Unit = { _, _ -> }
@@ -212,7 +214,8 @@ class SelectionMenu(private val context: Context) : ActionMode.Callback {
         menu.add(Menu.NONE, ID_HIGHLIGHT, 0, R.string.selection_highlight)
         menu.add(Menu.NONE, ID_NOTE, 1, R.string.selection_note)
         menu.add(Menu.NONE, ID_COPY, 2, android.R.string.copy)
-        menu.add(Menu.NONE, ID_SHARE, 3, R.string.selection_share)
+        menu.add(Menu.NONE, ID_SAY, 3, R.string.say_title)
+        menu.add(Menu.NONE, ID_SHARE, 4, R.string.selection_share)
         val pm = context.packageManager
         processors = runCatching {
             pm.queryIntentActivities(Intent(Intent.ACTION_PROCESS_TEXT).setType("text/plain"), 0)
@@ -230,6 +233,7 @@ class SelectionMenu(private val context: Context) : ActionMode.Callback {
             ID_HIGHLIGHT -> onAction(Action.HIGHLIGHT, null)
             ID_NOTE -> onAction(Action.NOTE, null)
             ID_COPY -> onAction(Action.COPY, null)
+            ID_SAY -> onAction(Action.SAY, null)
             ID_SHARE -> onAction(Action.SHARE, null)
             else -> onAction(Action.PROCESS, processors.getOrNull(item.itemId - ID_PROCESS) ?: return false)
         }
@@ -244,6 +248,7 @@ class SelectionMenu(private val context: Context) : ActionMode.Callback {
         const val ID_NOTE = 2
         const val ID_COPY = 3
         const val ID_SHARE = 4
+        const val ID_SAY = 5
         const val ID_PROCESS = 100
     }
 }

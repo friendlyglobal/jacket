@@ -59,14 +59,21 @@ class NaturalTtsPreferencesEditor(initial: NaturalTtsPreferences) : PreferencesE
  * says nothing of what follows; but it cuts each paragraph up a moment before it reads it, with
  * the tokenizer this wraps.
  */
-class SentenceLookahead {
+class SentenceLookahead(
+    /**
+     * What the voice is given in place of the page's words ("Say it this way"). The sentences are
+     * remembered as they will be said, since that is how the engine is asked for them.
+     */
+    private val edits: SpeechEdits = SpeechEdits(),
+) {
     private val paragraphs = ArrayDeque<List<String>>()
 
     /** Wraps Readium's sentence tokenizer for [language]. */
     fun tokenizer(language: Language?): TextTokenizer {
         val sentences = DefaultTextContentTokenizer(TextUnit.Sentence, language)
         return TextTokenizer { text ->
-            joinTitles(text, sentences.tokenize(text)).also { ranges -> note(ranges.map { text.substring(it) }) }
+            edits.sentences(text) { joinTitles(it, sentences.tokenize(it)) }
+                .also { ranges -> note(ranges.map { edits.spoken(text.substring(it)).spoken }) }
         }
     }
 

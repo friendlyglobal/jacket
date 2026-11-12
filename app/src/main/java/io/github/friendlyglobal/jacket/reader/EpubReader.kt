@@ -48,6 +48,8 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
@@ -80,6 +82,11 @@ import io.github.friendlyglobal.jacket.importer.TextLayout
 import io.github.friendlyglobal.jacket.data.TextPages
 import io.github.friendlyglobal.jacket.voice.NaturalTtsEngineProvider
 import io.github.friendlyglobal.jacket.voice.NaturalTtsPreferences
+import io.github.friendlyglobal.jacket.voice.Respelling
+import io.github.friendlyglobal.jacket.voice.SayIt
+import io.github.friendlyglobal.jacket.voice.SpeechEdits
+import io.github.friendlyglobal.jacket.voice.SpokenEngineProvider
+import io.github.friendlyglobal.jacket.voice.spokenSentences
 import io.github.friendlyglobal.jacket.voice.regionOf
 import io.github.friendlyglobal.jacket.voice.withPhoneRegion
 import io.github.friendlyglobal.jacket.voice.SentenceLookahead
@@ -104,9 +111,9 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import org.readium.navigator.media.common.MediaMetadataProvider
-import org.readium.navigator.media.tts.AndroidTtsNavigatorFactory
 import org.readium.navigator.media.tts.TtsNavigator
 import org.readium.navigator.media.tts.TtsNavigatorFactory
+import org.readium.navigator.media.tts.android.AndroidTtsEngineProvider
 import org.readium.navigator.media.tts.android.AndroidTtsPreferences
 import org.readium.r2.navigator.DecorableNavigator
 import org.readium.r2.navigator.HyperlinkNavigator
@@ -129,6 +136,7 @@ import org.readium.r2.shared.publication.services.search.isSearchable
 import org.readium.r2.shared.publication.services.search.search
 import org.readium.r2.shared.publication.services.positions
 import org.readium.r2.shared.util.AbsoluteUrl
+import org.readium.r2.shared.util.Url
 import org.readium.r2.shared.util.getOrElse
 import java.io.File
 import java.util.UUID
@@ -185,6 +193,8 @@ fun EpubReader(
     nav: ReaderNav,
     haptics: Haptics,
     annotations: List<Annotation>,
+    /** The words the voice is to say the listener's way in this book ("Say it this way"). */
+    respellings: List<Respelling>,
     onCenterTap: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -220,7 +230,7 @@ fun EpubReader(
     // and Readium's pages refuse a locked book by throwing: Jacket would close under the reader.
     if (publication.isRestricted) return ReaderError(stringResource(R.string.reader_error_protected))
     if (publication.readingOrder.isEmpty()) return ReaderError(stringResource(R.string.reader_error_no_pages))
-    EpubPages(book, publication, start, spoken, text, settings, page, nav, haptics, annotations, onCenterTap)
+    EpubPages(book, publication, start, spoken, text, settings, page, nav, haptics, annotations, respellings, onCenterTap)
 }
 
 /** A book opened: where to start it, its files as read-aloud reads them, and, for a text file, where its paragraphs are in its pages. */
@@ -245,6 +255,7 @@ private fun EpubPages(
     nav: ReaderNav,
     haptics: Haptics,
     annotations: List<Annotation>,
+    respellings: List<Respelling>,
     onCenterTap: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -754,6 +765,11 @@ private fun EpubPages(
                     context.getSystemService(ClipboardManager::class.java)
                         .setPrimaryClip(ClipData.newPlainText(book.title, text))
                 }
+                // "Say it this way": how the voice is to say the word, or the name, selected.
+                SelectionMenu.Action.SAY -> SayIt.wordFrom(text).takeIf { it.isNotEmpty() }?.let {
+                    haptics.tick()
+                    nav.sayWord = it
+                }
                 SelectionMenu.Action.SHARE -> runCatching {
                     val quote = if (book.author.isNotBlank()) {
                         resources.getString(R.string.reader_share_quote_author, text, book.title, book.author)
@@ -932,6 +948,10 @@ private fun EpubPages(
     }
     listen.colors = page.link.toArgb() to page.background.toArgb()
     listen.veil = readableVeil(page.text.toArgb(), page.background.toArgb())
+    // "Say it this way": the words written for the voice the way they sound, and the numbers of
+    // notes passed over. Both take effect with the next sentence the voice is given.
+    listen.edits.respellings = respellings
+    listen.skipNotes = settings.skipNoteNumbers
 
     // While the voice is speaking, the book's place is the sentence it is on (see saveSpoken).
     listen.onSpoken = { sentence ->
@@ -1613,7 +1633,7 @@ private class ReadAloud(
     private val listen: ListenState,
     private val scope: CoroutineScope,
     /** Which chapter file a locator is in, so the sleep timer knows when one ends. */
-    private val fileOf: (org.readium.r2.shared.util.Url) -> Int,
+    private val fileOf: (Url) -> Int,
     /** The page is being put back after the phone folded, unfolded or turned: not the listener moving it. */
     private val resizing: () -> Boolean = { false },
     /** When the reader last moved through the book themselves (see [ReaderNav.movedAt]). */
@@ -1677,11 +1697,59 @@ private class ReadAloud(
     /** The language, with the reader's region, to ask the phone's own voice for; null to go by the book. */
     var phoneVoiceLanguage: String? = null
 
+    /**
+     * What the voice is given in place of the page's words ("Say it this way"): the listener's
+     * respellings, and the numbers of notes left out. Whichever voice reads, it reads through this.
+     */
+    val edits = SpeechEdits()
+
+    /** The notes' numbers of the chapter files the voice is in and near. */
+    private val notes = SpokenNotes(publication)
+
+    /** The numbers that point to notes are passed over. */
+    var skipNotes = false
+        set(value) {
+            if (field == value) return
+            field = value
+            edits.noteMarks = if (value) notes::marksIn else null
+            // Switched on while listening: from the next paragraph on.
+            if (value) lastSpoken?.let { notesNear(it.href) }
+        }
+
     override val previousLabel = R.string.listen_previous_sentence
     override val nextLabel = R.string.listen_next_sentence
     private val systemFactory by lazy {
         val app = context.applicationContext as Application
-        if (metadata != null) AndroidTtsNavigatorFactory(app, publication, metadataProvider = metadata) else AndroidTtsNavigatorFactory(app, publication)
+        val engine = SpokenEngineProvider(AndroidTtsEngineProvider(app), edits)
+        if (metadata != null) {
+            TtsNavigatorFactory(app, publication, engine, tokenizerFactory = spokenSentences(edits), metadataProvider = metadata)
+        } else {
+            TtsNavigatorFactory(app, publication, engine, tokenizerFactory = spokenSentences(edits))
+        }
+    }
+
+    /**
+     * Has the chapter file [file] read for its notes' numbers before the voice is sent into it,
+     * and the files next to it read meanwhile (see [SpokenNotes]). A long file isn't waited for
+     * for long: the voice starts, and passes the numbers over from wherever the reading is done.
+     */
+    private suspend fun readNotes(file: Url?) {
+        if (!skipNotes || file == null) return
+        val reading = scope.launch { notes.prepare(file) }
+        withTimeoutOrNull(NOTES_WAIT_MS) { reading.join() }
+        notesNear(file)
+    }
+
+    /** The files the voice comes to next from [file] (and the one it would step back into), read for their notes' numbers in good time. */
+    private fun notesNear(file: Url) {
+        if (!skipNotes) return
+        val files = publication.readingOrder
+        val at = files.indexOfFirst { it.url().removeFragment().isEquivalent(file.removeFragment()) }
+        if (at < 0) return
+        scope.launch {
+            // Its own first: it may be the first the voice has been in since they were switched on.
+            for (i in listOf(at, at + 1, at + 2, at - 1)) files.getOrNull(i)?.let { notes.prepare(it.url()) }
+        }
     }
 
     /** Readium's read-aloud navigator, whichever voice is behind it. */
@@ -1817,7 +1885,13 @@ private class ReadAloud(
                 // The sentence a fresh start begins with is in front of the listener already,
                 // though it may have begun on the page before: the page stays where it is for it.
                 var stay = onPage
+                var file: Url? = null
                 tts.location.collect { location ->
+                    // In a new chapter file: the ones after it are read for their notes' numbers.
+                    if (location.href != file) {
+                        file = location.href
+                        notesNear(location.href)
+                    }
                     // The sentences a tap moves the voice past aren't shown, said or followed.
                     if (jumping) return@collect
                     listen.spokenFile = fileOf(location.href)
@@ -2118,9 +2192,11 @@ private class ReadAloud(
             override fun onStopRequested() = stop()
         }
         val forced = language?.let(::Language)
+        // Before Readium cuts the first paragraph into sentences: the notes' numbers in it.
+        readNotes(from?.href ?: navigator()?.currentLocator?.value?.href)
         voice?.let { ref ->
-            val lookahead = SentenceLookahead()
-            val engine = NaturalTtsEngineProvider(context.voices, ref, lookahead, language)
+            val lookahead = SentenceLookahead(edits)
+            val engine = SpokenEngineProvider(NaturalTtsEngineProvider(context.voices, ref, lookahead, language), edits)
             val factory = if (metadata != null) {
                 TtsNavigatorFactory(app, publication, engine, tokenizerFactory = lookahead::tokenizer, metadataProvider = metadata)
             } else {
@@ -2238,6 +2314,7 @@ private class ReadAloud(
             val inBlock = was.utteranceLocator.locations == block.locator.locations ||
                 (reading.length >= SAME_SENTENCE_CHARS && text.contains(reading.take(SAME_SENTENCE_CHARS)))
             if (!inBlock) {
+                readNotes(block.locator.href)
                 tts.go(block.locator)
                 tts.skipToNextUtterance()
                 // Readium finds the block by reading the file up to it, which in a long chapter
@@ -2409,6 +2486,9 @@ private class ReadAloud(
 
         /** The longest a tap waits for the voice to be at the tapped block. */
         const val JUMP_GO_MS = 3_000L
+
+        /** How long the voice waits for a chapter file to be read for its notes' numbers before it starts in it. */
+        const val NOTES_WAIT_MS = 1_200L
 
         /** Two voices' sentences are the same one if they open with this many of the same characters. */
         const val SAME_SENTENCE_CHARS = SENTENCE_OPENING

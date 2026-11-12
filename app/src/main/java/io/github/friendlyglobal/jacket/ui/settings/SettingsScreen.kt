@@ -68,8 +68,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import io.github.friendlyglobal.jacket.data.Backup
 import io.github.friendlyglobal.jacket.library
+import io.github.friendlyglobal.jacket.ui.voices.SayItDialog
+import io.github.friendlyglobal.jacket.ui.voices.SayItDraft
+import io.github.friendlyglobal.jacket.ui.voices.SayItList
 import io.github.friendlyglobal.jacket.ui.voices.VoicePicker
 import io.github.friendlyglobal.jacket.ui.voices.voiceLabel
+import io.github.friendlyglobal.jacket.voices
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -107,6 +111,9 @@ fun SettingsScreen(
     var message by remember { mutableStateOf<String?>(null) }
     // The voice is chosen here as it will sound in the phone's own language.
     var choosingVoice by remember { mutableStateOf(false) }
+    // "Say it this way": every word the voice says the listener's way, whichever book it is for.
+    var showingWords by remember { mutableStateOf(false) }
+    var saying by remember { mutableStateOf<SayItDraft?>(null) }
     val phoneLanguage = LocalConfiguration.current.locales[0]?.toLanguageTag()
     // A backup that keeps itself up to date: a file chosen once, in Drive say, written after changes.
     val autoBackup = context.autoBackup
@@ -280,7 +287,7 @@ fun SettingsScreen(
                 Group(column) {
                     SegmentedListItem(
                         onClick = { haptics.tick(); choosingVoice = true },
-                        shapes = ListItemDefaults.segmentedShapes(0, 2),
+                        shapes = ListItemDefaults.segmentedShapes(0, 4),
                         leadingContent = { Icon(JacketIcons.Voice, null) },
                         supportingContent = { Text(voiceLabel(phoneLanguage, settings)) },
                     ) { Text(stringResource(R.string.voice_title)) }
@@ -289,10 +296,20 @@ fun SettingsScreen(
                             haptics.tick()
                             runCatching { context.startActivity(Intent("com.android.settings.TTS_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                         },
-                        shapes = ListItemDefaults.segmentedShapes(1, 2),
+                        shapes = ListItemDefaults.segmentedShapes(1, 4),
                         leadingContent = { Icon(JacketIcons.Volume, null) },
                         supportingContent = { Text(stringResource(R.string.voice_phone_settings_description)) },
                     ) { Text(stringResource(R.string.voice_phone_settings)) }
+                    SegmentedListItem(
+                        onClick = { haptics.tick(); showingWords = true },
+                        shapes = ListItemDefaults.segmentedShapes(2, 4),
+                        leadingContent = { Icon(JacketIcons.Voice, null) },
+                        supportingContent = { Text(stringResource(R.string.say_hint)) },
+                    ) { Text(stringResource(R.string.say_title)) }
+                    SwitchRow(
+                        3, 4, stringResource(R.string.listen_skip_notes),
+                        stringResource(R.string.listen_skip_notes_description), settings.skipNoteNumbers,
+                    ) { toggle(it) { s -> s.copy(skipNoteNumbers = it) } }
                 }
             }
             item { Hint(stringResource(R.string.voice_settings_hint), column) }
@@ -457,6 +474,41 @@ fun SettingsScreen(
                 modifier = Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
             )
         }
+    }
+    if (showingWords) {
+        ModalBottomSheet(onDismissRequest = { showingWords = false }) {
+            val everyBook = stringResource(R.string.say_scope_all)
+            SayItList(
+                sayings = state.sayings,
+                // Each says where it applies: in every book, or in the one named.
+                scope = { saying -> if (saying.bookId == null) everyBook else state.find(saying.bookId)?.title },
+                haptics = haptics,
+                onAdd = { saying = SayItDraft() },
+                onEdit = { saying = SayItDraft(it) },
+                onDelete = { library.deleteSaying(it.id) },
+                modifier = Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
+            )
+        }
+    }
+    saying?.let { draft ->
+        SayItDialog(
+            draft = draft,
+            // From here a new word is for every book.
+            bookId = null,
+            // Heard in the voice that reads the listener's own language.
+            voice = remember(settings.voice, settings.voices, phoneLanguage) { context.voices.choose(phoneLanguage, settings) },
+            language = phoneLanguage,
+            haptics = haptics,
+            onSave = {
+                library.saveSaying(it)
+                saying = null
+            },
+            onDelete = {
+                library.deleteSaying(it.id)
+                saying = null
+            },
+            onDismiss = { saying = null },
+        )
     }
     message?.let { text ->
         AlertDialog(

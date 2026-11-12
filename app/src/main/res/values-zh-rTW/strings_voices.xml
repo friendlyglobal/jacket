@@ -43,4 +43,17 @@
     <string name="library_empty_message_phone">新增 EPUB、PDF、CBZ 漫畫或文字檔。Jacket 會保存一份私人副本，讓它有真正可翻的書頁，還能用自然語音朗讀。</string>
     <string name="library_try_sample">試讀一本範例書籍</string>
     <string name="sample_failed">無法開啟範例書籍。</string>
+    <string name="say_title">這樣讀</string>
+    <string name="say_hint">告訴語音某個名字或詞該怎麼讀。</string>
+    <string name="say_word">書裡的詞</string>
+    <string name="say_sounds">讀作</string>
+    <string name="say_sounds_example">照讀音寫出來，例如：赫麥歐妮</string>
+    <string name="say_hear">聽聽看</string>
+    <string name="say_every_book">用於所有書</string>
+    <string name="say_scope_all">所有書</string>
+    <string name="say_add">新增詞</string>
+    <string name="say_remove">移除「%1$s」</string>
+    <string name="say_empty">還沒有詞。在頁面上長按一個詞並選擇「這樣讀」，或在這裡新增。</string>
+    <string name="listen_skip_notes">略過註釋編號</string>
+    <string name="listen_skip_notes_description">語音不會讀出指向註釋的小數字。</string>
 </resources>

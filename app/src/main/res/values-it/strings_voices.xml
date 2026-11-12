@@ -43,4 +43,17 @@
     <string name="library_empty_message_phone">Aggiungi un EPUB, un PDF, un fumetto CBZ o un file di testo. Jacket ne conserva una copia privata, gli dà pagine vere da sfogliare e può leggerlo ad alta voce con una voce naturale.</string>
     <string name="library_try_sample">Prova un libro di esempio</string>
     <string name="sample_failed">Impossibile aprire il libro di esempio.</string>
+    <string name="say_title">Dillo così</string>
+    <string name="say_hint">Spiega alla voce come si dice un nome o una parola.</string>
+    <string name="say_word">Parola nel libro</string>
+    <string name="say_sounds">Suona così</string>
+    <string name="say_sounds_example">Scrivila come suona, per esempio: er-MAI-o-ni</string>
+    <string name="say_hear">Ascolta</string>
+    <string name="say_every_book">Usa in tutti i libri</string>
+    <string name="say_scope_all">Tutti i libri</string>
+    <string name="say_add">Aggiungi una parola</string>
+    <string name="say_remove">Rimuovi %1$s</string>
+    <string name="say_empty">Ancora nessuna parola. Tieni premuta una parola sulla pagina e scegli “Dillo così”, oppure aggiungine una qui.</string>
+    <string name="listen_skip_notes">Salta i numeri delle note</string>
+    <string name="listen_skip_notes_description">La voce non legge i numerini che rimandano alle note.</string>
 </resources>

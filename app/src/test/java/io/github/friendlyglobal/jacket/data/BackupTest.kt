@@ -166,4 +166,87 @@ class BackupTest {
         assertEquals(1, merged.annotations.size)
         assertTrue(merged.books.size == 1)
     }
+
+    // --- "Say it this way": the words the voice says the listener's way ---
+
+    @Test
+    fun roundTripKeepsTheWordsSaidYourWay() {
+        val state = LibraryState(
+            books = listOf(book("b1", "one.epub")),
+            settings = Settings(skipNoteNumbers = false),
+            sayings = listOf(
+                Saying(id = "s1", word = "Hermione", say = "her-MY-oh-nee", bookId = "b1", createdAt = 3),
+                Saying(id = "s2", word = "Siobhan", say = "shi-VAWN", bookId = null, createdAt = 4),
+            ),
+        )
+        val restored = Backup.read(Backup.write(state))
+        assertEquals(state.sayings, restored.sayings)
+        assertFalse(restored.settings.skipNoteNumbers)
+        assertEquals(state.copy(currentId = null), restored)
+    }
+
+    @Test
+    fun anOlderBackupRestoresWithoutThem() {
+        // As 1.1 wrote it: no "sayings", no "skipNoteNumbers".
+        val old = org.json.JSONObject(Backup.write(LibraryState(books = listOf(book("b1", "one.epub")), annotations = listOf(highlight))))
+        old.remove("sayings")
+        old.getJSONObject("settings").remove("skipNoteNumbers")
+        val restored = Backup.read(old.toString())
+        assertEquals(emptyList<Saying>(), restored.sayings)
+        assertTrue(restored.settings.skipNoteNumbers)
+        assertEquals(listOf(highlight), restored.annotations)
+        // And merged into a library that has some, theirs stay.
+        val here = LibraryState(books = listOf(book("b1", "one.epub")), sayings = listOf(Saying("s1", "Hermione", "her-MY-oh-nee", "b1")))
+        assertEquals(here.sayings, Backup.merge(here, restored).sayings)
+    }
+
+    @Test
+    fun mergeBringsWordsBackToTheBookTheyWereFor() {
+        // The same file, added again on a new phone under a new id.
+        val here = LibraryState(
+            books = listOf(book("new", "one.epub")),
+            sayings = listOf(Saying("mine", "Smaug", "smowg", bookId = "new")),
+        )
+        val backup = LibraryState(
+            books = listOf(book("old", "one.epub"), book("gone", "two.epub")),
+            sayings = listOf(
+                Saying("s1", "Hermione", "her-MY-oh-nee", bookId = "old"),
+                // Already said another way here: this phone's stays.
+                Saying("s2", "smaug", "smog", bookId = "old"),
+                Saying("s3", "Siobhan", "shi-VAWN", bookId = null),
+                Saying("s4", "Aragorn", "A-ra-gorn", bookId = "gone"),
+                // For a book in neither library: nothing to be said in.
+                Saying("s5", "Nobody", "no-body", bookId = "never"),
+            ),
+        )
+        val merged = Backup.merge(here, backup)
+        assertEquals(listOf("mine", "s1", "s3", "s4"), merged.sayings.map { it.id })
+        assertEquals("new", merged.sayings.first { it.id == "s1" }.bookId)
+        assertEquals("smowg", merged.sayings.first { it.id == "mine" }.say)
+        assertEquals("gone", merged.sayings.first { it.id == "s4" }.bookId)
+        // Restoring the same backup again adds nothing.
+        assertEquals(merged.sayings, Backup.merge(merged, backup).sayings)
+    }
+
+    @Test
+    fun aBooksOwnWayOfSayingAWordComesFirst() {
+        val state = LibraryState(
+            sayings = listOf(
+                Saying("s1", "Smaug", "smog", bookId = null),
+                Saying("s2", "Smaug", "smowg", bookId = "b1"),
+                Saying("s3", "Bilbo", "BILL-bo", bookId = "b2"),
+            ),
+        )
+        assertEquals(listOf("smowg", "smog"), state.respellingsFor("b1").map { it.say })
+        assertEquals(listOf("BILL-bo", "smog"), state.respellingsFor("b2").map { it.say })
+    }
+
+    @Test
+    fun aDamagedWordIsLeftOutAndCounted() {
+        val text = org.json.JSONObject(LibraryJson.encode(LibraryState(sayings = listOf(Saying("s1", "Hermione", "her-MY-oh-nee")))))
+        text.getJSONArray("sayings").put(org.json.JSONObject().put("id", "s2").put("word", "Ron"))
+        val read = LibraryJson.read(text.toString())
+        assertEquals(listOf("s1"), read.state.sayings.map { it.id })
+        assertEquals(1, read.unread)
+    }
 }

@@ -1,10 +1,11 @@
 package io.github.friendlyglobal.jacket.data
 
+import io.github.friendlyglobal.jacket.voice.SayIt
 import org.json.JSONObject
 
 /**
  * The backup file: settings, the list of books (title, author, where you are), bookmarks,
- * highlights and notes. Book files and covers stay out; adding a book's file again on the new
+ * highlights and notes, and the words the voice says your way. Book files and covers stay out; adding a book's file again on the new
  * phone reconnects it to its entry.
  */
 object Backup {
@@ -42,6 +43,8 @@ object Backup {
      * all but the folder this phone watches.
      * Collections are merged by id or name; a book here keeps its own and joins the backup's, and
      * stays pinned if it was pinned in either. Reading time comes back with them (see [mergeReading]).
+     * Words to say another way are merged like bookmarks; a word already fixed here keeps this
+     * phone's way of saying it.
      */
     fun merge(current: LibraryState, backup: LibraryState): LibraryState {
         // The same book: the same entry, or one made from the same file (by its name and size, or
@@ -78,9 +81,17 @@ object Backup {
             watchFolder = current.settings.watchFolder,
             watchSeen = current.settings.watchSeen,
         )
+        val sayings = current.sayings.toMutableList()
+        for (saved in backup.sayings) {
+            val bookId = saved.bookId?.let { ids[it] ?: it }
+            // One for a book that isn't in either library has nothing to be said in.
+            if (bookId != null && books.none { it.id == bookId }) continue
+            if (sayings.any { it.id == saved.id || (it.bookId == bookId && SayIt.sameWord(it.word, saved.word)) }) continue
+            sayings += saved.copy(bookId = bookId)
+        }
         return current.copy(
             books = books, settings = settings, annotations = annotations, collections = collections,
-            reading = mergeReading(current.reading, backup.reading),
+            reading = mergeReading(current.reading, backup.reading), sayings = sayings,
         )
     }
 

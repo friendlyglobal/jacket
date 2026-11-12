@@ -43,4 +43,17 @@
     <string name="library_empty_message_phone">कोई EPUB, PDF, CBZ कॉमिक या टेक्स्ट फ़ाइल जोड़ें। Jacket उसकी एक निजी कॉपी रखता है, उसे पलटने के लिए असली पन्ने देता है और उसे स्वाभाविक आवाज़ में पढ़कर सुना सकता है।</string>
     <string name="library_try_sample">एक नमूना किताब आज़माएँ</string>
     <string name="sample_failed">नमूना किताब नहीं खुल सकी।</string>
+    <string name="say_title">इसे ऐसे बोलें</string>
+    <string name="say_hint">आवाज़ को बताएँ कि कोई नाम या शब्द कैसे बोला जाता है।</string>
+    <string name="say_word">किताब में शब्द</string>
+    <string name="say_sounds">ऐसे बोला जाता है</string>
+    <string name="say_sounds_example">जैसा सुनाई देता है वैसा लिखें, जैसे: हर-माय-ओ-नी</string>
+    <string name="say_hear">सुनें</string>
+    <string name="say_every_book">हर किताब में इस्तेमाल करें</string>
+    <string name="say_scope_all">हर किताब</string>
+    <string name="say_add">शब्द जोड़ें</string>
+    <string name="say_remove">%1$s हटाएँ</string>
+    <string name="say_empty">अभी कोई शब्द नहीं है। पेज पर किसी शब्द को दबाकर रखें और “इसे ऐसे बोलें” चुनें, या यहाँ जोड़ें।</string>
+    <string name="listen_skip_notes">नोट के नंबर छोड़ें</string>
+    <string name="listen_skip_notes_description">आवाज़ उन छोटे नंबरों को नहीं पढ़ती जो नोट की ओर इशारा करते हैं।</string>
 </resources>

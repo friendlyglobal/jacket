@@ -43,4 +43,17 @@
     <string name="library_empty_message_phone">EPUB、PDF、CBZ コミック、テキストファイルを追加できます。Jacket は自分だけのコピーを保管し、めくれる本物のページにして、ナチュラル音声で読み上げることもできます。</string>
     <string name="library_try_sample">サンプルの本を試す</string>
     <string name="sample_failed">サンプルの本を開けませんでした。</string>
+    <string name="say_title">読み方を教える</string>
+    <string name="say_hint">名前や言葉の読み方を音声に教えます。</string>
+    <string name="say_word">本の中の言葉</string>
+    <string name="say_sounds">読み方</string>
+    <string name="say_sounds_example">聞こえるとおりに書きます。例：ハーマイオニー</string>
+    <string name="say_hear">聞いてみる</string>
+    <string name="say_every_book">すべての本で使う</string>
+    <string name="say_scope_all">すべての本</string>
+    <string name="say_add">言葉を追加</string>
+    <string name="say_remove">%1$sを削除</string>
+    <string name="say_empty">まだ言葉がありません。ページ上の言葉を長押しして「読み方を教える」を選ぶか、ここで追加してください。</string>
+    <string name="listen_skip_notes">注の番号を読まない</string>
+    <string name="listen_skip_notes_description">注を示す小さな番号を、音声は読み上げません。</string>
 </resources>

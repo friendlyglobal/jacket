@@ -43,4 +43,17 @@
     <string name="library_empty_message_phone">EPUB, PDF, CBZ 만화 또는 텍스트 파일을 추가하세요. Jacket이 개인 사본을 보관하고, 넘길 수 있는 진짜 페이지로 만들어 주며, 자연스러운 음성으로 읽어 줄 수도 있습니다.</string>
     <string name="library_try_sample">샘플 책 읽어 보기</string>
     <string name="sample_failed">샘플 책을 열 수 없습니다.</string>
+    <string name="say_title">이렇게 읽기</string>
+    <string name="say_hint">이름이나 낱말을 어떻게 읽는지 음성에 알려 주세요.</string>
+    <string name="say_word">책 속 낱말</string>
+    <string name="say_sounds">읽는 법</string>
+    <string name="say_sounds_example">들리는 대로 적어 주세요. 예: 허마이오니</string>
+    <string name="say_hear">들어 보기</string>
+    <string name="say_every_book">모든 책에서 사용</string>
+    <string name="say_scope_all">모든 책</string>
+    <string name="say_add">낱말 추가</string>
+    <string name="say_remove">%1$s 삭제</string>
+    <string name="say_empty">아직 낱말이 없습니다. 페이지에서 낱말을 길게 누르고 ‘이렇게 읽기’를 선택하거나 여기에서 추가하세요.</string>
+    <string name="listen_skip_notes">주석 번호 건너뛰기</string>
+    <string name="listen_skip_notes_description">주석을 가리키는 작은 숫자는 음성이 읽지 않습니다.</string>
 </resources>

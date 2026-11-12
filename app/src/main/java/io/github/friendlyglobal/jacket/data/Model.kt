@@ -3,6 +3,7 @@ package io.github.friendlyglobal.jacket.data
 import android.content.res.Resources
 import androidx.annotation.StringRes
 import io.github.friendlyglobal.jacket.R
+import io.github.friendlyglobal.jacket.voice.Respelling
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -168,6 +169,18 @@ data class Annotation(
     val createdAt: Long = 0L,
 )
 
+/**
+ * "Say it this way": a word the voice is to say another way when it reads aloud, written the way
+ * it sounds ([say]). In one book ([bookId]), or in every book (null).
+ */
+data class Saying(
+    val id: String,
+    val word: String,
+    val say: String,
+    val bookId: String? = null,
+    val createdAt: Long = 0L,
+)
+
 data class Settings(
     val coverStyle: CoverStyle = CoverStyle.JACKET,
     val showProgress: Boolean = true,
@@ -227,6 +240,8 @@ data class Settings(
     val voices: Map<String, String> = emptyMap(),
     /** The collection the library is showing (a [BookCollection] id), or null for every book. */
     val collection: String? = null,
+    /** Read aloud, the small numbers that point to notes are passed over. */
+    val skipNoteNumbers: Boolean = true,
 )
 
 data class LibraryState(
@@ -238,6 +253,8 @@ data class LibraryState(
     val reading: Map<String, Long> = emptyMap(),
     /** The reader's own collections, in the order they were made. */
     val collections: List<BookCollection> = emptyList(),
+    /** Words the voice says the listener's way ("Say it this way"), in the order they were made. */
+    val sayings: List<Saying> = emptyList(),
 ) {
     /** The book the covers show: the one picked, else the one opened most recently. */
     val current: Book?
@@ -251,6 +268,13 @@ data class LibraryState(
         }
 
     fun find(id: String?): Book? = id?.let { books.firstOrNull { b -> b.id == it } }
+
+    /**
+     * How the voice is to say words in the book [bookId]: the book's own first, then those for
+     * every book, so that a word fixed both ways is said the book's way.
+     */
+    fun respellingsFor(bookId: String): List<Respelling> =
+        (sayings.filter { it.bookId == bookId } + sayings.filter { it.bookId == null }).map { Respelling(it.word, it.say) }
 }
 
 /**
@@ -306,6 +330,15 @@ internal object LibraryJson {
             put("voice", state.settings.voice ?: JSONObject.NULL)
             put("voices", JSONObject().apply { state.settings.voices.forEach { (language, voice) -> put(language, voice) } })
             put("collection", state.settings.collection ?: JSONObject.NULL)
+            put("skipNoteNumbers", state.settings.skipNoteNumbers)
+        })
+        put("sayings", JSONArray().apply {
+            state.sayings.forEach {
+                put(JSONObject().apply {
+                    put("id", it.id); put("word", it.word); put("say", it.say)
+                    put("bookId", it.bookId ?: JSONObject.NULL); put("createdAt", it.createdAt)
+                })
+            }
         })
         put("collections", JSONArray().apply {
             state.collections.forEach { put(JSONObject().apply { put("id", it.id); put("name", it.name); put("createdAt", it.createdAt) }) }
@@ -373,6 +406,8 @@ internal object LibraryJson {
                 voice = if (s.isNull("voice")) null else s.optString("voice").takeIf { it.isNotEmpty() },
                 voices = s.optJSONObject("voices")?.let { v -> v.keys().asSequence().associateWith { v.optString(it) }.filterValues { it.isNotEmpty() } }.orEmpty(),
                 collection = if (s.isNull("collection")) null else s.optString("collection").takeIf { it.isNotEmpty() },
+                // Libraries and backups from before there was the choice: notes' numbers are passed over.
+                skipNoteNumbers = s.optBoolean("skipNoteNumbers", true),
             ),
             // Libraries from before collections have none.
             collections = list("collections").entries { c ->
@@ -380,6 +415,8 @@ internal object LibraryJson {
             },
             reading = root.optJSONObject("reading")?.let { days -> days.keys().asSequence().associateWith { days.optLong(it) } }.orEmpty(),
             annotations = list("annotations").entries { it.toAnnotation() },
+            // Libraries and backups from before "Say it this way" have none.
+            sayings = list("sayings").entries { it.toSaying() },
         )
         return Read(state, unread)
     }
@@ -427,6 +464,20 @@ internal object LibraryJson {
         color = enumOr(optString("color"), HighlightColor.YELLOW),
         createdAt = optLong("createdAt"),
     )
+
+    /** A word and how to say it; null (and counted as unread) if either is missing. */
+    private fun JSONObject.toSaying(): Saying? {
+        val word = optString("word").trim()
+        val say = optString("say").trim()
+        if (word.isEmpty() || say.isEmpty()) return null
+        return Saying(
+            id = getString("id"),
+            word = word,
+            say = say,
+            bookId = if (isNull("bookId")) null else optString("bookId").takeIf { it.isNotEmpty() },
+            createdAt = optLong("createdAt"),
+        )
+    }
 
     private fun JSONObject.toBook() = Book(
         id = getString("id"),
