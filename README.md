@@ -43,7 +43,7 @@ Google Play: coming soon ·
 ## Install
 
 - **From GitHub:** open the [latest release](https://github.com/friendlyglobal/jacket/releases/latest),
-  download `Jacket-1.0.1.apk` and open it. Your browser asks once to be allowed to install apps.
+  download `Jacket-1.1.0.apk` and open it. Your browser asks once to be allowed to install apps.
   It's about 200 MB, because the voices are inside, and it runs on Android 8 and later. Later
   versions install over it the same way, keeping your books and places.
 - **Google Play:** coming soon.
@@ -83,11 +83,16 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
 - **Typography:** Literata (Google's typeface for long reading), Atkinson Hyperlegible and
   OpenDyslexic, alongside the system serif and sans and the book's own fonts. Text size, line
   spacing, margins, justified text with hyphenation, and Book, Paper, Dark or Black pages.
-  Settings apply live and keep your place. Volume keys can turn pages.
+  Settings apply live and keep your place.
+- **Keys, page-turners and a mouse:** arrow keys, Page Up/Down and Space turn pages (the arrows
+  follow a right-to-left book), a Bluetooth page-turner works without touching the screen, and a
+  mouse wheel turns pages. While a book is read aloud, Space pauses it. Volume keys can turn pages too.
+- **Footnotes in a pop-up:** tap a note number and the note opens over the page, with a way to
+  go to it in the book. Works in books that mark their notes and in many that don't.
 - **Bookmarks, highlights and notes:** tap the ribbon to bookmark a page. Press and hold text to
   highlight it in one of five colours, add a note, copy, share, or send it to Translate and other
-  text apps. Everything is listed next to the contents, and a book's highlights and notes can be
-  shared out as text in one go.
+  text apps. Everything is listed next to the contents. A book's highlights and notes can be
+  shared as text in one go or saved as a Markdown file, and Settings saves every book's at once.
 - **Search inside EPUBs**, with results streaming in and the match marked on the page.
 - **Finishing a book:** the last page offers to mark it finished and suggests what to read next;
   finished books move to their own shelf.
@@ -124,10 +129,21 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
   phone short on memory starts with. If a phone can't keep up with a natural voice, the player
   says so and offers the change.
 - EPUB read-aloud keeps going with the screen off, with controls on the lock screen, in the
-  notification shade and on headphones. A sleep timer stops it after 15, 30 or 60 minutes or at
-  the end of the chapter.
-- Play/pause, skip by sentence (EPUB) or paragraph (text), 0.8× to 2× speed. It pauses when
-  another app plays audio or your headphones come out.
+  notification shade and on headphones. A sleep timer stops it after 15, 30 or 60 minutes, after
+  any length you set, or at the end of the chapter.
+- Play/pause, skip by sentence (EPUB) or paragraph (text), skip to the next or previous chapter,
+  and 0.5× to 3× speed. After a pause of a couple of minutes it picks up a sentence back, so you
+  find the thread. It pauses when another app plays audio or your headphones come out.
+
+### For every reader
+- **TalkBack:** the reader's controls stay put under a screen reader, the line under the page
+  says where you are and offers next and previous page, and the place slider speaks the percent
+  and chapter. Brightness and warmth have sliders as well as edge swipes, and the folded cover and
+  the widgets each read as one clear phrase.
+- **Keyboard alone:** Tab reaches the controls, Enter does what a tap on the page does, Escape
+  hands the keys back to the page.
+- **Large text:** pages lay out at the largest system font and display size, and text in the
+  reader goes up to 300%. Text colours meet WCAG AA contrast in every page colour.
 
 ### In your language
 English, Spanish, Brazilian Portuguese, French, Italian, German, Dutch, Polish, Russian, Ukrainian,
@@ -138,6 +154,8 @@ are a first pass; corrections from native speakers are welcome (`app/src/main/re
 ### Your library
 - **Watched folder:** pick a folder once in Settings, and new books in it are added whenever
   Jacket opens.
+- **No duplicates:** adding a file that's already in your library, even under another name,
+  tells you it's there instead of making a second copy.
 - **Reading time and streak:** today's minutes and the run of days read, under the library's
   title (off in Settings if you'd rather not count).
 - **Shortcuts:** long-press Jacket's icon for the book you're reading, the one before it, and
@@ -251,13 +269,7 @@ docs/concept.html            The interactive design concept the app started from
 
 The details, the reasons and the size of each item are in [docs/roadmap.md](docs/roadmap.md).
 
-**Coming in 1.1**
-- Turn pages with a keyboard, Bluetooth page-turner or mouse; Space pauses the voice
-- Footnotes open in a pop-up instead of jumping away
-- Listening speeds from 0.5× to 3×, and a sleep timer of any length
-- Save highlights and notes as a file, for one book or all of them
-
-**Later**
+**Next**
 - Plain and shared text work like full books: listening with the screen off, highlights, search
 - Fix how a name is pronounced, and skip note numbers when reading aloud
 - Skip and sleep buttons on the Galaxy Z Flip cover-screen player

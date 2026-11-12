@@ -1,0 +1,8 @@
+Jacket 1.1
+• Tournez les pages au clavier, à la télécommande ou à la molette
+• Les notes s'ouvrent dans une fenêtre
+• Écoutez de 0,5× à 3×, avec une minuterie libre et le saut de chapitre
+• Après une pause, l'écoute reprend une phrase plus tôt
+• Enregistrez surlignages et notes dans un fichier
+• Mieux avec TalkBack, le clavier et les grands textes, jusqu'à 300 %
+• Corrections : 100 % en fin de livre, plus de doublons, sauvegardes plus sûres, les livres protégés ne ferment plus l'app

@@ -10,7 +10,7 @@ and Google's own guidelines. It shows which way to go, not how many people asked
 Every item has to keep Jacket's rules: no internet permission, no GPL code, no ads or tracking,
 plain-language UI, and nothing labelled "AI".
 
-## 1.1
+## Shipped in 1.1 (11 November 2026)
 
 ### Turn pages with a keyboard, remote or mouse (S)
 Arrow keys, Page Up/Down and Space turn pages, and Space pauses the voice when it's reading. This
@@ -56,7 +56,11 @@ Go through the reader with TalkBack and
 they find. Text size stops at 200% (`reader/ReadingControls.kt:67`). Allowing larger text is a
 suggestion, not something users have been seen asking for.
 
-## Later
+Shipped: TalkBack, keyboard-only use, large text up to 300% and AA contrast. Still open: making a
+highlight or note without press-and-hold, PDF and comic zoom without pinching, and reading the
+page's own text with TalkBack inside the paginated view (Listen is the dependable route).
+
+## Next
 
 ### Plain and shared text work like full books (M)
 Shared text plays with the screen off, skips by sentence, and can be highlighted and searched.

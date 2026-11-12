@@ -1,0 +1,8 @@
+Jacket 1.1
+• Blader met toetsenbord, bladeraar of scrollwiel
+• Voetnoten openen in een venster
+• Luister op 0,5× tot 3×, met een slaaptimer van elke lengte en hoofdstukken overslaan
+• Na een pauze begint luisteren een zin terug
+• Bewaar markeringen en notities als bestand
+• Beter met TalkBack, toetsenbord en grote tekst, tot 300%
+• Opgelost: 100% aan het eind, geen dubbele boeken, veiligere back-ups, beveiligde boeken sluiten de app niet meer

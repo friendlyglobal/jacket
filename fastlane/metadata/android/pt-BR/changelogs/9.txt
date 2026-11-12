@@ -1,0 +1,8 @@
+Jacket 1.1
+• Vire as páginas com teclado, passador de páginas ou roda do mouse
+• As notas de rodapé abrem numa janela
+• Ouça de 0,5× a 3×, com timer de qualquer duração e pulo de capítulos
+• Depois de uma pausa, o áudio volta uma frase
+• Salve destaques e notas em um arquivo
+• Melhor com TalkBack, teclado e letras grandes, até 300%
+• Correções: 100% no fim do livro, sem livros duplicados, backups mais seguros, livros protegidos não fecham mais o app

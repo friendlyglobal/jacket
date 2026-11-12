@@ -1,0 +1,8 @@
+Jacket 1.1
+• Balik halaman dengan keyboard, pembalik halaman, atau roda mouse
+• Catatan kaki terbuka di jendela kecil
+• Dengarkan pada 0,5×–3×, dengan timer tidur berapa pun lamanya dan lompat bab
+• Setelah jeda, bacaan mulai satu kalimat sebelumnya
+• Simpan sorotan dan catatan sebagai file
+• Lebih nyaman dengan TalkBack, keyboard, dan teks besar, hingga 300%
+• Perbaikan: 100% di akhir buku, tanpa buku ganda, cadangan lebih aman, buku terlindungi tidak menutup aplikasi
