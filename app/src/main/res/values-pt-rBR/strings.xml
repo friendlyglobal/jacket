@@ -306,6 +306,8 @@
     <string name="widget_reading">Lendo</string>
     <string name="widget_empty">Adicione um livro para vestir a capa dele</string>
     <string name="listen_notification_channel">Leitura em voz alta</string>
+    <string name="listen_browse_continue">Continuar ouvindo</string>
+    <string name="listen_browse_recent">Livros recentes</string>
     <string name="reader_footer_time_left">Faltam %1$d min no capítulo</string>
     <string name="reading_time_left">Tempo restante no capítulo</string>
     <string name="reading_edge_swipes">Brilho e calor ao deslizar</string>

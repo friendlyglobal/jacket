@@ -306,6 +306,8 @@
     <string name="widget_reading">Leyendo</string>
     <string name="widget_empty">Añade un libro para lucir su portada</string>
     <string name="listen_notification_channel">Lectura en voz alta</string>
+    <string name="listen_browse_continue">Seguir escuchando</string>
+    <string name="listen_browse_recent">Libros recientes</string>
     <string name="reader_footer_time_left">Quedan %1$d min del capítulo</string>
     <string name="reading_time_left">Tiempo restante del capítulo</string>
     <string name="reading_edge_swipes">Brillo y calidez al deslizar</string>

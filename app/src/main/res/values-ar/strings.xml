@@ -337,6 +337,8 @@
     <string name="widget_reading">قيد القراءة</string>
     <string name="widget_empty">أضف كتابًا ليظهر غلافه هنا</string>
     <string name="listen_notification_channel">القراءة بصوت عالٍ</string>
+    <string name="listen_browse_continue">متابعة الاستماع</string>
+    <string name="listen_browse_recent">الكتب الأخيرة</string>
     <string name="reader_footer_time_left">بقي %1$d د من الفصل</string>
     <string name="reading_time_left">الوقت المتبقي في الفصل</string>
     <string name="reading_edge_swipes">السطوع والدفء بالسحب</string>

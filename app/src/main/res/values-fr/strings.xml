@@ -306,6 +306,8 @@
     <string name="widget_reading">En cours</string>
     <string name="widget_empty">Ajoutez un livre pour arborer sa couverture</string>
     <string name="listen_notification_channel">Lecture à voix haute</string>
+    <string name="listen_browse_continue">Reprendre l’écoute</string>
+    <string name="listen_browse_recent">Livres récents</string>
     <string name="reader_footer_time_left">%1$d min restantes dans le chapitre</string>
     <string name="reading_time_left">Temps restant dans le chapitre</string>
     <string name="reading_edge_swipes">Luminosité et chaleur par balayage</string>

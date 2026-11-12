@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Debug builds only: tells Android Auto that Jacket has something to listen to, so the lists
+         ListenService offers ("Continue listening", "Recent books") can be tried in a car or in
+         the Desktop Head Unit. A build that isn't from Google Play only shows there with Android
+         Auto's "Unknown sources" developer setting switched on.
+
+         Release builds leave it out on purpose. Declaring it puts every Google Play release
+         through the Android Auto review, and Jacket isn't ready for that yet (see
+         docs/roadmap.md). When it is, the entry below and res/xml/automotive_app_desc.xml move to
+         the main manifest.
+
+         One thing that review asks for is known to be missing, and lint is told so here rather
+         than left to fail every debug build: an activity that takes "play ... on Jacket" from the
+         phone's assistant (android.media.action.MEDIA_PLAY_FROM_SEARCH). In the car, a book asked
+         for by name already reaches ListenService through its media session. -->
+    <application tools:ignore="MissingIntentFilterForMediaSearch">
+        <meta-data
+            android:name="com.google.android.gms.car.application"
+            android:resource="@xml/automotive_app_desc" />
+    </application>
+</manifest>

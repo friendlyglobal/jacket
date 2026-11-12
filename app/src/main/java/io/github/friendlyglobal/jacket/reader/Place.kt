@@ -113,6 +113,19 @@ internal class TextPlaces(private val texts: List<String>) {
         return texts.indices.singleOrNull { holds(it, sentence) }
     }
 
+    /**
+     * The letter [progression] of the way down the file: which block it is in, and how many
+     * letters into it. Null for a file with no text.
+     */
+    fun spotAt(progression: Double): TextSpot? {
+        if (letters == 0) return null
+        val letter = (progression.coerceIn(0.0, 1.0) * letters).toInt().coerceAtMost(letters - 1)
+        // The block the letter is in: the last one that starts at or before it (an empty block
+        // starts where the next one does, so it is never the last of those).
+        val block = texts.indices.lastOrNull { starts[it] <= letter } ?: return null
+        return TextSpot(block, letter - starts[block])
+    }
+
     private fun opening(sentence: String?): String = sentence?.let(::bare)?.take(SENTENCE_OPENING).orEmpty()
 }
 
@@ -314,6 +327,58 @@ internal fun tappedAt(texts: List<String>, before: String, after: String): TextS
     }
     return null
 }
+
+/**
+ * Where in a chapter file the voice starts when there is no page to start from: started from a
+ * headphone button, the notification, the widget or the car, it carries on from the place the
+ * book was left at. That place is one of two things.
+ *
+ * The sentence the voice stopped on: [block] is the one of the file's blocks it is in (see
+ * [TextPlaces.blockOf]), [words] the sentence, and the voice starts with it.
+ *
+ * Or the page a reader was on: [words] are the page's first words, where enough of them were
+ * kept to tell it by, and the voice starts with the sentence they are in, as it would with the
+ * page in front of it. Failing them (too few, not found, or found twice), the place is known by
+ * how far down the file it is, [around], and the voice starts with the sentence that far down.
+ *
+ * [texts] are the file's blocks of text in order, [places] where each is in the file. Null for a
+ * file with no words.
+ */
+internal fun resumeSpot(texts: List<String>, places: TextPlaces, words: String?, around: Double?, block: Int? = null): TextSpot? {
+    if (block != null && block in texts.indices) {
+        val opening = words?.let(::bare)?.take(SENTENCE_OPENING).orEmpty()
+        return TextSpot(block, if (opening.isEmpty()) 0 else bare(texts[block]).indexOf(opening).coerceAtLeast(0))
+    }
+    return words?.let { tappedAt(texts, "", it) } ?: places.spotAt(around ?: 0.0)
+}
+
+/**
+ * What the voice's count of the book's place leads its sentence's own by, when it starts with no
+ * page in sight (see [spokenWithin] and [pageLead]). A page seen would say; with none, the book's
+ * place as it was last counted stands in for one: [counted] of the way through the book, which is
+ * [within] of the way down its file, while the sentence the voice starts with is [told] of the way
+ * down the file by its own count ([own] through the book). So the number the book shows doesn't
+ * move when the voice is started from a headphone button, and goes up from there as it reads.
+ *
+ * Only where the two are counts of the same place: in the same file ([sameFile]), and no further
+ * apart than pages and their pictures account for. A voice that had to start somewhere else (the
+ * saved place wasn't found) is counted by its own sentence alone; null then.
+ */
+internal fun carriedLead(sameFile: Boolean, counted: Double, own: Double, within: Double, told: Double): Double? =
+    if (sameFile && abs(counted - own) <= CARRY_LIMIT) pageLead(within, told, known = null, moved = false) else null
+
+/** Two counts of a place this far apart (of the whole book) are not of the same place. */
+internal const val CARRY_LIMIT = 0.02
+
+/**
+ * Whether the chapter the sleep timer was waiting on has ended. It started with the voice in the
+ * chapter file [startFile] and the page in the chapter [startChapter] of the contents (-1 for
+ * either while unknown; the chapter is always -1 with no reader open). Whichever comes first: the
+ * voice moving into another chapter file ([file]), or the page, following the voice, reaching
+ * another chapter of the contents ([chapter]).
+ */
+internal fun chapterEnded(startFile: Int, startChapter: Int, file: Int, chapter: Int): Boolean =
+    (file != startFile && file >= 0 && startFile >= 0) || chapter != startChapter
 
 /** How many letters behind and ahead of a tap it is looked for by, in the order tried. */
 private val TAP_CONTEXT = listOf(60 to 60, 24 to 24, 0 to 40, 40 to 0)

@@ -316,6 +316,8 @@
     <string name="widget_reading">Читаю</string>
     <string name="widget_empty">Добавьте книгу, чтобы надеть её обложку</string>
     <string name="listen_notification_channel">Чтение вслух</string>
+    <string name="listen_browse_continue">Продолжить слушать</string>
+    <string name="listen_browse_recent">Недавние книги</string>
     <string name="reader_footer_time_left">Ещё %1$d мин до конца главы</string>
     <string name="reading_time_left">Время до конца главы</string>
     <string name="reading_edge_swipes">Яркость и теплота свайпом</string>

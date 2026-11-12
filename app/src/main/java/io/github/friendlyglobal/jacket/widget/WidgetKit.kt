@@ -110,18 +110,10 @@ internal fun openIntent(context: Context, book: Book?) = Intent(context, MainAct
     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
 }
 
-/** Opens [book] and starts reading it aloud, as the launcher's "Listen" shortcut does. */
-internal fun listenIntent(context: Context, book: Book) = Intent(context, MainActivity::class.java).apply {
-    action = Intent.ACTION_MAIN
-    data = "jacket://listen/${book.id}".toUri()
-    putExtra(MainActivity.EXTRA_OPEN_BOOK, book.id)
-    putExtra(MainActivity.EXTRA_LISTEN, true)
-    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-}
-
 /**
  * A headphone button press, delivered to the read-aloud session: Media3's service takes these
- * and plays or pauses the voice without opening the app.
+ * and plays or pauses the voice without opening the app. Play with nothing being read aloud
+ * starts the voice in the book being read, at the place it was left at (see ListenService).
  */
 internal fun mediaButtonIntent(context: Context, keyCode: Int) = Intent(context, ListenService::class.java).apply {
     action = Intent.ACTION_MEDIA_BUTTON

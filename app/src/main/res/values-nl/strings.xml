@@ -296,6 +296,8 @@
     <string name="widget_reading">Ik lees</string>
     <string name="widget_empty">Voeg een boek toe om de omslag te dragen</string>
     <string name="listen_notification_channel">Voorlezen</string>
+    <string name="listen_browse_continue">Verder luisteren</string>
+    <string name="listen_browse_recent">Recente boeken</string>
     <string name="reader_footer_time_left">Nog %1$d min in dit hoofdstuk</string>
     <string name="reading_time_left">Resterende tijd in hoofdstuk</string>
     <string name="reading_edge_swipes">Helderheid en warmte met vegen</string>
