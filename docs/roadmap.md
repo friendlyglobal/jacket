@@ -56,8 +56,10 @@ Go through the reader with TalkBack and
 they find. Text size stops at 200% (`reader/ReadingControls.kt:67`). Allowing larger text is a
 suggestion, not something users have been seen asking for.
 
-Shipped: TalkBack, keyboard-only use, large text up to 300% and AA contrast. Still open: making a
-highlight or note without press-and-hold, PDF and comic zoom without pinching, and reading the
+Shipped: TalkBack, keyboard-only use, large text up to 300% and AA contrast. A highlight or a note
+can be made without press-and-hold: a button on the reader's top bar, and TalkBack actions, mark
+the sentence being read aloud or the first paragraph on the page. Still open: choosing any other
+words to highlight without touching the page, PDF and comic zoom without pinching, and reading the
 page's own text with TalkBack inside the paginated view (Listen is the dependable route).
 
 ## Shipped in 1.2 (12 November 2026)

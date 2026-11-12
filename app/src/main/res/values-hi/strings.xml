@@ -201,6 +201,13 @@
     <string name="reader_back_to_library">लाइब्रेरी पर वापस जाएँ</string>
     <string name="reader_search">किताब में खोजें</string>
     <string name="reader_bookmark_add">इस पेज को बुकमार्क करें</string>
+    <string name="reader_highlight_or_note">हाइलाइट करें या नोट जोड़ें</string>
+    <string name="reader_highlight_sentence">जो वाक्य पढ़ा जा रहा है उसे हाइलाइट करें</string>
+    <string name="reader_note_sentence">जो वाक्य पढ़ा जा रहा है उस पर नोट जोड़ें</string>
+    <string name="reader_highlight_paragraph">इस पेज का पहला पैराग्राफ़ हाइलाइट करें</string>
+    <string name="reader_note_paragraph">इस पेज के पहले पैराग्राफ़ पर नोट जोड़ें</string>
+    <string name="reader_highlighted">हाइलाइट हो गया</string>
+    <string name="reader_nothing_to_highlight">इस पेज पर हाइलाइट करने के लिए कोई शब्द नहीं हैं।</string>
     <string name="reader_bookmark_remove">बुकमार्क हटाएँ</string>
     <string name="reader_text_settings">टेक्स्ट और पेज की सेटिंग</string>
     <string name="reader_contents_and_notes">विषय-सूची, बुकमार्क और हाइलाइट</string>

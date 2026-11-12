@@ -103,6 +103,7 @@ import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.navigator.preferences.ReadingProgression
+import org.readium.r2.shared.publication.services.content.Content
 import org.readium.r2.shared.publication.services.isRestricted
 import org.readium.r2.shared.publication.services.locateProgression
 import org.readium.r2.shared.publication.services.search.isSearchable
@@ -977,6 +978,61 @@ private fun EpubPages(
     // notes passed over. Both take effect with the next sentence the voice is given.
     listen.edits.respellings = respellings
     listen.skipNotes = settings.skipNoteNumbers
+
+    // Highlights without selecting anything, for a screen reader and a keyboard, which can't
+    // press and hold on the page: the sentence being read aloud, or else the first paragraph on
+    // the page. Either is found in Readium's own reading of the file (which is where the voice
+    // reads from, and what a highlight is drawn by), not by asking the page to select it.
+    suspend fun firstParagraph(n: EpubNavigatorFragment): Pair<Locator, String>? {
+        val here = n.currentLocator.value
+        val top = topOf(n)?.text
+        val file = open.spoken.of(here.href, here.mediaType)
+        val texts = file.blocks.map { it.text }
+        val block = firstParagraphOn(texts, texts.indices.map(file.places::of), top, here.locations.progression) {
+            file.blocks[it].role is Content.TextElement.Role.Heading
+        } ?: return null
+        val paragraph = file.blocks[block]
+        return paragraph.locator.copy(text = Locator.Text(highlight = paragraph.text)) to paragraph.text
+    }
+    // (Offered once, for as long as the book is open here: the controls are told it is there.)
+    val spansNow by rememberUpdatedState(spans)
+    DisposableEffect(listen) {
+        nav.highlightHere = here@{ note ->
+            val n = navigator ?: return@here Marked.NOTHING
+            val (found, said) = (if (nav.listen.active) listen.sentenceNow() else null) ?: firstParagraph(n) ?: return@here Marked.NOTHING
+            val text = highlightWords(said)
+            if (text.isEmpty()) return@here Marked.NOTHING
+            // Told where it is in its file the pages' way (see SpokenFiles.placed), as every sentence of the voice's is.
+            val at = open.spoken.placed(found)
+            val resource = contents.resourceOf(at.href)
+            // Marked already: that highlight is opened, to be given a note, another colour, or taken off.
+            val marked = library.state.value.annotations.firstOrNull { old ->
+                old.bookId == book.id && old.kind == AnnotationKind.HIGHLIGHT && old.text == text &&
+                    old.locator?.let { runCatching { Locator.fromJSON(JSONObject(it)) }.getOrNull() }?.let { contents.resourceOf(it.href) == resource } == true
+            }
+            if (marked != null) {
+                nav.editing = marked.id
+                return@here Marked.ALREADY
+            }
+            val highlight = Annotation(
+                id = UUID.randomUUID().toString(),
+                bookId = book.id,
+                kind = AnnotationKind.HIGHLIGHT,
+                locator = at.toJSON().toString(),
+                section = textFile?.pagePlace(null, at)?.paragraph ?: 0,
+                progress = (spansNow?.total(resource, at.locations.progression ?: 0.0) ?: 0.0).toFloat(),
+                // (The voice may be in another chapter than the page, if the listener has gone to look elsewhere.)
+                chapter = contents.titleOf(contents.chapterAt(resource)).takeIf { nav.listen.active && nav.listen.offPage } ?: nav.title,
+                text = text,
+                color = library.state.value.annotations.lastOrNull { it.bookId == book.id && it.kind == AnnotationKind.HIGHLIGHT }?.color ?: HighlightColor.YELLOW,
+                createdAt = System.currentTimeMillis(),
+            )
+            library.addAnnotation(highlight)
+            if (note) nav.editing = highlight.id
+            Marked.DONE
+        }
+        onDispose { nav.highlightHere = null }
+    }
 
     // While the voice is speaking, the book's place is the sentence it is on (see saveSpoken).
     voicePage.onSpoken = { sentence, back ->

@@ -194,6 +194,13 @@
     <string name="reader_back_to_library">返回書庫</string>
     <string name="reader_search">在書中搜尋</string>
     <string name="reader_bookmark_add">將此頁加入書籤</string>
+    <string name="reader_highlight_or_note">畫線或加入筆記</string>
+    <string name="reader_highlight_sentence">為正在朗讀的句子畫線</string>
+    <string name="reader_note_sentence">為正在朗讀的句子加入筆記</string>
+    <string name="reader_highlight_paragraph">為本頁第一段畫線</string>
+    <string name="reader_note_paragraph">為本頁第一段加入筆記</string>
+    <string name="reader_highlighted">已畫線</string>
+    <string name="reader_nothing_to_highlight">本頁沒有可畫線的文字。</string>
     <string name="reader_bookmark_remove">移除書籤</string>
     <string name="reader_text_settings">文字和頁面設定</string>
     <string name="reader_contents_and_notes">目錄、書籤和畫線</string>

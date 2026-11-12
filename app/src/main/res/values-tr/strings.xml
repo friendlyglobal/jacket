@@ -201,6 +201,13 @@
     <string name="reader_back_to_library">Kitaplığa dön</string>
     <string name="reader_search">Kitapta ara</string>
     <string name="reader_bookmark_add">Bu sayfaya yer işareti koy</string>
+    <string name="reader_highlight_or_note">Vurgula veya not ekle</string>
+    <string name="reader_highlight_sentence">Okunan cümleyi vurgula</string>
+    <string name="reader_note_sentence">Okunan cümleye not ekle</string>
+    <string name="reader_highlight_paragraph">Bu sayfadaki ilk paragrafı vurgula</string>
+    <string name="reader_note_paragraph">Bu sayfadaki ilk paragrafa not ekle</string>
+    <string name="reader_highlighted">Vurgulandı</string>
+    <string name="reader_nothing_to_highlight">Bu sayfada vurgulanacak metin yok.</string>
     <string name="reader_bookmark_remove">Yer işaretini kaldır</string>
     <string name="reader_text_settings">Metin ve sayfa ayarları</string>
     <string name="reader_contents_and_notes">İçindekiler, yer işaretleri ve vurgular</string>

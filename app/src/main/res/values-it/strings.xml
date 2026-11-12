@@ -207,6 +207,13 @@
     <string name="reader_back_to_library">Torna alla libreria</string>
     <string name="reader_search">Cerca nel libro</string>
     <string name="reader_bookmark_add">Aggiungi un segnalibro a questa pagina</string>
+    <string name="reader_highlight_or_note">Evidenzia o aggiungi una nota</string>
+    <string name="reader_highlight_sentence">Evidenzia la frase che viene letta</string>
+    <string name="reader_note_sentence">Aggiungi una nota alla frase che viene letta</string>
+    <string name="reader_highlight_paragraph">Evidenzia il primo paragrafo di questa pagina</string>
+    <string name="reader_note_paragraph">Aggiungi una nota al primo paragrafo di questa pagina</string>
+    <string name="reader_highlighted">Evidenziato</string>
+    <string name="reader_nothing_to_highlight">In questa pagina non c\'è testo da evidenziare.</string>
     <string name="reader_bookmark_remove">Rimuovi segnalibro</string>
     <string name="reader_text_settings">Impostazioni di testo e pagina</string>
     <string name="reader_contents_and_notes">Indice, segnalibri ed evidenziazioni</string>

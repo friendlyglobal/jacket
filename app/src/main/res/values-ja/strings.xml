@@ -194,6 +194,13 @@
     <string name="reader_back_to_library">ライブラリに戻る</string>
     <string name="reader_search">本の中を検索</string>
     <string name="reader_bookmark_add">このページをブックマーク</string>
+    <string name="reader_highlight_or_note">ハイライトまたはメモを追加</string>
+    <string name="reader_highlight_sentence">読み上げ中の文をハイライト</string>
+    <string name="reader_note_sentence">読み上げ中の文にメモを追加</string>
+    <string name="reader_highlight_paragraph">このページの最初の段落をハイライト</string>
+    <string name="reader_note_paragraph">このページの最初の段落にメモを追加</string>
+    <string name="reader_highlighted">ハイライトしました</string>
+    <string name="reader_nothing_to_highlight">このページにはハイライトできる文字がありません。</string>
     <string name="reader_bookmark_remove">ブックマークを削除</string>
     <string name="reader_text_settings">文字とページの設定</string>
     <string name="reader_contents_and_notes">目次、ブックマーク、ハイライト</string>

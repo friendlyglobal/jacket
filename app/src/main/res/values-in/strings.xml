@@ -194,6 +194,13 @@
     <string name="reader_back_to_library">Kembali ke pustaka</string>
     <string name="reader_search">Telusuri di buku</string>
     <string name="reader_bookmark_add">Bookmark halaman ini</string>
+    <string name="reader_highlight_or_note">Sorot atau tambahkan catatan</string>
+    <string name="reader_highlight_sentence">Sorot kalimat yang sedang dibacakan</string>
+    <string name="reader_note_sentence">Tambahkan catatan ke kalimat yang sedang dibacakan</string>
+    <string name="reader_highlight_paragraph">Sorot paragraf pertama di halaman ini</string>
+    <string name="reader_note_paragraph">Tambahkan catatan ke paragraf pertama di halaman ini</string>
+    <string name="reader_highlighted">Disorot</string>
+    <string name="reader_nothing_to_highlight">Tidak ada teks di halaman ini untuk disorot.</string>
     <string name="reader_bookmark_remove">Hapus bookmark</string>
     <string name="reader_text_settings">Setelan teks dan halaman</string>
     <string name="reader_contents_and_notes">Daftar isi, bookmark, dan sorotan</string>

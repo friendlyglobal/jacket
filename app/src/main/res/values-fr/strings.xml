@@ -207,6 +207,13 @@
     <string name="reader_back_to_library">Retour à la bibliothèque</string>
     <string name="reader_search">Rechercher dans le livre</string>
     <string name="reader_bookmark_add">Ajouter un signet à cette page</string>
+    <string name="reader_highlight_or_note">Surligner ou ajouter une note</string>
+    <string name="reader_highlight_sentence">Surligner la phrase en cours de lecture</string>
+    <string name="reader_note_sentence">Ajouter une note à la phrase en cours de lecture</string>
+    <string name="reader_highlight_paragraph">Surligner le premier paragraphe de cette page</string>
+    <string name="reader_note_paragraph">Ajouter une note au premier paragraphe de cette page</string>
+    <string name="reader_highlighted">Surligné</string>
+    <string name="reader_nothing_to_highlight">Il n\'y a pas de texte à surligner sur cette page.</string>
     <string name="reader_bookmark_remove">Supprimer le signet</string>
     <string name="reader_text_settings">Paramètres du texte et de la page</string>
     <string name="reader_contents_and_notes">Sommaire, signets et surlignages</string>

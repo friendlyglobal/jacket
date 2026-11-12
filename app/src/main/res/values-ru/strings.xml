@@ -214,6 +214,13 @@
     <string name="reader_back_to_library">В библиотеку</string>
     <string name="reader_search">Поиск в книге</string>
     <string name="reader_bookmark_add">Добавить закладку</string>
+    <string name="reader_highlight_or_note">Выделить или добавить заметку</string>
+    <string name="reader_highlight_sentence">Выделить предложение, которое сейчас читается</string>
+    <string name="reader_note_sentence">Добавить заметку к предложению, которое сейчас читается</string>
+    <string name="reader_highlight_paragraph">Выделить первый абзац на этой странице</string>
+    <string name="reader_note_paragraph">Добавить заметку к первому абзацу на этой странице</string>
+    <string name="reader_highlighted">Выделено</string>
+    <string name="reader_nothing_to_highlight">На этой странице нет текста, который можно выделить.</string>
     <string name="reader_bookmark_remove">Удалить закладку</string>
     <string name="reader_text_settings">Настройки текста и страницы</string>
     <string name="reader_contents_and_notes">Оглавление, закладки и выделения</string>

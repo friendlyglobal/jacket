@@ -413,6 +413,32 @@ internal fun blockShowing(texts: List<String>, top: String?): Int? {
     return texts.indices.lastOrNull { starts[it] <= at && bare(texts[it]).isNotEmpty() }
 }
 
+/**
+ * Which of a chapter file's blocks of text is "the first paragraph on this page": what a
+ * highlight made without selecting anything marks, while nothing is being read aloud (a screen
+ * reader and a keyboard can't press and hold on the page). [top] is what the page shows from its
+ * first word on, running on into the blocks after it; the block that word is in is found by
+ * those words, as a tap on them would find it (see [tappedAt] and [blockShowing]), and failing
+ * that by how far down the file the page is ([around], with [progressions] where each block
+ * starts). A heading ([heading]) is no paragraph: the first block after it that isn't one is.
+ *
+ * Null when the page shows no words (a picture, a blank page), or the file has none.
+ */
+internal fun firstParagraphOn(
+    texts: List<String>,
+    progressions: List<Double>,
+    top: String?,
+    around: Double?,
+    heading: (Int) -> Boolean = { false },
+): Int? {
+    val words = top?.takeIf { it.isNotBlank() } ?: return null
+    val first = tappedAt(texts, "", words)?.block ?: blockShowing(texts, words) ?: startBlock(texts, progressions, words, around) ?: return null
+    return (first until texts.size).firstOrNull { !heading(it) && bare(texts[it]).isNotEmpty() }
+}
+
+/** A highlight's words as they are kept and shown: every run of spaces and line breaks as one space. */
+internal fun highlightWords(text: String): String = squeezed(text)
+
 /** Where a tap fell in a chapter file's text: which of its blocks, and how many letters into it (spaces aside). */
 internal data class TextSpot(val block: Int, val offset: Int)
 

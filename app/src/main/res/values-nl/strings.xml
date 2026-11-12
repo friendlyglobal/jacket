@@ -200,6 +200,13 @@
     <string name="reader_back_to_library">Terug naar bibliotheek</string>
     <string name="reader_search">Zoeken in boek</string>
     <string name="reader_bookmark_add">Bladwijzer toevoegen</string>
+    <string name="reader_highlight_or_note">Markeren of notitie toevoegen</string>
+    <string name="reader_highlight_sentence">De zin markeren die wordt voorgelezen</string>
+    <string name="reader_note_sentence">Notitie toevoegen bij de zin die wordt voorgelezen</string>
+    <string name="reader_highlight_paragraph">De eerste alinea op deze pagina markeren</string>
+    <string name="reader_note_paragraph">Notitie toevoegen bij de eerste alinea op deze pagina</string>
+    <string name="reader_highlighted">Gemarkeerd</string>
+    <string name="reader_nothing_to_highlight">Op deze pagina staat geen tekst om te markeren.</string>
     <string name="reader_bookmark_remove">Bladwijzer verwijderen</string>
     <string name="reader_text_settings">Tekst- en pagina-instellingen</string>
     <string name="reader_contents_and_notes">Inhoud, bladwijzers en markeringen</string>

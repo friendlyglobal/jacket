@@ -94,7 +94,8 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
   go to it in the book. Works in books that mark their notes and in many that don't.
 - **Bookmarks, highlights and notes:** tap the ribbon to bookmark a page. Press and hold text to
   highlight it in one of five colours, add a note, copy, share, or send it to Translate and other
-  text apps. Everything is listed next to the contents. A book's highlights and notes can be
+  text apps. With TalkBack or a keyboard, the highlighter button on the top bar marks the sentence
+  being read aloud, or the first paragraph on the page, and takes a note for it. Everything is listed next to the contents. A book's highlights and notes can be
   shared as text in one go or saved as a Markdown file, and Settings saves every book's at once.
 - **Search inside EPUBs**, with results streaming in and the match marked on the page.
 - **Finishing a book:** the last page offers to mark it finished and suggests what to read next;

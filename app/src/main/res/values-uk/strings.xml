@@ -214,6 +214,13 @@
     <string name="reader_back_to_library">До бібліотеки</string>
     <string name="reader_search">Пошук у книзі</string>
     <string name="reader_bookmark_add">Додати закладку</string>
+    <string name="reader_highlight_or_note">Виділити або додати нотатку</string>
+    <string name="reader_highlight_sentence">Виділити речення, яке зараз читається</string>
+    <string name="reader_note_sentence">Додати нотатку до речення, яке зараз читається</string>
+    <string name="reader_highlight_paragraph">Виділити перший абзац на цій сторінці</string>
+    <string name="reader_note_paragraph">Додати нотатку до першого абзацу на цій сторінці</string>
+    <string name="reader_highlighted">Виділено</string>
+    <string name="reader_nothing_to_highlight">На цій сторінці немає тексту, який можна виділити.</string>
     <string name="reader_bookmark_remove">Видалити закладку</string>
     <string name="reader_text_settings">Налаштування тексту й сторінки</string>
     <string name="reader_contents_and_notes">Зміст, закладки й виділення</string>

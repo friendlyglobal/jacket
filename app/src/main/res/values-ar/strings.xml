@@ -229,6 +229,13 @@
     <string name="reader_back_to_library">العودة إلى المكتبة</string>
     <string name="reader_search">البحث في الكتاب</string>
     <string name="reader_bookmark_add">إضافة إشارة مرجعية لهذه الصفحة</string>
+    <string name="reader_highlight_or_note">تمييز أو إضافة ملاحظة</string>
+    <string name="reader_highlight_sentence">تمييز الجملة التي تُقرأ الآن</string>
+    <string name="reader_note_sentence">إضافة ملاحظة إلى الجملة التي تُقرأ الآن</string>
+    <string name="reader_highlight_paragraph">تمييز أول فقرة في هذه الصفحة</string>
+    <string name="reader_note_paragraph">إضافة ملاحظة إلى أول فقرة في هذه الصفحة</string>
+    <string name="reader_highlighted">تم التمييز</string>
+    <string name="reader_nothing_to_highlight">لا توجد كلمات في هذه الصفحة لتمييزها.</string>
     <string name="reader_bookmark_remove">إزالة الإشارة المرجعية</string>
     <string name="reader_text_settings">إعدادات النص والصفحة</string>
     <string name="reader_contents_and_notes">المحتويات والإشارات المرجعية والتمييزات</string>

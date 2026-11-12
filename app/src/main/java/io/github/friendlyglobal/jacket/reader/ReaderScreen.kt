@@ -85,6 +85,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.Icon
@@ -247,6 +249,12 @@ class ReaderNav(
     internal var note by mutableStateOf<ShownNote?>(null)
     /** A word selected on the page for "Say it this way": how the voice is to say it is asked. */
     var sayWord by mutableStateOf<String?>(null)
+    /**
+     * Highlights, with a note if asked, without anything being selected: the sentence being read
+     * aloud, or else the first paragraph on the page. Selecting is a press and hold on the page,
+     * which a screen reader and a keyboard can't do. Null for formats without highlights.
+     */
+    internal var highlightHere by mutableStateOf<(suspend (note: Boolean) -> Marked)?>(null)
     /** Turns a page for the keys and the mouse wheel: +1 forward, -1 back. */
     var turnPage: (Int) -> Unit = { step(it) }
     /** The book reads right to left: the arrow keys go the other way round. */
@@ -283,6 +291,25 @@ class Origin(
     val page: Int = 0,
     val back: () -> Unit,
 )
+
+/** What came of highlighting without selecting (see [ReaderNav.highlightHere]). */
+internal enum class Marked {
+    /** It is highlighted (and, for a note, its editor is open). */
+    DONE,
+
+    /** It was highlighted already: that highlight is open to be changed. */
+    ALREADY,
+
+    /** There are no words there to highlight. */
+    NOTHING,
+}
+
+/**
+ * Highlighting without selecting, as the reader's controls offer it: what the two actions are
+ * called just now (they name what will be marked: the sentence being read, or the first
+ * paragraph on the page), and the doing of them.
+ */
+internal class QuickMarks(val highlight: String, val note: String, val onMark: (note: Boolean) -> Unit)
 
 /** Skipping by chapter from the player; null for a book without chapters (or a format that has none). */
 internal fun ReaderNav.chapterSteps(): ChapterSteps? =
@@ -366,6 +393,8 @@ fun ReaderScreen(
     var focusControls by remember(book.id) { mutableIntStateOf(0) }
     // While listening they tuck away by themselves instead: when they were last touched, and where they sit.
     val controls = remember(book.id) { ControlsWatch() }
+    // The menu for highlighting without selecting is open (see where it is offered, below).
+    var markMenu by remember(book.id) { mutableStateOf(false) }
     val noticeTouches = Modifier.pointerInput(Unit) {
         awaitPointerEventScope {
             while (true) {
@@ -589,7 +618,8 @@ fun ReaderScreen(
             // They stay under a finger, under a menu of their own, while the voice gets ready (the
             // player is what says so), for someone finding their way by touch with TalkBack, and
             // while a keyboard has its focus on one of them.
-            if (controls.pressed || listen.held || listen.preparing || context.screenReaderOn() || controlFocus.held) {
+            // (So do they under the highlight menu, which hangs from the top bar.)
+            if (controls.pressed || listen.held || listen.preparing || context.screenReaderOn() || controlFocus.held || markMenu) {
                 controls.touchedAt = now
                 continue
             }
@@ -779,6 +809,35 @@ fun ReaderScreen(
             true
         }
     }
+    // Highlights and notes are made by selecting words: a press and hold on the page, which a
+    // screen reader and a keyboard can't do. So the same two things are offered without it, on a
+    // button of the top bar (Tab reaches it) and as actions wherever the page's own are: they
+    // mark the sentence being read aloud, or else the first paragraph on the page, and say so.
+    val highlightHere = nav.highlightHere
+    val readingAloud = nav.listen.active && nav.listenController != null
+    val highlightLabel = stringResource(if (readingAloud) R.string.reader_highlight_sentence else R.string.reader_highlight_paragraph)
+    val noteLabel = stringResource(if (readingAloud) R.string.reader_note_sentence else R.string.reader_note_paragraph)
+    val marks = remember(highlightHere, highlightLabel, noteLabel) {
+        if (highlightHere == null) null else QuickMarks(highlightLabel, noteLabel) { note ->
+            scope.launch {
+                when (highlightHere(note)) {
+                    Marked.DONE -> {
+                        haptics.confirm()
+                        // (A note's editor opens, and says what was highlighted itself.)
+                        if (!note) Toast.makeText(context, R.string.reader_highlighted, Toast.LENGTH_SHORT).show()
+                    }
+                    Marked.ALREADY -> haptics.tick()
+                    Marked.NOTHING -> {
+                        haptics.reject()
+                        Toast.makeText(context, R.string.reader_nothing_to_highlight, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+    }
+    val markActions = remember(marks) {
+        marks?.let { listOf(CustomAccessibilityAction(it.highlight) { it.onMark(false); true }, CustomAccessibilityAction(it.note) { it.onMark(true); true }) }.orEmpty()
+    }
     // Chosen from a sheet, a place in the book is somewhere to read: the controls step aside for
     // it. Not under a screen reader, whose place among them would go with them.
     val stepAside = { if (!context.screenReaderOn()) chrome = false }
@@ -849,7 +908,7 @@ fun ReaderScreen(
                 ReaderFooter(
                     nav, book, page, settings, playerVoice, listenPace, haptics,
                     onePage = onePage,
-                    pageTurns = pageTurns,
+                    pageTurns = pageTurns + markActions,
                     onControls = {
                         touchedChrome = true
                         chrome = true
@@ -902,6 +961,10 @@ fun ReaderScreen(
                     onBack = close,
                     firstControl = firstControl,
                     hideControls = hideControls,
+                    marks = marks,
+                    markActions = markActions,
+                    markMenu = markMenu,
+                    onMarkMenu = { markMenu = it },
                     // The book's name stays on its own page: the back arrow's width in from the edge.
                     titleWidth = onePage?.let { (it - TITLE_INSET).coerceAtLeast(TITLE_INSET) },
                 )
@@ -924,7 +987,7 @@ fun ReaderScreen(
                 ReaderBottomBar(
                     nav = nav, book = book, haptics = haptics,
                     showScrubber = chrome,
-                    pageActions = pageTurns + hideControls,
+                    pageActions = pageTurns + markActions + hideControls,
                     voice = playerVoice,
                     rate = settings.listenRate,
                     onRate = setRate,
@@ -1427,6 +1490,13 @@ private fun ReaderTopBar(
     firstControl: FocusRequester,
     /** Sends the controls away: for a screen reader, which can't tap the page to do it. */
     hideControls: CustomAccessibilityAction,
+    /** Highlighting, and adding a note, without selecting anything; null where there are no highlights (a PDF, a comic). */
+    marks: QuickMarks? = null,
+    /** The same two, as a screen reader's actions on the book's name. */
+    markActions: List<CustomAccessibilityAction> = emptyList(),
+    /** Their menu is open, and the asking for it to open or close. */
+    markMenu: Boolean = false,
+    onMarkMenu: (Boolean) -> Unit = {},
     /** The most room the book's name may take, where it mustn't run across a fold (see [BookPosture]); null for all there is. */
     titleWidth: Dp? = null,
 ) {
@@ -1436,7 +1506,7 @@ private fun ReaderTopBar(
             Column(
                 (if (titleWidth != null) Modifier.widthIn(max = titleWidth) else Modifier).semantics(mergeDescendants = true) {
                     heading()
-                    customActions = listOf(hideControls)
+                    customActions = markActions + hideControls
                 },
             ) {
                 Text(book.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -1493,6 +1563,30 @@ private fun ReaderTopBar(
                         scaleY = scale
                     },
                 )
+            }
+            // Highlight, or add a note, without selecting: the menu says what will be marked.
+            if (marks != null) {
+                Box {
+                    IconButton(onClick = { onMarkMenu(true) }) { Icon(JacketIcons.Highlight, stringResource(R.string.reader_highlight_or_note)) }
+                    DropdownMenu(expanded = markMenu, onDismissRequest = { onMarkMenu(false) }) {
+                        DropdownMenuItem(
+                            text = { Text(marks.highlight) },
+                            leadingIcon = { Icon(JacketIcons.Highlight, null) },
+                            onClick = {
+                                onMarkMenu(false)
+                                marks.onMark(false)
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(marks.note) },
+                            leadingIcon = { Icon(JacketIcons.Note, null) },
+                            onClick = {
+                                onMarkMenu(false)
+                                marks.onMark(true)
+                            },
+                        )
+                    }
+                }
             }
             if (outerAvailable || outerActive) {
                 // One name, and on or off: a name that changed with it would be read against its own state.

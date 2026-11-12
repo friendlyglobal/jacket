@@ -1014,6 +1014,13 @@ internal class ReadAloud(
         }
     }
 
+    /**
+     * The sentence the voice is on (reading it, or paused on it), as it is marked on the page,
+     * and its words; null when nothing is being read. It is what a highlight made without
+     * selecting anything marks while the book is read aloud.
+     */
+    fun sentenceNow(): Pair<Locator, String>? = tts?.location?.value?.let { it.utteranceLocator to it.utterance }
+
     override fun toggle() {
         val tts = tts ?: return start() // start() ignores taps while it's still starting up
         if (tts.playback.value.playWhenReady) {

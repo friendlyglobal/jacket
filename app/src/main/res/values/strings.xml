@@ -236,7 +236,15 @@
     <!-- Reader -->
     <string name="reader_back_to_library">Back to library</string>
     <string name="reader_search">Search in book</string>
-    <string name="reader_bookmark_add">Bookmark this page</string>
+<!-- Highlighting without selecting text (a screen reader and a keyboard can't press and hold on the page). The button, and what its two choices are called: while the book is read aloud they mark the sentence the voice is on, otherwise the first paragraph on the page. -->
+    <string name="reader_highlight_or_note">Highlight or add a note</string>
+    <string name="reader_highlight_sentence">Highlight the sentence being read</string>
+    <string name="reader_note_sentence">Add a note to the sentence being read</string>
+    <string name="reader_highlight_paragraph">Highlight the first paragraph on this page</string>
+    <string name="reader_note_paragraph">Add a note to the first paragraph on this page</string>
+    <string name="reader_highlighted">Highlighted</string>
+    <string name="reader_nothing_to_highlight">There are no words on this page to highlight.</string>
+        <string name="reader_bookmark_add">Bookmark this page</string>
     <string name="reader_bookmark_remove">Remove bookmark</string>
     <string name="reader_text_settings">Text and page settings</string>
     <string name="reader_contents_and_notes">Contents, bookmarks and highlights</string>

@@ -194,6 +194,13 @@
     <string name="reader_back_to_library">서재로 돌아가기</string>
     <string name="reader_search">책에서 검색</string>
     <string name="reader_bookmark_add">이 페이지 북마크</string>
+    <string name="reader_highlight_or_note">하이라이트 또는 메모 추가</string>
+    <string name="reader_highlight_sentence">지금 읽고 있는 문장 하이라이트</string>
+    <string name="reader_note_sentence">지금 읽고 있는 문장에 메모 추가</string>
+    <string name="reader_highlight_paragraph">이 페이지의 첫 문단 하이라이트</string>
+    <string name="reader_note_paragraph">이 페이지의 첫 문단에 메모 추가</string>
+    <string name="reader_highlighted">하이라이트했습니다</string>
+    <string name="reader_nothing_to_highlight">이 페이지에는 하이라이트할 글이 없습니다.</string>
     <string name="reader_bookmark_remove">북마크 삭제</string>
     <string name="reader_text_settings">텍스트 및 페이지 설정</string>
     <string name="reader_contents_and_notes">목차, 북마크, 하이라이트</string>

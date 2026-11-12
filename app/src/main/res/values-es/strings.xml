@@ -207,6 +207,13 @@
     <string name="reader_back_to_library">Volver a la biblioteca</string>
     <string name="reader_search">Buscar en el libro</string>
     <string name="reader_bookmark_add">Marcar esta página</string>
+    <string name="reader_highlight_or_note">Resaltar o añadir una nota</string>
+    <string name="reader_highlight_sentence">Resaltar la frase que se está leyendo</string>
+    <string name="reader_note_sentence">Añadir una nota a la frase que se está leyendo</string>
+    <string name="reader_highlight_paragraph">Resaltar el primer párrafo de esta página</string>
+    <string name="reader_note_paragraph">Añadir una nota al primer párrafo de esta página</string>
+    <string name="reader_highlighted">Resaltado</string>
+    <string name="reader_nothing_to_highlight">En esta página no hay texto para resaltar.</string>
     <string name="reader_bookmark_remove">Quitar marcador</string>
     <string name="reader_text_settings">Ajustes de texto y página</string>
     <string name="reader_contents_and_notes">Índice, marcadores y resaltados</string>

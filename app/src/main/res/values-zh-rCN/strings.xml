@@ -194,6 +194,13 @@
     <string name="reader_back_to_library">返回书库</string>
     <string name="reader_search">在书中搜索</string>
     <string name="reader_bookmark_add">为此页添加书签</string>
+    <string name="reader_highlight_or_note">划线或添加笔记</string>
+    <string name="reader_highlight_sentence">给正在朗读的句子划线</string>
+    <string name="reader_note_sentence">给正在朗读的句子添加笔记</string>
+    <string name="reader_highlight_paragraph">给本页第一段划线</string>
+    <string name="reader_note_paragraph">给本页第一段添加笔记</string>
+    <string name="reader_highlighted">已划线</string>
+    <string name="reader_nothing_to_highlight">本页没有可划线的文字。</string>
     <string name="reader_bookmark_remove">移除书签</string>
     <string name="reader_text_settings">文字和页面设置</string>
     <string name="reader_contents_and_notes">目录、书签和划线</string>
