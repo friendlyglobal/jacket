@@ -36,6 +36,7 @@ import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.semantics.contentDescription
 import androidx.glance.semantics.semantics
+import io.github.friendlyglobal.jacket.ui.spoken
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
@@ -100,8 +101,15 @@ private fun Streak(context: Context, model: StreakModel) {
     WidgetTheme(model.seed) {
         val size = LocalSize.current
         val small = size.width < 110.dp
+        // Said as what it shows, in a phrase: "24 min today, Day 5". Piece by piece it was a bare
+        // number, "min today", "Day 5" twice and the week as seven single letters.
+        val said = spoken(
+            context.getString(R.string.list_separator),
+            context.getString(R.string.stats_today, model.today),
+            context.getString(R.string.stats_streak, model.streak).takeIf { model.streak > 0 },
+        )
         Column(
-            base(context, model.book).padding(horizontal = 14.dp, vertical = 12.dp),
+            base(context, model.book, said).padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = if (small || size.height < 140.dp) Alignment.CenterVertically else Alignment.Top,
             horizontalAlignment = if (small) Alignment.CenterHorizontally else Alignment.Start,
         ) {
