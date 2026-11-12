@@ -302,7 +302,6 @@
     <string name="listen_no_voice">Este celular não tem nenhuma voz de conversão de texto em voz instalada.</string>
     <string name="listen_no_readable_text">Este livro não tem texto que possa ser lido em voz alta.</string>
     <string name="listen_stopped_error">A leitura em voz alta parou: %1$s</string>
-    <string name="listen_voice_stopped">A voz parou. Verifique as configurações de conversão de texto em voz.</string>
 
     <string name="widget_reading">Lendo</string>
     <string name="widget_empty">Adicione um livro para vestir a capa dele</string>

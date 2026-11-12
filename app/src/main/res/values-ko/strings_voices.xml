@@ -23,7 +23,6 @@
     <string name="voice_about_text">자연스러운 음성은 Jacket에 포함되어 있으며 인터넷 없이 작동합니다. 자유롭게 사용할 수 있지만, 음성을 실제 사람인 것처럼 속이는 등 누군가를 속이거나 해치는 데 사용해서는 안 됩니다. 전체 약관은 설정의 라이선스에 있습니다.</string>
     <string name="voice_slow">이 음성은 이 휴대전화에 너무 무겁습니다. 탭하여 변경하세요.</string>
     <string name="listen_preparing">음성을 준비하는 중…</string>
-    <string name="voice_stopped">자연스러운 음성이 멈췄습니다. 다시 시도하거나 휴대전화 음성으로 바꾸세요.</string>
     <string name="voice_fell_back">자연스러운 음성을 시작할 수 없어 휴대전화 음성으로 읽고 있습니다.</string>
     <string name="voice_phone_settings">휴대전화 음성 설정</string>
     <string name="voice_phone_settings_description">휴대전화 자체 음성이 어떻게 들릴지 선택합니다.</string>

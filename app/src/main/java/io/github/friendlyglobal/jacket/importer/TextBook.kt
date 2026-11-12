@@ -277,18 +277,25 @@ private val AUTHOR_LINE = Regex("^Author:\\s*(.+)$")
 
 /**
  * A name for text shared from another app that came without one: its first line if that is short
- * enough to be a headline, otherwise its first words. Null when there is nothing to name it by.
+ * enough to be a headline, otherwise its first sentence, or its first words. Null when there is
+ * nothing to name it by.
  */
 internal fun titleOfSharedText(text: String): String? {
     val first = text.lineSequence().map { it.trim().trimStart('#').replace(SPACES, " ").trim() }.firstOrNull { line -> line.any { it.isLetterOrDigit() } }
         ?: return null
     if (first.length <= LONGEST_SHARED_TITLE) return first.trimEnd('.', ':', ';', ',')
+    // A first sentence that would do for a title, if it is neither a word or two nor too long.
+    SENTENCE_END.find(first)?.range?.first?.takeIf { it in SHORTEST_SHARED_TITLE..LONGEST_SHARED_TITLE }?.let { end ->
+        return first.substring(0, end + 1).trimEnd('.', '。')
+    }
     // The first words that fit, to the end of a word.
     val cut = first.take(LONGEST_SHARED_TITLE + 1).substringBeforeLast(' ', first.take(LONGEST_SHARED_TITLE))
     return cut.trimEnd('.', ':', ';', ',', '—', '–', '-') + "…"
 }
 
 private const val LONGEST_SHARED_TITLE = 60
+private const val SHORTEST_SHARED_TITLE = 12
+private val SENTENCE_END = Regex("[.!?](?=\\s)|[。！？]")
 private val SPACES = Regex("\\s+")
 
 /** A place in a text book: which paragraph (counting from 0), and how far into it (0..1). */

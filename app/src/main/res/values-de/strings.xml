@@ -292,7 +292,6 @@
     <string name="listen_no_voice">Auf diesem Smartphone ist keine Sprachausgabe-Stimme installiert.</string>
     <string name="listen_no_readable_text">Dieses Buch hat keinen Text, der vorgelesen werden kann.</string>
     <string name="listen_stopped_error">Vorlesen gestoppt: %1$s</string>
-    <string name="listen_voice_stopped">Die Stimme ist verstummt. Prüfe deine Einstellungen für die Sprachausgabe.</string>
 
     <string name="widget_reading">Ich lese</string>
     <string name="widget_empty">Füge ein Buch hinzu, um sein Cover zu tragen</string>

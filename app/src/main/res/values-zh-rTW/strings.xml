@@ -283,7 +283,6 @@
     <string name="listen_no_voice">這支手機尚未安裝文字轉語音的語音。</string>
     <string name="listen_no_readable_text">這本書沒有可朗讀的文字。</string>
     <string name="listen_stopped_error">朗讀已停止：%1$s</string>
-    <string name="listen_voice_stopped">語音已停止，請檢查文字轉語音設定。</string>
 
     <string name="widget_reading">閱讀中</string>
     <string name="widget_empty">新增一本書，穿上它的封面</string>

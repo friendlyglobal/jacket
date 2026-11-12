@@ -23,7 +23,6 @@
     <string name="voice_about_text">ナチュラル音声は Jacket に含まれており、インターネットなしで使えます。自由に使えますが、実在の人物の声と偽るなど、人をだましたり傷つけたりする目的には使えません。条件の全文は、設定のライセンスにあります。</string>
     <string name="voice_slow">この音声はこのスマートフォンには重すぎます。タップして変更できます。</string>
     <string name="listen_preparing">音声を準備しています…</string>
-    <string name="voice_stopped">ナチュラル音声が停止しました。もう一度試すか、スマートフォンの音声に切り替えてください。</string>
     <string name="voice_fell_back">ナチュラル音声を開始できなかったため、スマートフォンの音声で読み上げています。</string>
     <string name="voice_phone_settings">スマートフォンの音声の設定</string>
     <string name="voice_phone_settings_description">スマートフォン本体の音声の聞こえ方を選びます。</string>

@@ -23,7 +23,6 @@
     <string name="voice_about_text">Naturalne głosy są częścią Jacket i działają bez internetu. Można z nich korzystać bezpłatnie, ale nie wolno ich używać, by kogoś oszukać lub skrzywdzić, na przykład podając głos za prawdziwą osobę. Pełne warunki znajdziesz w Ustawieniach, w sekcji Licencje.</string>
     <string name="voice_slow">Ten głos to za dużo dla tego telefonu. Dotknij, aby go zmienić.</string>
     <string name="listen_preparing">Przygotowywanie głosu…</string>
-    <string name="voice_stopped">Naturalny głos się zatrzymał. Spróbuj ponownie lub przełącz na głos telefonu.</string>
     <string name="voice_fell_back">Naturalny głos nie mógł się uruchomić, więc czyta głos telefonu.</string>
     <string name="voice_phone_settings">Ustawienia głosu telefonu</string>
     <string name="voice_phone_settings_description">Wybierz, jak brzmi głos Twojego telefonu.</string>

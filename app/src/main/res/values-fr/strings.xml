@@ -302,7 +302,6 @@
     <string name="listen_no_voice">Aucune voix de synthèse vocale n\'est installée sur ce téléphone.</string>
     <string name="listen_no_readable_text">Ce livre ne contient aucun texte pouvant être lu à voix haute.</string>
     <string name="listen_stopped_error">Lecture à voix haute arrêtée : %1$s</string>
-    <string name="listen_voice_stopped">La voix s\'est arrêtée. Vérifiez vos paramètres de synthèse vocale.</string>
 
     <string name="widget_reading">En cours</string>
     <string name="widget_empty">Ajoutez un livre pour arborer sa couverture</string>

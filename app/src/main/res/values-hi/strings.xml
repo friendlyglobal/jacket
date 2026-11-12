@@ -293,7 +293,6 @@
     <string name="listen_no_voice">इस फ़ोन में कोई टेक्स्ट-टू-स्पीच आवाज़ इंस्टॉल नहीं है।</string>
     <string name="listen_no_readable_text">इस किताब में ऐसा कोई टेक्स्ट नहीं है जिसे पढ़कर सुनाया जा सके।</string>
     <string name="listen_stopped_error">पढ़कर सुनाना रुक गया: %1$s</string>
-    <string name="listen_voice_stopped">आवाज़ रुक गई। अपनी टेक्स्ट-टू-स्पीच सेटिंग देखें।</string>
 
     <string name="widget_reading">पढ़ी जा रही</string>
     <string name="widget_empty">कवर पहनाने के लिए कोई किताब जोड़ें</string>

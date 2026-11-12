@@ -23,7 +23,6 @@
     <string name="voice_about_text">Die natürlichen Stimmen gehören zu Jacket und funktionieren ohne Internet. Sie dürfen frei genutzt werden, aber nicht, um jemanden zu täuschen oder zu schädigen, etwa indem eine Stimme als echte Person ausgegeben wird. Die vollständigen Bedingungen stehen in den Einstellungen unter Lizenzen.</string>
     <string name="voice_slow">Diese Stimme ist zu viel für dieses Smartphone. Tippe, um sie zu ändern.</string>
     <string name="listen_preparing">Stimme wird vorbereitet …</string>
-    <string name="voice_stopped">Die natürliche Stimme hat angehalten. Versuch es noch einmal oder wechsle zur Stimme des Smartphones.</string>
     <string name="voice_fell_back">Die natürliche Stimme konnte nicht starten, deshalb liest die Stimme des Smartphones.</string>
     <string name="voice_phone_settings">Einstellungen der Smartphone-Stimme</string>
     <string name="voice_phone_settings_description">Wähle, wie die Stimme deines Smartphones klingt.</string>

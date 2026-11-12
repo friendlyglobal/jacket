@@ -312,7 +312,6 @@
     <string name="listen_no_voice">На цьому телефоні не встановлено голос для синтезу мовлення.</string>
     <string name="listen_no_readable_text">У цій книзі немає тексту, який можна прочитати вголос.</string>
     <string name="listen_stopped_error">Читання вголос зупинено: %1$s</string>
-    <string name="listen_voice_stopped">Голос перестав читати. Перевірте налаштування синтезу мовлення.</string>
 
     <string name="widget_reading">Читаю</string>
     <string name="widget_empty">Додайте книгу, щоб одягнути її обкладинку</string>

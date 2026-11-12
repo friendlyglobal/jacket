@@ -292,7 +292,6 @@
     <string name="listen_no_voice">Op deze telefoon is geen stem voor tekst-naar-spraak geïnstalleerd.</string>
     <string name="listen_no_readable_text">Dit boek heeft geen tekst die kan worden voorgelezen.</string>
     <string name="listen_stopped_error">Voorlezen gestopt: %1$s</string>
-    <string name="listen_voice_stopped">De stem is gestopt. Controleer je instellingen voor tekst-naar-spraak.</string>
 
     <string name="widget_reading">Ik lees</string>
     <string name="widget_empty">Voeg een boek toe om de omslag te dragen</string>

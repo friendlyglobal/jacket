@@ -293,7 +293,6 @@
     <string name="listen_no_voice">Bu telefonda yüklü bir metin okuma sesi yok.</string>
     <string name="listen_no_readable_text">Bu kitapta sesli okunabilecek metin yok.</string>
     <string name="listen_stopped_error">Sesli okuma durdu: %1$s</string>
-    <string name="listen_voice_stopped">Ses durdu. Metin okuma ayarlarınızı kontrol edin.</string>
 
     <string name="widget_reading">Okunuyor</string>
     <string name="widget_empty">Kapağını giymek için bir kitap ekleyin</string>

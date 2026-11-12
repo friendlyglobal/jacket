@@ -312,7 +312,6 @@
     <string name="listen_no_voice">Na tym telefonie nie zainstalowano głosu syntezatora mowy.</string>
     <string name="listen_no_readable_text">Ta książka nie zawiera tekstu, który można przeczytać na głos.</string>
     <string name="listen_stopped_error">Czytanie na głos zatrzymane: %1$s</string>
-    <string name="listen_voice_stopped">Głos przestał czytać. Sprawdź ustawienia syntezatora mowy.</string>
 
     <string name="widget_reading">Czytam</string>
     <string name="widget_empty">Dodaj książkę, aby nosić jej okładkę</string>

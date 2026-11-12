@@ -283,7 +283,6 @@
     <string name="listen_no_voice">Ponsel ini tidak memiliki suara teks ke ucapan yang terinstal.</string>
     <string name="listen_no_readable_text">Buku ini tidak memiliki teks yang dapat dibacakan.</string>
     <string name="listen_stopped_error">Pembacaan berhenti: %1$s</string>
-    <string name="listen_voice_stopped">Suara berhenti. Periksa setelan teks ke ucapan Anda.</string>
 
     <string name="widget_reading">Sedang dibaca</string>
     <string name="widget_empty">Tambahkan buku untuk memakai sampulnya</string>

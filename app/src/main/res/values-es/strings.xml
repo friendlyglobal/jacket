@@ -302,7 +302,6 @@
     <string name="listen_no_voice">Este teléfono no tiene instalada ninguna voz de texto a voz.</string>
     <string name="listen_no_readable_text">Este libro no tiene texto que se pueda leer en voz alta.</string>
     <string name="listen_stopped_error">Lectura en voz alta detenida: %1$s</string>
-    <string name="listen_voice_stopped">La voz se ha detenido. Revisa los ajustes de texto a voz.</string>
 
     <string name="widget_reading">Leyendo</string>
     <string name="widget_empty">Añade un libro para lucir su portada</string>

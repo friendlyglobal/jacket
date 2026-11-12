@@ -302,7 +302,6 @@
     <string name="listen_no_voice">Su questo telefono non è installata nessuna voce di sintesi vocale.</string>
     <string name="listen_no_readable_text">Questo libro non contiene testo che si possa leggere ad alta voce.</string>
     <string name="listen_stopped_error">Lettura ad alta voce interrotta: %1$s</string>
-    <string name="listen_voice_stopped">La voce si è interrotta. Controlla le impostazioni di sintesi vocale.</string>
 
     <string name="widget_reading">In lettura</string>
     <string name="widget_empty">Aggiungi un libro per indossarne la copertina</string>

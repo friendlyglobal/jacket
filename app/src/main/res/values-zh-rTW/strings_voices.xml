@@ -23,7 +23,6 @@
     <string name="voice_about_text">自然語音隨 Jacket 提供，不需連線即可使用。可以免費使用，但不得用來欺騙或傷害他人，例如把語音冒充成真人。完整條款請見「設定」中的「授權」。</string>
     <string name="voice_slow">這支手機跑不動這個語音。輕觸即可更換。</string>
     <string name="listen_preparing">正在準備語音…</string>
-    <string name="voice_stopped">自然語音停止了。請再試一次，或改用手機語音。</string>
     <string name="voice_fell_back">自然語音無法啟動，現在由手機語音朗讀。</string>
     <string name="voice_phone_settings">手機語音設定</string>
     <string name="voice_phone_settings_description">選擇手機內建語音的聲音。</string>

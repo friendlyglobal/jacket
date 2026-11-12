@@ -368,6 +368,11 @@ class TextBookTest {
         assertEquals("Ten ways to read more", titleOfSharedText("Ten ways to read more\n\nThe first is to carry a book."))
         assertEquals("Meeting notes", titleOfSharedText("\n\n  # Meeting notes  \nAttendees: all"))
         assertEquals("A short thought", titleOfSharedText("A short thought."))
+        // A long first line is named by its first sentence, when that is one worth having.
+        assertEquals("Ten ways to read more", titleOfSharedText("Ten ways to read more. The first is to carry a book everywhere you go, and the second is to stop."))
+        assertEquals("Why do we read at all?", titleOfSharedText("Why do we read at all? Nobody quite knows, though everyone who reads has an answer of their own to give."))
+        // (A first sentence of a word or two is no title: the first words are.)
+        assertEquals("No. That was all she said before she left the room and went…", titleOfSharedText("No. That was all she said before she left the room and went out into the rain without her coat."))
         val long = "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness"
         assertEquals("It was the best of times, it was the worst of times, it was…", titleOfSharedText(long))
         assertTrue(titleOfSharedText("x".repeat(500))!!.length <= 61)

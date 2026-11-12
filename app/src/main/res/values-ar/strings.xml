@@ -333,7 +333,6 @@
     <string name="listen_no_voice">لا يوجد صوت مثبَّت لتحويل النص إلى كلام على هذا الهاتف.</string>
     <string name="listen_no_readable_text">لا يحتوي هذا الكتاب على نص يمكن قراءته بصوت عالٍ.</string>
     <string name="listen_stopped_error">توقفت القراءة بصوت عالٍ: %1$s</string>
-    <string name="listen_voice_stopped">توقف الصوت. تحقّق من إعدادات تحويل النص إلى كلام.</string>
 
     <string name="widget_reading">قيد القراءة</string>
     <string name="widget_empty">أضف كتابًا ليظهر غلافه هنا</string>
