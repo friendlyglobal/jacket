@@ -201,7 +201,6 @@
     <string name="reading_typeface">Typeface</string>
     <!-- Sample letters each typeface option previews itself with. -->
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">Selected</string>
     <string name="reading_page">Page</string>
     <string name="reading_layout">Layout</string>
     <string name="reading_layout_hint">Pages turn like a book: swipe, or tap the edges. Unfolded, you get a two-page spread.</string>
@@ -234,8 +233,6 @@
     <string name="reader_search">Search in book</string>
     <string name="reader_bookmark_add">Bookmark this page</string>
     <string name="reader_bookmark_remove">Remove bookmark</string>
-    <string name="reader_outer_show">Show cover on outer screen</string>
-    <string name="reader_outer_hide">Hide cover on outer screen</string>
     <string name="reader_text_settings">Text and page settings</string>
     <string name="reader_contents_and_notes">Contents, bookmarks and highlights</string>
     <string name="reader_notes">Bookmarks and highlights</string>

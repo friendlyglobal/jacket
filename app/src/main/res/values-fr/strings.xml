@@ -175,7 +175,6 @@
     <string name="reading_text_size_sample">A</string>
     <string name="reading_typeface">Police</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">Sélectionné</string>
     <string name="reading_page">Page</string>
     <string name="reading_layout">Mise en page</string>
     <string name="reading_layout_hint">Les pages se tournent comme dans un livre : balayez ou touchez les bords. Téléphone déplié, vous voyez deux pages côte à côte.</string>
@@ -206,8 +205,6 @@
     <string name="reader_search">Rechercher dans le livre</string>
     <string name="reader_bookmark_add">Ajouter un signet à cette page</string>
     <string name="reader_bookmark_remove">Supprimer le signet</string>
-    <string name="reader_outer_show">Afficher la couverture sur l\'écran externe</string>
-    <string name="reader_outer_hide">Masquer la couverture de l\'écran externe</string>
     <string name="reader_text_settings">Paramètres du texte et de la page</string>
     <string name="reader_contents_and_notes">Sommaire, signets et surlignages</string>
     <string name="reader_notes">Signets et surlignages</string>

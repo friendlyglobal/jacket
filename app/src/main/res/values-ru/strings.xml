@@ -182,7 +182,6 @@
     <string name="reading_text_size_sample">A</string>
     <string name="reading_typeface">Шрифт</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">Выбрано</string>
     <string name="reading_page">Страница</string>
     <string name="reading_layout">Режим</string>
     <string name="reading_layout_hint">Страницы листаются как в книге: проведите пальцем или коснитесь края. В разложенном виде — разворот из двух страниц.</string>
@@ -213,8 +212,6 @@
     <string name="reader_search">Поиск в книге</string>
     <string name="reader_bookmark_add">Добавить закладку</string>
     <string name="reader_bookmark_remove">Удалить закладку</string>
-    <string name="reader_outer_show">Показать обложку на внешнем экране</string>
-    <string name="reader_outer_hide">Скрыть обложку на внешнем экране</string>
     <string name="reader_text_settings">Настройки текста и страницы</string>
     <string name="reader_contents_and_notes">Оглавление, закладки и выделения</string>
     <string name="reader_notes">Закладки и выделения</string>

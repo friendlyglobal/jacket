@@ -168,7 +168,6 @@
     <string name="reading_text_size_sample">A</string>
     <string name="reading_typeface">Schrift</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">Ausgewählt</string>
     <string name="reading_page">Seite</string>
     <string name="reading_layout">Layout</string>
     <string name="reading_layout_hint">Seiten blättern wie im Buch: wischen oder an den Rändern tippen. Aufgeklappt siehst du eine Doppelseite.</string>
@@ -199,8 +198,6 @@
     <string name="reader_search">Im Buch suchen</string>
     <string name="reader_bookmark_add">Lesezeichen setzen</string>
     <string name="reader_bookmark_remove">Lesezeichen entfernen</string>
-    <string name="reader_outer_show">Cover auf Außendisplay zeigen</string>
-    <string name="reader_outer_hide">Cover auf Außendisplay ausblenden</string>
     <string name="reader_text_settings">Text- und Seiteneinstellungen</string>
     <string name="reader_contents_and_notes">Inhalt, Lesezeichen und Markierungen</string>
     <string name="reader_notes">Lesezeichen und Markierungen</string>

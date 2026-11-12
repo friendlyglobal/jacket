@@ -169,7 +169,6 @@
     <string name="reading_text_size_sample">अ</string>
     <string name="reading_typeface">टाइपफ़ेस</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">चुना गया</string>
     <string name="reading_page">पेज</string>
     <string name="reading_layout">लेआउट</string>
     <string name="reading_layout_hint">पेज किताब की तरह पलटते हैं: स्वाइप करें या किनारों पर टैप करें। फ़ोन खोलने पर दो पेज एक साथ दिखते हैं।</string>
@@ -200,8 +199,6 @@
     <string name="reader_search">किताब में खोजें</string>
     <string name="reader_bookmark_add">इस पेज को बुकमार्क करें</string>
     <string name="reader_bookmark_remove">बुकमार्क हटाएँ</string>
-    <string name="reader_outer_show">बाहरी स्क्रीन पर कवर दिखाएँ</string>
-    <string name="reader_outer_hide">बाहरी स्क्रीन से कवर छिपाएँ</string>
     <string name="reader_text_settings">टेक्स्ट और पेज की सेटिंग</string>
     <string name="reader_contents_and_notes">विषय-सूची, बुकमार्क और हाइलाइट</string>
     <string name="reader_notes">बुकमार्क और हाइलाइट</string>

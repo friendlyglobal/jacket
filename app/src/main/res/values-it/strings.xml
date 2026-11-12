@@ -175,7 +175,6 @@
     <string name="reading_text_size_sample">A</string>
     <string name="reading_typeface">Carattere</string>
     <string name="reading_typeface_sample">Aa</string>
-    <string name="reading_selected">Selezionato</string>
     <string name="reading_page">Pagina</string>
     <string name="reading_layout">Layout</string>
     <string name="reading_layout_hint">Le pagine si girano come in un libro: scorri o tocca i bordi. Con il telefono aperto, vedi due pagine affiancate.</string>
@@ -206,8 +205,6 @@
     <string name="reader_search">Cerca nel libro</string>
     <string name="reader_bookmark_add">Aggiungi un segnalibro a questa pagina</string>
     <string name="reader_bookmark_remove">Rimuovi segnalibro</string>
-    <string name="reader_outer_show">Mostra la copertina sullo schermo esterno</string>
-    <string name="reader_outer_hide">Nascondi la copertina dallo schermo esterno</string>
     <string name="reader_text_settings">Impostazioni di testo e pagina</string>
     <string name="reader_contents_and_notes">Indice, segnalibri ed evidenziazioni</string>
     <string name="reader_notes">Segnalibri ed evidenziazioni</string>
