@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">Diğer cihazlarınız</string>
+    <string name="catch_up_title">Cihazlar arasında kaldığınız yerden devam</string>
+    <string name="catch_up_description">İki cihazda okuyun ve birinde kaldığınız yerden diğerinde devam edin.</string>
+    <string name="catch_up_setup_body">Tüm cihazlarınızın paylaştığı bir klasör seçin: Google Drive, Dropbox veya Syncthing gibi bir uygulamanın hepsinde aynı tuttuğu bir klasör ya da cihazlar arasında taşıdığınız bir USB bellek.\n\nJacket orada konumlarınızı, yer işaretlerinizi, vurgularınızı, notlarınızı ve koleksiyonlarınızı içeren küçük bir dosya tutar ve diğer cihazlarınızın orada tuttuğu dosyaları okur. Jacket hiçbir zaman internete bağlanmaz: bunu klasörü paylaşan uygulama yapar. Kitaplarınız, kapaklarınız ve ayarlarınız her cihazda kalır.\n\nArdından aynısını diğer cihazınızda, aynı klasörle yapın.</string>
+    <string name="catch_up_device_name">Bu cihazın adı</string>
+    <string name="catch_up_choose_folder">Klasör seç</string>
+    <string name="catch_up_setup_files_hint">İstediğiniz klasörü seçemiyor musunuz? Bunun yerine bu cihazın dosyasını oraya kaydedin, ardından diğer cihazların dosyalarını sırayla ekleyin.</string>
+    <string name="catch_up_setup_files">Bunun yerine dosya kaydet</string>
+    <string name="catch_up_failed">Jacket oraya kaydedemedi, yeniden deneyecek. Başka bir yer seçmek için bunu kapatıp yeniden açın.</string>
+    <string name="catch_up_others">Bulunan cihazlar</string>
+    <string name="catch_up_others_none_folder">Henüz yok. Bunu diğer cihazınızda da aynı klasörle açın.</string>
+    <string name="catch_up_others_none_files">Henüz yok. Bunu diğer cihazınızda da açın, ardından kaydettiği dosyayı seçmek için buraya dokunun.</string>
+    <string name="catch_up_others_add">%1$s. Başka bir cihazın dosyasını eklemek için dokunun.</string>
+    <string name="catch_up_hint">Jacket sizi başka bir cihazın ulaştığı sayfaya götürmeden önce sorar: konumunuz asla kendiliğinden değişmez. Yer işaretleri, vurgular, notlar ve koleksiyonlar her cihazda aynı tutulur; birinde sildiğiniz diğerlerinde de silinir.</string>
+    <string name="catch_up_offer_page">%1$s cihazında %2$d. sayfadasınız.</string>
+    <string name="catch_up_offer_page_chapter">%1$s cihazında %2$d. sayfadasınız (%3$s).</string>
+    <string name="catch_up_offer_percent">%1$s cihazında kitabın %%%2$d kadarını okudunuz.</string>
+    <string name="catch_up_offer_percent_chapter">%1$s cihazında kitabın %%%2$d kadarını okudunuz (%3$s).</string>
+    <string name="catch_up_offer_book">%1$s cihazında %2$s kitabında daha ilerdesiniz.</string>
+    <string name="catch_up_go">Oraya git</string>
+</resources>

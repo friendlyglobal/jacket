@@ -49,6 +49,14 @@ languages they know; for any other language, the phone's voice is used.
 - **Backup files you export.** You can export a backup file from Jacket yourself. It is saved
   wherever you choose, such as your phone's storage or a cloud storage app, and is then handled
   by that location.
+- **Catching up between devices.** If you turn on "Catch up between devices", Jacket keeps one
+  file in a folder you choose, and reads the files your other devices keep there. The file holds
+  the books you have opened, marked or put in a collection (their titles and file names), where
+  you are in each, and your
+  bookmarks, highlights, notes and collections. It does not hold the books themselves. Jacket
+  does not send it anywhere: if the folder belongs to a cloud storage or sync app, that app
+  moves it, under its own terms. Turning the feature off stops the file being updated; you can
+  delete it like any other file.
 
 ## What people near you can see
 
@@ -77,8 +85,9 @@ This information comes from Google Play and Android, not from Jacket, and is cov
 
 ## Deleting your data
 
-Uninstalling Jacket deletes all of its data from your device. Backup files you exported, and
-any Android backup in your Google account, are not affected; you manage those yourself.
+Uninstalling Jacket deletes all of its data from your device. Backup files you exported, the
+file Jacket kept for your other devices, and any Android backup in your Google account are not
+affected; you manage those yourself.
 
 ## Children
 

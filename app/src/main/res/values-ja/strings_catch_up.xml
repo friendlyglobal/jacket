@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">ほかのデバイス</string>
+    <string name="catch_up_title">デバイス間で続きから読む</string>
+    <string name="catch_up_description">2 台のデバイスで読み、一方で読み終えたところからもう一方で続けられます。</string>
+    <string name="catch_up_setup_body">すべてのデバイスで共有しているフォルダを選んでください。Google ドライブ、Dropbox、Syncthing などのアプリが各デバイスで同じ内容に保つフォルダや、デバイス間で持ち運ぶ USB メモリが使えます。\n\nJacket はそこに、読書位置、ブックマーク、ハイライト、メモ、コレクションを収めた小さなファイルを置き、ほかのデバイスがそこに置いたファイルを読み取ります。Jacket 自体がインターネットに接続することはありません。それを行うのはフォルダを共有するアプリです。本、表紙、設定はそれぞれのデバイスに残ります。\n\n次に、もう一方のデバイスでも同じフォルダを選んで同じ設定をしてください。</string>
+    <string name="catch_up_device_name">このデバイスの名前</string>
+    <string name="catch_up_choose_folder">フォルダを選択</string>
+    <string name="catch_up_setup_files_hint">使いたいフォルダを選べない場合は、代わりにこのデバイスのファイルをそこに保存し、ほかのデバイスのファイルを 1 つずつ追加してください。</string>
+    <string name="catch_up_setup_files">代わりにファイルを保存</string>
+    <string name="catch_up_failed">Jacket はそこに保存できませんでした。もう一度試みます。別の場所を選ぶには、この機能をオフにしてからオンにし直してください。</string>
+    <string name="catch_up_others">見つかったデバイス</string>
+    <string name="catch_up_others_none_folder">まだありません。もう一方のデバイスでも、同じフォルダを選んでオンにしてください。</string>
+    <string name="catch_up_others_none_files">まだありません。もう一方のデバイスでもオンにしてから、ここをタップして、そのデバイスが保存したファイルを選んでください。</string>
+    <string name="catch_up_others_add">%1$s。タップすると、別のデバイスのファイルを追加できます。</string>
+    <string name="catch_up_hint">ほかのデバイスで読み進めたページへ移動する前に、Jacket は必ず確認します。読書位置が勝手に変わることはありません。ブックマーク、ハイライト、メモ、コレクションはすべてのデバイスで同じに保たれ、一方で削除したものはほかのデバイスでも削除されます。</string>
+    <string name="catch_up_offer_page">%1$s では %2$d ページまで読んでいます。</string>
+    <string name="catch_up_offer_page_chapter">%1$s では %2$d ページ（%3$s）まで読んでいます。</string>
+    <string name="catch_up_offer_percent">%1$s では %2$d%% まで読んでいます。</string>
+    <string name="catch_up_offer_percent_chapter">%1$s では %2$d%%（%3$s）まで読んでいます。</string>
+    <string name="catch_up_offer_book">%1$s では「%2$s」をもっと先まで読んでいます。</string>
+    <string name="catch_up_go">そこへ移動</string>
+</resources>

@@ -243,6 +243,32 @@ a line has the voice read on from there.
     counted as before (only the voice's place goes through the rule that the percent never falls).
   - Text that runs right to left, and vertical text, haven't been tried.
 
+### Catch up on a second device (M)
+Read on two devices (a foldable and a tablet, say) and pick up on one where you left off on the
+other. Each device keeps one small file in a folder they share, written by nobody else:
+"Jacket – Tablet.json". The reader's own sync app (Google Drive, Dropbox, Syncthing) or a USB
+stick carries the files; Jacket only reads and writes them through Android's file picker, and
+still has no internet permission (`data/CatchUp.kt`).
+- Sync is what [ReadEra charges for](https://readera.org/premium).
+- A place is never taken, only offered: "On Tablet you're on page 212, in Chapter 9. Go there".
+  One tap goes there and leaves the way back on offer; ✕ puts it away until that device reads on.
+  The library says it once when Jacket opens, the book's own page when it is opened.
+- Bookmarks, highlights, notes and collections are merged by id, each change counting one more
+  than the last so that no clock is compared (`data/CatchUpRules.kt`). A deletion is kept as one,
+  so it doesn't come back from a device that hasn't heard. Only what the reader deleted counts: a
+  book removed from one device deletes its highlights nowhere else. Settings, book files, the
+  watched folder and covers stay on each device.
+- One file per device means two devices writing at once write two files. A sync app's copy of a
+  file ("… (1).json"), a file only half arrived and an old copy come round again are all
+  harmless: of a device's copies the one it wrote last is used, by its own count of its writes,
+  and a file that doesn't read whole is left alone (`data/DeviceFile.kt`).
+- Folders: Android's folder picker only shows an app that says it has folders to give. The
+  Google Drive app (2.26.447, November 2026) says so on Android 11 and later and not before
+  (read from the app itself; not tried with an account). So where a folder can't be chosen, the
+  reader saves this device's file and adds the other devices' files one by one instead.
+- Still to do: a run against a signed-in Drive, Dropbox and OneDrive on real devices; tidying
+  away a device that is no longer used; carrying "finished" and pins.
+
 ## Next
 
 ### Android Auto (M)
@@ -257,14 +283,6 @@ Choose a book on the car's screen and have it read from where it was left.
   phone's assistant (`android.media.action.MEDIA_PLAY_FROM_SEARCH`), covers in the car's lists
   (they need a content provider), and a run in a real car or the Desktop Head Unit.
 - Risk: Android Auto apps get their own Play review, on every release from then on.
-
-### Catch up on a second device (M)
-Two devices share one backup file in a folder the user picks (for example, one synced by Drive),
-and opening Jacket takes the newer place.
-- Sync is what [ReadEra charges for](https://readera.org/premium).
-- Restore already merges books (`data/Backup.kt:34`).
-- Risks: restore replaces all settings with the backup's (`:59`), backups don't include the book
-  files, and a synced file can be out of date.
 
 ### Earlier ideas
 - A natural voice for Chinese, and listening to a book in another language, translated on the

@@ -403,6 +403,11 @@ fun SettingsScreen(
                 }
             }
 
+            // Reading on two devices: each offers to go to the page the other reached.
+            item { GroupTitle(stringResource(R.string.catch_up_group), column) }
+            item { CatchUpSettings(haptics, column) }
+            item { Hint(stringResource(R.string.catch_up_hint), column) }
+
             item { GroupTitle(stringResource(R.string.notes_tab_highlights), column) }
             item {
                 Group(column) {
@@ -637,7 +642,7 @@ private fun SwitchRow(index: Int, count: Int, title: String, description: String
 }
 
 /** A row that wears a switch is a switch to a screen reader too ("on", "off"), as the same rows in the reader's sheet are: not a tick box. */
-private fun Modifier.asSwitch(): Modifier = semantics { role = Role.Switch }
+internal fun Modifier.asSwitch(): Modifier = semantics { role = Role.Switch }
 
 @Composable
 private fun Hint(text: String, modifier: Modifier) {

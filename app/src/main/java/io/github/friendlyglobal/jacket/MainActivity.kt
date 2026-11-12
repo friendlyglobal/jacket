@@ -49,6 +49,7 @@ import androidx.compose.ui.zIndex
 import androidx.core.content.IntentCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import io.github.friendlyglobal.jacket.data.CatchUpRules
 import io.github.friendlyglobal.jacket.data.ImportReport
 import io.github.friendlyglobal.jacket.data.LibrarySort
 import io.github.friendlyglobal.jacket.importer.titleOfSharedText
@@ -110,10 +111,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Each time Jacket comes to the front: anything new in the watched folder joins the library. */
+    /**
+     * Each time Jacket comes to the front: anything new in the watched folder joins the library,
+     * and what the reader's other devices wrote since is read (see CatchUp).
+     */
     override fun onStart() {
         super.onStart()
         lifecycleScope.launch { library.scanWatchedFolder()?.let(reports::tryEmit) }
+        catchUp.look()
     }
 
     /**
@@ -123,6 +128,8 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         library.flush()
+        // And where they got to is written for their other devices.
+        catchUp.leave()
     }
 
     /**
@@ -312,6 +319,33 @@ private fun JacketRoot(
             if (answer == SnackbarResult.ActionPerformed && added != null && destination == HOME) openNow(added.id, null)
         }
     }
+    // Another of the reader's devices is further on in a book: said once in the library, with the
+    // way there. Left alone or put away it goes, and the offer is made again over the book's own
+    // page when it is opened (which is where it is answered: see CatchUpOffer).
+    val catchUp = LocalContext.current.catchUp
+    val offers by catchUp.offers.collectAsStateWithLifecycle()
+    LaunchedEffect(offers, destination == HOME) {
+        if (destination != HOME) return@LaunchedEffect
+        val books = library.state.value
+        // The book on the cover first, then the ones read most lately.
+        val offer = offers.values.filterNot(catchUp::saidInLibrary)
+            .sortedWith(compareByDescending<CatchUpRules.Offer> { it.bookId == books.current?.id }.thenByDescending { books.find(it.bookId)?.lastOpenedAt ?: 0L })
+            .firstOrNull() ?: return@LaunchedEffect
+        val book = books.find(offer.bookId) ?: return@LaunchedEffect
+        catchUp.sayInLibrary(offer)
+        val answer = snackbar.showSnackbar(
+            resources.getString(R.string.catch_up_offer_book, offer.deviceName, book.title),
+            actionLabel = resources.getString(R.string.catch_up_go),
+            withDismissAction = true,
+            duration = SnackbarDuration.Long,
+        )
+        // One tap: the book is put at that place, and opened there.
+        if (answer == SnackbarResult.ActionPerformed && destination == HOME && catchUp.offers.value[offer.bookId] == offer) {
+            catchUp.goThere(offer.bookId)
+            openNow(offer.bookId, null)
+        }
+    }
+
     // A removed book can't stay open. Asked of the library as it is now, not of what this
     // composition saw: started cold by a widget or a shortcut, the book is asked for before this
     // first runs, and going by the stale view would send it straight back to the library.

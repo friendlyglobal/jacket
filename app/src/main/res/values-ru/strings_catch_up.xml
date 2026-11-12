@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">Ваши другие устройства</string>
+    <string name="catch_up_title">Продолжать на другом устройстве</string>
+    <string name="catch_up_description">Читайте на двух устройствах и продолжайте на одном с того места, где остановились на другом.</string>
+    <string name="catch_up_setup_body">Выберите папку, общую для всех ваших устройств: ту, которую приложение вроде Google Диска, Dropbox или Syncthing поддерживает одинаковой на каждом из них, или флешку, которую вы переносите с одного на другое.\n\nJacket хранит там небольшой файл с вашими позициями, закладками, выделениями, заметками и коллекциями и читает файлы, которые хранят там другие ваши устройства. Сам Jacket никогда не выходит в интернет: это делает приложение, которое синхронизирует папку. Книги, обложки и настройки остаются на каждом устройстве.\n\nЗатем сделайте то же самое на другом устройстве, выбрав ту же папку.</string>
+    <string name="catch_up_device_name">Название этого устройства</string>
+    <string name="catch_up_choose_folder">Выбрать папку</string>
+    <string name="catch_up_setup_files_hint">Не получается выбрать нужную папку? Сохраните в ней файл этого устройства, а затем добавьте файлы остальных устройств по одному.</string>
+    <string name="catch_up_setup_files">Сохранить файл вместо папки</string>
+    <string name="catch_up_failed">Jacket не смог сохранить туда и попробует ещё раз. Чтобы выбрать другое место, выключите и снова включите это.</string>
+    <string name="catch_up_others">Найденные устройства</string>
+    <string name="catch_up_others_none_folder">Пока нет. Включите это и на другом устройстве, выбрав ту же папку.</string>
+    <string name="catch_up_others_none_files">Пока нет. Включите это и на другом устройстве, а затем нажмите здесь, чтобы выбрать сохранённый им файл.</string>
+    <string name="catch_up_others_add">%1$s. Нажмите, чтобы добавить файл ещё одного устройства.</string>
+    <string name="catch_up_hint">Jacket спрашивает, прежде чем перейти на страницу, до которой вы дочитали на другом устройстве: ваша позиция никогда не меняется сама. Закладки, выделения, заметки и коллекции одинаковы на всех устройствах, а удалённое на одном удаляется и на остальных.</string>
+    <string name="catch_up_offer_page">На устройстве «%1$s» вы на странице %2$d.</string>
+    <string name="catch_up_offer_page_chapter">На устройстве «%1$s» вы на странице %2$d — «%3$s».</string>
+    <string name="catch_up_offer_percent">На устройстве «%1$s» прочитано %2$d&#160;%%.</string>
+    <string name="catch_up_offer_percent_chapter">На устройстве «%1$s» прочитано %2$d&#160;%% — «%3$s».</string>
+    <string name="catch_up_offer_book">На устройстве «%1$s» вы продвинулись дальше в книге «%2$s».</string>
+    <string name="catch_up_go">Перейти</string>
+</resources>

@@ -361,18 +361,16 @@ class Library(private val context: Context) : LibraryOrganizer {
         changed()
     }
 
-    fun updatePosition(id: String, position: Int, offset: Float, progress: Float, sectionCount: Int) {
+    /**
+     * Saves the page a PDF or a comic was scrolled to: [page] of [pages], the top of the screen
+     * [offset] of the way down it, [progress] of the way through the book.
+     *
+     * [back] says the reader went back through the pages themselves to get here. Without it the
+     * book's progress is never taken down, as for every other book (see [Book.leftOnPage]).
+     */
+    fun updatePage(id: String, page: Int, offset: Float, progress: Float, pages: Int, back: Boolean) {
         if (!offset.isFinite() || !progress.isFinite()) return
-        _state.update { s ->
-            s.copy(books = s.books.map {
-                if (it.id == id) it.copy(
-                    position = position,
-                    positionOffset = offset.coerceIn(0f, 1f),
-                    progress = progress.coerceIn(0f, 1f),
-                    sectionCount = sectionCount,
-                ) else it
-            })
-        }
+        _state.update { s -> s.copy(books = s.books.map { if (it.id == id) it.leftOnPage(page, offset, progress, pages, back) else it }) }
         changed()
     }
 
@@ -517,6 +515,7 @@ class Library(private val context: Context) : LibraryOrganizer {
     }
 
     override fun deleteCollection(id: String) {
+        onDeleted?.invoke(null, id)
         _state.update { s ->
             s.copy(
                 collections = s.collections.filterNot { it.id == id },
@@ -570,8 +569,40 @@ class Library(private val context: Context) : LibraryOrganizer {
     }
 
     fun deleteAnnotation(id: String) {
+        onDeleted?.invoke(id, null)
         _state.update { s -> s.copy(annotations = s.annotations.filterNot { it.id == id }) }
         changed()
+    }
+
+    /**
+     * Told of each bookmark, highlight or note ([mark]) and each collection the reader deletes,
+     * before it goes from the library: so that the reader's other devices can be told it was
+     * deleted (see [CatchUp]). The library itself only shows that something is no longer there,
+     * which is also true of a book's bookmarks when the book is removed from this device.
+     */
+    @Volatile internal var onDeleted: ((mark: String?, collection: String?) -> Unit)? = null
+
+    /**
+     * Changes the library in one step, from whatever it is at that moment: for folding in what
+     * the reader's other devices told (see [CatchUp]). [transform] may be asked more than once
+     * (the library changed under it), and returning the library it was given changes nothing.
+     */
+    internal fun <T> revise(transform: (LibraryState) -> Pair<LibraryState, T>): T {
+        while (true) {
+            val before = _state.value
+            val (after, result) = transform(before)
+            if (after === before) return result
+            if (_state.compareAndSet(before, after)) {
+                changed()
+                return result
+            }
+        }
+    }
+
+    /** Puts [id] at the place another device reached in it, because the reader asked to go there. */
+    internal fun catchUpTo(id: String, place: SharedPlace) {
+        _state.update { s -> s.copy(books = s.books.map { if (it.id == id) it.caughtUpTo(place) else it }) }
+        changed(saveNow = true)
     }
 
     /**

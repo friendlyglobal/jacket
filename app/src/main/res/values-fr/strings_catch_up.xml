@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Reading on two devices: see values/strings_catch_up.xml for what each of these is. -->
+<resources>
+    <string name="catch_up_group">Vos autres appareils</string>
+    <string name="catch_up_title">Continuer d\'un appareil à l\'autre</string>
+    <string name="catch_up_description">Lisez sur deux appareils et reprenez sur l\'un là où vous vous êtes arrêté sur l\'autre.</string>
+    <string name="catch_up_setup_body">Choisissez un dossier que tous vos appareils partagent : un dossier qu\'une appli comme Google Drive, Dropbox ou Syncthing garde identique sur chacun d\'eux, ou une clé USB que vous passez de l\'un à l\'autre.\n\nJacket y garde un petit fichier avec vos positions, signets, surlignages, notes et collections, et lit les fichiers que vos autres appareils y gardent. Jacket ne se connecte jamais à Internet : c\'est l\'appli qui partage le dossier qui s\'en charge. Vos livres, couvertures et paramètres restent sur chaque appareil.\n\nFaites ensuite la même chose sur votre autre appareil, avec le même dossier.</string>
+    <string name="catch_up_device_name">Nom de cet appareil</string>
+    <string name="catch_up_choose_folder">Choisir un dossier</string>
+    <string name="catch_up_setup_files_hint">Impossible de choisir le dossier voulu ? Enregistrez-y plutôt le fichier de cet appareil, puis ajoutez un par un les fichiers des autres appareils.</string>
+    <string name="catch_up_setup_files">Enregistrer un fichier à la place</string>
+    <string name="catch_up_failed">Jacket n\'a pas pu enregistrer à cet endroit et réessaiera. Pour choisir un autre endroit, désactivez puis réactivez cette option.</string>
+    <string name="catch_up_others">Appareils trouvés</string>
+    <string name="catch_up_others_none_folder">Aucun pour l\'instant. Activez aussi cette option sur votre autre appareil, avec le même dossier.</string>
+    <string name="catch_up_others_none_files">Aucun pour l\'instant. Activez aussi cette option sur votre autre appareil, puis touchez ici pour choisir le fichier qu\'il a enregistré.</string>
+    <string name="catch_up_others_add">%1$s. Touchez pour ajouter le fichier d\'un autre appareil.</string>
+    <string name="catch_up_hint">Jacket demande avant de vous emmener à la page atteinte sur un autre appareil : votre position ne change jamais toute seule. Les signets, surlignages, notes et collections restent identiques sur tous les appareils, et ce que vous supprimez sur l\'un est supprimé sur les autres.</string>
+    <string name="catch_up_offer_page">Sur %1$s, vous en êtes à la page %2$d.</string>
+    <string name="catch_up_offer_page_chapter">Sur %1$s, vous en êtes à la page %2$d, dans %3$s.</string>
+    <string name="catch_up_offer_percent">Sur %1$s, vous en êtes à %2$d&#160;%%.</string>
+    <string name="catch_up_offer_percent_chapter">Sur %1$s, vous en êtes à %2$d&#160;%%, dans %3$s.</string>
+    <string name="catch_up_offer_book">Sur %1$s, vous êtes plus loin dans %2$s.</string>
+    <string name="catch_up_go">Y aller</string>
+</resources>
