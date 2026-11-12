@@ -34,6 +34,83 @@ class ListeningComfortsTest {
         assertEquals(ListenRates, listenRateChoices(7f))
     }
 
+    // ---- The sleep timer as one button (the widget's) ----
+
+    @Test
+    fun `one button steps through the same timers as the player's menu`() {
+        val plain = sleepChoices(ownMinutes = 0, hasChapters = false)
+        assertEquals(listOf(SleepTimer.OFF, SleepTimer.MIN_15, SleepTimer.MIN_30, SleepTimer.MIN_60), plain.map { it.timer })
+        assertEquals(listOf(0, 15, 30, 60), plain.map { it.minutes })
+        val all = sleepChoices(ownMinutes = 45, hasChapters = true)
+        assertEquals(
+            listOf(SleepTimer.OFF, SleepTimer.MIN_15, SleepTimer.MIN_30, SleepTimer.MIN_60, SleepTimer.OTHER, SleepTimer.CHAPTER),
+            all.map { it.timer },
+        )
+        assertEquals(45, all.first { it.timer == SleepTimer.OTHER }.minutes)
+        // A length of their own that is one of the usual ones isn't offered twice.
+        assertEquals(plain, sleepChoices(ownMinutes = 30, hasChapters = false))
+        // Nor one that is no length at all.
+        assertEquals(plain, sleepChoices(ownMinutes = -3, hasChapters = false))
+        assertEquals(plain, sleepChoices(ownMinutes = 5000, hasChapters = false))
+        // Every timed choice runs for some time, and no two choices are the same timer.
+        assertTrue(all.filter { it.timer.timed }.all { it.minutes > 0 })
+        assertEquals(all.size, all.map { it.timer }.distinct().size)
+    }
+
+    @Test
+    fun `each press sets the next timer, and the one after the last is off`() {
+        val choices = sleepChoices(ownMinutes = 45, hasChapters = true)
+        var timer = SleepTimer.OFF
+        val pressed = (1..choices.size).map { nextSleepChoice(timer, choices).also { timer = it.timer } }
+        assertEquals(
+            listOf(SleepTimer.MIN_15, SleepTimer.MIN_30, SleepTimer.MIN_60, SleepTimer.OTHER, SleepTimer.CHAPTER, SleepTimer.OFF),
+            pressed.map { it.timer },
+        )
+        assertEquals(listOf(15, 30, 60, 45, 0, 0), pressed.map { it.minutes })
+        // In a book without chapters, an hour is followed by off.
+        assertEquals(SleepChoice(SleepTimer.OFF), nextSleepChoice(SleepTimer.MIN_60, sleepChoices(0, hasChapters = false)))
+    }
+
+    @Test
+    fun `a timer the button doesn't offer is followed by off`() {
+        // Set in the player: to the end of the chapter, then the contents turned out empty; or a
+        // length typed in and changed since.
+        assertEquals(SleepChoice(SleepTimer.OFF), nextSleepChoice(SleepTimer.CHAPTER, sleepChoices(0, hasChapters = false)))
+        assertEquals(SleepChoice(SleepTimer.OFF), nextSleepChoice(SleepTimer.OTHER, sleepChoices(0, hasChapters = true)))
+        assertEquals(SleepChoice(SleepTimer.OFF), nextSleepChoice(SleepTimer.MIN_15, emptyList()))
+    }
+
+    @Test
+    fun `the minutes left are counted up, and counted again as each one ends`() {
+        val minute = 60_000L
+        assertEquals(15, sleepMinutesShown(15 * minute))
+        assertEquals(15, sleepMinutesShown(14 * minute + 1))
+        assertEquals(14, sleepMinutesShown(14 * minute))
+        assertEquals(1, sleepMinutesShown(minute))
+        assertEquals(1, sleepMinutesShown(1))
+        assertEquals(0, sleepMinutesShown(0))
+        assertEquals(0, sleepMinutesShown(-5_000))
+        // The wait runs to the moment the number drops by one, never to nothing while time is left.
+        assertEquals(minute, sleepMinuteEndsIn(15 * minute))
+        assertEquals(1, sleepMinuteEndsIn(14 * minute + 1))
+        assertEquals(30_000L, sleepMinuteEndsIn(30_000L))
+        assertEquals(0, sleepMinuteEndsIn(0))
+        assertEquals(0, sleepMinuteEndsIn(-1))
+        // Stepping through a whole timer: every number once, in order, and it ends on time.
+        var left = 3 * minute - 250
+        val shown = ArrayList<Int>()
+        var waited = 0L
+        while (left > 0) {
+            shown += sleepMinutesShown(left)
+            val wait = sleepMinuteEndsIn(left)
+            assertTrue(wait in 1..minute)
+            waited += wait
+            left -= wait
+        }
+        assertEquals(listOf(3, 2, 1), shown)
+        assertEquals(3 * minute - 250, waited)
+    }
+
     // ---- The sleep timer ----
 
     @Test

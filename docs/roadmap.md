@@ -82,6 +82,46 @@ search, and bookmarks.
   and with TalkBack a text file is now read through Listen, like an EPUB, where the old reader's
   paragraphs could be swiped through one by one.
 
+### Galaxy Z Flip cover-screen player: skip and sleep (S)
+While a book is read aloud, the "Jacket player" widget has a sentence back, a sentence on and the
+sleep timer beside play and pause, so a Flip can stay shut for all of them.
+- On a Flip, full apps on the cover screen need
+  [Good Lock](https://www.droid-life.com/2023/08/02/galaxy-z-flip-5-cover-screen-apps-good-lock/),
+  so this widget is the whole Flip experience.
+- The buttons are the reader's own (`reader/ListenRemote.kt`), not a second player. The moon steps
+  the reader's timer: 15 minutes, 30, an hour, your own length, the end of the chapter, off.
+- Every button is 48dp or more. As many are shown as the widget's size has room for, from play
+  alone on the smallest to large buttons with the timer in words at the cover screen's size.
+- Still open: it has not been on a real Flip. Samsung's own
+  [sample](https://developer.samsung.com/codelab/galaxy-z/widget-flex-window.html) gives the cover
+  screen's widget about 352 by 339dp, which is the size it was laid out and checked at. What size a
+  Flip really gives it, how it sits around the camera cut-out, and starting the voice from the
+  cover screen (which opens the book, so needs the phone open) are to be seen on one.
+
+### Your reading (S–M)
+A page with the time read this week, this month and this year, the longest streak, a calendar of
+the days read (the more read on a day, the stronger its colour) and the books finished with their
+dates. It opens from the line of today's reading in the library, and from Settings.
+- KOReader's reading calendar is popular enough that
+  [other tools copy it](https://github.com/paviro/KoShelf).
+- All of it comes from the minutes per day Jacket already kept (`data/ReadingStats.kt` does the
+  sums). Days are kept for a little over a year, so the calendar goes back that far.
+- For a screen reader the calendar is one sentence ("Read on 18 days in November 2026, 6 hours in
+  all"), not a grid of numbers.
+- Still open: nothing is shown per book (time spent on each), and listening time isn't counted,
+  only reading time, as before.
+
+### A clear message for an outdated Android System WebView (S)
+On a phone whose web view has never been updated (Android 8.0's is version 58, from 2017), a book
+opened on its first page and couldn't be paged through. The reader now says so in place of the
+pages, with a button to that app's page in the Play Store.
+- The oldest web view let through is 64, the first with `ResizeObserver`, which Readium 3.4's page
+  script needs to lay pages out (`reader/WebViewCheck.kt` has the reasoning). Readium itself
+  states no minimum.
+- Still open: no web view between 64 and 90 has been run for real (58 fails, 91 works; in between
+  rests on reading Readium's scripts and on a current web view with the newer parts taken away).
+  A phone without the Play Store gets the same message, and its button opens the browser.
+
 ## Next
 
 ### Say it this way (M)
@@ -90,19 +130,6 @@ Fix how a name is pronounced, and skip note numbers when reading aloud.
   [another reader app's board](https://voicereader.featurebase.app/p/option-to-correct-pronunciations-in-voice-reader).
 - Nothing like it exists in `voice/` yet.
 - Risk: word highlighting (`voice/SpeechTiming.kt`) has to stay lined up with the changed text.
-
-### Galaxy Z Flip cover-screen player: skip and sleep (S)
-- `widget/PlayerWidget.kt:152` offers only play/pause.
-- On a Flip, full apps on the cover screen need
-  [Good Lock](https://www.droid-life.com/2023/08/02/galaxy-z-flip-5-cover-screen-apps-good-lock/),
-  so this widget is the whole Flip experience.
-- Risk: it needs testing on a real Flip.
-
-### Your reading (S–M)
-A page with this week, month and year, books finished, and a calendar.
-- KOReader's reading calendar is popular enough that
-  [other tools copy it](https://github.com/paviro/KoShelf).
-- Jacket already stores minutes per day (`data/Model.kt:229`) but shows only today and the streak.
 
 ### Book posture (S–M)
 Half-open, Jacket reads like a paperback, with the fold as the spine.

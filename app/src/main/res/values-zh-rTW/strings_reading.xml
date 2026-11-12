@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Your reading" (the page of reading time) and what the reader says when the phone's web view is too old to show pages. See values/strings_reading.xml for what each is for. -->
+<resources>
+    <string name="reading_title">我的閱讀</string>
+    <string name="settings_reading_description">本週、本月和今年的閱讀時間，有閱讀的日子和讀完的書。</string>
+    <string name="reading_this_week">本週</string>
+    <string name="reading_this_month">本月</string>
+    <string name="reading_this_year">今年</string>
+    <string name="reading_longest_streak">最長連續天數</string>
+    <string name="reading_days_read">閱讀日曆</string>
+    <string name="reading_previous_month">上個月</string>
+    <string name="reading_next_month">下個月</string>
+    <plurals name="reading_month_summary">
+        <item quantity="other">%2$s：閱讀 %1$d 天，共 %3$s</item>
+    </plurals>
+    <string name="reading_month_none">%1$s：沒有閱讀</string>
+    <string name="reading_calendar_hint">顏色越濃，當天讀得越久。</string>
+    <string name="reading_books_finished">讀完的書</string>
+    <string name="reading_finished_none">還沒有讀完的書。</string>
+    <string name="reader_webview_old">如要顯示頁面，Jacket 需要較新版本的 %1$s。請在 Play 商店更新，然後重新開啟這本書。</string>
+    <string name="reader_webview_update">開啟 Play 商店</string>
+</resources>

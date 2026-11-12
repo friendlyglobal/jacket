@@ -95,6 +95,8 @@ fun SettingsScreen(
     onSettings: ((Settings) -> Settings) -> Unit,
     onBack: () -> Unit,
     onLicenses: () -> Unit = {},
+    /** Opens "Your reading". */
+    onReading: () -> Unit = {},
 ) {
     val settings = state.settings
     val library = LocalContext.current.library
@@ -312,7 +314,7 @@ fun SettingsScreen(
                     val folder = settings.watchFolder
                     SegmentedListItem(
                         onClick = { haptics.tick(); folderPicker.launch(null) },
-                        shapes = ListItemDefaults.segmentedShapes(0, 2),
+                        shapes = ListItemDefaults.segmentedShapes(0, 3),
                         leadingContent = { Icon(JacketIcons.Download, null) },
                         supportingContent = {
                             // The folder's own name once one is chosen.
@@ -339,9 +341,18 @@ fun SettingsScreen(
                             null
                         },
                     ) { Text(stringResource(R.string.settings_watch_folder)) }
-                    SwitchRow(1, 2, stringResource(R.string.settings_reading_stats), null, settings.readingStats) {
+                    SwitchRow(1, 3, stringResource(R.string.settings_reading_stats), null, settings.readingStats) {
                         toggle(it) { s -> s.copy(readingStats = it) }
                     }
+                    // The page of that reading time. With it switched off the row stays, greyed out:
+                    // there is nothing to open, and the switch above is what brings it back.
+                    SegmentedListItem(
+                        onClick = { haptics.tick(); onReading() },
+                        enabled = settings.readingStats,
+                        shapes = ListItemDefaults.segmentedShapes(2, 3),
+                        leadingContent = { Icon(JacketIcons.Clock, null) },
+                        supportingContent = { Text(stringResource(R.string.settings_reading_description)) },
+                    ) { Text(stringResource(R.string.reading_title)) }
                 }
             }
 

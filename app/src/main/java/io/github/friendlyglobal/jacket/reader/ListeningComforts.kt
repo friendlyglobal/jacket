@@ -32,6 +32,42 @@ internal fun sleepMinutesOf(text: String): Int? = text.trim().toIntOrNull()?.tak
 /** The whole minutes a timer ending at [endsAt] still has at [now] (both in milliseconds), counted up: never less than one. */
 internal fun sleepMinutesLeft(endsAt: Long, now: Long): Int = ((endsAt - now) / 60_000 + 1).coerceAtLeast(1).toInt()
 
+/** A sleep timer as a single button sets it: which timer, and for a timed one, how many minutes. */
+internal data class SleepChoice(val timer: SleepTimer, val minutes: Int = timer.minutes)
+
+/**
+ * The sleep timers a single button steps through, in order: off, the usual lengths, the
+ * listener's own length ([ownMinutes], kept from the last time one was typed in; 0 for none) and,
+ * in a book that has chapters, the end of the chapter. The same ones the player's menu lists.
+ */
+internal fun sleepChoices(ownMinutes: Int, hasChapters: Boolean): List<SleepChoice> = buildList {
+    add(SleepChoice(SleepTimer.OFF))
+    SleepTimer.entries.filter { it.minutes > 0 }.forEach { add(SleepChoice(it)) }
+    // A length of their own that is one of the usual ones anyway is already there.
+    if (ownMinutes in 1..LONGEST_SLEEP_MINUTES && SleepTimer.entries.none { it.minutes == ownMinutes }) add(SleepChoice(SleepTimer.OTHER, ownMinutes))
+    if (hasChapters) add(SleepChoice(SleepTimer.CHAPTER))
+}
+
+/**
+ * The timer a press of that button sets when [current] is running: the next of [choices], and
+ * after the last of them, off again. A timer that isn't among them (a length typed in the player
+ * and changed since) is followed by off, so a press never leaves a timer running that the button
+ * can't show the way out of.
+ */
+internal fun nextSleepChoice(current: SleepTimer, choices: List<SleepChoice>): SleepChoice {
+    val at = choices.indexOfFirst { it.timer == current }
+    return choices.getOrNull(at + 1)?.takeIf { at >= 0 } ?: SleepChoice(SleepTimer.OFF)
+}
+
+/**
+ * The whole minutes a timer with [leftMillis] still to run has, counted up: a timer just set to
+ * 15 minutes says 15 for its first minute, and 1 for its last.
+ */
+internal fun sleepMinutesShown(leftMillis: Long): Int = ((leftMillis + 59_999L) / 60_000L).coerceAtLeast(0L).toInt()
+
+/** How long until that number changes: the wait before it is counted again. */
+internal fun sleepMinuteEndsIn(leftMillis: Long): Long = if (leftMillis <= 0L) 0L else (leftMillis - 1L) % 60_000L + 1L
+
 /**
  * How many sentences back the voice takes up again after a pause of [pausedMillis], so the
  * listener finds the thread.
