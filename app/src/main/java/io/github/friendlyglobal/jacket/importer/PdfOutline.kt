@@ -351,7 +351,9 @@ internal object PdfOutline {
             if (filters.isEmpty()) return ByteBuffer.wrap(raw)
             if (filters != listOf("FlateDecode")) error("Unknown filter")
             val inflater = Inflater()
-            val out = ByteArrayOutputStream(length * 3)
+            // Sized for the usual case, but never past the most a stream may grow to: a large PDF's
+            // declared length would otherwise ask for hundreds of megabytes before a byte is read.
+            val out = ByteArrayOutputStream(minOf(length.toLong() * 3, LARGEST_STREAM.toLong()).toInt().coerceAtLeast(32))
             try {
                 inflater.setInput(raw)
                 val buffer = ByteArray(1 shl 14)
