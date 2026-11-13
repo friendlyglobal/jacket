@@ -17,6 +17,8 @@
     <string name="reading_calendar_hint">颜色越浓，当天读得越久。</string>
     <string name="reading_books_finished">读完的书</string>
     <string name="reading_finished_none">还没有读完的书。</string>
+    <string name="reading_listened">其中收听 %1$s</string>
+    <string name="book_time_spent">与这本书共度 %1$s</string>
     <string name="reader_webview_old">要显示页面，Jacket 需要更新版本的 %1$s。请在 Play 商店中更新，然后重新打开这本书。</string>
     <string name="reader_webview_update">打开 Play 商店</string>
 </resources>

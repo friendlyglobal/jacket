@@ -1,6 +1,7 @@
 package io.github.friendlyglobal.jacket.ui.home
 
 import android.graphics.Bitmap
+import android.icu.text.MeasureFormat
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
@@ -69,6 +70,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -92,6 +94,7 @@ import io.github.friendlyglobal.jacket.ui.JacketIcons
 import io.github.friendlyglobal.jacket.ui.theme.SeedScheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.Locale
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import io.github.friendlyglobal.jacket.ui.asHeading
@@ -228,6 +231,17 @@ internal fun EditBookSheet(
             Modifier.verticalScroll(rememberScrollState()).navigationBarsPadding().padding(horizontal = 24.dp).padding(bottom = 16.dp),
         ) {
             Text(stringResource(R.string.library_edit_book), style = MaterialTheme.typography.titleLarge, modifier = Modifier.asHeading())
+            // The book's own sheet: the time spent with it, read and listened, said quietly under its name.
+            val locale = LocalConfiguration.current.locales[0] ?: Locale.ROOT
+            val time = bookTime(book, locale, MeasureFormat.FormatWidth.SHORT, named = true)
+            if (time != null) {
+                val said = bookTime(book, locale, MeasureFormat.FormatWidth.WIDE, named = true).orEmpty().joinToString(stringResource(R.string.list_separator))
+                Text(
+                    time.joinToString(stringResource(R.string.separator)),
+                    style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp).semantics { contentDescription = said },
+                )
+            }
             Spacer(Modifier.height(16.dp))
             Box(
                 Modifier.align(Alignment.CenterHorizontally).width(150.dp).aspectRatio(2f / 3f).clip(RoundedCornerShape(14.dp))

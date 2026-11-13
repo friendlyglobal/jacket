@@ -20,6 +20,8 @@
     <string name="reading_calendar_hint">Im mocniejszy kolor, tym więcej czytania tego dnia.</string>
     <string name="reading_books_finished">Przeczytane książki</string>
     <string name="reading_finished_none">Nie ma jeszcze przeczytanych książek.</string>
+    <string name="reading_listened">w tym %1$s słuchania</string>
+    <string name="book_time_spent">%1$s z tą książką</string>
     <string name="reader_webview_old">Aby pokazać strony, Jacket potrzebuje nowszej wersji aplikacji %1$s. Zaktualizuj ją w Sklepie Play, a potem otwórz książkę ponownie.</string>
     <string name="reader_webview_update">Otwórz Sklep Play</string>
 </resources>

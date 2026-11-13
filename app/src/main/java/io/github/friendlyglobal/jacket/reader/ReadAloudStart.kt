@@ -99,10 +99,13 @@ internal class SpokenFiles(private val publication: Publication) {
      * through here. A sentence already told this way comes out the same; one that isn't found in
      * its file is left as it is.
      */
-    suspend fun placed(sentence: Locator): Locator {
+    suspend fun placed(sentence: Locator): Locator = placedIn(sentence).first
+
+    /** The same, with how many letters the sentence's file holds: what the time left in its chapter is counted in. */
+    suspend fun placedIn(sentence: Locator): Pair<Locator, Int> {
         val file = of(sentence.href, sentence.mediaType)
-        val block = file.blockOf(sentence) ?: return sentence.findable()
-        return sentence.findable().copyWithLocations(progression = file.places.of(block, sentence.text.highlight), totalProgression = null)
+        val block = file.blockOf(sentence) ?: return sentence.findable() to file.places.letters
+        return sentence.findable().copyWithLocations(progression = file.places.of(block, sentence.text.highlight), totalProgression = null) to file.places.letters
     }
 
     private companion object {

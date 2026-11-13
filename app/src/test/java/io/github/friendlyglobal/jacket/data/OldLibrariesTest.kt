@@ -195,4 +195,46 @@ class OldLibrariesTest {
         assertEquals("supertonic3/M1", state.settings.voice)
         assertEquals(1f, state.settings.listenRate)
     }
+
+    @Test
+    fun aLibraryFromBeforeListeningCountedHasNoListeningAndNoTimeWithEachBook() {
+        val state = LibraryJson.read(rc3).state
+        assertTrue(state.listened.isEmpty())
+        assertEquals(0L, state.books.single().spentMs)
+        assertEquals(0L, state.books.single().listenedMs)
+        // Its reading time is as it was.
+        assertEquals(mapOf("2026-11-09" to 120000L, "2026-11-10" to 190231L), state.reading)
+    }
+
+    @Test
+    fun listeningIsAddedBesideTheReadingTimeSoAnOlderJacketReadsTheSameTotals() {
+        val state = LibraryJson.read(rc3).state.let { old ->
+            old.copy(
+                books = old.books.map { it.copy(spentMs = 900_000L, listenedMs = 600_000L) },
+                reading = old.reading + ("2026-11-11" to 900_000L),
+                listened = mapOf("2026-11-11" to 600_000L),
+            )
+        }
+        val written = org.json.JSONObject(LibraryJson.encode(state))
+        // "reading" keeps its shape, every minute in it (listening too) where an older version looks.
+        assertEquals(900_000L, written.getJSONObject("reading").getLong("2026-11-11"))
+        // What an older version doesn't know, it passes over: without the new keys, the rest is the same.
+        written.remove("listened")
+        written.getJSONArray("books").getJSONObject(0).apply {
+            remove("spentMs")
+            remove("listenedMs")
+        }
+        val older = LibraryJson.read(written.toString())
+        assertEquals(0, older.unread)
+        assertEquals(state.reading, older.state.reading)
+        assertEquals(state.books.map { it.copy(spentMs = 0L, listenedMs = 0L) }, older.state.books)
+    }
+
+    @Test
+    fun aDamagedFileNeverHasMoreListenedThanSpent() {
+        val damaged = rc3.replace("\"pace\":1424230.25", "\"pace\":1424230.25,\"spentMs\":1000,\"listenedMs\":5000")
+        val book = LibraryJson.read(damaged).state.books.single()
+        assertEquals(5000L, book.spentMs)
+        assertEquals(5000L, book.listenedMs)
+    }
 }

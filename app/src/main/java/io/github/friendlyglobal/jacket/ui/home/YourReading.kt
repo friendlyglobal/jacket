@@ -81,6 +81,8 @@ import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.LibraryState
 import io.github.friendlyglobal.jacket.data.MonthReading
 import io.github.friendlyglobal.jacket.data.READING_SHADES
+import io.github.friendlyglobal.jacket.data.READ_DAY_MS
+import io.github.friendlyglobal.jacket.data.ReadingTotals
 import io.github.friendlyglobal.jacket.data.calendarWeeks
 import io.github.friendlyglobal.jacket.data.finishedBooks
 import io.github.friendlyglobal.jacket.data.longestStreak
@@ -118,6 +120,10 @@ import java.util.Locale
  * row, a calendar of the days read (the more read on a day, the deeper its colour) and the books
  * finished, with the day each was. All of it from what the library already keeps; nothing leaves
  * the phone. Opened from the line of today's reading in the library, and from Settings.
+ *
+ * Listening is reading here: the time the voice read a book aloud is in every total, and each
+ * says how much of it was listened to ("4 hr listened"), as each finished book says the time
+ * spent with it.
  */
 @Composable
 fun YourReadingScreen(state: LibraryState, onBack: () -> Unit) {
@@ -126,6 +132,8 @@ fun YourReadingScreen(state: LibraryState, onBack: () -> Unit) {
     val today = remember(state.reading) { LocalDate.now() }
     val weekStart = remember(locale) { WeekFields.of(locale).firstDayOfWeek }
     val totals = remember(state.reading, today, weekStart) { readingTotals(state.reading, today, weekStart) }
+    // How much of each was listened to: counted the same way, from the days' listening.
+    val listened = remember(state.listened, today, weekStart) { readingTotals(state.listened, today, weekStart) }
     val longest = remember(state.reading) { longestStreak(state.reading) }
     val streak = remember(state.reading, today) { readingStreak(state.reading, today) }
     val months = remember(state.reading, today) { readingMonths(state.reading, today) }
@@ -158,7 +166,7 @@ fun YourReadingScreen(state: LibraryState, onBack: () -> Unit) {
         ) {
             val column = Modifier.widthIn(max = 640.dp).fillMaxWidth()
 
-            item { Totals(totals.week, totals.month, totals.year, longest, locale, column.padding(top = 8.dp)) }
+            item { Totals(totals, listened, longest, locale, column.padding(top = 8.dp)) }
 
             item { SectionTitle(stringResource(R.string.reading_days_read), column) }
             item { ReadingCalendar(state.reading, months, today, locale, column) }
@@ -195,32 +203,38 @@ private fun SectionTitle(text: String, modifier: Modifier) {
 // ---------------------------------------------------------------------------------------------
 
 @Composable
-private fun Totals(week: Long, month: Long, year: Long, longest: Int, locale: Locale, modifier: Modifier) {
+private fun Totals(totals: ReadingTotals, listened: ReadingTotals, longest: Int, locale: Locale, modifier: Modifier) {
     // Side by side while there's room for two; one under the other with the phone's font turned up.
     val stacked = LocalDensity.current.fontScale > 1.3f
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Tile(
             label = stringResource(R.string.reading_this_week),
-            value = readingTime(week, locale, MeasureFormat.FormatWidth.SHORT),
-            said = readingTime(week, locale, MeasureFormat.FormatWidth.WIDE),
+            value = readingTime(totals.week, locale, MeasureFormat.FormatWidth.SHORT),
+            said = readingTime(totals.week, locale, MeasureFormat.FormatWidth.WIDE),
             container = MaterialTheme.colorScheme.primaryContainer,
             content = MaterialTheme.colorScheme.onPrimaryContainer,
             large = true,
+            listened = listened.week,
+            locale = locale,
             modifier = Modifier.fillMaxWidth(),
         )
         val monthTile = @Composable { tile: Modifier ->
             Tile(
                 label = stringResource(R.string.reading_this_month),
-                value = readingTime(month, locale, MeasureFormat.FormatWidth.SHORT),
-                said = readingTime(month, locale, MeasureFormat.FormatWidth.WIDE),
+                value = readingTime(totals.month, locale, MeasureFormat.FormatWidth.SHORT),
+                said = readingTime(totals.month, locale, MeasureFormat.FormatWidth.WIDE),
+                listened = listened.month,
+                locale = locale,
                 modifier = tile,
             )
         }
         val yearTile = @Composable { tile: Modifier ->
             Tile(
                 label = stringResource(R.string.reading_this_year),
-                value = readingTime(year, locale, MeasureFormat.FormatWidth.SHORT),
-                said = readingTime(year, locale, MeasureFormat.FormatWidth.WIDE),
+                value = readingTime(totals.year, locale, MeasureFormat.FormatWidth.SHORT),
+                said = readingTime(totals.year, locale, MeasureFormat.FormatWidth.WIDE),
+                listened = listened.year,
+                locale = locale,
                 modifier = tile,
             )
         }
@@ -250,7 +264,8 @@ private fun Totals(week: Long, month: Long, year: Long, longest: Int, locale: Lo
 
 /**
  * One number of the page with its name over it. To a screen reader it is one thing, said in full:
- * "This week, 2 hours, 14 minutes", where the eye gets "2 hr 14 min".
+ * "This week, 2 hours, 14 minutes", where the eye gets "2 hr 14 min". A time that was partly
+ * listened to says how much under it, quietly ("1 hr 30 min listened"), from a minute of it.
  */
 @Composable
 private fun Tile(
@@ -261,9 +276,15 @@ private fun Tile(
     container: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     content: Color = MaterialTheme.colorScheme.onSurface,
     large: Boolean = false,
+    /** How much of the time was listened to, in milliseconds. */
+    listened: Long = 0L,
+    locale: Locale = Locale.ROOT,
     badge: (@Composable () -> Unit)? = null,
 ) {
-    val phrase = spoken(stringResource(R.string.list_separator), label, said)
+    val heard = listened.takeIf { it >= READ_DAY_MS }
+    val heardShown = heard?.let { stringResource(R.string.reading_listened, readingTime(it, locale, MeasureFormat.FormatWidth.SHORT)) }
+    val heardSaid = heard?.let { stringResource(R.string.reading_listened, readingTime(it, locale, MeasureFormat.FormatWidth.WIDE)) }
+    val phrase = spoken(stringResource(R.string.list_separator), label, said, heardSaid)
     Surface(
         shape = if (large) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.large,
         color = container, contentColor = content,
@@ -279,6 +300,12 @@ private fun Tile(
                 Spacer(Modifier.height(2.dp))
                 val style = if (large) MaterialTheme.typography.displaySmallEmphasized else MaterialTheme.typography.titleLargeEmphasized
                 Text(value, style = style, maxLines = 2, overflow = TextOverflow.Ellipsis, autoSize = if (large) fitOnOneLine(style) else null)
+                if (heardShown != null) {
+                    Text(
+                        heardShown, style = MaterialTheme.typography.labelMedium, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                        color = if (large) content else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }
@@ -450,7 +477,11 @@ private fun monthTitle(month: YearMonth, locale: Locale): String {
 /** A finish this early isn't a day anyone finished a book: Jacket 0.x kept none, and its books were given a stand-in. */
 private val FIRST_REAL_FINISH = LocalDate.of(2020, 1, 1)
 
-/** A finished book: its cover, its title, who wrote it and the day it was finished. One thing to a screen reader. */
+/**
+ * A finished book: its cover, its title, who wrote it and the day it was finished, and the time
+ * spent with it, read and listened ("6 hr 10 min · 4 hr listened"; none for a book finished before
+ * Jacket kept it). One thing to a screen reader.
+ */
 @Composable
 private fun FinishedBook(book: Book, index: Int, count: Int, locale: Locale, modifier: Modifier) {
     val day = remember(book.finishedAt, locale) {
@@ -459,13 +490,41 @@ private fun FinishedBook(book: Book, index: Int, count: Int, locale: Locale, mod
             ?.let { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale).withDecimalStyle(DecimalStyle.of(locale)).format(it) }
     }
     val line = listOfNotNull(book.author.takeIf { it.isNotBlank() }, day)
-    val phrase = spoken(stringResource(R.string.list_separator), book.title, book.author, day)
+    val separator = stringResource(R.string.separator)
+    // (In a list of books, the time beside each is plainly the time with it: the eye isn't told so.)
+    val time = bookTime(book, locale, MeasureFormat.FormatWidth.SHORT, named = false)?.joinToString(separator)
+    val timeSaid = bookTime(book, locale, MeasureFormat.FormatWidth.WIDE, named = true)?.joinToString(stringResource(R.string.list_separator))
+    val phrase = spoken(stringResource(R.string.list_separator), book.title, book.author, day, timeSaid)
     SegmentedListItem(
         shapes = ListItemDefaults.segmentedShapes(index, count),
         modifier = modifier.clearAndSetSemantics { contentDescription = phrase },
         leadingContent = { CoverImage(book, Modifier.size(width = 36.dp, height = 54.dp).clip(RoundedCornerShape(6.dp))) },
-        supportingContent = if (line.isNotEmpty()) { { Text(line.joinToString(stringResource(R.string.separator))) } } else null,
+        supportingContent = if (line.isNotEmpty() || time != null) {
+            {
+                Column {
+                    if (line.isNotEmpty()) Text(line.joinToString(separator))
+                    if (time != null) Text(time, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        } else {
+            null
+        },
     ) { Text(book.title, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+}
+
+/**
+ * The time spent with [book], read and listened, as the parts of a line: "6 hr 10 min" (or, [named],
+ * "6 hours, 10 minutes with this book") and, where a minute or more of it was, "4 hr listened".
+ * Null for a book with less than a minute of it, or one read before Jacket kept it.
+ */
+@Composable
+internal fun bookTime(book: Book, locale: Locale, width: MeasureFormat.FormatWidth, named: Boolean): List<String>? {
+    if (book.spentMs < READ_DAY_MS) return null
+    val spent = readingTime(book.spentMs, locale, width)
+    return listOfNotNull(
+        if (named) stringResource(R.string.book_time_spent, spent) else spent,
+        book.listenedMs.takeIf { it >= READ_DAY_MS }?.let { stringResource(R.string.reading_listened, readingTime(it, locale, width)) },
+    )
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -74,6 +74,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -184,6 +185,12 @@ class ListenState {
     var phrase by mutableStateOf("")
     var spoken by mutableIntStateOf(0)
     /**
+     * How fast the voice is speaking, in letters a millisecond at the speed it is set to: timed as
+     * it reads (see [VoicePace]), and 0 until a sentence or two have been heard. "Time left in
+     * chapter" is told by it.
+     */
+    var lettersPerMs by mutableFloatStateOf(0f)
+    /**
      * The listener has moved away from the sentence being read (turned pages, scrolled, jumped):
      * the page stops following the voice, and the player offers the way back to it.
      */
@@ -248,65 +255,6 @@ class ChapterSteps(
     @param:StringRes val previousLabel: Int = R.string.reader_previous_chapter,
     @param:StringRes val nextLabel: Int = R.string.reader_next_chapter,
 )
-
-/**
- * How fast the voice gets through a book, learnt from the pages it turns as it reads: the time
- * the whole book would take at this rate. The mini player tells the minutes left in the chapter by
- * it. Nothing is known until enough has been heard, and only an unbroken run of the voice's own
- * page turns counts: a pause, or the listener turning a page themselves, starts the run again.
- */
-internal class ListeningPace {
-    /** Milliseconds the whole book takes to be read aloud; 0 while unknown. */
-    var wholeBook = 0f
-        private set
-    private var since = 0L
-    private var from = -1f
-    private var heard = 0L
-    private var advanced = 0f
-
-    /** The speed went from [old] to [new]: what was learnt carries over, scaled, until the new speed has been heard. */
-    fun retimed(old: Float, new: Float) {
-        if (old > 0f && new > 0f) wholeBook *= old / new
-        from = -1f
-        heard = 0L
-        advanced = 0f
-    }
-
-    /**
-     * The page on screen at [now] (milliseconds) is [progress] through the book (0..1).
-     * [following] while the voice is speaking and this is the page it turned to by itself.
-     */
-    fun page(now: Long, progress: Float, following: Boolean) {
-        if (!following) {
-            from = -1f
-            return
-        }
-        val step = progress - from
-        if (from < 0f || step < 0f || step > LONGEST_STEP || now - since > LONGEST_PAGE_MS) {
-            since = now
-            from = progress
-            return
-        }
-        // The same page, reported again.
-        if (step == 0f) return
-        heard += now - since
-        advanced += step
-        since = now
-        from = progress
-        if (heard >= AFTER_MS) wholeBook = heard / advanced
-    }
-
-    private companion object {
-        /** The pace is told from at least this much listening... */
-        const val AFTER_MS = 30_000L
-
-        /** ...in steps of a page or two at most (this much of the book): more is a jump... */
-        const val LONGEST_STEP = 0.05f
-
-        /** ...and none taking longer than a full spread read slowly. */
-        const val LONGEST_PAGE_MS = 900_000L
-    }
-}
 
 /** The player's parts follow one another in by this much. */
 internal const val ARRIVAL_STAGGER_MS = 70L

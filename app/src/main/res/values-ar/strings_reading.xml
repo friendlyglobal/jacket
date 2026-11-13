@@ -22,6 +22,8 @@
     <string name="reading_calendar_hint">كلما كان اللون أقوى، قرأت أكثر في ذلك اليوم.</string>
     <string name="reading_books_finished">الكتب المكتملة</string>
     <string name="reading_finished_none">لم تُكمل أي كتاب بعد.</string>
+    <string name="reading_listened">منها %1$s استماعًا</string>
+    <string name="book_time_spent">%1$s مع هذا الكتاب</string>
     <string name="reader_webview_old">لعرض الصفحات، يحتاج Jacket إلى إصدار أحدث من %1$s. حدّثه من متجر Play ثم افتح الكتاب مجددًا.</string>
     <string name="reader_webview_update">فتح متجر Play</string>
 </resources>

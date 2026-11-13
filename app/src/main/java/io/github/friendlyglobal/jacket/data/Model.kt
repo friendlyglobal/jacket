@@ -81,6 +81,13 @@ data class Book(
      * Jacket kept it; its file is read for it when it is needed.
      */
     val sha256: String? = null,
+    /**
+     * The time spent with the book on this phone, in milliseconds: its pages read, and the voice
+     * reading it aloud. A minute of both at once (the page in view while the voice speaks) is one minute.
+     */
+    val spentMs: Long = 0L,
+    /** How much of [spentMs] was listened to: the voice speaking. Never more than [spentMs]. */
+    val listenedMs: Long = 0L,
 ) {
     val isFinished: Boolean get() = finishedAt > 0L
 
@@ -305,8 +312,17 @@ data class LibraryState(
     val currentId: String? = null,
     val settings: Settings = Settings(),
     val annotations: List<Annotation> = emptyList(),
-    /** Time spent reading, per day (ISO date to milliseconds): today's total and the streak. */
+    /**
+     * Time spent reading, per day (ISO date to milliseconds): today's total and the streak.
+     * Listening counts: the time the voice spent reading a book aloud is in here too.
+     */
     val reading: Map<String, Long> = emptyMap(),
+    /**
+     * How much of each day's [reading] was listened to (ISO date to milliseconds; a day without
+     * listening has no entry). Kept beside [reading] rather than inside it, so that a Jacket from
+     * before listening counted reads the same days and totals it always did.
+     */
+    val listened: Map<String, Long> = emptyMap(),
     /** The reader's own collections, in the order they were made. */
     val collections: List<BookCollection> = emptyList(),
     /** Words the voice says the listener's way ("Say it this way"), in the order they were made. */
@@ -400,6 +416,7 @@ internal object LibraryJson {
             state.collections.forEach { put(JSONObject().apply { put("id", it.id); put("name", it.name); put("createdAt", it.createdAt) }) }
         })
         put("reading", JSONObject().apply { state.reading.forEach { (day, millis) -> put(day, millis) } })
+        put("listened", JSONObject().apply { state.listened.forEach { (day, millis) -> put(day, millis) } })
         put("books", JSONArray().apply { state.books.forEach { put(it.toJson()) } })
         put("annotations", JSONArray().apply { state.annotations.forEach { put(it.toJson()) } })
     }.toString()
@@ -470,6 +487,8 @@ internal object LibraryJson {
                 c.optString("id").takeIf { it.isNotEmpty() }?.let { id -> BookCollection(id, c.optString("name"), c.optLong("createdAt")) }
             },
             reading = root.optJSONObject("reading")?.let { days -> days.keys().asSequence().associateWith { days.optLong(it) } }.orEmpty(),
+            // Libraries and backups from before listening counted as reading have none.
+            listened = root.optJSONObject("listened")?.let { days -> days.keys().asSequence().associateWith { days.optLong(it) } }.orEmpty(),
             annotations = list("annotations").entries { it.toAnnotation() },
             // Libraries and backups from before "Say it this way" have none.
             sayings = list("sayings").entries { it.toSaying() },
@@ -498,6 +517,8 @@ internal object LibraryJson {
         put("originalCover", originalCover ?: JSONObject.NULL)
         put("originalSeed", originalSeed ?: JSONObject.NULL)
         put("sha256", sha256 ?: JSONObject.NULL)
+        put("spentMs", spentMs)
+        put("listenedMs", listenedMs)
     }
 
     /** A bookmark or highlight as it is written to the library, a backup and the file other devices read. */
@@ -565,5 +586,9 @@ internal object LibraryJson {
         originalSeed = if (isNull("originalSeed") || !has("originalSeed")) null else getInt("originalSeed"),
         // Libraries and backups made before Jacket kept it have none.
         sha256 = if (isNull("sha256")) null else optString("sha256").takeIf { it.isNotEmpty() },
+        // Libraries and backups from before the time with each book was kept have none. (No more
+        // listened than spent, whatever a damaged file says.)
+        spentMs = maxOf(optLong("spentMs").coerceAtLeast(0L), optLong("listenedMs").coerceAtLeast(0L)),
+        listenedMs = optLong("listenedMs").coerceAtLeast(0L),
     )
 }

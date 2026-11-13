@@ -18,6 +18,8 @@
     <string name="reading_calendar_hint">Hoe sterker de kleur, hoe langer je die dag las.</string>
     <string name="reading_books_finished">Uitgelezen boeken</string>
     <string name="reading_finished_none">Nog geen boeken uitgelezen.</string>
+    <string name="reading_listened">waarvan %1$s geluisterd</string>
+    <string name="book_time_spent">%1$s met dit boek</string>
     <string name="reader_webview_old">Om pagina\'s te tonen heeft Jacket een nieuwere versie van %1$s nodig. Werk die bij via de Play Store en open het boek daarna opnieuw.</string>
     <string name="reader_webview_update">Play Store openen</string>
 </resources>

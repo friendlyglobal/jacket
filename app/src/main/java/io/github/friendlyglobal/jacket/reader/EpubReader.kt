@@ -1156,10 +1156,9 @@ private fun EpubPages(
         onDispose {}
     }
     // The voice has these pages for as long as the book is open here, whatever else changes.
-    // Closing the book stops it (see ReaderScreen), and another book opened over this one (from a
-    // widget, a shortcut) ends it mid-sentence: that sentence is the place. A screen that goes any
-    // other way (Android clearing it away while the voice reads on behind another app) only takes
-    // the pages with it: the voice reads on, and keeps the book's place itself from there.
+    // Another book opened over this one (from a widget, a shortcut) ends it mid-sentence: that
+    // sentence is the place. Closing the book, or Android clearing the screen away behind another
+    // app, only takes the pages with it: the voice reads on, and keeps the book's place itself from there.
     val saveLastSpoken by rememberUpdatedState { saveSpoken() }
     DisposableEffect(listen) {
         nav.listenController = listen
@@ -1180,6 +1179,14 @@ private fun EpubPages(
             while (!(nav.contentReady && navigator != null && resize.target == null)) delay(JOIN_POLL_MS)
         }
         listen.attach(voicePage)
+    }
+    // While the book is read aloud, the time left in the chapter is told from where the voice is,
+    // not from the page in view: the letters from its sentence to the end of the chapter it is in
+    // (see VoicePace.kt). Told as each sentence starts, and again once the page knows where its
+    // chapters start in a file that holds several.
+    LaunchedEffect(listen, spans) {
+        snapshotFlow { listen.spokenSpot?.takeIf { nav.listen.active }?.let { contents.lettersLeft(it, spans, located) } }
+            .collect { nav.voiceLettersLeft = it }
     }
     // While the book is read aloud, a tap on a sentence has the voice read on from there, wherever
     // it was; a tap anywhere else (a margin, a picture, the space between paragraphs) brings up the
@@ -1491,6 +1498,21 @@ internal class Spans(positions: List<Locator>, contents: Contents) {
         val span = start[file + 1] - start[file]
         return file to if (span > 0) ((total - start[file]) / span).coerceIn(0.0, 1.0) else 0.0
     }
+}
+
+/**
+ * The letters from the voice's sentence at [spot] to the end of the chapter it is in, the book's
+ * files placed by [spans] and the chapters inside a file by [known] where it covers that file;
+ * null where that can't be told (before the first chapter, in a file outside the reading order).
+ */
+internal fun Contents.lettersLeft(spot: VoiceSpot, spans: Spans?, known: Located?): Float? {
+    if (spans == null) return null
+    val file = resourceOf(spot.file)
+    if (file < 0) return null
+    val end = span(chapterAt(file, spot.within, known), spans, known)?.endInclusive ?: return null
+    val fileStart = spans.total(file, 0.0) ?: return null
+    val fileEnd = spans.total(file, 1.0) ?: return null
+    return lettersLeftInChapter(spot.within, spot.fileLetters, fileStart, fileEnd, end)
 }
 
 internal class Contents(private val publication: Publication) {

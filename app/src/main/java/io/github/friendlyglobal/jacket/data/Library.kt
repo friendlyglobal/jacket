@@ -463,26 +463,39 @@ class Library(private val context: Context) : LibraryOrganizer {
     }
 
     /**
-     * A page of [id] was on screen for [millis] and carried the reader [advanced] of the way
-     * through the book: counts towards today's reading, and (when it was a page read rather than
-     * flipped past) towards the book's pace.
+     * A page of [id] was read for [millis] and carried the reader [advanced] of the way through
+     * the book: counts towards today's reading and the time spent with the book, and (when it was
+     * a page read rather than flipped past) towards the book's pace. [advanced] is 0 for time
+     * that says nothing of the pace: a page that was partly listened to.
      */
     fun addReading(id: String, millis: Long, advanced: Float) {
         if (millis <= 0L) return
-        val today = java.time.LocalDate.now().toString()
+        val now = java.time.LocalDateTime.now()
         _state.update { s ->
-            val days = (s.reading + (today to (s.reading[today] ?: 0L) + millis)).let { all ->
-                if (all.size <= KEPT_DAYS) all else all.toSortedMap().entries.toList().takeLast(KEPT_DAYS).associate { it.key to it.value }
-            }
-            val books = if (advanced <= 0f || advanced > MOST_ONE_PAGE || !advanced.isFinite()) s.books else s.books.map {
-                if (it.id != id) it else {
-                    val sample = millis / advanced
-                    // A running average: it settles after a few pages and keeps following you.
-                    it.copy(pace = if (it.pace <= 0f) sample else it.pace * 0.8f + sample * 0.2f)
-                }
-            }
-            s.copy(books = books, reading = days)
+            val timed = s.withTimeSpent(id, millis, listened = false, end = now)
+            if (advanced <= 0f || advanced > MOST_ONE_PAGE || !advanced.isFinite()) timed else timed.copy(
+                books = timed.books.map {
+                    if (it.id != id) it else {
+                        val sample = millis / advanced
+                        // A running average: it settles after a few pages and keeps following you.
+                        it.copy(pace = if (it.pace <= 0f) sample else it.pace * 0.8f + sample * 0.2f)
+                    }
+                },
+            )
         }
+        changed()
+    }
+
+    /**
+     * The voice read [id] aloud for [millis], up to now: listening counts as reading. It goes
+     * towards the day's reading time (and so the streak), and the time spent with the book, and
+     * is kept as listened in both (see [LibraryState.withTimeSpent]). The book's reading pace is
+     * the reader's own, and learns nothing from the voice.
+     */
+    fun addListening(id: String, millis: Long) {
+        if (millis <= 0L) return
+        val now = java.time.LocalDateTime.now()
+        _state.update { it.withTimeSpent(id, millis, listened = true, end = now) }
         changed()
     }
 
@@ -832,9 +845,6 @@ class Library(private val context: Context) : LibraryOrganizer {
 
         /** How long a change waits to be saved, for the ones that come right behind it. */
         const val SAVE_AFTER_MS = 500L
-
-        /** Reading time is kept per day for a little over a year. */
-        const val KEPT_DAYS = 400
 
         /** A step through the book bigger than this wasn't a page read: it was a jump. */
         const val MOST_ONE_PAGE = 0.03f

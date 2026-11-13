@@ -17,6 +17,8 @@
     <string name="reading_calendar_hint">Makin kuat warnanya, makin lama Anda membaca hari itu.</string>
     <string name="reading_books_finished">Buku yang selesai</string>
     <string name="reading_finished_none">Belum ada buku yang selesai.</string>
+    <string name="reading_listened">%1$s didengarkan</string>
+    <string name="book_time_spent">%1$s bersama buku ini</string>
     <string name="reader_webview_old">Untuk menampilkan halaman, Jacket memerlukan %1$s yang lebih baru. Perbarui dari Play Store, lalu buka lagi bukunya.</string>
     <string name="reader_webview_update">Buka Play Store</string>
 </resources>
