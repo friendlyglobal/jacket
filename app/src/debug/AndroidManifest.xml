@@ -20,5 +20,13 @@
         <meta-data
             android:name="com.google.android.gms.car.application"
             android:resource="@xml/automotive_app_desc" />
+
+        <!-- Debug builds only: measures what the natural voices cost to make, started from adb
+             (see voice/VoiceBench.kt). Exported so adb can start it; release builds don't have it. -->
+        <activity
+            android:name=".voice.VoiceBench"
+            android:exported="true"
+            android:label="Voice bench"
+            tools:ignore="ExportedActivity" />
     </application>
 </manifest>

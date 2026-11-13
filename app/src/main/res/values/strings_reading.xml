@@ -37,4 +37,7 @@
     <string name="reader_webview_update">Open the Play Store</string>
     <!-- The app's name where the phone doesn't give one. -->
     <string name="reader_webview_name" translatable="false">Android System WebView</string>
+    <!-- Settings, under Listening: off by default, so the screen times out as usual while the voice reads. -->
+    <string name="listen_screen_on">Keep the screen on while listening</string>
+    <string name="listen_screen_on_description">When this is off, the screen turns off as usual while the voice reads. That saves battery and keeps the phone cooler.</string>
 </resources>

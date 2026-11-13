@@ -2,6 +2,7 @@ package io.github.friendlyglobal.jacket.voice
 
 import android.os.Handler
 import android.os.Looper
+import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -139,6 +140,10 @@ internal class NaturalSpeech(
     private val warm: () -> Boolean = { false },
     /** The phone is running hot (severe or worse): for [VoiceHealth.hot]. */
     private val hot: () -> Boolean = { false },
+    /** The phone's own word on its temperature (PowerManager.THERMAL_STATUS_*), for the log. */
+    private val thermal: () -> Int = { 0 },
+    /** The screen is on, for the log. */
+    private val screenOn: () -> Boolean = { true },
 ) {
     interface Listener {
         /** The voice has reached characters [range] of the text spoken as [id]. */
@@ -168,8 +173,15 @@ internal class NaturalSpeech(
     /** The seconds of speech it last aimed to keep ready (see [Cushion.target]); 0 before the first. */
     private var aim = 0f
 
-    /** Whether the model was last set up for a warm phone (see [ModelHost.ease]); null before the first time. */
-    private var easedFor: Boolean? = null
+    /** Whether the model was last set up for a warm phone, and for a voice that was behind (see [ModelHost.ease]); null before the first time. */
+    private var easedFor: Pair<Boolean, Boolean>? = null
+
+    /**
+     * The voice couldn't keep up on the calm few cores while the phone was cool: it runs on more
+     * from then on (see [ModelHost.threadsFor]). Never taken back: on fewer it would only fall
+     * behind again, and each change loads the model afresh.
+     */
+    private var behind = host.isBehind(model)
 
     /** The model may have just been loaded again: the next piece made pays for it warming up, and says nothing of the pace. */
     private var reloaded = false
@@ -180,6 +192,9 @@ internal class NaturalSpeech(
     /** The quality the voice is made at, and how the phone has been keeping up with it. */
     private var guard = QualityGuard()
     private var closed = false
+
+    /** What listening costs, logged about once a minute (see [VoiceMeter]). */
+    private val meter = VoiceMeter()
 
     /** 1 is the voice's own pace. Takes effect at once, on the sentence being spoken too. */
     var speed = 1f
@@ -262,6 +277,7 @@ internal class NaturalSpeech(
             next = Session(id, text, language, pieces, jobs, endsParagraph, 0, 0)
         }
         session = next
+        meter.start(now, Process::getElapsedCpuTime, VoiceMeter::makingMs)
         // What comes next is made while this plays, as far ahead as the cushion calls for.
         this.upcoming = upcoming.flatMap { later -> SpeechPieces.of(later, quickStart = false).map { later.substring(it) } }
         ahead = emptyList()
@@ -295,6 +311,7 @@ internal class NaturalSpeech(
     private fun cut() {
         val was = session ?: return
         session = null
+        meter.stop()
         val cut = out.stop()
         val piece = cut?.let { c -> was.jobs.indexOfFirst { it.clip === c.item.clip } } ?: -1
         val now = SystemClock.elapsedRealtime()
@@ -368,18 +385,22 @@ internal class NaturalSpeech(
     }
 
     /**
-     * Has the model run on fewer cores while the phone is warm, and on its usual number once it
-     * has cooled (see [ModelHost.ease]). Loading it again takes a moment, so only with enough
-     * speech in hand to cover it.
+     * Has the model run on as many cores as the phone calls for (see [ModelHost.ease]): the calm
+     * few, more once the voice is seen to fall behind on them while the phone is cool, and the
+     * calm few while it is warm. Loading it again takes a moment, so only with enough speech in
+     * hand to cover it.
      */
     private fun ease() {
         val warm = warm()
-        if (warm == easedFor || inHand() < Cushion.RELOAD_SECONDS) return
-        easedFor = warm
+        // (A warm phone that struggles is held back by its heat, not short of cores.)
+        if (!behind && !warm && guard.shortOfSpeed) behind = true
+        val wanted = warm to behind
+        if (wanted == easedFor || inHand() < Cushion.RELOAD_SECONDS) return
+        easedFor = wanted
         // Already on as many cores as wanted: nothing is loaded again, and the next piece counts.
-        if (!host.wouldEase(model, warm)) return
+        if (!host.wouldEase(model, warm, behind)) return
         reloaded = true
-        host.ease(model, warm)
+        host.ease(model, warm, behind)
     }
 
     /**
@@ -421,6 +442,8 @@ internal class NaturalSpeech(
                 val pauseFrames = (breath / speed.pow(0.6f) * model.sampleRate / 1000f).toInt()
                 val ratio = speed / clip.speed
                 noteDry(clip, fromFrame, pauseFrames, ratio, askedAt)
+                // How long it is heard for, breath and all.
+                val heardMs = (((clip.pcm.size - fromFrame) / ratio.coerceAtLeast(0.25f) + pauseFrames) * 1000f / clip.sampleRate).toLong()
                 out.play(
                     PcmOut.Item(
                         clip = clip,
@@ -434,7 +457,12 @@ internal class NaturalSpeech(
                                 listener?.onRange(s.id, (offset + word.start) until (offset + word.end))
                             }
                         },
-                        onSpoken = { if (session === s && last) finish(s) },
+                        onSpoken = {
+                            if (session === s) {
+                                logCost(heardMs)
+                                if (last) finish(s)
+                            }
+                        },
                     ),
                 )
             }
@@ -445,6 +473,15 @@ internal class NaturalSpeech(
     private fun finish(s: Session) {
         session = null
         listener?.onDone(s.id)
+    }
+
+    /**
+     * [heardMs] more of speech has been heard: about once a minute, what listening has cost is
+     * logged, for a phone that runs warm to be looked into (see [VoiceMeter]).
+     */
+    private fun logCost(heardMs: Long) {
+        val reading = meter.heard(heardMs, SystemClock.elapsedRealtime(), Process::getElapsedCpuTime, VoiceMeter::makingMs) ?: return
+        Log.i(TAG, VoiceMeter.describe(reading, model.threads, synth.steps, inHand(), aim, thermal(), screenOn()))
     }
 
     /**

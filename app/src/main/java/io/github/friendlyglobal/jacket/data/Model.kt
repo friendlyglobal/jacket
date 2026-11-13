@@ -313,6 +313,12 @@ data class Settings(
     val collection: String? = null,
     /** Read aloud, the small numbers that point to notes are passed over. */
     val skipNoteNumbers: Boolean = true,
+    /**
+     * The screen stays on while the voice reads, as it does while the book is read by eye. Off
+     * (as it starts), the screen turns off after the phone's own timeout while the voice reads on:
+     * a screen kept lit for nobody is most of what listening costs in battery and heat.
+     */
+    val screenOnWhileListening: Boolean = false,
     /** On a screen wide enough for two, a PDF's or a comic's pages are shown two at a time, like an open book. */
     val sideBySide: Boolean = true,
 )
@@ -414,6 +420,7 @@ internal object LibraryJson {
             put("voices", JSONObject().apply { state.settings.voices.forEach { (language, voice) -> put(language, voice) } })
             put("collection", state.settings.collection ?: JSONObject.NULL)
             put("skipNoteNumbers", state.settings.skipNoteNumbers)
+            put("screenOnWhileListening", state.settings.screenOnWhileListening)
             put("sideBySide", state.settings.sideBySide)
         })
         put("sayings", JSONArray().apply {
@@ -494,6 +501,7 @@ internal object LibraryJson {
                 collection = if (s.isNull("collection")) null else s.optString("collection").takeIf { it.isNotEmpty() },
                 // Libraries and backups from before there was the choice: notes' numbers are passed over.
                 skipNoteNumbers = s.optBoolean("skipNoteNumbers", true),
+                screenOnWhileListening = s.optBoolean("screenOnWhileListening", false),
                 // Libraries and backups from before there was the choice: pages side by side where they fit.
                 sideBySide = s.optBoolean("sideBySide", true),
             ),

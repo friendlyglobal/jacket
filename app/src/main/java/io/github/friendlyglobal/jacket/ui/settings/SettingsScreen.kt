@@ -287,7 +287,7 @@ fun SettingsScreen(
                 Group(column) {
                     SegmentedListItem(
                         onClick = { haptics.tick(); choosingVoice = true },
-                        shapes = ListItemDefaults.segmentedShapes(0, 4),
+                        shapes = ListItemDefaults.segmentedShapes(0, 5),
                         leadingContent = { Icon(JacketIcons.Voice, null) },
                         supportingContent = { Text(voiceLabel(phoneLanguage, settings)) },
                     ) { Text(stringResource(R.string.voice_title)) }
@@ -296,20 +296,24 @@ fun SettingsScreen(
                             haptics.tick()
                             runCatching { context.startActivity(Intent("com.android.settings.TTS_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                         },
-                        shapes = ListItemDefaults.segmentedShapes(1, 4),
+                        shapes = ListItemDefaults.segmentedShapes(1, 5),
                         leadingContent = { Icon(JacketIcons.Volume, null) },
                         supportingContent = { Text(stringResource(R.string.voice_phone_settings_description)) },
                     ) { Text(stringResource(R.string.voice_phone_settings)) }
                     SegmentedListItem(
                         onClick = { haptics.tick(); showingWords = true },
-                        shapes = ListItemDefaults.segmentedShapes(2, 4),
+                        shapes = ListItemDefaults.segmentedShapes(2, 5),
                         leadingContent = { Icon(JacketIcons.Voice, null) },
                         supportingContent = { Text(stringResource(R.string.say_hint)) },
                     ) { Text(stringResource(R.string.say_title)) }
                     SwitchRow(
-                        3, 4, stringResource(R.string.listen_skip_notes),
+                        3, 5, stringResource(R.string.listen_skip_notes),
                         stringResource(R.string.listen_skip_notes_description), settings.skipNoteNumbers,
                     ) { toggle(it) { s -> s.copy(skipNoteNumbers = it) } }
+                    SwitchRow(
+                        4, 5, stringResource(R.string.listen_screen_on),
+                        stringResource(R.string.listen_screen_on_description), settings.screenOnWhileListening,
+                    ) { toggle(it) { s -> s.copy(screenOnWhileListening = it) } }
                 }
             }
             item { Hint(stringResource(R.string.voice_settings_hint), column) }

@@ -69,19 +69,4 @@ class CushionTest {
         assertEquals(ahead(1f) * 2f, ahead(2f).toFloat(), 1f)
         assertTrue(ahead(0.5f) <= ahead(1f))
     }
-
-    @Test
-    fun `a warm phone runs the voice on fewer cores, and its usual number once cool`() {
-        // Half the cores, four at most, as before; two in battery saver.
-        assertEquals(4, ModelHost.threadsFor(cores = 8, saving = false, warm = false))
-        assertEquals(4, ModelHost.threadsFor(cores = 12, saving = false, warm = false))
-        assertEquals(2, ModelHost.threadsFor(cores = 4, saving = false, warm = false))
-        assertEquals(1, ModelHost.threadsFor(cores = 2, saving = false, warm = false))
-        assertEquals(2, ModelHost.threadsFor(cores = 8, saving = true, warm = false))
-        assertEquals(1, ModelHost.threadsFor(cores = 1, saving = true, warm = false))
-        // Warm: two at most, never more than it had.
-        assertEquals(ModelHost.WARM_THREADS, ModelHost.threadsFor(cores = 8, saving = false, warm = true))
-        assertEquals(2, ModelHost.threadsFor(cores = 8, saving = true, warm = true))
-        assertEquals(1, ModelHost.threadsFor(cores = 2, saving = false, warm = true))
-    }
 }

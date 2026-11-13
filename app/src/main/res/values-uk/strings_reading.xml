@@ -24,4 +24,6 @@
     <string name="book_time_spent">%1$s із цією книжкою</string>
     <string name="reader_webview_old">Щоб показувати сторінки, Jacket потрібна новіша версія застосунку %1$s. Оновіть її в Play Маркеті, а потім відкрийте книгу знову.</string>
     <string name="reader_webview_update">Відкрити Play Маркет</string>
+    <string name="listen_screen_on">Не вимикати екран під час прослуховування</string>
+    <string name="listen_screen_on_description">Якщо вимкнено, екран гасне як зазвичай, поки голос читає. Так заощаджується заряд, і телефон менше нагрівається.</string>
 </resources>

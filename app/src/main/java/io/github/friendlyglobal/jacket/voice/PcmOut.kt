@@ -58,23 +58,30 @@ internal class PcmOut(private val sampleRate: Int) {
     private var track: AudioTrack? = null
     private var total = 0L
     private var ratio = 1f
-    private var pumping = false
     private var released = false
 
     /** The phone won't give us a way to make sound at all: nothing queued will ever be heard. */
     var onFailure: () -> Unit = {}
     private val silence = ShortArray(sampleRate / 20)
+
+    /**
+     * Writes what the stream will take and tells what has been heard, then sleeps until the next
+     * thing there is to do (see [step]). It is put off and brought forward under [lock] only, so
+     * there is never more than one of it waiting.
+     */
     private val pump = object : Runnable {
-        override fun run() {
-            val more = synchronized(lock) { if (released) false else step() }
-            if (more) audio.postDelayed(this, PUMP_MS) else synchronized(lock) { pumping = false; if (queue.isNotEmpty() && !released) start() }
+        override fun run() = synchronized(lock) {
+            val wait = if (released) NOTHING_TO_DO else step()
+            audio.removeCallbacks(this)
+            if (wait != NOTHING_TO_DO) audio.postDelayed(this, wait)
         }
     }
 
     fun play(item: Item) = synchronized(lock) {
         if (released) return@synchronized
         queue.addLast(item)
-        start()
+        // At once, not at the next planned look: the clip is to follow the one before it without a gap.
+        kick()
     }
 
     /** Cuts the sound now and forgets what was queued. */
@@ -108,6 +115,8 @@ internal class PcmOut(private val sampleRate: Int) {
         for (item in queue) {
             if (item.due != 0L) item.due = now + ((item.speechFrames * 1000L / sampleRate) / value.coerceAtLeast(0.25f)).toLong() + STALL_MS
         }
+        // The next word comes sooner or later than planned.
+        kick()
     }
 
     fun release() {
@@ -116,20 +125,29 @@ internal class PcmOut(private val sampleRate: Int) {
         thread.quitSafely()
     }
 
-    private fun start() {
-        if (pumping) return
-        pumping = true
+    /** Has the pump look now. Under [lock]. */
+    private fun kick() {
+        audio.removeCallbacks(pump)
         audio.post(pump)
     }
 
-    /** Writes what the stream will take, reports what has been heard. False once there is nothing left to do. */
-    private fun step(): Boolean {
-        if (queue.isEmpty()) return false
+    /**
+     * Writes what the stream will take and reports what has been heard. Gives back how long it
+     * can sleep until there is something to do again, or [NOTHING_TO_DO] once there is nothing.
+     *
+     * It used to look every 12 ms, about 80 times a second for as long as the voice spoke, which
+     * kept the processor from resting between sentences. Now it looks when something is due: the
+     * next word (for the ink to follow it), the end of the speech being heard (for the next
+     * sentence to follow it without a gap), and before the stream runs low. That is a few times a
+     * second. The stream is a big one, and asked for as the phone's power-saving kind (see [open]).
+     */
+    private fun step(): Long {
+        if (queue.isEmpty()) return NOTHING_TO_DO
         val out = track ?: runCatching { open() }.getOrElse { error ->
             Log.e(TAG, "Couldn't open an audio stream", error)
             queue.clear()
             main.post { onFailure() }
-            return false
+            return NOTHING_TO_DO
         }.also { track = it }
         // Feed the stream, in order.
         for (item in queue) {
@@ -189,14 +207,28 @@ internal class PcmOut(private val sampleRate: Int) {
             if (!item.spoken) break
         }
         while (queue.isNotEmpty() && queue.first().spoken && queue.first().allWritten) queue.removeFirst()
-        return queue.isNotEmpty()
+        if (queue.isEmpty()) return NOTHING_TO_DO
+        val current = queue.firstOrNull { it.streamStart >= 0 && !it.spoken }
+        return nextLook(
+            framesQueued = (total - taken()).coerceAtLeast(0L),
+            moreToWrite = queue.any { !it.allWritten },
+            framesToNext = current?.let { item ->
+                val at = item.from + (position - item.streamStart)
+                val words = item.clip.words
+                (if (item.nextWord < words.size) words[item.nextWord].frame else item.clip.pcm.size) - at
+            },
+            msToDue = current?.takeIf { it.written >= it.speechFrames }?.let { it.due - now },
+            sampleRate = sampleRate,
+            ratio = ratio,
+        )
     }
 
     /**
      * The stream died under us (the sound went to another device, say: headphones, a speaker).
-     * Open a new one and carry on from what had been heard.
+     * Open a new one and carry on from what had been heard. Gives back how long to wait before
+     * looking again: not at all.
      */
-    private fun reopen(error: Int): Boolean {
+    private fun reopen(error: Int): Long {
         Log.w(TAG, "Audio stream lost ($error); opening another")
         val position = heard()
         for (item in queue) {
@@ -214,7 +246,7 @@ internal class PcmOut(private val sampleRate: Int) {
         track = null
         total = 0L
         lastTaken = -1L
-        return true
+        return 0L
     }
 
     /** Frames the phone has taken from the stream since it opened. */
@@ -265,9 +297,10 @@ internal class PcmOut(private val sampleRate: Int) {
             .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
             .build()
         val minimum = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT)
-        // A quarter of a second: enough never to run dry between pumps, little enough that
-        // pausing and changing pace are felt at once.
-        val size = maxOf(minimum, sampleRate / 4 * 2)
+        // A second of sound: the pump tops it up every half second or so, and sleeps between.
+        // Pausing doesn't wait for it to play out (the stream is emptied: see stop), and a change
+        // of pace is made where the phone mixes the sound, on what is in the stream too.
+        val size = maxOf(minimum, sampleRate * 2 * BUFFER_MS / 1000)
         val out = AudioTrack.Builder()
             .setAudioAttributes(
                 AudioAttributes.Builder()
@@ -278,6 +311,10 @@ internal class PcmOut(private val sampleRate: Int) {
             .setAudioFormat(format)
             .setBufferSizeInBytes(size)
             .setTransferMode(AudioTrack.MODE_STREAM)
+            // The phone's own way of playing long listening: its sound path takes big helpings
+            // and lets the processor sleep between them, where a quick-answering one keeps waking
+            // it. A voice reading a book has no use for the quick answer.
+            .setPerformanceMode(AudioTrack.PERFORMANCE_MODE_POWER_SAVING)
             .build()
         // Start on the first words rather than wait for the buffer to fill.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) runCatching { out.setStartThresholdInFrames(startThreshold()) }
@@ -289,12 +326,40 @@ internal class PcmOut(private val sampleRate: Int) {
     /** A twenty-fifth of a second of sound is enough to start on. */
     private fun startThreshold(): Int = maxOf(1, sampleRate / 25)
 
-    private companion object {
-        const val TAG = "JacketVoice"
-        const val PUMP_MS = 12L
-        const val STALL_MS = 1_500L
+    internal companion object {
+        private const val TAG = "JacketVoice"
+        private const val STALL_MS = 1_500L
 
         /** The most the sound is taken to lag behind what the phone has accepted. */
-        const val MOST_LAG_MS = 250L
+        private const val MOST_LAG_MS = 250L
+
+        /** How much sound the stream holds. */
+        private const val BUFFER_MS = 1_000
+
+        /** [step]'s answer when the queue is empty: the pump stops until the next clip. */
+        const val NOTHING_TO_DO = -1L
+
+        /** The pump never sleeps longer than this while there is sound: a stream that stalls is noticed. */
+        const val MOST_WAIT_MS = 1_000L
+
+        /** ... nor shorter: two words a hair apart are told together. */
+        const val LEAST_WAIT_MS = 10L
+
+        /**
+         * How long the pump can sleep. [framesQueued] have been handed to the phone and not yet
+         * played; [moreToWrite] if there is sound still to hand it, which it does once half of
+         * what it holds has played. [framesToNext] until the next word of the clip being heard,
+         * or the end of its speech (null with none being heard), told a millisecond after it is
+         * due. [msToDue] until that clip must have been heard by the clock (see Item.due), if it
+         * has been handed over whole. The stream plays at [ratio] times the clips' own pace.
+         */
+        fun nextLook(framesQueued: Long, moreToWrite: Boolean, framesToNext: Long?, msToDue: Long?, sampleRate: Int, ratio: Float): Long {
+            val pace = ratio.coerceAtLeast(0.25f) * sampleRate / 1000f
+            var wait = MOST_WAIT_MS
+            if (moreToWrite) wait = minOf(wait, (framesQueued / 2 / pace).toLong())
+            if (framesToNext != null) wait = minOf(wait, (framesToNext / pace).toLong() + 1)
+            if (msToDue != null) wait = minOf(wait, msToDue)
+            return wait.coerceAtLeast(LEAST_WAIT_MS)
+        }
     }
 }

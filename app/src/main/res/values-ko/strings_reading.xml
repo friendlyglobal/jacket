@@ -21,4 +21,6 @@
     <string name="book_time_spent">이 책과 함께한 시간 %1$s</string>
     <string name="reader_webview_old">페이지를 표시하려면 %1$s 앱을 더 새로운 버전으로 업데이트해야 합니다. Play 스토어에서 업데이트한 다음 책을 다시 여세요.</string>
     <string name="reader_webview_update">Play 스토어 열기</string>
+    <string name="listen_screen_on">듣는 동안 화면 켜 두기</string>
+    <string name="listen_screen_on_description">끄면 음성이 읽는 동안에도 화면이 평소처럼 꺼집니다. 배터리를 아끼고 휴대전화도 덜 뜨거워집니다.</string>
 </resources>

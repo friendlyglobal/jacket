@@ -78,7 +78,8 @@ class Voices(private val context: Context) {
         val model = runCatching { host.acquire(pack, warm) }
             .onFailure { Log.e(TAG, "Couldn't load ${ref.pack}", it) }
             .getOrNull() ?: return null
-        return NaturalSpeech(host, model, voice.speaker, _health, warm = { warm }, hot = { hot })
+        val power = context.getSystemService(PowerManager::class.java)
+        return NaturalSpeech(host, model, voice.speaker, _health, warm = { warm }, hot = { hot }, thermal = { thermal }, screenOn = { power?.isInteractive != false })
     }
 
     /**

@@ -24,4 +24,6 @@
     <string name="book_time_spent">%1$s z tą książką</string>
     <string name="reader_webview_old">Aby pokazać strony, Jacket potrzebuje nowszej wersji aplikacji %1$s. Zaktualizuj ją w Sklepie Play, a potem otwórz książkę ponownie.</string>
     <string name="reader_webview_update">Otwórz Sklep Play</string>
+    <string name="listen_screen_on">Nie wyłączaj ekranu podczas słuchania</string>
+    <string name="listen_screen_on_description">Gdy to jest wyłączone, ekran gaśnie jak zwykle, kiedy głos czyta. To oszczędza baterię, a telefon mniej się nagrzewa.</string>
 </resources>
