@@ -27,6 +27,10 @@
     <!-- The heading over the list of books read to the end, each with the day it was finished; and what stands there while there are none. -->
     <string name="reading_books_finished">Books finished</string>
     <string name="reading_finished_none">No books finished yet.</string>
+    <!-- Under a total of time read, beside a finished book and on a book's own sheet: how much of the time was the voice reading the book aloud (listening counts as reading). %1$s is a length of time ("4 hr", "1 hr 30 min"; in full for a screen reader). -->
+    <string name="reading_listened">%1$s listened</string>
+    <!-- The time spent with one book, read and listened, on the book's own sheet (and for a screen reader beside a finished book). %1$s is a length of time ("6 hr 10 min"). -->
+    <string name="book_time_spent">%1$s with this book</string>
 
     <!-- Shown in place of a book's pages on a phone whose Android System WebView (the app that draws them) has never been updated. %1$s is that app's name, usually "Android System WebView", sometimes "Chrome". Then the button that opens its page in the Play Store. -->
     <string name="reader_webview_old">To show pages, Jacket needs a newer %1$s. Update it from the Play Store, then open the book again.</string>

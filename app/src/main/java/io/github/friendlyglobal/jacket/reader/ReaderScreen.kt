@@ -148,6 +148,7 @@ import io.github.friendlyglobal.jacket.data.Book
 import io.github.friendlyglobal.jacket.data.BookFormat
 import io.github.friendlyglobal.jacket.data.ReadingMoment
 import io.github.friendlyglobal.jacket.data.Settings
+import io.github.friendlyglobal.jacket.data.pageReadingMs
 import io.github.friendlyglobal.jacket.library
 import io.github.friendlyglobal.jacket.listening
 import io.github.friendlyglobal.jacket.voices
@@ -720,19 +721,24 @@ fun ReaderScreen(
     }
 
     // Reading time: how long each page was up before the next (a page left open, or flipped
-    // past, doesn't count), for the book's pace and today's total. Listening isn't reading pace.
+    // past, doesn't count), for the book's pace and today's total. Listening is counted by the
+    // voice itself, as it speaks (see Listening): here, the time the player was up is taken off
+    // a page's, so no minute is counted twice (see pageReadingMs), and a page listened to at
+    // all says nothing of the reader's own pace.
     LaunchedEffect(book.id, nav) {
         var since = SystemClock.elapsedRealtime()
         var from = -1f
+        var listened = readAloud.listeningMs(book.id)
         snapshotFlow { nav.pageKey }.collect {
             val now = SystemClock.elapsedRealtime()
             val progress = library.state.value.find(book.id)?.progress ?: return@collect
-            val spent = now - since
-            if (from >= 0f && spent in SHORTEST_PAGE_MS..LONGEST_PAGE_MS && !nav.listen.active) {
-                library.addReading(book.id, spent, progress - from)
-            }
+            val listenedNow = readAloud.listeningMs(book.id)
+            val aloud = listenedNow - listened
+            val read = if (from >= 0f) pageReadingMs(now - since, aloud) else 0L
+            if (read > 0L) library.addReading(book.id, read, if (aloud <= 0L) progress - from else 0f)
             since = now
             from = progress
+            listened = listenedNow
         }
     }
 
@@ -1332,10 +1338,6 @@ private fun ReaderSheet(
 
 private val AnyHeight = setOf(SheetValue.Hidden, SheetValue.PartiallyExpanded, SheetValue.Expanded)
 private val FullHeightOnly = setOf(SheetValue.Hidden, SheetValue.Expanded)
-
-/** A page up for less than this was flipped past; for more than the other, left open. Neither is reading. */
-private const val SHORTEST_PAGE_MS = 3_000L
-private const val LONGEST_PAGE_MS = 180_000L
 
 /**
  * The lower half of a phone standing half-open on a table: where you are, and two broad buttons

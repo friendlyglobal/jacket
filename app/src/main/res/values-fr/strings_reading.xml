@@ -19,6 +19,8 @@
     <string name="reading_calendar_hint">Plus la couleur est intense, plus vous avez lu ce jour-là.</string>
     <string name="reading_books_finished">Livres terminés</string>
     <string name="reading_finished_none">Aucun livre terminé pour l\'instant.</string>
+    <string name="reading_listened">dont %1$s d\'écoute</string>
+    <string name="book_time_spent">%1$s avec ce livre</string>
     <string name="reader_webview_old">Pour afficher les pages, Jacket a besoin d\'une version plus récente de %1$s. Mettez-la à jour depuis le Play Store, puis rouvrez le livre.</string>
     <string name="reader_webview_update">Ouvrir le Play Store</string>
 </resources>

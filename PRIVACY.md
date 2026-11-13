@@ -18,7 +18,9 @@ are no analytics, no ads and no accounts. Jacket sends the developer nothing.
   *Share*, Jacket copies the file into its private storage on your device, along with a cover
   image that it extracts or generates. Text you share to Jacket is saved as a book the same way.
 - **Your reading data.** Reading positions, bookmarks, highlights, notes and settings are stored
-  on your device.
+  on your device, and so is the time you spend with your books: how long you read or listened
+  each day (kept for a little over a year), how much of it was listening, and the time spent
+  with each book. It is only used for "Your reading", your streak and the widget.
 - **PDF passwords.** A PDF that is locked with a password asks you for it. Jacket keeps the
   password only while it is running, unless you tick *Remember on this phone*. A remembered
   password is stored encrypted on your device, with a key that Android keeps on that device. It
@@ -45,15 +47,16 @@ languages they know; for any other language, the phone's voice is used.
 ## Backups
 
 - **Android device backup.** If you have device backup turned on, Android's Auto Backup may
-  include Jacket's library list, reading positions, bookmarks, highlights, notes and settings
-  in your Google account backup. Book files are not included. Google stores this backup under
+  include Jacket's library list, reading positions, reading and listening time, bookmarks,
+  highlights, notes and settings in your Google account backup. Book files are not included. Google stores this backup under
   its own terms; the developer has no access to it. You can turn backup off in your phone's
   settings.
 - **Moving to a new phone.** If you use Android's phone-to-phone transfer, Android may copy
   Jacket's data, including your books, directly to the new phone.
-- **Backup files you export.** You can export a backup file from Jacket yourself. It is saved
-  wherever you choose, such as your phone's storage or a cloud storage app, and is then handled
-  by that location.
+- **Backup files you export.** You can export a backup file from Jacket yourself. It holds the
+  same things as your reading data above (reading and listening time included), not the books
+  themselves. It is saved wherever you choose, such as your phone's storage or a cloud storage
+  app, and is then handled by that location.
 - **Catching up between devices.** If you turn on "Catch up between devices", Jacket keeps one
   file in a folder you choose, and reads the files your other devices keep there. The file holds
   the books you have opened, marked or put in a collection (their titles and file names), where

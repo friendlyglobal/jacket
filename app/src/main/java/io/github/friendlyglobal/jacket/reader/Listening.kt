@@ -102,6 +102,12 @@ class Listening(private val app: Application) {
     /** What the phone sees of read-aloud: one player, whichever book the voice is on. */
     internal val player = BookPlayer(this)
 
+    /** Listening time: it runs while the voice is really speaking, and what it counts goes to the library as reading time. */
+    private val listened = ListeningClock()
+
+    /** And the time the player is up (the voice speaking, paused or getting ready), which a page on screen isn't read in (see [listeningMs]). */
+    private val playerUp = ListeningClock()
+
     init {
         // The player's state is Compose state, as the reader's screen needs it to be, and what
         // follows it here does so by watching that state. Compose only tells such watchers of a
@@ -181,7 +187,40 @@ class Listening(private val app: Application) {
                 hand.reading?.takeIf { state.find(it.bookId) == null }?.stop()
             }
         }
+        // Listening counts as reading. While the voice is really speaking (not paused, by the
+        // listener, the sleep timer or a call; not stopped; not still getting ready) its time goes
+        // to the day's reading and to the book: a minute at a time, so the library's "min today"
+        // keeps up, and whatever is left over the moment it stops. It is the app's one voice,
+        // so this is all listening there is: with the book open, the screen off, Jacket behind
+        // another app, from the cover screen's player, the widget or a headset.
+        scope.launch {
+            snapshotFlow { voice?.takeIf { it.listen.active && it.listen.playing && !it.listen.preparing }?.bookId }.collectLatest { speaking ->
+                count(listened.speaking(speaking, SystemClock.uptimeMillis()))
+                if (speaking == null) return@collectLatest
+                while (true) {
+                    delay(LISTENED_EVERY_MS)
+                    count(listened.tick(SystemClock.uptimeMillis()))
+                }
+            }
+        }
+        // (By the clock a reader times its pages with, which runs on while the phone sleeps.)
+        scope.launch {
+            snapshotFlow { voice?.takeIf { it.listen.active }?.bookId }.collect { playerUp.speaking(it, SystemClock.elapsedRealtime()) }
+        }
     }
+
+    private fun count(stretch: ListeningClock.Heard?) {
+        if (stretch != null) library.addListening(stretch.bookId, stretch.millis)
+    }
+
+    /**
+     * How long listening has been on in [bookId] since Jacket started (the voice speaking, paused
+     * or getting ready), in milliseconds of [SystemClock.elapsedRealtime]. A reader compares two of
+     * these to know how much of a page's time on screen was spent with the player up: that is
+     * listening (counted while the voice speaks, here), never reading as well. A page read before
+     * Listen was pressed, or after the player was closed, is reading as ever.
+     */
+    fun listeningMs(bookId: String): Long = playerUp.timeIn(bookId, SystemClock.elapsedRealtime())
 
     // ---- For the phone: the player behind the notification, headphones, the widget, the car ----
 
@@ -446,5 +485,8 @@ class Listening(private val app: Application) {
 
         /** The cover shown with the player is no taller than this. */
         const val COVER_PX = 512
+
+        /** While the voice speaks, its time is counted as reading this often (and when it stops). */
+        const val LISTENED_EVERY_MS = 60_000L
     }
 }

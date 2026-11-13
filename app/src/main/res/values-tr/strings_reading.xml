@@ -18,6 +18,8 @@
     <string name="reading_calendar_hint">Renk ne kadar güçlüyse o gün o kadar uzun okudunuz.</string>
     <string name="reading_books_finished">Bitirilen kitaplar</string>
     <string name="reading_finished_none">Henüz bitirilen kitap yok.</string>
+    <string name="reading_listened">%1$s dinlendi</string>
+    <string name="book_time_spent">Bu kitapla %1$s</string>
     <string name="reader_webview_old">Sayfaları göstermek için Jacket’ın daha yeni bir %1$s sürümüne ihtiyacı var. Play Store’dan güncelleyin, sonra kitabı yeniden açın.</string>
     <string name="reader_webview_update">Play Store’u aç</string>
 </resources>

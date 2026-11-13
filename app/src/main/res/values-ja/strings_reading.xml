@@ -17,6 +17,8 @@
     <string name="reading_calendar_hint">色が濃いほど、その日に長く読んでいます。</string>
     <string name="reading_books_finished">読み終えた本</string>
     <string name="reading_finished_none">読み終えた本はまだありません。</string>
+    <string name="reading_listened">うち聴いた時間 %1$s</string>
+    <string name="book_time_spent">この本と過ごした時間 %1$s</string>
     <string name="reader_webview_old">ページを表示するには、%1$s を新しいバージョンに更新する必要があります。Play ストアで更新してから、もう一度本を開いてください。</string>
     <string name="reader_webview_update">Play ストアを開く</string>
 </resources>

@@ -17,6 +17,8 @@
     <string name="reading_calendar_hint">색이 진할수록 그날 더 오래 읽었습니다.</string>
     <string name="reading_books_finished">완독한 책</string>
     <string name="reading_finished_none">아직 완독한 책이 없습니다.</string>
+    <string name="reading_listened">그중 들은 시간 %1$s</string>
+    <string name="book_time_spent">이 책과 함께한 시간 %1$s</string>
     <string name="reader_webview_old">페이지를 표시하려면 %1$s 앱을 더 새로운 버전으로 업데이트해야 합니다. Play 스토어에서 업데이트한 다음 책을 다시 여세요.</string>
     <string name="reader_webview_update">Play 스토어 열기</string>
 </resources>

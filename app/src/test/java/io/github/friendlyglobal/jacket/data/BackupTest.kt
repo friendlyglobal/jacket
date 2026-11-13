@@ -249,4 +249,46 @@ class BackupTest {
         assertEquals(listOf("s1"), read.state.sayings.map { it.id })
         assertEquals(1, read.unread)
     }
+
+    @Test
+    fun listeningTimeComesBackWithTheReadingTimeAndEachBooksTime() {
+        val state = LibraryState(
+            books = listOf(book("b1", "one.epub").copy(spentMs = 7_200_000L, listenedMs = 5_400_000L)),
+            reading = mapOf("2026-11-12" to 3_600_000L, "2026-11-13" to 1_800_000L),
+            listened = mapOf("2026-11-12" to 3_000_000L),
+        )
+        val restored = Backup.merge(LibraryState(), Backup.read(Backup.write(state)))
+        assertEquals(state.reading, restored.reading)
+        assertEquals(state.listened, restored.listened)
+        assertEquals(7_200_000L, restored.books.single().spentMs)
+        assertEquals(5_400_000L, restored.books.single().listenedMs)
+    }
+
+    @Test
+    fun listeningTimeIsMergedLikeReadingTimeAndNeverDoubled() {
+        val here = LibraryState(
+            books = listOf(book("new", "one.epub").copy(spentMs = 600_000L, listenedMs = 600_000L)),
+            reading = mapOf("2026-11-13" to 1_200_000L),
+            listened = mapOf("2026-11-13" to 600_000L),
+        )
+        val saved = LibraryState(
+            books = listOf(book("b1", "one.epub").copy(spentMs = 3_600_000L, listenedMs = 300_000L)),
+            reading = mapOf("2026-11-12" to 900_000L, "2026-11-13" to 900_000L),
+            listened = mapOf("2026-11-12" to 900_000L, "2026-11-13" to 300_000L),
+        )
+        val merged = Backup.merge(here, saved)
+        // A day in both is the longer of the two, for reading and for listening alike.
+        assertEquals(mapOf("2026-11-12" to 900_000L, "2026-11-13" to 1_200_000L), merged.reading)
+        assertEquals(mapOf("2026-11-12" to 900_000L, "2026-11-13" to 600_000L), merged.listened)
+        // Listening is never more than the reading it is part of.
+        merged.listened.forEach { (day, millis) -> assertTrue(millis <= merged.reading.getValue(day)) }
+        // The book's time, the longer of the two.
+        assertEquals(3_600_000L, merged.books.single().spentMs)
+        assertEquals(600_000L, merged.books.single().listenedMs)
+        // This phone's own backup, restored again, changes nothing.
+        val again = Backup.merge(merged, Backup.read(Backup.write(merged)))
+        assertEquals(merged.reading, again.reading)
+        assertEquals(merged.listened, again.listened)
+        assertEquals(merged.books.map { it.spentMs to it.listenedMs }, again.books.map { it.spentMs to it.listenedMs })
+    }
 }
