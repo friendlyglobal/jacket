@@ -110,8 +110,7 @@ dates. It opens from the line of today's reading in the library, and from Settin
   sums). Days are kept for a little over a year, so the calendar goes back that far.
 - For a screen reader the calendar is one sentence ("Read on 18 days in November 2026, 6 hours in
   all"), not a grid of numbers.
-- Still open: nothing is shown per book (time spent on each), and listening time isn't counted,
-  only reading time, as before.
+- Listening counts since 1.5, and each book keeps its time (see "Listening first" below).
 
 ### A clear message for an outdated Android System WebView (S)
 On a phone whose web view has never been updated (Android 8.0's is version 58, from 2017), a book
@@ -429,6 +428,29 @@ whole session rougher. Now two of the last three sentences must agree before it 
 pass comes back as soon as the phone has room for it, one at a time (`voice/QualityGuard.kt`).
 With the screen off, the words aren't inked in one by one either; the sentence is, and the
 words catch up when the page is looked at again.
+
+## Coming in 1.5
+
+### Listening first (M)
+For readers who mostly listen ("my main source is audio").
+- Listening counts as reading: the minutes the voice is really speaking (not paused, stopped by
+  the sleep timer or a call, or getting ready) go into today's time, the streak, "Your reading"
+  and the widget, from wherever it is heard (`reader/ListeningClock.kt`, counted in
+  `reader/Listening.kt`). A page's time on screen counts only for what the voice didn't speak
+  of it, so no minute is counted twice (`data/ReadingTime.kt`). Listening that runs past
+  midnight is shared between the two days; how long it lasted never comes from the phone's
+  clock, so a clock set back neither loses nor adds time.
+- Each book keeps its time, read and listened (`spentMs`, `listenedMs`), shown beside a finished
+  book in "Your reading" and on the book's Edit sheet; each total there says how much was
+  listened ("4 hr listened"). New keys only: older files load, an older Jacket reads the same
+  totals, and backups carry both, merged at the longer of the two like the days. Catching up
+  between devices carries no reading time, so neither is it doubled there.
+- "Time left in chapter" on the player now comes from the sentence being spoken to the chapter's
+  end, counted in letters, at the pace the voice is heard to read (`reader/VoicePace.kt`): it
+  had said 3 minutes with 13 to go, going by the page in view and its page turns.
+- Back from a book keeps the voice reading, as Home does; the library shows it and pauses it.
+- The folded library's "Continue reading" card has the wide pane's Listen / Pause button.
+- Still open: a PDF's player still says the pages left, as PDFs have no time left in chapter.
 
 ## Next
 
