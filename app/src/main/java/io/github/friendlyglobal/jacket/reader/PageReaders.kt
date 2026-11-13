@@ -35,6 +35,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -81,6 +82,8 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.core.graphics.get
@@ -140,18 +143,21 @@ private fun <T : Closeable> rememberDocument(key: Any, open: () -> T): Result<T>
 }
 
 /**
- * Left and right edges page back and forward; the middle toggles the reader controls. With
- * [onDoubleTap] (pages that zoom), a tap waits a moment to see whether a second one follows.
+ * Left and right edges page back and forward ([rightToLeft]: forward and back, as a manga turns);
+ * the middle toggles the reader controls. With [onDoubleTap] (pages that zoom), a tap waits a
+ * moment to see whether a second one follows.
  */
 @Composable
-private fun Modifier.tapZones(
+internal fun Modifier.tapZones(
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     onCenter: () -> Unit,
     onDoubleTap: ((Offset) -> Unit)? = null,
     /** Asked first: a tap that was on something of the page's own (a sentence, while it is read aloud) is that, and nothing else. */
     onPage: (Offset) -> Boolean = { false },
+    rightToLeft: Boolean = false,
 ): Modifier {
+    val backward by rememberUpdatedState(rightToLeft)
     val previous by rememberUpdatedState(onPrevious)
     val next by rememberUpdatedState(onNext)
     val center by rememberUpdatedState(onCenter)
@@ -164,8 +170,8 @@ private fun Modifier.tapZones(
                 val x = offset.x / size.width
                 when {
                     taken(offset) -> {}
-                    x < 0.28f -> previous()
-                    x > 0.72f -> next()
+                    x < 0.28f -> if (backward) next() else previous()
+                    x > 0.72f -> if (backward) previous() else next()
                     else -> center()
                 }
             },
@@ -282,6 +288,8 @@ fun PdfReader(
     annotations: List<Annotation>,
     /** "Say it this way": how the voice is to say words, in this book and in every book. */
     respellings: List<Respelling>,
+    /** The fold of a phone held half-open like a book, in the window: the spine between two pages side by side. */
+    spine: IntRect?,
     onProgress: ProgressSink,
     onCenterTap: () -> Unit,
 ) {
@@ -305,7 +313,8 @@ fun PdfReader(
             // While the voice speaks, the book's place is the sentence it is on, which the voice
             // saves: the page that happens to be in view (moved there to follow it) isn't saved over it.
             val held = { aloud.holdsThePlace || SystemClock.uptimeMillis() - aloud.followedAt <= FOLLOW_SETTLE_MS }
-            PagedList(pdf.pageCount, book.position, book.positionOffset, pdf.firstPageAspect, page, nav, haptics, onProgress, onCenterTap, aloud, held) { index, width ->
+            val shown = PageShowing(book.rightToLeft ?: false, settings.sideBySide, spine, pdf::aspects)
+            PagedList(pdf.pageCount, book.position, book.positionOffset, pdf.firstPageAspect, shown, page, nav, haptics, onProgress, onCenterTap, aloud, held) { index, width ->
                 pdf.render(index, width)
             }
         }
@@ -317,6 +326,9 @@ private class ComicDocument(file: File) : Closeable {
     private val lock = Mutex()
     private var closed = false
     val pages = Comic.pageNames(zip)
+
+    /** The comic says it is read right to left (manga, in its ComicInfo.xml). */
+    val rightToLeft: Boolean = runCatching { Comic.info(zip)?.rightToLeft == true }.getOrDefault(false)
 
     suspend fun render(index: Int, width: Int): Bitmap? = withContext(Dispatchers.IO) {
         val bytes = lock.withLock {
@@ -330,6 +342,19 @@ private class ComicDocument(file: File) : Closeable {
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
     }
 
+    /**
+     * How wide each page is for its height (0 where that can't be told): what pages side by side
+     * are laid out by. Only the start of each picture is read, where its size is written.
+     */
+    suspend fun aspects(): FloatArray = withContext(Dispatchers.IO) {
+        FloatArray(pages.size) { index ->
+            lock.withLock {
+                check(!closed) { "Document closed" }
+                runCatching { zip.getInputStream(zip.getEntry(pages[index])).use(Comic::aspectOf) }.getOrDefault(0f)
+            }
+        }
+    }
+
     override fun close() {
         DocumentCloser.launch {
             lock.withLock {
@@ -341,7 +366,17 @@ private class ComicDocument(file: File) : Closeable {
 }
 
 @Composable
-fun ComicReader(book: Book, page: PageColors, nav: ReaderNav, haptics: Haptics, onProgress: ProgressSink, onCenterTap: () -> Unit) {
+fun ComicReader(
+    book: Book,
+    settings: Settings,
+    page: PageColors,
+    nav: ReaderNav,
+    haptics: Haptics,
+    /** The fold of a phone held half-open like a book, in the window: the spine between two pages side by side. */
+    spine: IntRect?,
+    onProgress: ProgressSink,
+    onCenterTap: () -> Unit,
+) {
     val library = LocalContext.current.library
     val result = rememberDocument(book.id) { ComicDocument(library.fileOf(book)) }
     when {
@@ -349,13 +384,39 @@ fun ComicReader(book: Book, page: PageColors, nav: ReaderNav, haptics: Haptics, 
         result.isFailure || result.getOrThrow().pages.isEmpty() -> ReaderError(stringResource(R.string.reader_error_comic))
         else -> {
             val comic = result.getOrThrow()
-            PagedList(comic.pages.size, book.position, book.positionOffset, 0.66f, page, nav, haptics, onProgress, onCenterTap) { index, width ->
+            // Right to left as the reader chose for this book, or else as the comic says of itself.
+            val shown = PageShowing(book.rightToLeft ?: comic.rightToLeft, settings.sideBySide, spine, comic::aspects)
+            PagedList(comic.pages.size, book.position, book.positionOffset, 0.66f, shown, page, nav, haptics, onProgress, onCenterTap) { index, width ->
                 comic.render(index, width)
             }
         }
     }
 }
 
+/**
+ * How a book of pages is to be shown: whether it reads [rightToLeft], whether two pages may be
+ * shown [sideBySide] where the window is wide enough, the [spine] of a phone held half-open, and
+ * how to learn the pages' [shapes] (each one's width for its height), which pages side by side
+ * are laid out by.
+ */
+internal class PageShowing(
+    val rightToLeft: Boolean,
+    val sideBySide: Boolean,
+    val spine: IntRect?,
+    val shapes: suspend () -> FloatArray,
+)
+
+/**
+ * A book of pages, as the window allows: two side by side where it is wide enough for that and
+ * the reader hasn't switched it off (see [SideBySide] and PageSpreads.kt), else one after another,
+ * scrolled through. The reader's place ([KeptPage]) is kept apart from either, so folding,
+ * unfolding or switching from one to the other keeps it.
+ *
+ * Which pages go together hangs on every page's shape (a double-page scan stands alone, and moves
+ * the pairs after it on by one), so the shapes are learnt once the window could show two. Until
+ * they are known, the book opens as soon as they are (or after [SHAPES_WAIT_MS], one page at a
+ * time); a book already open stays as it is until then.
+ */
 @Composable
 private fun PagedList(
     count: Int,
@@ -363,6 +424,7 @@ private fun PagedList(
     /** How far down the page at [initial] the top of the screen was (0..1). */
     initialOffset: Float,
     placeholderAspect: Float,
+    shown: PageShowing,
     page: PageColors,
     nav: ReaderNav,
     haptics: Haptics,
@@ -374,12 +436,83 @@ private fun PagedList(
     held: () -> Boolean = { false },
     render: suspend (index: Int, width: Int) -> Bitmap?,
 ) {
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = initial.coerceIn(0, (count - 1).coerceAtLeast(0)))
+    val kept = remember { KeptPage(initial.coerceIn(0, (count - 1).coerceAtLeast(0)), initialOffset.takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: 0f) }
+    var shapes by remember { mutableStateOf<FloatArray?>(null) }
+    var waited by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(SHAPES_WAIT_MS)
+        waited = true
+    }
+    val rightToLeft = shown.rightToLeft
+    SideEffect { nav.rightToLeft = rightToLeft }
+    // Back takes the selection off before it does anything else.
+    val marking = aloud?.marking
+    BackHandler(enabled = marking?.selection != null) { marking?.clear() }
+    // A tap waits to see if it's a double tap; a little less long than the system's own patience,
+    // so the page edges still answer briskly.
+    val platform = LocalViewConfiguration.current
+    val brisk = remember(platform) {
+        object : ViewConfiguration by platform {
+            override val doubleTapTimeoutMillis: Long get() = minOf(platform.doubleTapTimeoutMillis, 250L)
+        }
+    }
+    CompositionLocalProvider(LocalViewConfiguration provides brisk) {
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+            val wanted = shown.sideBySide && SideBySide.mayFit(maxWidth.value)
+            LaunchedEffect(wanted) {
+                if (wanted && shapes == null) shapes = runCatching { shown.shapes() }.getOrNull() ?: FloatArray(0)
+            }
+            val aspects = shapes?.takeIf { it.size == count }
+            val rows = remember(aspects) { aspects?.let(PageRows::paired) }
+            val typical = remember(aspects) { aspects?.let(SideBySide::typical) ?: 0f }
+            val paired = wanted && aspects != null && rows != null && SideBySide.fits(maxWidth.value, maxHeight.value, typical)
+            SideEffect {
+                nav.sideBySide = paired
+                // A mouse wheel turns two pages side by side, as it turns any book of pages; it scrolls one after another.
+                nav.paged = paired
+            }
+            when {
+                paired -> SpreadPages(rows!!, aspects!!, kept, rightToLeft, shown.spine, page, nav, haptics, onProgress, onCenterTap, aloud, held, render)
+                // (Nothing yet: the book's cover is still over the page while it opens.)
+                wanted && shapes == null && !nav.contentReady && !waited -> Box(Modifier.fillMaxSize())
+                else -> ScrolledPages(count, kept, placeholderAspect, rightToLeft, page, nav, haptics, onProgress, onCenterTap, aloud, held, render)
+            }
+        }
+    }
+}
+
+/** How long a book that could open with pages side by side waits for its pages' shapes before it opens one page at a time. */
+private const val SHAPES_WAIT_MS = 1_500L
+
+/** One page after another, as wide as the window (to a point), scrolled through: as on any phone. */
+@Composable
+private fun ScrolledPages(
+    count: Int,
+    kept: KeptPage,
+    placeholderAspect: Float,
+    rightToLeft: Boolean,
+    page: PageColors,
+    nav: ReaderNav,
+    haptics: Haptics,
+    onProgress: ProgressSink,
+    onCenterTap: () -> Unit,
+    aloud: PdfAloud?,
+    held: () -> Boolean,
+    render: suspend (index: Int, width: Int) -> Bitmap?,
+) {
+    val start = remember { kept.page to kept.offset }
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = start.first)
     val scope = rememberCoroutineScope()
     val first by remember { derivedStateOf { listState.firstVisibleItemIndex } }
     // The last page is on screen when the list can't scroll any further (pages are often shorter
     // than the screen, so the last one never becomes the first visible).
     LaunchedEffect(listState, nav) { snapshotFlow { listState.atEnd() }.collect { nav.atEnd = it } }
+    // Shown another way (unfolded, say), the pages open where these were.
+    DisposableEffect(listState) {
+        onDispose {
+            if (listState.layoutInfo.totalItemsCount > 0) listState.topOfScreen().let { (at, fraction) -> kept.keep(at, fraction) }
+        }
+    }
     val resources = LocalResources.current
     SideEffect {
         nav.sectionCount = count
@@ -404,51 +537,38 @@ private fun PagedList(
         // (A highlight that was found on the pages is gone to where it is on its page.)
         nav.goTo = { mark -> if (aloud?.marking?.goTo?.invoke(mark) != true) nav.jumpTo(mark.section) }
         nav.turnPage = { delta -> nav.jumpTo(first + delta) }
+        nav.canTurn = { delta -> first + delta in 0 until count }
+        // A comic's previous and next are a page's (a PDF's are its chapters', or the voice's: see PdfAloud).
+        if (aloud == null) {
+            nav.step = { nav.turnPage(it) }
+            nav.canStep = { nav.canTurn(it) }
+        }
     }
     PageTicks(listState, haptics)
 
     val zoom = remember(listState) { PageZoom(scope, listState) }
     zoom.spring = MaterialTheme.motionScheme.defaultSpatialSpec()
-    TrackProgress(listState, count, initial, initialOffset, held, { zoom.scale }, onProgress)
+    TrackProgress(listState, count, start.first, start.second, kept, held, { zoom.scale }, onProgress)
     // Where each page in view is in the window, and where the pages' own box is: for what is
     // asked in the window's terms (a tap on a line, where the line being read is, the words under
     // a finger). Not state: nothing is laid out again for it.
-    val frames = remember(listState) { PageFrames(listState) }
-    val origin = remember(listState) { arrayOf(Offset.Zero) }
+    val frames = remember(listState) { PageFrames { listState.layoutInfo.visibleItemsInfo.map { it.index } } }
+    val density = LocalDensity.current
+    val words = remember(listState, aloud, density) { PageWords(aloud, frames, density) }
     if (aloud != null) FollowVoice(listState, aloud, nav, frames) { zoom.scale }
     // Highlights and choosing words, on a PDF whose words are to hand (see PdfHighlights.kt).
     val marking = aloud?.marking
-    val widthOf: (Int) -> Float = { aloud?.layout?.widthOf(it) ?: 0f }
-    // Back takes the selection off before it does anything else.
-    BackHandler(enabled = marking?.selection != null) { marking?.clear() }
-    val density = LocalDensity.current
-    val context = LocalContext.current
-    // The finger that is choosing words: where it is (in the pages' box), and where it points,
-    // which for a finger on a handle is the line the handle hangs from, not the handle.
-    val finger = remember(listState) { arrayOf<Offset?>(null) }
-    val pointing = remember(listState) { arrayOf(Offset.Zero) }
-    // Where a handle is in the window: the middle of the drop that is drawn (see PdfMarking.drawHandles).
-    fun handleInWindow(marks: PdfMarking, handle: SelectionHandle): Offset? {
-        val at = marks.handlePoint(handle) ?: return null
-        val tip = frames.inWindow(at.page, at.x, at.bottom + PdfMarking.LINE_ROOM, widthOf(at.page)) ?: return null
-        val radius = with(density) { PdfMarking.HANDLE_RADIUS.toPx() }
-        return Offset(if (at.hangsLeft) tip.x - radius else tip.x + radius, tip.y + radius)
-    }
-    fun pointTo(marks: PdfMarking, at: Offset) {
-        finger[0] = at
-        frames.nearest(at + pointing[0] + origin[0], widthOf)?.let { marks.moveTo(it.page, it.x, it.y) }
-    }
     // A handle dragged to the top or the foot of the screen takes the pages with it.
     if (marking != null) {
         LaunchedEffect(marking, marking.dragging) {
             if (!marking.dragging) {
-                finger[0] = null
+                words.finger[0] = null
                 return@LaunchedEffect
             }
             val edge = with(density) { EDGE_SCROLL.toPx() }
             while (true) {
                 withFrameNanos { }
-                val at = finger[0] ?: continue
+                val at = words.finger[0] ?: continue
                 val height = listState.layoutInfo.viewportSize.height
                 val past = when {
                     at.y < edge -> at.y - edge
@@ -457,79 +577,20 @@ private fun PagedList(
                 }
                 if (past == 0f) continue
                 val moved = listState.dispatchRawDelta((past * EDGE_SCROLL_SPEED).coerceIn(-edge, edge) / zoom.scale)
-                if (moved != 0f) pointTo(marking, at)
+                if (moved != 0f) words.pointTo(marking, at)
             }
         }
     }
-    val told = remember(listState) { booleanArrayOf(false) }
     // A screenful of what's showing: less of the list, zoomed in.
     val step = { listState.layoutInfo.viewportSize.height * 0.85f / zoom.scale }
-    // A tap waits to see if it's a double tap; a little less long than the system's own patience,
-    // so the page edges still answer briskly.
-    val platform = LocalViewConfiguration.current
-    val brisk = remember(platform) {
-        object : ViewConfiguration by platform {
-            override val doubleTapTimeoutMillis: Long get() = minOf(platform.doubleTapTimeoutMillis, 250L)
-        }
-    }
-    CompositionLocalProvider(LocalViewConfiguration provides brisk) {
     BoxWithConstraints(
         Modifier
             .fillMaxSize()
             .clipToBounds()
             .onSizeChanged { zoom.width = it.width.toFloat().coerceAtLeast(1f) }
-            .onGloballyPositioned { origin[0] = it.positionInWindow() }
+            .onGloballyPositioned { words.origin[0] = it.positionInWindow() }
             // Choosing words comes first: a finger that is selecting doesn't scroll, zoom or tap.
-            .then(
-                when {
-                    marking != null -> Modifier.pointerInput(marking) {
-                        selectGestures(
-                            handleAt = { at ->
-                                val reach = HANDLE_REACH.toPx()
-                                SelectionHandle.entries.asReversed().firstOrNull { handle ->
-                                    handleInWindow(marking, handle)?.let { (it - (at + origin[0])).getDistance() <= reach } == true
-                                }
-                            },
-                            wordsAt = { at -> frames.under(at + origin[0], widthOf)?.let { marking.wordsAt(it.page, it.x, it.y) } == true },
-                            onPress = { at ->
-                                haptics.longPress()
-                                finger[0] = at
-                                pointing[0] = Offset.Zero
-                                frames.under(at + origin[0], widthOf)?.let { marking.press(it.page, it.x, it.y) }
-                            },
-                            onGrab = { handle, at ->
-                                finger[0] = at
-                                // The finger is on the handle, under the words: it points at the middle of their line.
-                                pointing[0] = marking.handlePoint(handle)
-                                    ?.let { frames.inWindow(it.page, it.x, it.middle, widthOf(it.page)) }
-                                    ?.let { it - (at + origin[0]) } ?: Offset.Zero
-                                marking.grab(handle)
-                            },
-                            onMove = { at -> pointTo(marking, at) },
-                            onRelease = {
-                                finger[0] = null
-                                marking.release()
-                            },
-                        )
-                    }
-                    // Where nothing can be highlighted, a press and hold says why (once: a finger resting on the page isn't asking).
-                    aloud?.cantMark != null -> Modifier.pointerInput(aloud.cantMark) {
-                        selectGestures(
-                            handleAt = { null },
-                            wordsAt = { !told[0] },
-                            onPress = {
-                                told[0] = true
-                                haptics.reject()
-                                Toast.makeText(context, aloud.cantMark, Toast.LENGTH_LONG).show()
-                            },
-                            onGrab = { _, _ -> },
-                            onMove = {},
-                            onRelease = {},
-                        )
-                    }
-                    else -> Modifier
-                },
-            )
+            .chooseWords(words, haptics)
             .pointerInput(zoom) { zoomGestures(zoom) }
             .tapZones(
                 onPrevious = { scope.launch { listState.animateScrollBy(-step()) } },
@@ -539,26 +600,8 @@ private fun PagedList(
                     haptics.tick()
                     zoom.toggle(at)
                 },
-                // A tap with words selected lets them go, and does nothing else. A tap on a
-                // highlight opens it. And while the PDF is read aloud, a tap on a line has the
-                // voice read on from there.
-                onPage = { at ->
-                    val tapped = if (aloud?.layout == null) null else frames.under(at + origin[0], widthOf)
-                    val mark = if (tapped == null) null else marking?.markAt(tapped.page, tapped.x, tapped.y)
-                    when {
-                        marking?.selection != null -> {
-                            marking.clear()
-                            true
-                        }
-                        mark != null -> {
-                            haptics.tick()
-                            nav.editing = mark
-                            true
-                        }
-                        aloud == null || tapped == null -> false
-                        else -> aloud.onTap(tapped.page, tapped.x, tapped.y).also { if (it) haptics.tick() }
-                    }
-                },
+                onPage = { at -> words.tap(at, haptics, nav) },
+                rightToLeft = rightToLeft,
             ),
     ) {
         val widthPx = with(LocalDensity.current) { min(maxWidth, 900.dp).roundToPx() }
@@ -582,18 +625,9 @@ private fun PagedList(
             PdfSelectionMenu(
                 marking, haptics,
                 moving = { listState.isScrollInProgress to listOf(zoom.scale, zoom.panX, listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) },
-                selectionInWindow = {
-                    // As much of it as is in sight.
-                    val window = Rect(origin[0], Size(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat()))
-                    marking.selected.mapNotNull { line ->
-                        val from = frames.inWindow(line.page, line.left, line.top, widthOf(line.page)) ?: return@mapNotNull null
-                        val to = frames.inWindow(line.page, line.right, line.bottom, widthOf(line.page)) ?: return@mapNotNull null
-                        Rect(from, to).takeIf { it.overlaps(window) }?.intersect(window)
-                    }.reduceOrNull { all, one -> Rect(minOf(all.left, one.left), minOf(all.top, one.top), maxOf(all.right, one.right), maxOf(all.bottom, one.bottom)) }
-                },
+                selectionInWindow = { words.selectionInWindow(Size(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat())) },
             )
         }
-    }
     }
 }
 
@@ -604,18 +638,149 @@ private const val EDGE_SCROLL_SPEED = 0.12f
 /** A finger this near the middle of a selection handle takes hold of it. */
 private val HANDLE_REACH = 26.dp
 
+/**
+ * Choosing words on a PDF's pages, and what a tap on one is (a highlight, a line for the voice to
+ * read on from), whichever way the pages are shown: all of it is asked in the window's terms, of
+ * where the pages are drawn ([frames]).
+ */
+@Stable
+internal class PageWords(val aloud: PdfAloud?, val frames: PageFrames, private val density: Density) {
+    /** Where the pages' own box is in the window. */
+    val origin = arrayOf(Offset.Zero)
+
+    /** The finger that is choosing words: where it is (in the pages' box), and where it points, which for a finger on a handle is the line the handle hangs from, not the handle. */
+    val finger = arrayOf<Offset?>(null)
+    val pointing = arrayOf(Offset.Zero)
+
+    /** The reader has been told why nothing can be highlighted: once is enough (a finger resting on the page isn't asking). */
+    val told = booleanArrayOf(false)
+
+    val marking: PdfMarking? get() = aloud?.marking
+
+    /** How wide [page] is in its own units; 0 until the PDF's words are to hand. */
+    fun widthOf(page: Int): Float = aloud?.layout?.widthOf(page) ?: 0f
+
+    /** Where a handle is in the window: the middle of the drop that is drawn (see PdfMarking.drawHandles). */
+    fun handleInWindow(marks: PdfMarking, handle: SelectionHandle): Offset? {
+        val at = marks.handlePoint(handle) ?: return null
+        val tip = frames.inWindow(at.page, at.x, at.bottom + PdfMarking.LINE_ROOM, widthOf(at.page)) ?: return null
+        val radius = with(density) { PdfMarking.HANDLE_RADIUS.toPx() }
+        return Offset(if (at.hangsLeft) tip.x - radius else tip.x + radius, tip.y + radius)
+    }
+
+    fun pointTo(marks: PdfMarking, at: Offset) {
+        finger[0] = at
+        frames.nearest(at + pointing[0] + origin[0], ::widthOf)?.let { marks.moveTo(it.page, it.x, it.y) }
+    }
+
+    /**
+     * A tap at [at] (in the pages' box), asked before it turns a page or brings the controls up:
+     * true if it was something else. A tap with words selected lets them go, and does nothing
+     * else. A tap on a highlight opens it. And while the PDF is read aloud, a tap on a line has the
+     * voice read on from there.
+     */
+    fun tap(at: Offset, haptics: Haptics, nav: ReaderNav): Boolean {
+        val marking = marking
+        val tapped = if (aloud?.layout == null) null else frames.under(at + origin[0], ::widthOf)
+        val mark = if (tapped == null) null else marking?.markAt(tapped.page, tapped.x, tapped.y)
+        return when {
+            marking?.selection != null -> {
+                marking.clear()
+                true
+            }
+            mark != null -> {
+                haptics.tick()
+                nav.editing = mark
+                true
+            }
+            aloud == null || tapped == null -> false
+            else -> aloud.onTap(tapped.page, tapped.x, tapped.y).also { if (it) haptics.tick() }
+        }
+    }
+
+    /** As much of what is selected as is in sight, in the window: where its menu goes. [size] is the pages' box's. */
+    fun selectionInWindow(size: Size): Rect? {
+        val marking = marking ?: return null
+        val window = Rect(origin[0], size)
+        return marking.selected.mapNotNull { line ->
+            val from = frames.inWindow(line.page, line.left, line.top, widthOf(line.page)) ?: return@mapNotNull null
+            val to = frames.inWindow(line.page, line.right, line.bottom, widthOf(line.page)) ?: return@mapNotNull null
+            Rect(from, to).takeIf { it.overlaps(window) }?.intersect(window)
+        }.reduceOrNull { all, one -> Rect(minOf(all.left, one.left), minOf(all.top, one.top), maxOf(all.right, one.right), maxOf(all.bottom, one.bottom)) }
+    }
+}
+
+/**
+ * Choosing words with a finger: press and hold on one, then drag either handle. A finger that is
+ * selecting doesn't scroll, zoom or tap. Where nothing can be highlighted, a press and hold says
+ * why, once.
+ */
+@Composable
+internal fun Modifier.chooseWords(words: PageWords, haptics: Haptics): Modifier {
+    val context = LocalContext.current
+    val marking = words.marking
+    val cantMark = words.aloud?.cantMark
+    return when {
+        marking != null -> pointerInput(marking) {
+            selectGestures(
+                handleAt = { at ->
+                    val reach = HANDLE_REACH.toPx()
+                    SelectionHandle.entries.asReversed().firstOrNull { handle ->
+                        words.handleInWindow(marking, handle)?.let { (it - (at + words.origin[0])).getDistance() <= reach } == true
+                    }
+                },
+                wordsAt = { at -> words.frames.under(at + words.origin[0], words::widthOf)?.let { marking.wordsAt(it.page, it.x, it.y) } == true },
+                onPress = { at ->
+                    haptics.longPress()
+                    words.finger[0] = at
+                    words.pointing[0] = Offset.Zero
+                    words.frames.under(at + words.origin[0], words::widthOf)?.let { marking.press(it.page, it.x, it.y) }
+                },
+                onGrab = { handle, at ->
+                    words.finger[0] = at
+                    // The finger is on the handle, under the words: it points at the middle of their line.
+                    words.pointing[0] = marking.handlePoint(handle)
+                        ?.let { words.frames.inWindow(it.page, it.x, it.middle, words.widthOf(it.page)) }
+                        ?.let { it - (at + words.origin[0]) } ?: Offset.Zero
+                    marking.grab(handle)
+                },
+                onMove = { at -> words.pointTo(marking, at) },
+                onRelease = {
+                    words.finger[0] = null
+                    marking.release()
+                },
+            )
+        }
+        cantMark != null -> pointerInput(cantMark) {
+            selectGestures(
+                handleAt = { null },
+                wordsAt = { !words.told[0] },
+                onPress = {
+                    words.told[0] = true
+                    haptics.reject()
+                    Toast.makeText(context, cantMark, Toast.LENGTH_LONG).show()
+                },
+                onGrab = { _, _ -> },
+                onMove = {},
+                onRelease = {},
+            )
+        }
+        else -> this
+    }
+}
+
 /** A point of a page in view, in the page's own units. */
-private class PagePoint(val page: Int, val x: Float, val y: Float)
+internal class PagePoint(val page: Int, val x: Float, val y: Float)
 
 /**
  * Where the pages in view are in the window as they are drawn now, scrolled and zoomed: all of
  * each page, whether or not all of it is in sight. What a point of the window is over, and where
- * in the window a point of a page is, are both told from it.
+ * in the window a point of a page is, are both told from it. [inView] tells which pages are in view.
  */
-private class PageFrames(private val list: LazyListState) {
+internal class PageFrames(private val inView: () -> List<Int>) {
     /**
      * Each page's picture, as it is laid out. Asked where it is when that is wanted: it moves
-     * without being laid out again. (The list uses a picture's place again for another page, so
+     * without being laid out again. (A list uses a picture's place again for another page, so
      * one kept here for a page that has gone out of view may be another page's by now: only the
      * pages in view are answered for.)
      */
@@ -623,24 +788,26 @@ private class PageFrames(private val list: LazyListState) {
 
     /** Where page [index] is in the window; null unless it is in view. */
     fun of(index: Int): Rect? {
-        val page = pages[index]?.takeIf { it.isAttached && list.layoutInfo.visibleItemsInfo.any { item -> item.index == index } } ?: return null
+        val page = pages[index]?.takeIf { it.isAttached && index in inView() } ?: return null
         return Rect(page.localToWindow(Offset.Zero), page.localToWindow(Offset(page.size.width.toFloat(), page.size.height.toFloat())))
     }
 
     /** The page under [inWindow] and the point of it there, where [width] says how wide a page is in its own units; null between pages, and off them. */
     fun under(inWindow: Offset, width: (Int) -> Float): PagePoint? {
-        for (item in list.layoutInfo.visibleItemsInfo) {
-            val frame = of(item.index)?.takeIf { it.contains(inWindow) && it.width > 0f } ?: continue
-            val scale = width(item.index) / frame.width
-            return if (scale > 0f) PagePoint(item.index, (inWindow.x - frame.left) * scale, (inWindow.y - frame.top) * scale) else null
+        for (index in inView()) {
+            val frame = of(index)?.takeIf { it.contains(inWindow) && it.width > 0f } ?: continue
+            val scale = width(index) / frame.width
+            return if (scale > 0f) PagePoint(index, (inWindow.x - frame.left) * scale, (inWindow.y - frame.top) * scale) else null
         }
         return null
     }
 
     /** The page nearest to [inWindow], and the point of it there (which may be off its edge): where a finger dragging a handle is, wherever it has got to. */
     fun nearest(inWindow: Offset, width: (Int) -> Float): PagePoint? {
-        val (index, frame) = list.layoutInfo.visibleItemsInfo.mapNotNull { item -> of(item.index)?.takeIf { it.width > 0f && width(item.index) > 0f }?.let { item.index to it } }
-            .minByOrNull { (_, frame) -> if (inWindow.y < frame.top) frame.top - inWindow.y else if (inWindow.y > frame.bottom) inWindow.y - frame.bottom else 0f } ?: return null
+        fun off(from: Float, to: Float, at: Float) = if (at < from) from - at else if (at > to) at - to else 0f
+        val (index, frame) = inView().mapNotNull { index -> of(index)?.takeIf { it.width > 0f && width(index) > 0f }?.let { index to it } }
+            // (Pages side by side are told apart across; pages one above another, up and down.)
+            .minByOrNull { (_, frame) -> off(frame.top, frame.bottom, inWindow.y) + off(frame.left, frame.right, inWindow.x) } ?: return null
         val scale = width(index) / frame.width
         return PagePoint(index, (inWindow.x - frame.left) * scale, (inWindow.y - frame.top) * scale)
     }
@@ -650,6 +817,14 @@ private class PageFrames(private val list: LazyListState) {
         val frame = of(page)?.takeIf { width > 0f } ?: return null
         val scale = frame.width / width
         return Offset(frame.left + x * scale, frame.top + y * scale)
+    }
+
+    /** Where [line] of a page in view is in the window, the page being [width] of its own units wide; null unless it is in view. */
+    fun lineInWindow(line: MarkedLine, width: Float): Rect? {
+        val frame = of(line.page)
+        if (frame == null || width <= 0f) return null
+        val scale = frame.width / width
+        return Rect(frame.left + line.left * scale, frame.top + line.top * scale, frame.left + line.right * scale, frame.top + line.bottom * scale)
     }
 }
 
@@ -661,7 +836,7 @@ private class PageFrames(private val list: LazyListState) {
 private fun LazyListState.atEnd(): Boolean = layoutInfo.totalItemsCount > 0 && !canScrollForward
 
 @Composable
-private fun PageImage(
+internal fun PageImage(
     index: Int,
     widthPx: Int,
     placeholderAspect: Float,
@@ -671,6 +846,8 @@ private fun PageImage(
     frames: PageFrames,
     /** How many times their size the pages are drawn just now. */
     zoomed: () -> Float,
+    /** Where the page goes and how large it is, where that is decided outside (pages side by side); null for as wide as the list, to a point, at its own shape. */
+    box: Modifier? = null,
     onRendered: () -> Unit,
 ) {
     val bitmap by produceState<ImageBitmap?>(null, index, widthPx) {
@@ -684,11 +861,7 @@ private fun PageImage(
     // The page develops on its placeholder rather than popping onto it.
     val developed = animateFloatAsState(if (bitmap != null) 1f else 0f, MaterialTheme.motionScheme.defaultEffectsSpec(), label = "page")
     Box(
-        Modifier
-            .widthIn(max = 900.dp)
-            .padding(horizontal = 8.dp)
-            .fillMaxWidth()
-            .aspectRatio(aspect)
+        (box ?: Modifier.widthIn(max = 900.dp).padding(horizontal = 8.dp).fillMaxWidth().aspectRatio(aspect))
             // The handles of what is selected hang from its ends, over the page's edge if they must: drawn outside what clips the page.
             .drawWithContent {
                 drawContent()
@@ -784,16 +957,7 @@ private fun FollowVoice(listState: LazyListState, aloud: PdfAloud, nav: ReaderNa
                 y >= info.viewportStartOffset && y < info.viewportStartOffset + info.viewportSize.height / zoomed()
             }
         }
-        aloud.lineInWindow = { line ->
-            val width = aloud.layout?.widthOf(line.page) ?: 0f
-            val frame = frames.of(line.page)
-            if (frame == null || width <= 0f) {
-                null
-            } else {
-                val scale = frame.width / width
-                Rect(frame.left + line.left * scale, frame.top + line.top * scale, frame.left + line.right * scale, frame.top + line.bottom * scale)
-            }
-        }
+        aloud.lineInWindow = { line -> frames.lineInWindow(line, aloud.layout?.widthOf(line.page) ?: 0f) }
     }
     LaunchedEffect(listState, aloud) {
         // (A reader that opens on a voice already reading is put at the book's place first: that is not the listener moving.)
@@ -849,9 +1013,9 @@ private fun FollowVoice(listState: LazyListState, aloud: PdfAloud, nav: ReaderNa
 }
 
 /** Where on the screen the line being read aloud is put (of its height, from the top), and how far up or down it may be before the pages move. */
-private const val LINE_AT = 0.25f
-private const val LINE_NO_HIGHER = 0.1f
-private const val LINE_NO_LOWER = 0.6f
+internal const val LINE_AT = 0.25f
+internal const val LINE_NO_HIGHER = 0.1f
+internal const val LINE_NO_LOWER = 0.6f
 
 /**
  * A light tick each time a new page scrolls into first place. A fling through many pages gets a
@@ -873,7 +1037,7 @@ private fun PageTicks(listState: LazyListState, haptics: Haptics) {
     }
 }
 
-private const val TICK_GAP_MS = 160L
+internal const val TICK_GAP_MS = 160L
 
 /**
  * Turns list scrolling into a saved position and an overall 0..1 progress, once scrolling settles.
@@ -885,6 +1049,8 @@ private const val TICK_GAP_MS = 160L
  * [ScrolledPlace]): the one thing that lets the book's progress fall. The page the list opens on,
  * and the pages as they lie after the window or the zoom ([zoomed]) has changed, are the same
  * place shown again. While the place is [held] by somebody else (the voice), nothing is saved.
+ * Whatever is saved, the top of the screen is [kept], for the pages to open there if they are
+ * shown another way.
  */
 @Composable
 private fun TrackProgress(
@@ -892,6 +1058,7 @@ private fun TrackProgress(
     count: Int,
     start: Int,
     startOffset: Float,
+    kept: KeptPage,
     held: () -> Boolean,
     zoomed: () -> Float,
     onProgress: ProgressSink,
@@ -925,6 +1092,7 @@ private fun TrackProgress(
         snapshotFlow { Triple(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset, listState.canScrollForward) }
             .collectLatest { (_, _, more) ->
                 delay(300)
+                listState.topOfScreen().let { (page, fraction) -> kept.keep(page, fraction) }
                 if (holds()) {
                     // Wherever the pages are when the place is the reader's again is where it is then.
                     place.shownAgain()

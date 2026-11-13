@@ -218,6 +218,7 @@
     <string name="reader_next_page">Nächste Seite</string>
     <string name="reader_page_number">Seite %1$d</string>
     <string name="reader_page_of">Seite %1$d von %2$d</string>
+    <string name="reader_pages_of">Seiten %1$d–%2$d von %3$d</string>
     <string name="reader_percent_read">%1$d&#160;%% gelesen</string>
     <string name="reader_footer_last_page">Letzte Seite im Kapitel</string>
     <plurals name="reader_footer_pages_left">
@@ -334,6 +335,11 @@
     <string name="reading_edge_swipes_description">Am linken Rand nach oben oder unten wischen für die Helligkeit, am rechten für die Wärme.</string>
     <string name="reading_night_pages">Dunkle Seiten bei Nacht</string>
     <string name="reading_night_pages_description">Ist dein Smartphone im dunklen Design, werden helle Seiten ebenfalls dunkel.</string>
+    <string name="reading_pages_group">PDFs und Comics</string>
+    <string name="reading_side_by_side">Seiten nebeneinander</string>
+    <string name="reading_side_by_side_description">Auf einem breiten Bildschirm erscheinen zwei Seiten zusammen, wie in einem aufgeschlagenen Buch.</string>
+    <string name="reading_right_to_left">Von rechts nach links</string>
+    <string name="reading_right_to_left_description">Für Manga: Die Seiten blättern von rechts nach links. Nur für dieses Buch.</string>
     <string name="settings_tabletop">Tischmodus</string>
     <string name="settings_tabletop_description">Halb aufgeklappt auf dem Tisch: die Seite über dem Falz, die Bedienelemente darunter.</string>
     <string name="settings_watch_folder">Überwachter Ordner</string>

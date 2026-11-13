@@ -257,6 +257,7 @@
     <string name="reader_next_page">Next page</string>
     <string name="reader_page_number">Page %1$d</string>
     <string name="reader_page_of">Page %1$d of %2$d</string>
+    <string name="reader_pages_of">Pages %1$d–%2$d of %3$d</string>
     <string name="reader_percent_read">%1$d%% read</string>
     <string name="reader_footer_last_page">Last page in chapter</string>
     <plurals name="reader_footer_pages_left">
@@ -394,6 +395,11 @@
     <string name="reading_edge_swipes_description">Swipe up or down along the left edge for brightness, the right edge for warmth.</string>
     <string name="reading_night_pages">Dark pages at night</string>
     <string name="reading_night_pages_description">When your phone is in dark theme, light pages turn dark too.</string>
+    <string name="reading_pages_group">PDFs and comics</string>
+    <string name="reading_side_by_side">Pages side by side</string>
+    <string name="reading_side_by_side_description">On a wide screen, two pages show together, like an open book.</string>
+    <string name="reading_right_to_left">Right to left</string>
+    <string name="reading_right_to_left_description">For manga: pages turn from right to left. Just for this book.</string>
     <string name="settings_tabletop">Tabletop mode</string>
     <string name="settings_tabletop_description">Half-folded on a table: the page above the fold, the controls below.</string>
     <string name="settings_watch_folder">Watched folder</string>

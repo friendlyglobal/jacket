@@ -177,6 +177,27 @@ class PdfDocument(file: File, password: String? = null) : Closeable {
         withContext(Dispatchers.IO) { renderer.render(index, width) }
     }
 
+    /**
+     * How wide each page is for its height (0 where that can't be told): what pages side by side
+     * are laid out by. A few pages at a time, so a page wanted on screen meanwhile is drawn between them.
+     */
+    suspend fun aspects(): FloatArray = withContext(Dispatchers.IO) {
+        val aspects = FloatArray(pageCount)
+        for (from in 0 until pageCount step ASPECTS_AT_A_TIME) {
+            lock.withLock {
+                check(!closed) { "Document closed" }
+                for (index in from until minOf(from + ASPECTS_AT_A_TIME, pageCount)) {
+                    aspects[index] = runCatching { renderer.aspect(index) }.getOrDefault(0f).takeIf { it.isFinite() } ?: 0f
+                }
+            }
+        }
+        aspects
+    }
+
+    private companion object {
+        const val ASPECTS_AT_A_TIME = 24
+    }
+
     /** Waits for a page still rendering, then closes off the main thread. */
     override fun close() {
         DocumentCloser.launch {

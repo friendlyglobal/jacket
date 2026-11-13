@@ -219,6 +219,7 @@
     <string name="reader_next_page">अगला पेज</string>
     <string name="reader_page_number">पेज %1$d</string>
     <string name="reader_page_of">पेज %1$d / %2$d</string>
+    <string name="reader_pages_of">पेज %1$d–%2$d / %3$d</string>
     <string name="reader_percent_read">%1$d%% पढ़ी गई</string>
     <string name="reader_footer_last_page">अध्याय का आखिरी पेज</string>
     <plurals name="reader_footer_pages_left">
@@ -335,6 +336,11 @@
     <string name="reading_edge_swipes_description">चमक के लिए बाएँ किनारे पर और गर्माहट के लिए दाएँ किनारे पर ऊपर या नीचे स्वाइप करें।</string>
     <string name="reading_night_pages">रात में गहरे पन्ने</string>
     <string name="reading_night_pages_description">जब आपका फ़ोन डार्क थीम में हो, तो हल्के पन्ने भी गहरे हो जाते हैं।</string>
+    <string name="reading_pages_group">PDF और कॉमिक्स</string>
+    <string name="reading_side_by_side">पेज साथ-साथ</string>
+    <string name="reading_side_by_side_description">चौड़ी स्क्रीन पर खुली किताब की तरह दो पेज एक साथ दिखते हैं।</string>
+    <string name="reading_right_to_left">दाएँ से बाएँ</string>
+    <string name="reading_right_to_left_description">मांगा के लिए: पेज दाएँ से बाएँ पलटते हैं। सिर्फ़ इस किताब के लिए।</string>
     <string name="settings_tabletop">टेबलटॉप मोड</string>
     <string name="settings_tabletop_description">मेज़ पर आधा मुड़ा हुआ: पन्ना मोड़ के ऊपर, कंट्रोल नीचे।</string>
     <string name="settings_watch_folder">निगरानी वाला फ़ोल्डर</string>

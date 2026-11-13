@@ -46,7 +46,8 @@ object Backup {
      * stays pinned if it was pinned in either. Reading time comes back with them (see [mergeReading]),
      * and so does how much of it was listened to, and the time spent with each book (see [withTimeFrom]).
      * Words to say another way are merged like bookmarks; a word already fixed here keeps this
-     * phone's way of saying it.
+     * phone's way of saying it. A book of pages takes the backup's choice of reading right to left
+     * where none was made here.
      */
     fun merge(current: LibraryState, backup: LibraryState): LibraryState {
         // The same book: the same entry, or one made from the same file (by its name and size, or
@@ -60,9 +61,12 @@ object Backup {
         val books = current.books.map { book ->
             val saved = backup.books.firstOrNull { sameBook(it, book) } ?: return@map book
             ids[saved.id] = book.id
-            val here = book.copy(collections = book.collections + saved.collections.here(), pinnedAt = maxOf(book.pinnedAt, saved.pinnedAt))
-                // The time spent with it: the longer of the two (see withTimeFrom).
-                .withTimeFrom(saved)
+            // The time spent with it: the longer of the two (see withTimeFrom). Which way its pages
+            // read, where this phone was never told: the backup's choice.
+            val here = book.copy(
+                collections = book.collections + saved.collections.here(), pinnedAt = maxOf(book.pinnedAt, saved.pinnedAt),
+                rightToLeft = book.rightToLeft ?: saved.rightToLeft,
+            ).withTimeFrom(saved)
             if (saved.lastOpenedAt > here.lastOpenedAt) {
                 here.copy(
                     position = saved.position, positionOffset = saved.positionOffset, progress = saved.progress,

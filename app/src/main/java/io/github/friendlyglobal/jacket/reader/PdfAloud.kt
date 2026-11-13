@@ -407,7 +407,8 @@ internal fun rememberPdfAloud(
                 val spot = target(delta) ?: return@step
                 scope.launch { open.pdfStart(spot, resumed = false)?.let { listened.readFrom(it.block, it.offset, chapter = chapters.isNotEmpty()) } }
             } else if (chapters.isEmpty()) {
-                nav.jumpTo(nav.section + delta)
+                // (A page on, or two side by side.)
+                nav.turnPage(delta)
             } else {
                 // From before the first chapter, the first; from in between, the one before or after.
                 stepFrom(delta)?.let(::show)
@@ -416,7 +417,7 @@ internal fun rememberPdfAloud(
         nav.canStep = { delta ->
             when {
                 voice != null && nav.listen.active && voice.pdfSentence != null -> target(delta) != null
-                chapters.isEmpty() -> nav.section + delta in 0 until nav.sectionCount
+                chapters.isEmpty() -> nav.canTurn(delta)
                 else -> stepFrom(delta) != null
             }
         }

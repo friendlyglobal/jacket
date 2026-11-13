@@ -218,6 +218,7 @@
     <string name="reader_next_page">Volgende pagina</string>
     <string name="reader_page_number">Pagina %1$d</string>
     <string name="reader_page_of">Pagina %1$d van %2$d</string>
+    <string name="reader_pages_of">Pagina\'s %1$d–%2$d van %3$d</string>
     <string name="reader_percent_read">%1$d%% gelezen</string>
     <string name="reader_footer_last_page">Laatste pagina van hoofdstuk</string>
     <plurals name="reader_footer_pages_left">
@@ -334,6 +335,11 @@
     <string name="reading_edge_swipes_description">Veeg omhoog of omlaag langs de linkerrand voor helderheid, langs de rechterrand voor warmte.</string>
     <string name="reading_night_pages">Donkere pagina\'s \'s nachts</string>
     <string name="reading_night_pages_description">Als je telefoon in het donkere thema staat, worden lichte pagina\'s ook donker.</string>
+    <string name="reading_pages_group">Pdf\'s en strips</string>
+    <string name="reading_side_by_side">Pagina\'s naast elkaar</string>
+    <string name="reading_side_by_side_description">Op een breed scherm staan twee pagina\'s samen, zoals in een opengeslagen boek.</string>
+    <string name="reading_right_to_left">Van rechts naar links</string>
+    <string name="reading_right_to_left_description">Voor manga: pagina\'s slaan om van rechts naar links. Alleen voor dit boek.</string>
     <string name="settings_tabletop">Tafelmodus</string>
     <string name="settings_tabletop_description">Half dichtgevouwen op tafel: de pagina boven de vouw, de bediening eronder.</string>
     <string name="settings_watch_folder">Bewaakte map</string>
