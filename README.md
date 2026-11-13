@@ -43,7 +43,7 @@ Google Play: coming soon ·
 ## Install
 
 - **From GitHub:** open the [latest release](https://github.com/friendlyglobal/jacket/releases/latest),
-  download `Jacket-1.4.1.apk` and open it. Your browser asks once to be allowed to install apps.
+  download `Jacket-1.5.0.apk` and open it. Your browser asks once to be allowed to install apps.
   It's about 200 MB, because the voices are inside, and it runs on Android 8 and later. Later
   versions install over it the same way, keeping your books and places.
 - **Google Play:** coming soon.

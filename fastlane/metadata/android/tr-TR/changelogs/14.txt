@@ -1,0 +1,7 @@
+Jacket 1.5
+• Dinlemek okuma sayılır: "Okumalarınız"da ve serinizde
+• Doğal sesler önceden hazırlanır: ısınan telefon en iyi sesi korur
+• PDF ve çizgi romanlar: yan yana iki sayfa, mangalar için sağdan sola
+• Seçilen metin, PDF'lerdeki gibi renkleri ve "Buradan itibaren sesli oku"yu alır
+• Metin telefonun yazı boyutunu izler; koyu sayfalarda koyu kontroller
+• Geri tuşu sesi durdurmaz; tutamaçlar parlaklık için nereden kaydıracağınızı gösterir
