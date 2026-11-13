@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
+import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 
@@ -48,7 +49,10 @@ internal class PcmOut(private val sampleRate: Int) {
 
     private val lock = Any()
     private val main = Handler(Looper.getMainLooper())
-    private val thread = HandlerThread("jacket-voice-out").apply { start() }
+    // At the priority Android gives sound: the voice's own work, and the rest of the app, can't
+    // starve it when the phone is short of processor (hot, or busy), and the speaker never runs
+    // out of what was already made.
+    private val thread = HandlerThread("jacket-voice-out", Process.THREAD_PRIORITY_AUDIO).apply { start() }
     private val audio = Handler(thread.looper)
     private val queue = ArrayDeque<Item>()
     private var track: AudioTrack? = null

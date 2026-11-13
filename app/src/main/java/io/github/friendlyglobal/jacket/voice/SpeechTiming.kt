@@ -238,7 +238,7 @@ object SpeechTiming {
     }
 
     /** How long a word takes to say, roughly: its letters, with digits counted as the words they become. */
-    private fun weight(text: String, range: IntRange): Float {
+    internal fun weight(text: String, range: IntRange): Float {
         var weight = 0f
         for (i in range) {
             val c = text[i]
