@@ -31,6 +31,7 @@ internal class NaturalModel(private val context: Context, val pack: VoicePack, t
     val sampleRate: Int
 
     /** How many processor cores it runs on. sherpa-onnx fixes that when it loads: see [rethread]. */
+    @Volatile
     var threads: Int = threads
         private set
 
@@ -226,6 +227,9 @@ internal class ModelHost(private val context: Context) {
 
     /** Runs [work] on the voice thread. */
     fun run(work: () -> Unit) = executor.execute(work)
+
+    /** Whether [ease] would load [model] again for a phone that is [warm] or not (a phone with few cores is on few already). */
+    fun wouldEase(model: NaturalModel, warm: Boolean): Boolean = threads(warm) != model.threads
 
     /**
      * Has [model] run on fewer cores while the phone is [warm], and on its usual number once it

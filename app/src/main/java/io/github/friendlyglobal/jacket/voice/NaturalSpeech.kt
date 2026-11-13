@@ -376,6 +376,8 @@ internal class NaturalSpeech(
         val warm = warm()
         if (warm == easedFor || inHand() < Cushion.RELOAD_SECONDS) return
         easedFor = warm
+        // Already on as many cores as wanted: nothing is loaded again, and the next piece counts.
+        if (!host.wouldEase(model, warm)) return
         reloaded = true
         host.ease(model, warm)
     }
