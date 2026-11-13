@@ -210,6 +210,12 @@ class ReaderNav(
     var chapterProgress by mutableFloatStateOf(-1f)
     /** What's left of the chapter, as a fraction of the whole book (negative while unknown): at your pace, the time left. */
     var chapterLeft by mutableFloatStateOf(-1f)
+    /**
+     * While the book is read aloud: the letters from the sentence the voice is on to the end of
+     * its chapter (see [lettersLeftInChapter]); null while that isn't known. The player tells the
+     * time left in the chapter by it, at the voice's own speed.
+     */
+    var voiceLettersLeft by mutableStateOf<Float?>(null)
     /** Where the last jump started from, offered back for a little while. */
     var cameFrom by mutableStateOf<Origin?>(null)
     var sectionName: (Int) -> String = { "" }
@@ -680,27 +686,6 @@ fun ReaderScreen(
         if (!struggling) listen.warned = false else if (listening && !listen.warned && !chrome) peek = true
     }
 
-    // How fast the voice gets through this book, learnt from the pages it turns (see ListeningPace):
-    // the mini player tells the time left in the chapter by it, as the footer does by your own
-    // reading pace. Until a page or so has been heard, it says what the footer would.
-    val heard = remember(book.id) { ListeningPace() }
-    var listenPace by remember(book.id) { mutableFloatStateOf(0f) }
-    var paceRate by remember(book.id) { mutableFloatStateOf(settings.listenRate) }
-    LaunchedEffect(book.id, nav, settings.listenRate) {
-        if (paceRate != settings.listenRate) {
-            heard.retimed(paceRate, settings.listenRate)
-            paceRate = settings.listenRate
-            listenPace = heard.wholeBook
-        }
-        snapshotFlow { Triple(nav.pageKey, listen.playing && !listen.preparing, listen.offPage) }.collect { (_, speaking, elsewhere) ->
-            val progress = library.state.value.find(book.id)?.progress ?: return@collect
-            // Only pages the voice turned itself count, not the listener's own.
-            val theirs = SystemClock.uptimeMillis() - nav.movedAt < LISTENER_TURN_MS
-            heard.page(SystemClock.elapsedRealtime(), progress, following = speaking && !elsewhere && !theirs)
-            listenPace = heard.wholeBook
-        }
-    }
-
     // The cover screen and the widget follow along: the chapter, the place in it (to the nearest
     // half percent: about a page), and read-aloud.
     DisposableEffect(book.id) { onDispose { library.endMoment(book.id) } }
@@ -934,7 +919,7 @@ fun ReaderScreen(
                 modifier = Modifier.align(Alignment.BottomCenter).keyboardControls(controlFocus, "footer"),
             ) {
                 ReaderFooter(
-                    nav, book, page, settings, playerVoice, listenPace, haptics,
+                    nav, book, page, settings, playerVoice, haptics,
                     onePage = onePage,
                     pageTurns = pageTurns + markActions,
                     onControls = {
@@ -1412,17 +1397,16 @@ private fun footerText(nav: ReaderNav, book: Book, settings: Settings): String {
 }
 
 /**
- * What's left of the chapter for the mini player: the minutes the voice still needs, once its pace
- * through this book is known (and "Time left" is on); until then what the footer says of the pages.
+ * What's left of the chapter for the mini player: the minutes the voice still needs (with "Time
+ * left" on), told from the sentence it is on to the chapter's end and how fast it speaks (see
+ * VoicePace.kt), not from the page in view or the reader's own pace. Where that can't be told (a
+ * PDF, a book without chapters, before the first sentence) it says what the footer would of the pages.
  */
 @Composable
-private fun listeningLeft(nav: ReaderNav, settings: Settings, pace: Float): String {
-    val left = nav.chapterLeft
-    return if (settings.timeLeft && pace > 0f && left >= 0f && !nav.atEnd) {
-        stringResource(R.string.reader_footer_time_left, ceil(pace * left / 60_000f).toInt().coerceAtLeast(1))
-    } else {
-        nav.footer
-    }
+private fun listeningLeft(nav: ReaderNav, book: Book, settings: Settings): String {
+    val minutes = nav.voiceLettersLeft.takeIf { settings.timeLeft }
+        ?.let { voiceMinutesLeft(it, nav.listen.lettersPerMs, settings.listenRate, book.language ?: nav.bookLanguage) }
+    return if (minutes != null) stringResource(R.string.reader_footer_time_left, minutes) else nav.footer
 }
 
 /**
@@ -1480,9 +1464,6 @@ private const val CONTROLS_POLL_MS = 250L
  * it leaves: the mark on the sentence the voice stopped on outlasts it by about a second.
  */
 private const val STOPPED_CONTROLS_MS = 1_000L
-
-/** A page changing this soon after the reader's own swipe, turn or jump was theirs, not the voice's. */
-private const val LISTENER_TURN_MS = 2_000L
 
 /** The longest the landed cover waits for the first page; after that the book opens on a loading indicator. */
 private const val HOLD_CAP_MS = 2_500L
@@ -1726,8 +1707,6 @@ private fun ReaderFooter(
     page: PageColors,
     settings: Settings,
     voice: ListenVoice,
-    /** The voice's pace through this book (see [ReaderScreen]); 0 while unknown. */
-    listenPace: Float,
     haptics: Haptics,
     /** The width of one page, while the phone is held half-open like a book: what the line says keeps to the left-hand page. Null for the whole line. */
     onePage: Dp? = null,
@@ -1796,7 +1775,7 @@ private fun ReaderFooter(
             if (player && controller != null) {
                 MiniPlayer(
                     nav.listen, controller, voice,
-                    left = listeningLeft(nav, settings, listenPace),
+                    left = listeningLeft(nav, book, settings),
                     progress = if (nav.chapterProgress >= 0f) nav.chapterProgress else nav.section.toFloat() / (nav.sectionCount - 1).coerceAtLeast(1),
                     colors = page,
                     haptics = haptics,

@@ -71,7 +71,9 @@ internal object Pages {
  */
 internal class TextPlaces(private val texts: List<String>) {
     private val starts = IntArray(texts.size)
-    private val letters: Int
+
+    /** How many letters the file holds (spaces aside): what "time left in chapter" is counted in while it is read aloud. */
+    val letters: Int
 
     init {
         var before = 0

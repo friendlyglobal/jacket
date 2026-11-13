@@ -118,6 +118,13 @@ internal class VoicePage(
     var startAt: (suspend (stopped: Locator?) -> VoiceStart?)? = null
 }
 
+/**
+ * Where the voice is in the chapter file it is reading: the file, how far down it the sentence
+ * being spoken starts (0..1, by letters: see [TextPlaces]) and how many letters the file holds.
+ * What "time left in chapter" is counted from while the book is read aloud (see VoicePace.kt).
+ */
+internal data class VoiceSpot(val file: Url, val within: Double, val fileLetters: Int)
+
 /** The voice a book is read with, and the language where that isn't the one the book gives: what a running voice was opened with. */
 internal data class Tuning(val voice: VoiceRef?, val language: String?, val phoneVoiceLanguage: String?)
 
@@ -328,6 +335,13 @@ internal class ReadAloud(
     /** The sentence the voice is on, as a place the pages can go by: where a reader opening the book finds it. Null when nothing is being read. */
     val sentence: Locator? get() = lastPlaced
 
+    /** Where in its chapter file the voice is, for the reader to tell the time left in the chapter by; null when nothing is being read. */
+    var spokenSpot: VoiceSpot? by mutableStateOf(null)
+        private set
+
+    /** How fast the voice is speaking, timed sentence by sentence: the player's state tells it on ([ListenState.lettersPerMs]). */
+    private val pace = VoicePace()
+
     /** In a PDF: the sentence the voice is on as letters of its paragraph, which is how it is found on the PDF's pages. Null when nothing is being read. */
     var pdfSentence: PdfSentence? by mutableStateOf(null)
         private set
@@ -534,6 +548,7 @@ internal class ReadAloud(
                 var started = !playing
                 // Whether it has been asked to speak: told apart from speaking, which waits on the voice.
                 var asked = false
+                var speaking = false
                 tts.playback.collect { playback ->
                     val now = playback.playWhenReady && playback.state is TtsNavigator.State.Ready
                     if (now) started = true
@@ -554,6 +569,10 @@ internal class ReadAloud(
                         listen.playing = now
                         if (!now) listen.preparing = false
                     }
+                    // A sentence the voice stopped in the middle of, or took up again in the middle
+                    // of, says nothing of how fast it reads.
+                    if (now != speaking) pace.interrupted()
+                    speaking = now
                     when (val state = playback.state) {
                         is TtsNavigator.State.Ended -> {
                             // Read to the end of the book: all of it has been heard, and is saved as that.
@@ -613,8 +632,14 @@ internal class ReadAloud(
                     // The pages are told where it is in their own terms, not in read-aloud's: sent
                     // after a sentence they can't find by its words, they go by where it is.
                     if (location.utteranceLocator != lastSpoken) {
-                        val placed = files.placed(location.utteranceLocator)
+                        // How fast it reads, for the time left in the chapter: the sentence before
+                        // this one is timed, unless the listener sent the voice here from the middle of it.
+                        if (sent) pace.interrupted()
+                        pace.began(bare(location.utterance).length, SystemClock.elapsedRealtime())
+                        listen.lettersPerMs = pace.lettersPerMs
+                        val (placed, letters) = files.placedIn(location.utteranceLocator)
                         lastPlaced = placed
+                        spokenSpot = VoiceSpot(placed.href, placed.locations.progression ?: 0.0, letters)
                         // In a PDF: which letters of its paragraph the sentence is, to find it on the PDF's pages by.
                         if (open.pdf != null) pdfSentence = open.pdfSentence(placed, location.utterance.length)
                         spoken(placed)
@@ -884,6 +909,8 @@ internal class ReadAloud(
 
     /** Moves the voice, not yet speaking, to the sentence after [at], or the one before it; false if it can't. */
     private suspend fun skipSentence(tts: TtsNavigator<*, *, *, *>, at: TtsNavigator.Location, forward: Boolean): Boolean {
+        // (Passed over, not read: nothing of how fast the voice reads.)
+        pace.interrupted()
         if (forward) {
             if (!tts.hasNextUtterance()) return false
             tts.skipToNextUtterance()
@@ -941,6 +968,9 @@ internal class ReadAloud(
         // The voice and the language it is reading with already: a reader that opens the book the
         // voice is reading sets them as they are, and nothing is to be heard of it.
         if (tuned == Tuning(voice, language, phoneVoiceLanguage)) return
+        // Another voice speaks at a pace of its own: the time left in the chapter goes by it once it is heard.
+        pace.forget()
+        listen.lettersPerMs = 0f
         val playing = running.playback.value.playWhenReady
         val at = lastSpoken
         session?.cancel()
@@ -1110,6 +1140,9 @@ internal class ReadAloud(
     override fun setRate(rate: Float) {
         // (A reader that opens the book the voice is reading sets the speed it already has.)
         if (rate == speed) return
+        // What was learnt of how fast the voice reads carries over to the new speed, scaled.
+        pace.retimed(speed, rate)
+        listen.lettersPerMs = pace.lettersPerMs
         speed = rate
         if (tts != null) submitRate(rate)
     }
@@ -1186,6 +1219,8 @@ internal class ReadAloud(
         lastSpoken = null
         lastPlaced = null
         pdfSentence = null
+        spokenSpot = null
+        pace.interrupted()
         if (spoken != null) {
             stoppedAt = spoken
             stoppedAtTime = SystemClock.elapsedRealtime()
