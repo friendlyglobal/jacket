@@ -1156,10 +1156,9 @@ private fun EpubPages(
         onDispose {}
     }
     // The voice has these pages for as long as the book is open here, whatever else changes.
-    // Closing the book stops it (see ReaderScreen), and another book opened over this one (from a
-    // widget, a shortcut) ends it mid-sentence: that sentence is the place. A screen that goes any
-    // other way (Android clearing it away while the voice reads on behind another app) only takes
-    // the pages with it: the voice reads on, and keeps the book's place itself from there.
+    // Another book opened over this one (from a widget, a shortcut) ends it mid-sentence: that
+    // sentence is the place. Closing the book, or Android clearing the screen away behind another
+    // app, only takes the pages with it: the voice reads on, and keeps the book's place itself from there.
     val saveLastSpoken by rememberUpdatedState { saveSpoken() }
     DisposableEffect(listen) {
         nav.listenController = listen

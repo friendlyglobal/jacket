@@ -1324,9 +1324,9 @@ internal class ReadAloud(
     }
 
     /**
-     * The reader has gone. Closing a book stops its voice first (see ReaderScreen); a screen that
-     * goes some other way (Android clearing it away behind another app) leaves the voice reading,
-     * with no pages, and the book's place is kept here from now on.
+     * The reader has gone: the book was closed, or Android cleared the screen away behind another
+     * app. A voice that is reading goes on, with no pages, and the book's place is kept here from
+     * now on.
      */
     fun detach(page: VoicePage) {
         if (this.page !== page) return

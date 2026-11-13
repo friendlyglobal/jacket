@@ -540,12 +540,15 @@ fun ReaderScreen(
         }
     }
 
+    // Closing the book leaves the voice reading, as going Home does: the library says it is, and
+    // pauses it, as do the notification, a headset and the widget (see Listening). Opening the
+    // book again finds the page at the sentence it has reached. Every book that is read aloud
+    // (EPUB, PDF, FB2, text) is read on with no reader open, so none has to stop here.
     val close: () -> Unit = {
         if (!closing) {
             // First, so the cover is made knowing where in the library it will land.
             onClose()
             closing = true
-            nav.listenController?.stop()
         }
     }
 
