@@ -174,7 +174,7 @@ fun HomeScreen(
     onSample: () -> Unit = {},
     /** The phone folds: the empty library speaks of its outer screen (see Foldables). */
     foldable: Boolean = false,
-    /** Opens the book and starts reading it aloud; offered on the wide layout's "Continue reading" pane. */
+    /** Opens the book and starts reading it aloud: the Listen button of the "Continue reading" card or pane. */
     onListen: ((Book) -> Unit)? = null,
     /** Pins, collections, a book's details and cover, the grid or the list; without it, none are offered. */
     organizer: LibraryOrganizer? = null,
@@ -318,6 +318,9 @@ fun HomeScreen(
                         ContinueCard(
                             hero, outerAvailable, onOpen = { onOpen(it, CoverSpot.HERO) }, modifier = Modifier.animateItem(),
                             aloud = aloud?.takeIf { it.bookId == hero.id }?.playing,
+                            haptics = haptics,
+                            onListen = onListen,
+                            onAloud = onAloud,
                         )
                     }
                 }
@@ -560,7 +563,11 @@ private fun SettingsButton(haptics: Haptics, backFromSettings: Boolean, onClick:
 
 private const val GEAR_TURN = 90f
 
-/** The book on your cover screen, one tap from where you left off. */
+/**
+ * The book on your cover screen, one tap from where you left off: reading it (the card), or
+ * listening to it (its Listen button, which pauses the voice and takes it up again while the book
+ * is being read aloud), as the wide layout's pane offers both.
+ */
 @Composable
 private fun ContinueCard(
     book: Book,
@@ -569,6 +576,11 @@ private fun ContinueCard(
     modifier: Modifier = Modifier,
     /** The book is being read aloud: true while the voice reads, false while it is paused; null when it isn't. */
     aloud: Boolean? = null,
+    haptics: Haptics? = null,
+    /** Opens the book and starts reading it aloud; null for no Listen button. */
+    onListen: ((Book) -> Unit)? = null,
+    /** Pauses the voice (false) or has it read on (true). */
+    onAloud: (Boolean) -> Unit = {},
 ) {
     val interaction = remember { MutableInteractionSource() }
     // Back from reading, the line runs on to where you got to.
@@ -627,6 +639,56 @@ private fun ContinueCard(
                         }
                     }
                 }
+                // Formats that can be read aloud: listening is one tap from the library, as reading is.
+                // (Under the words, where it has the card's width: a narrow screen has no room beside them.)
+                if (onListen != null && haptics != null && book.canListen) {
+                    Spacer(Modifier.height(12.dp))
+                    ListenButton(aloud, haptics, onListen = { onListen(book) }, onAloud = onAloud, modifier = Modifier.heightIn(min = 40.dp))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Listen, on the "Continue reading" card and pane: opens the book and starts reading it aloud.
+ * While the book is being read aloud (the voice reading on with the book shut), the same button
+ * pauses the voice ("Pause") and takes it up again ("Resume"), where it stands.
+ */
+@Composable
+private fun ListenButton(
+    /** The book is being read aloud: true while the voice reads, false while it is paused; null when it isn't. */
+    aloud: Boolean?,
+    haptics: Haptics,
+    onListen: () -> Unit,
+    onAloud: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    FilledTonalButton(
+        onClick = {
+            when (aloud) {
+                null -> { haptics.tick(); onListen() }
+                else -> { haptics.toggle(!aloud); onAloud(!aloud) }
+            }
+        },
+        shapes = ButtonDefaults.shapes(),
+        modifier = modifier,
+    ) {
+        val motion = MaterialTheme.motionScheme
+        AnimatedContent(
+            targetState = aloud,
+            transitionSpec = { fadeIn(motion.fastEffectsSpec()) togetherWith fadeOut(motion.fastEffectsSpec()) },
+            label = "listen-button",
+        ) { reading ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val (icon, label) = when (reading) {
+                    null -> JacketIcons.Headphones to R.string.library_listen
+                    true -> JacketIcons.Pause to R.string.listen_pause
+                    false -> JacketIcons.Play to R.string.library_resume
+                }
+                Icon(icon, null, Modifier.size(ButtonDefaults.IconSize))
+                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                Text(stringResource(label), maxLines = 1, autoSize = fitOnOneLine(MaterialTheme.typography.labelLarge))
             }
         }
     }
@@ -785,36 +847,7 @@ private fun NowReadingPane(
                         }
                         // Formats that can be read aloud.
                         if (onListen != null && book.canListen) {
-                            // While the book is being read aloud (the voice was started with it
-                            // shut), the same button pauses the voice and takes it up again.
-                            FilledTonalButton(
-                                onClick = {
-                                    when (aloud) {
-                                        null -> { haptics.tick(); onListen(book) }
-                                        else -> { haptics.toggle(!aloud); onAloud(!aloud) }
-                                    }
-                                },
-                                shapes = ButtonDefaults.shapes(),
-                                modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                            ) {
-                                val motion = MaterialTheme.motionScheme
-                                AnimatedContent(
-                                    targetState = aloud,
-                                    transitionSpec = { fadeIn(motion.fastEffectsSpec()) togetherWith fadeOut(motion.fastEffectsSpec()) },
-                                    label = "listen-button",
-                                ) { reading ->
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        val (icon, label) = when (reading) {
-                                            null -> JacketIcons.Headphones to R.string.library_listen
-                                            true -> JacketIcons.Pause to R.string.listen_pause
-                                            false -> JacketIcons.Play to R.string.library_resume
-                                        }
-                                        Icon(icon, null, Modifier.size(ButtonDefaults.IconSize))
-                                        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
-                                        Text(stringResource(label), maxLines = 1, autoSize = fitOnOneLine(MaterialTheme.typography.labelLarge))
-                                    }
-                                }
-                            }
+                            ListenButton(aloud, haptics, onListen = { onListen(book) }, onAloud = onAloud, modifier = Modifier.weight(1f).heightIn(min = 48.dp))
                         }
                     }
                 }
