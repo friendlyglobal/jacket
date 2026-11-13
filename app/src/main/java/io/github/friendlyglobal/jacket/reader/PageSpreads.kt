@@ -177,37 +177,37 @@ internal fun SpreadPages(
     if (aloud != null) FollowVoiceBySpread(pager, rows, kept, aloud, nav, frames, zoom, words, viewport, turning) { turnTo(it) }
     val marking = aloud?.marking
 
-    // The pages lie as a book's whichever language the phone is in: a book's direction is its own.
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        BoxWithConstraints(
-            Modifier
-                .fillMaxSize()
-                .clipToBounds()
-                .onSizeChanged {
-                    zoom.size = Size(it.width.toFloat().coerceAtLeast(1f), it.height.toFloat().coerceAtLeast(1f))
-                    viewport[0] = zoom.size
-                }
-                .onGloballyPositioned { words.origin[0] = it.positionInWindow() }
-                // Choosing words comes first: a finger that is selecting doesn't turn, zoom or tap.
-                .chooseWords(words, haptics)
-                .pointerInput(zoom) { spreadZoomGestures(zoom) }
-                .tapZones(
-                    onPrevious = { nav.turnPage(-1) },
-                    onNext = { nav.turnPage(1) },
-                    onCenter = onCenterTap,
-                    onDoubleTap = { at ->
-                        haptics.tick()
-                        zoom.toggle(at)
-                    },
-                    onPage = { at -> words.tap(at, haptics, nav) },
-                    rightToLeft = rightToLeft,
-                ),
-        ) {
-            val widthPx = constraints.maxWidth.toFloat()
-            val heightPx = constraints.maxHeight.toFloat()
-            val layout = remember(widthPx, heightPx, density, rightToLeft, spine) {
-                PairLayout(widthPx, heightPx, density.density, rightToLeft, spine?.left?.toFloat(), spine?.right?.toFloat())
+    BoxWithConstraints(
+        Modifier
+            .fillMaxSize()
+            .clipToBounds()
+            .onSizeChanged {
+                zoom.size = Size(it.width.toFloat().coerceAtLeast(1f), it.height.toFloat().coerceAtLeast(1f))
+                viewport[0] = zoom.size
             }
+            .onGloballyPositioned { words.origin[0] = it.positionInWindow() }
+            // Choosing words comes first: a finger that is selecting doesn't turn, zoom or tap.
+            .chooseWords(words, haptics)
+            .pointerInput(zoom) { spreadZoomGestures(zoom) }
+            .tapZones(
+                onPrevious = { nav.turnPage(-1) },
+                onNext = { nav.turnPage(1) },
+                onCenter = onCenterTap,
+                onDoubleTap = { at ->
+                    haptics.tick()
+                    zoom.toggle(at)
+                },
+                onPage = { at -> words.tap(at, haptics, nav) },
+                rightToLeft = rightToLeft,
+            ),
+    ) {
+        val widthPx = constraints.maxWidth.toFloat()
+        val heightPx = constraints.maxHeight.toFloat()
+        val layout = remember(widthPx, heightPx, density, rightToLeft, spine) {
+            PairLayout(widthPx, heightPx, density.density, rightToLeft, spine?.left?.toFloat(), spine?.right?.toFloat())
+        }
+        // The pages lie as a book's whichever language the phone is in: a book's direction is its own.
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
             HorizontalPager(
                 state = pager,
                 modifier = Modifier.fillMaxSize().graphicsLayer {
@@ -232,18 +232,18 @@ internal fun SpreadPages(
                         val sized = with(density) {
                             Modifier.absoluteOffset { IntOffset(box.left.roundToInt(), box.top.roundToInt()) }.size(width.toDp(), height.toDp())
                         }
-                        PageImage(box.page, width, width / height.toFloat(), page, render, aloud, frames, { zoom.scale }, sized) { nav.contentReady = true }
+                        PageImage(box.page, width, width / height.toFloat(), page, render, aloud, frames, { zoom.scale }, sized, ownSize = false) { nav.contentReady = true }
                     }
                 }
             }
-            // The menu over words that are selected: by them, wherever the spread has got to.
-            if (marking != null) {
-                PdfSelectionMenu(
-                    marking, haptics,
-                    moving = { pager.isScrollInProgress to listOf(zoom.scale, zoom.panX, zoom.panY, pager.currentPage) },
-                    selectionInWindow = { words.selectionInWindow(Size(widthPx, heightPx)) },
-                )
-            }
+        }
+        // The menu over words that are selected: by them, wherever the spread has got to.
+        if (marking != null) {
+            PdfSelectionMenu(
+                marking, haptics,
+                moving = { pager.isScrollInProgress to listOf(zoom.scale, zoom.panX, zoom.panY, pager.currentPage) },
+                selectionInWindow = { words.selectionInWindow(Size(widthPx, heightPx)) },
+            )
         }
     }
 }

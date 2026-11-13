@@ -846,8 +846,9 @@ internal fun PageImage(
     frames: PageFrames,
     /** How many times their size the pages are drawn just now. */
     zoomed: () -> Float,
-    /** Where the page goes and how large it is, where that is decided outside (pages side by side); null for as wide as the list, to a point, at its own shape. */
-    box: Modifier? = null,
+    modifier: Modifier = Modifier,
+    /** The page is as wide as the list (to a point), at its own shape; false where [modifier] places and sizes it (pages side by side). */
+    ownSize: Boolean = true,
     onRendered: () -> Unit,
 ) {
     val bitmap by produceState<ImageBitmap?>(null, index, widthPx) {
@@ -861,7 +862,8 @@ internal fun PageImage(
     // The page develops on its placeholder rather than popping onto it.
     val developed = animateFloatAsState(if (bitmap != null) 1f else 0f, MaterialTheme.motionScheme.defaultEffectsSpec(), label = "page")
     Box(
-        (box ?: Modifier.widthIn(max = 900.dp).padding(horizontal = 8.dp).fillMaxWidth().aspectRatio(aspect))
+        modifier
+            .then(if (ownSize) Modifier.widthIn(max = 900.dp).padding(horizontal = 8.dp).fillMaxWidth().aspectRatio(aspect) else Modifier)
             // The handles of what is selected hang from its ends, over the page's edge if they must: drawn outside what clips the page.
             .drawWithContent {
                 drawContent()
