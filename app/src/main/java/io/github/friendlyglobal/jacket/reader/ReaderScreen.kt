@@ -260,6 +260,10 @@ class ReaderNav(
     internal var noHighlights by mutableStateOf<NoHighlights?>(null)
     /** Turns a page for the keys and the mouse wheel: +1 forward, -1 back. */
     var turnPage: (Int) -> Unit = { step(it) }
+    /** Whether there is a page (or two pages side by side) to turn to that way. */
+    var canTurn: (Int) -> Boolean = { section + it in 0 until sectionCount }
+    /** A book of pages shows two side by side just now (see PagePairs.kt): held half-open, the fold is the spine between them. */
+    var sideBySide by mutableStateOf(false)
     /** The book reads right to left: the arrow keys go the other way round. */
     var rightToLeft by mutableStateOf(false)
     /** The book is laid out in pages (not one long scroll): a mouse wheel turns them. */
@@ -761,8 +765,9 @@ fun ReaderScreen(
     // Book posture: half-open with the fold upright, the fold is the spine between the two pages
     // of the spread (see BookPosture). The pages keep clear of it, and so do the controls: they
     // sit on the right-hand page, as they would on a phone of that width. Only where there are
-    // two pages to part: a book of pages, not one scrolled, nor a PDF's or a comic's single page.
-    val pagedBook = book.format.isWords && settings.layout == PageLayout.PAGES
+    // two pages to part: a book of pages, not one scrolled, nor a PDF's or a comic's single page
+    // (two of theirs side by side, yes).
+    val pagedBook = (book.format.isWords && settings.layout == PageLayout.PAGES) || nav.sideBySide
     val bookFold by rememberBookFold(watch = pagedBook)
     val spine = remember(bookFold, windowWidth, windowHeight, density, coverUp) {
         if (coverUp) null else BookPosture.spine(bookFold, windowWidth, windowHeight, with(density) { BookPosture.OFF_CENTRE.dp.toPx() })
@@ -893,8 +898,8 @@ fun ReaderScreen(
                     when (book.format) {
                         // A text file and an FB2 book are read through pages made of them, the same way as an EPUB.
                         BookFormat.EPUB, BookFormat.TXT, BookFormat.FB2 -> EpubReader(book, settings, page, nav, haptics, annotations, respellings, spine, toggleChrome)
-                        BookFormat.PDF -> PdfReader(book, settings, page, nav, haptics, annotations, respellings, onProgress, toggleChrome)
-                        BookFormat.CBZ -> ComicReader(book, page, nav, haptics, onProgress, toggleChrome)
+                        BookFormat.PDF -> PdfReader(book, settings, page, nav, haptics, annotations, respellings, spine, onProgress, toggleChrome)
+                        BookFormat.CBZ -> ComicReader(book, settings, page, nav, haptics, spine, onProgress, toggleChrome)
                     }
                 }
             }
@@ -1115,6 +1120,10 @@ fun ReaderScreen(
                 Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).navigationBarsPadding(),
                 forEpub = book.format.isWords,
                 lightLevels = true,
+                // A PDF's or a comic's: two pages side by side, and which way this one reads.
+                forPages = !book.format.isWords,
+                rightToLeft = if (book.format.isWords) null else nav.rightToLeft,
+                onRightToLeft = { library.setRightToLeft(book.id, it) },
             )
         }
         Sheet.VOICE -> ReaderSheet(onGone = { sheet = Sheet.NONE }) { leave ->

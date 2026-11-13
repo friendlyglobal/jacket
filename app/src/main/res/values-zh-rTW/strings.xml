@@ -212,6 +212,7 @@
     <string name="reader_next_page">下一頁</string>
     <string name="reader_page_number">第 %1$d 頁</string>
     <string name="reader_page_of">第 %1$d 頁，共 %2$d 頁</string>
+    <string name="reader_pages_of">第 %1$d–%2$d 頁，共 %3$d 頁</string>
     <string name="reader_percent_read">已讀 %1$d%%</string>
     <string name="reader_footer_last_page">本章最後一頁</string>
     <plurals name="reader_footer_pages_left">
@@ -325,6 +326,11 @@
     <string name="reading_edge_swipes_description">沿左邊緣上下滑動調整亮度，沿右邊緣調整色溫。</string>
     <string name="reading_night_pages">夜間使用深色頁面</string>
     <string name="reading_night_pages_description">手機處於深色主題時，淺色頁面也會變為深色。</string>
+    <string name="reading_pages_group">PDF 和漫畫</string>
+    <string name="reading_side_by_side">雙頁並排</string>
+    <string name="reading_side_by_side_description">在寬螢幕上，兩頁一起顯示，就像打開的書。</string>
+    <string name="reading_right_to_left">從右到左</string>
+    <string name="reading_right_to_left_description">適合漫畫：從右向左翻頁。只對這本書生效。</string>
     <string name="settings_tabletop">桌面模式</string>
     <string name="settings_tabletop_description">半摺放在桌上：頁面在摺痕上方，控制項在下方。</string>
     <string name="settings_watch_folder">監看的資料夾</string>

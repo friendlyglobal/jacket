@@ -88,6 +88,12 @@ data class Book(
     val spentMs: Long = 0L,
     /** How much of [spentMs] was listened to: the voice speaking. Never more than [spentMs]. */
     val listenedMs: Long = 0L,
+    /**
+     * A book of pages (a PDF, a comic) reads right to left, as manga do: the reader's own choice
+     * for this book. Null while they haven't made one: then a comic goes by what it says of
+     * itself (its ComicInfo.xml), and anything else reads left to right.
+     */
+    val rightToLeft: Boolean? = null,
 ) {
     val isFinished: Boolean get() = finishedAt > 0L
 
@@ -305,6 +311,8 @@ data class Settings(
     val collection: String? = null,
     /** Read aloud, the small numbers that point to notes are passed over. */
     val skipNoteNumbers: Boolean = true,
+    /** On a screen wide enough for two, a PDF's or a comic's pages are shown two at a time, like an open book. */
+    val sideBySide: Boolean = true,
 )
 
 data class LibraryState(
@@ -403,6 +411,7 @@ internal object LibraryJson {
             put("voices", JSONObject().apply { state.settings.voices.forEach { (language, voice) -> put(language, voice) } })
             put("collection", state.settings.collection ?: JSONObject.NULL)
             put("skipNoteNumbers", state.settings.skipNoteNumbers)
+            put("sideBySide", state.settings.sideBySide)
         })
         put("sayings", JSONArray().apply {
             state.sayings.forEach {
@@ -481,6 +490,8 @@ internal object LibraryJson {
                 collection = if (s.isNull("collection")) null else s.optString("collection").takeIf { it.isNotEmpty() },
                 // Libraries and backups from before there was the choice: notes' numbers are passed over.
                 skipNoteNumbers = s.optBoolean("skipNoteNumbers", true),
+                // Libraries and backups from before there was the choice: pages side by side where they fit.
+                sideBySide = s.optBoolean("sideBySide", true),
             ),
             // Libraries from before collections have none.
             collections = list("collections").entries { c ->
@@ -519,6 +530,7 @@ internal object LibraryJson {
         put("sha256", sha256 ?: JSONObject.NULL)
         put("spentMs", spentMs)
         put("listenedMs", listenedMs)
+        put("rightToLeft", rightToLeft ?: JSONObject.NULL)
     }
 
     /** A bookmark or highlight as it is written to the library, a backup and the file other devices read. */
@@ -590,5 +602,7 @@ internal object LibraryJson {
         // listened than spent, whatever a damaged file says.)
         spentMs = maxOf(optLong("spentMs").coerceAtLeast(0L), optLong("listenedMs").coerceAtLeast(0L)),
         listenedMs = optLong("listenedMs").coerceAtLeast(0L),
+        // Nor do those from before a book of pages could be read right to left: they go by what the book says.
+        rightToLeft = if (!has("rightToLeft") || isNull("rightToLeft")) null else optBoolean("rightToLeft"),
     )
 }

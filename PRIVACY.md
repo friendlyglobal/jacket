@@ -20,7 +20,8 @@ are no analytics, no ads and no accounts. Jacket sends the developer nothing.
 - **Your reading data.** Reading positions, bookmarks, highlights, notes and settings are stored
   on your device, and so is the time you spend with your books: how long you read or listened
   each day (kept for a little over a year), how much of it was listening, and the time spent
-  with each book. It is only used for "Your reading", your streak and the widget.
+  with each book. It is only used for "Your reading", your streak and the widget. Which PDFs
+  and comics you set to read right to left is kept with them.
 - **PDF passwords.** A PDF that is locked with a password asks you for it. Jacket keeps the
   password only while it is running, unless you tick *Remember on this phone*. A remembered
   password is stored encrypted on your device, with a key that Android keeps on that device. It
@@ -48,7 +49,7 @@ languages they know; for any other language, the phone's voice is used.
 
 - **Android device backup.** If you have device backup turned on, Android's Auto Backup may
   include Jacket's library list, reading positions, reading and listening time, bookmarks,
-  highlights, notes and settings in your Google account backup. Book files are not included. Google stores this backup under
+  highlights, notes and settings (including which books read right to left) in your Google account backup. Book files are not included. Google stores this backup under
   its own terms; the developer has no access to it. You can turn backup off in your phone's
   settings.
 - **Moving to a new phone.** If you use Android's phone-to-phone transfer, Android may copy

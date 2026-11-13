@@ -225,6 +225,7 @@
     <string name="reader_next_page">Próxima página</string>
     <string name="reader_page_number">Página %1$d</string>
     <string name="reader_page_of">Página %1$d de %2$d</string>
+    <string name="reader_pages_of">Páginas %1$d–%2$d de %3$d</string>
     <string name="reader_percent_read">%1$d%% lido</string>
     <string name="reader_footer_last_page">Última página do capítulo</string>
     <plurals name="reader_footer_pages_left">
@@ -344,6 +345,11 @@
     <string name="reading_edge_swipes_description">Deslize para cima ou para baixo na borda esquerda para o brilho e na direita para o calor.</string>
     <string name="reading_night_pages">Páginas escuras à noite</string>
     <string name="reading_night_pages_description">Quando o celular está no tema escuro, as páginas claras também ficam escuras.</string>
+    <string name="reading_pages_group">PDFs e quadrinhos</string>
+    <string name="reading_side_by_side">Páginas lado a lado</string>
+    <string name="reading_side_by_side_description">Numa tela larga, duas páginas aparecem juntas, como um livro aberto.</string>
+    <string name="reading_right_to_left">Da direita para a esquerda</string>
+    <string name="reading_right_to_left_description">Para mangá: as páginas viram da direita para a esquerda. Só neste livro.</string>
     <string name="settings_tabletop">Modo mesa</string>
     <string name="settings_tabletop_description">Meio dobrado sobre a mesa: a página acima da dobra e os controles abaixo.</string>
     <string name="settings_watch_folder">Pasta monitorada</string>

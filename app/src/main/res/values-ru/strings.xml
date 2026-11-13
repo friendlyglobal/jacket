@@ -232,6 +232,7 @@
     <string name="reader_next_page">Следующая страница</string>
     <string name="reader_page_number">Страница %1$d</string>
     <string name="reader_page_of">Страница %1$d из %2$d</string>
+    <string name="reader_pages_of">Страницы %1$d–%2$d из %3$d</string>
     <string name="reader_percent_read">Прочитано %1$d&#160;%%</string>
     <string name="reader_footer_last_page">Последняя страница главы</string>
     <plurals name="reader_footer_pages_left">
@@ -354,6 +355,11 @@
     <string name="reading_edge_swipes_description">Проведите вверх или вниз вдоль левого края для яркости, вдоль правого — для теплоты.</string>
     <string name="reading_night_pages">Тёмные страницы ночью</string>
     <string name="reading_night_pages_description">Когда на телефоне тёмная тема, светлые страницы тоже становятся тёмными.</string>
+    <string name="reading_pages_group">PDF и комиксы</string>
+    <string name="reading_side_by_side">Две страницы рядом</string>
+    <string name="reading_side_by_side_description">На широком экране видны сразу две страницы, как в раскрытой книге.</string>
+    <string name="reading_right_to_left">Справа налево</string>
+    <string name="reading_right_to_left_description">Для манги: страницы листаются справа налево. Только для этой книги.</string>
     <string name="settings_tabletop">Режим на столе</string>
     <string name="settings_tabletop_description">Полусложенный на столе: страница над сгибом, управление под ним.</string>
     <string name="settings_watch_folder">Отслеживаемая папка</string>

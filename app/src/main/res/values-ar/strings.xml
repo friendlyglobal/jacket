@@ -247,6 +247,7 @@
     <string name="reader_next_page">الصفحة التالية</string>
     <string name="reader_page_number">صفحة %1$d</string>
     <string name="reader_page_of">صفحة %1$d من %2$d</string>
+    <string name="reader_pages_of">الصفحات %1$d–%2$d من %3$d</string>
     <string name="reader_percent_read">تمت قراءة %1$d%%</string>
     <string name="reader_footer_last_page">آخر صفحة في الفصل</string>
     <plurals name="reader_footer_pages_left">
@@ -375,6 +376,11 @@
     <string name="reading_edge_swipes_description">اسحب لأعلى أو لأسفل على الحافة اليسرى للسطوع، وعلى اليمنى للدفء.</string>
     <string name="reading_night_pages">صفحات داكنة ليلًا</string>
     <string name="reading_night_pages_description">عندما يكون هاتفك في المظهر الداكن، تصبح الصفحات الفاتحة داكنة أيضًا.</string>
+    <string name="reading_pages_group">ملفات PDF والقصص المصوّرة</string>
+    <string name="reading_side_by_side">صفحتان متجاورتان</string>
+    <string name="reading_side_by_side_description">على الشاشة العريضة، تظهر صفحتان معًا مثل كتاب مفتوح.</string>
+    <string name="reading_right_to_left">من اليمين إلى اليسار</string>
+    <string name="reading_right_to_left_description">للمانغا: تُقلَب الصفحات من اليمين إلى اليسار. لهذا الكتاب فقط.</string>
     <string name="settings_tabletop">وضع الطاولة</string>
     <string name="settings_tabletop_description">نصف مطويّ على طاولة: الصفحة فوق الطيّة وعناصر التحكم تحتها.</string>
     <string name="settings_watch_folder">مجلد مُراقَب</string>

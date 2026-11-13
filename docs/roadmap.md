@@ -452,6 +452,45 @@ For readers who mostly listen ("my main source is audio").
 - The folded library's "Continue reading" card has the wide pane's Listen / Pause button.
 - Still open: a PDF's player still says the pages left, as PDFs have no time left in chapter.
 
+### Pages side by side for PDFs and comics (M)
+On the unfolded inner screen, a tablet on its side or any window wide enough, a PDF's or a comic's
+pages show a spread at a time, like an open book (`reader/PagePairs.kt`, `reader/PageSpreads.kt`).
+- **Book order.** The cover alone, then 2–3, 4–5… A page wider than it is tall (a double-page
+  scan) stands alone, and so does the page left before it. The footer and the top bar say
+  "Pages 2–3 of 8".
+- **When.** Both pages are shown whole, each fitted to its half of the window and to the height
+  above the footer. Two are shown when each would be at least 300dp wide and at least 0.55 of
+  the width one page has shown whole by itself; the book's typical page shape (the middle one of
+  all its pages') decides. The Pixel 9 Pro Fold's inner screen qualifies either way up, and so
+  does a tablet on its side. A folded phone, a phone on its side (too low for two whole pages
+  anyone could read) and a tablet held upright keep the one scrolled page they had. A book of
+  landscape pages (slides) is never paired.
+- **Turning.** Spreads turn sideways, by swipe, the page's edges, the keys and the volume keys;
+  zoom takes the spread as one and a finger moves about it while zoomed in. A PDF's highlights,
+  notes, chosen words, search results and read-aloud mark work on either page, and the spread
+  turns when the voice reads on past it. The slider, "Back to…" and bookmarks go by page.
+- **The place** is the first page of the spread, or the second if the reader's place was already
+  on it (read on the folded screen to page 5, unfolded to 4–5, folded again: page 5, as far down
+  it as before). Folding and unfolding keep it. Held half-open like a book, each page sits on its
+  own half, 16dp clear of the fold, a lone cover on the right, with the spine's shadow between.
+- **Right to left.** A comic whose ComicInfo.xml says `<Manga>YesAndRightToLeft</Manga>` reads
+  right to left; any PDF or comic can be set to in the reading settings, for that book. It flips
+  the order of a pair, the way spreads turn, the edge taps and the arrow keys (one scrolled page
+  still scrolls down).
+- **Settings.** "PDFs and comics" in the reading settings (and in Settings): "Pages side by side",
+  on by default, for every book, since it is about the screen and the reader's taste rather than
+  one book; and, in the reader, "Right to left", for that book alone. Both are kept in the
+  library and in backups.
+- **Memory.** The pages' shapes are learnt once a window could show two (a PDF page's size from
+  Android's PDF reader, a comic page's from the head of its picture file). Only the spread in view
+  is drawn, each page at its own width: two pages of a spread are smaller pictures than the one
+  wide page of the scrolled view.
+- Still open: only tried on the emulator; a PDF that says it reads right to left
+  (`/Direction /R2L`) isn't noticed (comics are); the slider still fills left to right in a book
+  read right to left; and a book opened on a wide screen waits for its pages' shapes before it
+  opens (a 361-page PDF opened on its spread in under a second on the emulator; after 1.5 s it
+  opens one page at a time and goes to pages side by side once they are known).
+
 ## Next
 
 ### Android Auto (M)

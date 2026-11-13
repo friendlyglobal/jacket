@@ -553,6 +553,13 @@ class Library(private val context: Context) : LibraryOrganizer {
         changed()
     }
 
+    /** Whether [id], a book of pages, reads right to left: the reader's choice, which stands over what the book says of itself. */
+    fun setRightToLeft(id: String, rightToLeft: Boolean) {
+        if (_state.value.find(id)?.rightToLeft == rightToLeft) return
+        _state.update { s -> s.copy(books = s.books.map { if (it.id == id) it.copy(rightToLeft = rightToLeft) else it }) }
+        changed()
+    }
+
     /**
      * Forgets the password of [id], a locked PDF: it is asked for the next time the PDF is opened.
      * The words kept of the PDF for reading it aloud go with it.

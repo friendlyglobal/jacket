@@ -96,9 +96,19 @@ fun ReadingControls(
      * for anyone who can't make that swipe (a screen reader, a switch, a keyboard, an unsteady hand).
      */
     lightLevels: Boolean = false,
+    /** PDFs and comics are read too: whether their pages are shown side by side is offered. */
+    forPages: Boolean = true,
+    /** In the reader, for a PDF or a comic: whether this one reads right to left, and the changing of it. Null elsewhere. */
+    rightToLeft: Boolean? = null,
+    onRightToLeft: (Boolean) -> Unit = {},
 ) {
     val haptics = rememberHaptics()
+    // A PDF's or a comic's own come first in its reader, where most of the rest is for books of words.
+    val pages = @Composable {
+        if (forPages) PageChoices(settings, onSettings, rightToLeft, onRightToLeft, haptics)
+    }
     Column(modifier) {
+        if (!forEpub) pages()
         Label(stringResource(R.string.reading_text_size))
         val textSize = stringResource(R.string.reading_text_size)
         val percent = stringResource(R.string.percent, (settings.textScale * 100).roundToInt())
@@ -245,6 +255,8 @@ fun ReadingControls(
                 modifier = Modifier.padding(top = 8.dp, start = 4.dp, end = 4.dp),
             )
         }
+
+        if (forEpub) pages()
 
         Label(stringResource(R.string.settings_group_reading))
         ToggleRow(stringResource(R.string.reading_time_left), null, settings.timeLeft) { on ->
@@ -405,6 +417,32 @@ private fun LevelSlider(name: String, level: Float, range: ClosedFloatingPointRa
                 stateDescription = percent
             },
         )
+    }
+}
+
+/**
+ * For PDFs and comics: two pages side by side on a wide screen (for every book, like the rest of
+ * these choices), and, in the reader, whether this one reads right to left (for this book alone:
+ * it is the book's way, not the reader's).
+ */
+@Composable
+private fun PageChoices(
+    settings: Settings,
+    onSettings: ((Settings) -> Settings) -> Unit,
+    rightToLeft: Boolean?,
+    onRightToLeft: (Boolean) -> Unit,
+    haptics: Haptics,
+) {
+    Label(stringResource(R.string.reading_pages_group))
+    ToggleRow(stringResource(R.string.reading_side_by_side), stringResource(R.string.reading_side_by_side_description), settings.sideBySide) { on ->
+        haptics.toggle(on)
+        onSettings { it.copy(sideBySide = on) }
+    }
+    if (rightToLeft != null) {
+        ToggleRow(stringResource(R.string.reading_right_to_left), stringResource(R.string.reading_right_to_left_description), rightToLeft) { on ->
+            haptics.toggle(on)
+            onRightToLeft(on)
+        }
     }
 }
 

@@ -1,5 +1,6 @@
 package io.github.friendlyglobal.jacket.importer
 
+import android.graphics.BitmapFactory
 import android.util.Xml
 import org.xmlpull.v1.XmlPullParser
 import java.io.File
@@ -20,24 +21,51 @@ object Comic {
         val pages = pageNames(zip)
         require(pages.isNotEmpty()) { "No pages in comic" }
         val cover = zip.getInputStream(zip.getEntry(pages.first())).use { Bitmaps.decodeSampled(it.readBytes(), 1400) }
-        val info = zip.entries().asSequence().firstOrNull { it.name.substringAfterLast('/').equals("ComicInfo.xml", true) }
-            ?.let { entry -> runCatching { zip.getInputStream(entry).use(::comicInfo) }.getOrNull() }
-        BookMeta(info?.first, info?.second, cover, pages.size)
+        val info = runCatching { info(zip) }.getOrNull()
+        BookMeta(info?.title, info?.writer, cover, pages.size)
     }
 
-    private fun comicInfo(stream: java.io.InputStream): Pair<String?, String?> {
+    /** What a comic's ComicInfo.xml says of it: its name, who wrote it, and whether it reads right to left. */
+    class Info(val title: String?, val writer: String?, val rightToLeft: Boolean)
+
+    /** The comic's ComicInfo.xml, read; null where it has none. */
+    fun info(zip: ZipFile): Info? {
+        val entry = zip.entries().asSequence().firstOrNull { it.name.substringAfterLast('/').equals("ComicInfo.xml", true) } ?: return null
+        return zip.getInputStream(entry).use(::comicInfo)
+    }
+
+    private fun comicInfo(stream: java.io.InputStream): Info {
         val parser = Xml.newPullParser().apply { setInput(stream, null) }
         val values = HashMap<String, String>()
         var event = parser.eventType
         while (event != XmlPullParser.END_DOCUMENT) {
-            if (event == XmlPullParser.START_TAG && parser.name in setOf("Title", "Series", "Number", "Writer")) {
+            if (event == XmlPullParser.START_TAG && parser.name in setOf("Title", "Series", "Number", "Writer", "Manga")) {
                 values[parser.name] = parser.nextText().trim()
             }
             event = parser.next()
         }
         val series = values["Series"]?.let { s -> values["Number"]?.let { "$s #$it" } ?: s }
-        return (values["Title"]?.takeIf { it.isNotEmpty() } ?: series) to values["Writer"]
+        return Info(values["Title"]?.takeIf { it.isNotEmpty() } ?: series, values["Writer"], readsRightToLeft(values["Manga"]))
     }
+
+    /**
+     * Whether ComicInfo.xml's `Manga` says the pages read right to left. It is "Yes" for any manga
+     * and "YesAndRightToLeft" for one whose pages turn the other way; only that says the direction.
+     */
+    internal fun readsRightToLeft(manga: String?): Boolean = manga?.trim().equals("YesAndRightToLeft", ignoreCase = true)
+
+    /**
+     * How wide the picture in [stream] is for its height; 0 where that can't be told. Only its
+     * start is read, where the size is written, never the whole picture.
+     */
+    fun aspectOf(stream: java.io.InputStream): Float {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeStream(stream.buffered(SIZE_READ), null, bounds)
+        return if (bounds.outWidth > 0 && bounds.outHeight > 0) bounds.outWidth / bounds.outHeight.toFloat() else 0f
+    }
+
+    /** What is read at a time of a picture whose size is wanted: its size is written well within this. */
+    private const val SIZE_READ = 16 * 1024
 
     /** Sorts "page2" before "page10". */
     object NaturalOrder : Comparator<String> {

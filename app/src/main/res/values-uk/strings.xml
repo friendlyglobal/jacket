@@ -232,6 +232,7 @@
     <string name="reader_next_page">Наступна сторінка</string>
     <string name="reader_page_number">Сторінка %1$d</string>
     <string name="reader_page_of">Сторінка %1$d з %2$d</string>
+    <string name="reader_pages_of">Сторінки %1$d–%2$d з %3$d</string>
     <string name="reader_percent_read">Прочитано %1$d%%</string>
     <string name="reader_footer_last_page">Остання сторінка розділу</string>
     <plurals name="reader_footer_pages_left">
@@ -354,6 +355,11 @@
     <string name="reading_edge_swipes_description">Проведіть угору або вниз уздовж лівого краю для яскравості, уздовж правого — для теплоти.</string>
     <string name="reading_night_pages">Темні сторінки вночі</string>
     <string name="reading_night_pages_description">Коли на телефоні темна тема, світлі сторінки теж стають темними.</string>
+    <string name="reading_pages_group">PDF і комікси</string>
+    <string name="reading_side_by_side">Дві сторінки поруч</string>
+    <string name="reading_side_by_side_description">На широкому екрані видно одразу дві сторінки, як у розгорнутій книжці.</string>
+    <string name="reading_right_to_left">Справа наліво</string>
+    <string name="reading_right_to_left_description">Для манґи: сторінки гортаються справа наліво. Лише для цієї книжки.</string>
     <string name="settings_tabletop">Режим на столі</string>
     <string name="settings_tabletop_description">Напівскладений на столі: сторінка над згином, керування під ним.</string>
     <string name="settings_watch_folder">Відстежувана папка</string>
