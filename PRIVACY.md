@@ -1,6 +1,6 @@
 # Jacket Privacy Policy
 
-**Effective date: 12 November 2026**
+**Effective date: 13 November 2026**
 
 Jacket is a free, open-source e-reader for Android, developed at
 [github.com/friendlyglobal/jacket](https://github.com/friendlyglobal/jacket). This policy explains
@@ -51,9 +51,9 @@ languages they know; for any other language, the phone's voice is used.
 
 - **Android device backup.** If you have device backup turned on, Android's Auto Backup may
   include Jacket's library list, reading positions, reading and listening time, bookmarks,
-  highlights, notes and settings (including which books read right to left) in your Google account backup. Book files are not included. Google stores this backup under
-  its own terms; the developer has no access to it. You can turn backup off in your phone's
-  settings.
+  highlights, notes and settings (including which books read right to left) in your Google
+  account backup. Book files are not included. Google stores this backup under its own terms;
+  the developer has no access to it. You can turn backup off in your phone's settings.
 - **Moving to a new phone.** If you use Android's phone-to-phone transfer, Android may copy
   Jacket's data, including your books, directly to the new phone.
 - **Backup files you export.** You can export a backup file from Jacket yourself. It holds the

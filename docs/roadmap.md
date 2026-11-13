@@ -429,7 +429,20 @@ pass comes back as soon as the phone has room for it, one at a time (`voice/Qual
 With the screen off, the words aren't inked in one by one either; the sentence is, and the
 words catch up when the page is looked at again.
 
-## Coming in 1.5
+## Shipped in 1.5 (13 November 2026)
+
+For a reader who mostly listens, and from a hands-on review of the reader.
+
+### The natural voice works calmly ahead (M)
+On a phone that got hot, the voice turned rough and stopped between sentences at once: heat
+made it prepare only one sentence ahead and drop straight to its roughest quality. Now it keeps
+speech ready by the second (`voice/Cushion.kt`): about 20 seconds ahead, 60 while the phone is
+warm or slow, held to 6 MB. Heat no longer lowers the quality; a warm phone makes the voice on
+two cores instead, the voice is made at a lower priority, and the sound plays at audio priority. Fewer
+refinement passes are the last resort, only with under 10 seconds in hand and the phone still
+behind (`voice/QualityGuard.kt`). Fewer voices would not help: all ten share one model. Still
+open: in an EPUB the voice sees only the current and next paragraph, so short lines of
+dialogue keep it from getting far ahead.
 
 ### Listening first (M)
 For readers who mostly listen ("my main source is audio").
