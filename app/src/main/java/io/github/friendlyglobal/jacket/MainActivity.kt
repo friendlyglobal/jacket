@@ -20,6 +20,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -59,6 +60,8 @@ import io.github.friendlyglobal.jacket.outer.OuterDisplay
 import io.github.friendlyglobal.jacket.reader.ReaderFragments
 import io.github.friendlyglobal.jacket.reader.ReaderKeys
 import io.github.friendlyglobal.jacket.reader.ReaderScreen
+import io.github.friendlyglobal.jacket.reader.ReaderSystemBars
+import io.github.friendlyglobal.jacket.reader.readerControlsDark
 import io.github.friendlyglobal.jacket.ui.CoverSpot
 import io.github.friendlyglobal.jacket.ui.CoverTransition
 import io.github.friendlyglobal.jacket.ui.KeepScreenOn
@@ -466,7 +469,13 @@ private fun JacketRoot(
                                 onBack = { destination = HOME },
                                 onOpen = { book -> open(book.id, CoverSpot.TILE) },
                             )
-                            book != null -> JacketTheme(seed = if (bookColors) book.seedColor else null, animated = false) {
+                            // A book's controls dress like its page: dark over Dark and Black pages (see ReaderLook).
+                            book != null -> JacketTheme(
+                                seed = if (bookColors) book.seedColor else null,
+                                darkTheme = readerControlsDark(state.settings, isSystemInDarkTheme()),
+                                animated = false,
+                            ) {
+                                ReaderSystemBars(dark = readerControlsDark(state.settings, isSystemInDarkTheme()))
                                 CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) {
                                     ReaderScreen(
                                         book = book,

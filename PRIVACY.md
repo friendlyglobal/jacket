@@ -21,7 +21,9 @@ are no analytics, no ads and no accounts. Jacket sends the developer nothing.
   on your device, and so is the time you spend with your books: how long you read or listened
   each day (kept for a little over a year), how much of it was listening, and the time spent
   with each book. It is only used for "Your reading", your streak and the widget. Which PDFs
-  and comics you set to read right to left is kept with them.
+  and comics you set to read right to left is kept with them. Settings include a small count
+  of how many times the reader has shown where to swipe for brightness and warmth, so those
+  hints stop after the first few books; it is kept with the other settings, in backups too.
 - **PDF passwords.** A PDF that is locked with a password asks you for it. Jacket keeps the
   password only while it is running, unless you tick *Remember on this phone*. A remembered
   password is stored encrypted on your device, with a key that Android keeps on that device. It

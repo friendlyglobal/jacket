@@ -30,10 +30,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Jacket">
 
-        <!-- configChanges keeps the activity (and the outer-display session) alive across fold/unfold. -->
+        <!-- configChanges keeps the activity (and the outer-display session) alive across fold/unfold,
+             and a book open through a change of the phone's font size: its pages re-flow in place. -->
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|density|keyboardHidden|uiMode"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|density|fontScale|keyboardHidden|uiMode"
             android:exported="true"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize">

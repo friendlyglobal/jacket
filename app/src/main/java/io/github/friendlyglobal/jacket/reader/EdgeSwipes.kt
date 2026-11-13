@@ -1,19 +1,10 @@
 package io.github.friendlyglobal.jacket.reader
 
 import android.view.WindowManager
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -24,12 +15,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
@@ -57,6 +45,9 @@ internal class EdgeLevels(brightness: Float, warmth: Float) {
 
     /** The edge under the finger: -1 the left (brightness), +1 the right (warmth), 0 neither. */
     var active by mutableIntStateOf(0)
+
+    /** The edge a finger has landed on and not yet left, swiping or not (its handle answers it, see EdgeHandles): -1, +1, or 0. */
+    var touched by mutableIntStateOf(0)
 }
 
 /** The dimmest the reader goes: still readable in the dark, never a black screen. */
@@ -66,12 +57,20 @@ internal const val DIMMEST = 0.02f
 internal fun phoneBrightness(context: android.content.Context): Float =
     android.provider.Settings.System.getInt(context.contentResolver, android.provider.Settings.System.SCREEN_BRIGHTNESS, 128) / 255f
 
-/** The strip along each edge that listens for these swipes. */
-private val EdgeStrip = 32.dp
+/**
+ * The strip along each edge that listens for these swipes: about a fingertip wide, so it is easy
+ * to land in. Nothing is taken from anything else by its width: only a move up or down, begun
+ * soon after the finger lands, is a swipe; a move sideways there is still a page turn (or
+ * Android's back gesture, which the phone itself watches for), a tap is still a tap, and a finger
+ * held still is still a press and hold on the words.
+ */
+internal val EdgeStrip = 40.dp
 
 /**
  * Watches for a finger moving up or down along either edge. A sideways move there is still a page
- * turn (or the system's back swipe), a tap is still a tap, and anywhere else is left alone.
+ * turn (or the system's back swipe), a tap is still a tap, a finger held still before it moves is
+ * still a press and hold (choosing words, which the move after it stretches), and anywhere else is
+ * left alone.
  */
 internal suspend fun PointerInputScope.edgeSwipes(
     levels: EdgeLevels,
@@ -88,26 +87,36 @@ internal suspend fun PointerInputScope.edgeSwipes(
         down.position.x >= size.width - strip -> 1
         else -> return@awaitEachGesture
     }
-    val slop = viewConfiguration.touchSlop
-    var moved = Offset.Zero
-    var swiping = false
-    var step = -1
-    while (true) {
-        val event = awaitPointerEvent(PointerEventPass.Initial)
-        val change = event.changes.fastFirstOrNull { it.id == down.id } ?: break
-        if (!change.pressed || event.changes.size > 1) break
-        val delta = change.positionChange()
-        moved += delta
-        if (!swiping) {
-            if (abs(moved.x) > slop && abs(moved.x) >= abs(moved.y)) break
-            if (abs(moved.y) > slop && abs(moved.y) > abs(moved.x) * 1.5f) {
-                swiping = true
-                levels.active = side
-                // Starting from wherever the phone has it, so the first move isn't a jump.
-                if (side < 0 && levels.brightness < 0f) levels.brightness = phoneBrightness()
+    levels.touched = side
+    try {
+        val slop = viewConfiguration.touchSlop
+        var moved = Offset.Zero
+        // Before it is a swipe: a move up or down, begun before a press and hold would be.
+        val swiping = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+            var decided: Boolean? = null
+            while (decided == null) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                val change = event.changes.fastFirstOrNull { it.id == down.id }
+                if (change != null) moved += change.positionChange()
+                decided = when {
+                    change == null || !change.pressed || event.changes.size > 1 -> false
+                    abs(moved.x) > slop && abs(moved.x) >= abs(moved.y) -> false
+                    abs(moved.y) > slop && abs(moved.y) > abs(moved.x) * 1.5f -> true
+                    else -> null
+                }
             }
-        }
-        if (swiping) {
+            decided
+        } == true
+        if (!swiping) return@awaitEachGesture
+        levels.active = side
+        // Starting from wherever the phone has it, so the first move isn't a jump.
+        if (side < 0 && levels.brightness < 0f) levels.brightness = phoneBrightness()
+        var step = -1
+        while (true) {
+            val event = awaitPointerEvent(PointerEventPass.Initial)
+            val change = event.changes.fastFirstOrNull { it.id == down.id } ?: break
+            if (!change.pressed || event.changes.size > 1) break
+            val delta = change.positionChange()
             change.consume()
             val by = -delta.y / (size.height * 0.6f)
             if (side < 0) {
@@ -121,10 +130,11 @@ internal suspend fun PointerInputScope.edgeSwipes(
                 step = notch
             }
         }
-    }
-    if (swiping) {
         levels.active = 0
         onSettled()
+    } finally {
+        levels.touched = 0
+        levels.active = 0
     }
 }
 
@@ -164,30 +174,5 @@ internal fun BoxScope.Warmth(levels: EdgeLevels, enabled: Boolean) {
     )
 }
 
-private val Warmest = Color(0xFFFFB061)
-
-/** A pill beside the finger showing the level being set, while it's being set. */
-@Composable
-internal fun BoxScope.EdgeLevel(levels: EdgeLevels) {
-    val side = levels.active
-    var shown by remember { mutableIntStateOf(-1) }
-    if (side != 0) shown = side
-    val fill = if (shown < 0) MaterialTheme.colorScheme.primary else Warmest
-    AnimatedVisibility(
-        visible = side != 0,
-        enter = fadeIn(MaterialTheme.motionScheme.fastEffectsSpec()) + scaleIn(MaterialTheme.motionScheme.fastSpatialSpec(), initialScale = 0.8f),
-        exit = fadeOut(MaterialTheme.motionScheme.defaultEffectsSpec()),
-        modifier = Modifier.align(if (shown < 0) Alignment.CenterStart else Alignment.CenterEnd).padding(horizontal = 48.dp),
-    ) {
-        Box(
-            Modifier
-                .size(width = 40.dp, height = 176.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .drawBehind {
-                    val level = (if (shown < 0) levels.brightness else levels.warmth).coerceIn(0f, 1f)
-                    drawRect(fill, Offset(0f, size.height * (1f - level)), Size(size.width, size.height * level))
-                },
-        )
-    }
-}
+/** The warmest the page is tinted: an amber, multiplied in. */
+internal val Warmest = Color(0xFFFFB061)

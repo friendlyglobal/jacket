@@ -237,7 +237,8 @@ private fun EpubPages(
     val resources = LocalResources.current
     val library = context.library
     val publication = open.publication
-    val selectionMenu = remember(publication) { SelectionMenu(context) }
+    // Words selected on the page: the web view says when there are some (see EpubSelection.kt).
+    val selection = remember(publication) { WebSelection() }
     val scope = rememberCoroutineScope()
     val contents = remember(publication) { Contents(publication) }
     val scroll = settings.layout == PageLayout.SCROLL
@@ -247,12 +248,14 @@ private fun EpubPages(
     // are no pages to part.
     val density = LocalDensity.current
     val windowWidth = LocalWindowInfo.current.containerSize.width
-    val spread = remember(spine, scroll, settings.textScale, settings.margins, windowWidth, density) {
+    // The words grow with the phone's font size too, on top of the reader's own size (see BookTextSize).
+    val textSize = BookTextSize.of(settings.textScale, phoneTextScale())
+    val spread = remember(spine, scroll, textSize, settings.margins, windowWidth, density) {
         spine?.takeIf { !scroll }?.let { fold ->
-            with(density) { BookPosture.spread(windowWidth.toDp().value, fold.width.toDp().value, settings.textScale, settings.margins.readium) }
+            with(density) { BookPosture.spread(windowWidth.toDp().value, fold.width.toDp().value, textSize, settings.margins.readium) }
         }
     }
-    val preferences = epubPreferences(settings, page, spread)
+    val preferences = epubPreferences(settings, page, spread, textSize)
     val tap by rememberUpdatedState(onCenterTap)
     val turner = remember { PageTurner(scope) }
     var navigator by remember { mutableStateOf<EpubNavigatorFragment?>(null) }
@@ -318,7 +321,7 @@ private fun EpubPages(
                 filePage = next
             }
         },
-        configuration = readerConfiguration(selectionMenu),
+        configuration = readerConfiguration(selection),
     )
 
     // The fragment manager asks for a navigator when the book opens, and again whenever Compose
@@ -753,66 +756,6 @@ private fun EpubPages(
         onDispose { n.removeDecorationListener(listener) }
     }
 
-    // Selected text: highlight it, add a note, copy, share, or hand it to Translate and friends.
-    selectionMenu.onAction = { action, processor ->
-        scope.launch {
-            val n = navigator ?: return@launch
-            val selection = n.currentSelection() ?: return@launch
-            val text = selection.locator.text.highlight?.trim().orEmpty()
-            n.clearSelection()
-            if (text.isEmpty()) return@launch
-            when (action) {
-                SelectionMenu.Action.HIGHLIGHT, SelectionMenu.Action.NOTE -> {
-                    haptics.confirm()
-                    val resource = contents.resourceOf(selection.locator.href)
-                    val highlight = Annotation(
-                        id = UUID.randomUUID().toString(),
-                        bookId = book.id,
-                        kind = AnnotationKind.HIGHLIGHT,
-                        locator = selection.locator.toJSON().toString(),
-                        section = textFile?.pagePlace(null, selection.locator)?.paragraph ?: 0,
-                        progress = (spans?.total(resource, selection.locator.locations.progression ?: 0.0) ?: 0.0).toFloat(),
-                        chapter = nav.title,
-                        text = text,
-                        color = annotations.lastOrNull { it.kind == AnnotationKind.HIGHLIGHT }?.color ?: HighlightColor.YELLOW,
-                        createdAt = System.currentTimeMillis(),
-                    )
-                    library.addAnnotation(highlight)
-                    if (action == SelectionMenu.Action.NOTE) nav.editing = highlight.id
-                }
-                SelectionMenu.Action.COPY -> {
-                    context.getSystemService(ClipboardManager::class.java)
-                        .setPrimaryClip(ClipData.newPlainText(book.title, text))
-                }
-                // "Say it this way": how the voice is to say the word, or the name, selected.
-                SelectionMenu.Action.SAY -> SayIt.wordFrom(text).takeIf { it.isNotEmpty() }?.let {
-                    haptics.tick()
-                    nav.sayWord = it
-                }
-                SelectionMenu.Action.SHARE -> runCatching {
-                    val quote = if (book.author.isNotBlank()) {
-                        resources.getString(R.string.reader_share_quote_author, text, book.title, book.author)
-                    } else {
-                        resources.getString(R.string.reader_share_quote, text, book.title)
-                    }
-                    val send = Intent(Intent.ACTION_SEND).setType("text/plain")
-                        .putExtra(Intent.EXTRA_TEXT, quote)
-                    context.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                }
-                SelectionMenu.Action.PROCESS -> runCatching {
-                    val info = processor?.activityInfo ?: return@runCatching
-                    context.startActivity(
-                        Intent(Intent.ACTION_PROCESS_TEXT).setType("text/plain")
-                            .setClassName(info.packageName, info.name)
-                            .putExtra(Intent.EXTRA_PROCESS_TEXT, text)
-                            .putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, true)
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                    )
-                }
-            }
-        }
-    }
-
     // Bookmarks: remember the page by the first words on it, and find it again by them.
     nav.place = place@{
         val n = navigator ?: return@place null
@@ -978,6 +921,80 @@ private fun EpubPages(
     // notes passed over. Both take effect with the next sentence the voice is given.
     listen.edits.respellings = respellings
     listen.skipNotes = settings.skipNoteNumbers
+
+    // Selected words: highlighted in a colour, given a note, copied, shared, said the reader's way,
+    // read aloud from, or handed to Translate and friends. The menu is the one a PDF's words have
+    // (see EpubSelection.kt), and so are its choices.
+    val onSelectionChoice: (SelectionChoice) -> Unit = { choice ->
+        scope.launch {
+            val n = navigator ?: return@launch
+            val chosen = n.currentSelection() ?: return@launch
+            val text = chosen.locator.text.highlight?.trim().orEmpty()
+            n.clearSelection()
+            selection.finish()
+            if (text.isEmpty()) return@launch
+            when (choice) {
+                is SelectionChoice.Highlight, SelectionChoice.Note -> {
+                    haptics.confirm()
+                    val resource = contents.resourceOf(chosen.locator.href)
+                    val highlight = Annotation(
+                        id = UUID.randomUUID().toString(),
+                        bookId = book.id,
+                        kind = AnnotationKind.HIGHLIGHT,
+                        locator = chosen.locator.toJSON().toString(),
+                        section = textFile?.pagePlace(null, chosen.locator)?.paragraph ?: 0,
+                        progress = (spans?.total(resource, chosen.locator.locations.progression ?: 0.0) ?: 0.0).toFloat(),
+                        chapter = nav.title,
+                        text = text,
+                        // A colour picked, or for a note the colour last used.
+                        color = (choice as? SelectionChoice.Highlight)?.color
+                            ?: annotations.lastOrNull { it.kind == AnnotationKind.HIGHLIGHT }?.color ?: HighlightColor.YELLOW,
+                        createdAt = System.currentTimeMillis(),
+                    )
+                    library.addAnnotation(highlight)
+                    if (choice == SelectionChoice.Note) nav.editing = highlight.id
+                }
+                SelectionChoice.Copy -> {
+                    context.getSystemService(ClipboardManager::class.java)
+                        .setPrimaryClip(ClipData.newPlainText(book.title, text))
+                }
+                // "Say it this way": how the voice is to say the word, or the name, selected.
+                SelectionChoice.Say -> SayIt.wordFrom(text).takeIf { it.isNotEmpty() }?.let {
+                    haptics.tick()
+                    nav.sayWord = it
+                }
+                SelectionChoice.Share -> runCatching {
+                    val quote = if (book.author.isNotBlank()) {
+                        resources.getString(R.string.reader_share_quote_author, text, book.title, book.author)
+                    } else {
+                        resources.getString(R.string.reader_share_quote, text, book.title)
+                    }
+                    val send = Intent(Intent.ACTION_SEND).setType("text/plain")
+                        .putExtra(Intent.EXTRA_TEXT, quote)
+                    context.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                }
+                // "Read aloud from here": the voice goes to the sentence the selection starts in
+                // (started there, if it wasn't running), found in its own reading of the file.
+                SelectionChoice.Listen -> {
+                    haptics.confirm()
+                    val file = open.spoken.of(chosen.locator.href, chosen.locator.mediaType)
+                    val spot = selectionSpot(file.blocks.map { it.text }, chosen.locator.text)
+                    // Not told apart (the same words twice in the chapter): from the page in view.
+                    if (spot != null) listen.listenFrom(file.blocks[spot.block], spot.offset) else listen.start()
+                }
+                is SelectionChoice.Process -> runCatching {
+                    val info = choice.activity.activityInfo
+                    context.startActivity(
+                        Intent(Intent.ACTION_PROCESS_TEXT).setType("text/plain")
+                            .setClassName(info.packageName, info.name)
+                            .putExtra(Intent.EXTRA_PROCESS_TEXT, text)
+                            .putExtra(Intent.EXTRA_PROCESS_TEXT_READONLY, true)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                    )
+                }
+            }
+        }
+    }
 
     // Highlights without selecting anything, for a screen reader and a keyboard, which can't
     // press and hold on the page: the sentence being read aloud, or else the first paragraph on
@@ -1240,6 +1257,7 @@ private fun EpubPages(
                 }
             }
             .pointerInput(turner) { pageTurnGestures(turner) }
+            .selectionTouches(selection)
             .onSizeChanged { size ->
                 val old = resize.size
                 resize.size = size
@@ -1256,6 +1274,7 @@ private fun EpubPages(
         AndroidFragment<EpubNavigatorFragment>(Modifier.fillMaxSize().livePage(turner)) { fragment -> navigator = fragment }
         PageAbove(turner)
         Box(Modifier.fillMaxSize().graphicsLayer { alpha = reflowVeil.value }.background(page.background))
+        EpubSelectionMenu(selection, { navigator }, haptics, onSelectionChoice)
     }
 }
 

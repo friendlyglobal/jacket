@@ -243,6 +243,7 @@
     <string name="reader_listen">استماع: القراءة بصوت عالٍ</string>
     <string name="reader_previous_chapter">الفصل السابق</string>
     <string name="reader_next_chapter">الفصل التالي</string>
+    <string name="reader_chapter_numbered">الفصل %1$s</string>
     <string name="reader_previous_page">الصفحة السابقة</string>
     <string name="reader_next_page">الصفحة التالية</string>
     <string name="reader_page_number">صفحة %1$d</string>

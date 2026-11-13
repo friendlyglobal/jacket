@@ -208,6 +208,7 @@
     <string name="reader_listen">듣기: 소리 내어 읽기</string>
     <string name="reader_previous_chapter">이전 장</string>
     <string name="reader_next_chapter">다음 장</string>
+    <string name="reader_chapter_numbered">제%1$s장</string>
     <string name="reader_previous_page">이전 페이지</string>
     <string name="reader_next_page">다음 페이지</string>
     <string name="reader_page_number">%1$d페이지</string>

@@ -282,6 +282,8 @@ data class Settings(
     val timeLeft: Boolean = true,
     /** Swiping up and down the page's left edge sets the brightness, the right edge the warmth. */
     val edgeSwipes: Boolean = true,
+    /** How many times a book has opened with the edges' handles showing by themselves where to swipe (see EdgeHandles): a few, then only with the controls. */
+    val edgeHints: Int = 0,
     /** The reader's own brightness (0..1), or negative to leave it to the phone. */
     val brightness: Float = -1f,
     /** How warm the page is tinted (0..1). */
@@ -399,6 +401,7 @@ internal object LibraryJson {
             put("onboarded", state.settings.onboarded)
             put("timeLeft", state.settings.timeLeft)
             put("edgeSwipes", state.settings.edgeSwipes)
+            put("edgeHints", state.settings.edgeHints)
             put("brightness", state.settings.brightness.toDouble())
             put("warmth", state.settings.warmth.toDouble())
             put("nightPages", state.settings.nightPages)
@@ -476,6 +479,7 @@ internal object LibraryJson {
                 onboarded = s.optBoolean("onboarded", true),
                 timeLeft = s.optBoolean("timeLeft", true),
                 edgeSwipes = s.optBoolean("edgeSwipes", true),
+                edgeHints = s.optInt("edgeHints", 0).coerceAtLeast(0),
                 brightness = s.optDouble("brightness", -1.0).toFloat().takeIf { it.isFinite() } ?: -1f,
                 warmth = s.optDouble("warmth", 0.0).toFloat().takeIf { it.isFinite() }?.coerceIn(0f, 1f) ?: 0f,
                 nightPages = s.optBoolean("nightPages", false),

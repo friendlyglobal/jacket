@@ -466,8 +466,27 @@ internal class ReadAloud(
         begin(from = null)
     }
 
-    /** Starts reading at [from]; else at the top of what's on screen, or, with no page in front of the listener, at the place the book was left at. */
-    private fun begin(from: Locator?, playing: Boolean = true) {
+    /**
+     * "Read aloud from here", on words selected on the page: the voice goes to the sentence of
+     * [block] (of its own reading of the book) holding the letter [offset] letters in, spaces
+     * aside, and reads on from there; started there, if it wasn't running.
+     */
+    fun listenFrom(block: Content.TextElement, offset: Int) {
+        if (tts != null) return readFrom(block, offset)
+        listen.offPage = false
+        // Still starting up: one session at a time.
+        if (session?.isActive == true) return
+        // The listener chose where it reads from.
+        sent = true
+        begin(from = null, at = block to offset)
+    }
+
+    /**
+     * Starts reading at [from], or at the sentence of a block [at] the letters given into it; else
+     * at the top of what's on screen, or, with no page in front of the listener, at the place the
+     * book was left at.
+     */
+    private fun begin(from: Locator?, playing: Boolean = true, at: Pair<Content.TextElement, Int>? = null) {
         // The voice is back: the mark of where it stopped has done its work.
         here?.cancel()
         tappedSentence = null
@@ -488,6 +507,7 @@ internal class ReadAloud(
             // Pages that aren't Readium's (a PDF's) say themselves where the voice starts on them.
             val own = if (from == null && n == null) page?.takeIf { it.inSight() }?.startAt?.invoke(stoppedAt) else null
             val resume = when {
+                at != null -> at
                 from != null -> null
                 // Started again on the page where it stopped: the sentence it stopped on, in the block of
                 // Readium's own reading of the file that holds it.
@@ -522,12 +542,15 @@ internal class ReadAloud(
                 // it stopped on, so the listener finds the thread; the page goes there with it
                 // if that sentence isn't on the one in view.
                 // (The first words on a PDF's page are a fresh start, not the sentence it stopped on.)
-                val back = if (resume != null && own?.resumed != false) rewindAfterStop() else 0
-                if (back > 0) {
-                    stepBack(tts, back)
-                    false
-                } else {
-                    n?.let { skipToPage(tts, it) } == true
+                // (Sent to a sentence chosen on the page, it starts there and nowhere else, and the page stays.)
+                val back = if (resume != null && at == null && own?.resumed != false) rewindAfterStop() else 0
+                when {
+                    at != null -> true
+                    back > 0 -> {
+                        stepBack(tts, back)
+                        false
+                    }
+                    else -> n?.let { skipToPage(tts, it) } == true
                 }
             } else {
                 skipToSentence(tts, from).let { false }

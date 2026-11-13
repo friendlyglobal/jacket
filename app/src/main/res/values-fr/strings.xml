@@ -221,6 +221,7 @@
     <string name="reader_listen">Écouter : lecture à voix haute</string>
     <string name="reader_previous_chapter">Chapitre précédent</string>
     <string name="reader_next_chapter">Chapitre suivant</string>
+    <string name="reader_chapter_numbered">Chapitre %1$s</string>
     <string name="reader_previous_page">Page précédente</string>
     <string name="reader_next_page">Page suivante</string>
     <string name="reader_page_number">Page %1$d</string>

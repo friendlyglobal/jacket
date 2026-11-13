@@ -208,6 +208,7 @@
     <string name="reader_listen">聴く：読み上げ</string>
     <string name="reader_previous_chapter">前の章</string>
     <string name="reader_next_chapter">次の章</string>
+    <string name="reader_chapter_numbered">第%1$s章</string>
     <string name="reader_previous_page">前のページ</string>
     <string name="reader_next_page">次のページ</string>
     <string name="reader_page_number">%1$d ページ</string>

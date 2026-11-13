@@ -208,6 +208,7 @@
     <string name="reader_listen">Dengarkan: bacakan</string>
     <string name="reader_previous_chapter">Bab sebelumnya</string>
     <string name="reader_next_chapter">Bab berikutnya</string>
+    <string name="reader_chapter_numbered">Bab %1$s</string>
     <string name="reader_previous_page">Halaman sebelumnya</string>
     <string name="reader_next_page">Halaman berikutnya</string>
     <string name="reader_page_number">Halaman %1$d</string>

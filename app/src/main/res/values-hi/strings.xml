@@ -215,6 +215,7 @@
     <string name="reader_listen">सुनें: पढ़कर सुनाएँ</string>
     <string name="reader_previous_chapter">पिछला अध्याय</string>
     <string name="reader_next_chapter">अगला अध्याय</string>
+    <string name="reader_chapter_numbered">अध्याय %1$s</string>
     <string name="reader_previous_page">पिछला पेज</string>
     <string name="reader_next_page">अगला पेज</string>
     <string name="reader_page_number">पेज %1$d</string>

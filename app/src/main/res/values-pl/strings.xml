@@ -228,6 +228,7 @@
     <string name="reader_listen">Słuchaj: czytanie na głos</string>
     <string name="reader_previous_chapter">Poprzedni rozdział</string>
     <string name="reader_next_chapter">Następny rozdział</string>
+    <string name="reader_chapter_numbered">Rozdział %1$s</string>
     <string name="reader_previous_page">Poprzednia strona</string>
     <string name="reader_next_page">Następna strona</string>
     <string name="reader_page_number">Strona %1$d</string>
