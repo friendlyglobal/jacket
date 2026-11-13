@@ -180,13 +180,10 @@ class ListeningComfortsTest {
     // ---- A fast reader and a slow phone ----
 
     @Test
-    fun `a faster voice is made further ahead, by the same seconds in hand`() {
-        assertEquals(2, NaturalSpeech.sentencesAhead(0.5f))
-        assertEquals(2, NaturalSpeech.sentencesAhead(1f))
-        assertEquals(3, NaturalSpeech.sentencesAhead(1.5f))
-        assertEquals(4, NaturalSpeech.sentencesAhead(2f))
-        assertEquals(6, NaturalSpeech.sentencesAhead(3f))
-        assertTrue(ListenRates.all { NaturalSpeech.sentencesAhead(it) <= NaturalSpeech.MOST_AHEAD })
+    fun `the reader is asked for enough sentences ahead for the fastest reading`() {
+        // At three times the pace a cushion of a minute is three minutes of the voice's own: some
+        // twenty ordinary sentences. How many of them are made is the cushion's to say (see CushionTest).
+        assertTrue(NaturalSpeech.MOST_AHEAD >= 20)
     }
 
     @Test

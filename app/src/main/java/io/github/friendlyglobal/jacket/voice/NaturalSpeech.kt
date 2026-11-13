@@ -6,6 +6,7 @@ import android.os.SystemClock
 import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.math.pow
+import kotlin.math.roundToInt
 
 /**
  * How well the natural voice is keeping up on this phone. [pace] is the time it takes to make a
@@ -116,17 +117,27 @@ internal class Synthesizer(private val host: ModelHost, private val model: Natur
 }
 
 /**
- * Speaks texts with a natural voice, one at a time, as the reader asks for them: makes the sound a
- * sentence or two ahead, plays it without gaps, reports each word as it's heard, and picks up
- * where it was after a pause. Both the EPUB reader (through Readium) and the plain-text reader
- * speak through this. Main thread only.
+ * Speaks texts with a natural voice, one at a time, as the reader asks for them: makes the sound
+ * ahead of the listener, calmly and at full quality, as far as the cushion calls for (see
+ * [Cushion]), plays it without gaps, reports each word as it's heard, and picks up where it was
+ * after a pause. Both the EPUB reader (through Readium) and the plain-text reader speak through
+ * this. Main thread only.
+ *
+ * A phone that warms up gets the same voice with less strain: a bigger cushion, and the model on
+ * fewer cores. A rougher voice is the last resort, for when the cushion is about to run dry (see
+ * [QualityGuard]); and if it runs dry anyway, the listener waits a moment between sentences
+ * rather than hearing it garbled.
+ *
+ * What it does is logged under the `JacketVoice` tag: `adb logcat -s JacketVoice`.
  */
 internal class NaturalSpeech(
     private val host: ModelHost,
     private val model: NaturalModel,
     speaker: Int,
     private val health: MutableStateFlow<VoiceHealth>,
-    /** The phone is running hot: ease off. */
+    /** The phone is warming up (its own thermal status is moderate or worse): work further ahead, on fewer cores. */
+    private val warm: () -> Boolean = { false },
+    /** The phone is running hot (severe or worse): for [VoiceHealth.hot]. */
     private val hot: () -> Boolean = { false },
 ) {
     interface Listener {
@@ -145,9 +156,26 @@ internal class NaturalSpeech(
     private val out = PcmOut(model.sampleRate)
     private var session: Session? = null
     private var paused: Paused? = null
+
+    /** The pieces of the sentences after the one being spoken, in the order they will be heard. */
+    private var upcoming: List<String> = emptyList()
+
+    /** Those of them asked for so far: always the first so many of [upcoming]. */
     private var ahead: List<Synthesizer.Job> = emptyList()
     private var failures = 0
     private var made = 0
+
+    /** The seconds of speech it last aimed to keep ready (see [Cushion.target]); 0 before the first. */
+    private var aim = 0f
+
+    /** Whether the model was last set up for a warm phone (see [ModelHost.ease]); null before the first time. */
+    private var easedFor: Boolean? = null
+
+    /** The model may have just been loaded again: the next piece made pays for it warming up, and says nothing of the pace. */
+    private var reloaded = false
+
+    /** When the sound handed to the speaker so far runs out (elapsed realtime); 0 with nothing playing. */
+    private var dryAt = 0L
 
     /** The quality the voice is made at, and how the phone has been keeping up with it. */
     private var guard = QualityGuard()
@@ -171,7 +199,11 @@ internal class NaturalSpeech(
         val endsParagraph: Boolean,
         val startPiece: Int,
         val startFrame: Int,
-    )
+    ) {
+        /** Where the listener is, by the last word heard: the piece, and the frame in its sound. */
+        var heardPiece = startPiece
+        var heardFrame = startFrame
+    }
 
     private class Paused(
         val text: String,
@@ -185,10 +217,17 @@ internal class NaturalSpeech(
 
     init {
         health.value = VoiceHealth(hot = hot())
-        synth.onMade = ::measure
+        synth.onMade = { clip, madeWith ->
+            measure(clip, madeWith)
+            // (Before more is asked for: loading the model again, if it is time to, comes before the next piece.)
+            ease()
+            // Its real length is known now, and the cushion may have grown: there may be more to ask for.
+            planAhead()
+        }
         out.onFailure = {
             session?.let { s ->
                 session = null
+                dryAt = 0L
                 listener?.onError(s.id)
             }
         }
@@ -223,14 +262,10 @@ internal class NaturalSpeech(
             next = Session(id, text, language, pieces, jobs, endsParagraph, 0, 0)
         }
         session = next
-        // What comes next is made while this plays: a sentence or two, no further, so little is
-        // wasted (in battery, too) if the listener stops or jumps.
-        ahead = upcoming.take(if (hot()) 1 else sentencesAhead(speed)).flatMapIndexed { i, later ->
-            SpeechPieces.of(later, quickStart = false).take(2).mapIndexed { p, range ->
-                synth.request(later.substring(range), language, speed, UPCOMING - i * 4 - p)
-            }
-        }
-        synth.retain(next.jobs + ahead)
+        // What comes next is made while this plays, as far ahead as the cushion calls for.
+        this.upcoming = upcoming.flatMap { later -> SpeechPieces.of(later, quickStart = false).map { later.substring(it) } }
+        ahead = emptyList()
+        planAhead()
         feed(next, next.startPiece, next.startFrame)
     }
 
@@ -271,7 +306,78 @@ internal class NaturalSpeech(
             // All of it had: nothing to go back to.
             else -> null
         }
+        // What is made, or being made, is kept for when the listener goes on; nothing more is
+        // started meanwhile. (Asked for again when they do, it costs nothing until it is made.)
+        ahead = ahead.filter { it.state != Synthesizer.State.WAITING }
         synth.retain(paused?.jobs.orEmpty() + ahead)
+        dryAt = 0L
+    }
+
+    /**
+     * Asks for the pieces after the sentence being spoken, as far ahead as the cushion calls for:
+     * when the sentence is asked for, and again as each piece is made (lengths are reckoned until
+     * then, and the cushion may have grown). Never fewer than were asked for already: nothing is
+     * thrown away for being further ahead than the reckoning thought.
+     */
+    private fun planAhead() {
+        val s = session ?: return
+        val seconds = upcoming.map { piece ->
+            synth.find(piece, s.language, speed)?.clip?.let { it.millis / 1000f } ?: Cushion.estimate(piece, speed)
+        }
+        val count = maxOf(Cushion.ahead(seconds, aim()), ahead.size).coerceAtMost(upcoming.size)
+        ahead = upcoming.take(count).mapIndexed { i, piece -> synth.request(piece, s.language, speed, UPCOMING - i) }
+        synth.retain(s.jobs + ahead)
+    }
+
+    /** The seconds of speech to keep ready (see [Cushion.target]). A change is logged. */
+    private fun aim(): Float {
+        val warm = warm()
+        val next = Cushion.target(warm, guard.struggling, model.sampleRate)
+        if (next != aim) {
+            val why = when {
+                warm -> "the phone is warm"
+                guard.struggling -> "the phone is slow"
+                aim > 0f -> "the phone keeps up again"
+                else -> "the phone keeps up"
+            }
+            Log.i(TAG, (if (aim > 0f) "Cushion ${aim.roundToInt()} s to " else "Cushion ") + "${next.roundToInt()} s of speech ahead: $why")
+            aim = next
+        }
+        return aim
+    }
+
+    /**
+     * Seconds of speech made and ready ahead of the listener: what is left of the sentence being
+     * spoken, then the pieces after it, for as long as they are made one after another.
+     */
+    private fun inHand(): Float {
+        val s = session ?: return 0f
+        var ms = 0L
+        for (i in s.heardPiece until s.jobs.size) {
+            val clip = s.jobs[i].clip ?: return ms / 1000f
+            ms += if (i == s.heardPiece) (clip.pcm.size - s.heardFrame).coerceAtLeast(0) * 1000L / clip.sampleRate else clip.millis
+        }
+        for (job in ahead) ms += (job.clip ?: return ms / 1000f).millis
+        return ms / 1000f
+    }
+
+    /** Everything there is to make, as far as the reader has said what comes next, is made. */
+    private fun caughtUp(): Boolean {
+        val s = session ?: return false
+        return ahead.size == upcoming.size && (s.jobs + ahead).none { it.state == Synthesizer.State.WAITING || it.state == Synthesizer.State.RUNNING }
+    }
+
+    /**
+     * Has the model run on fewer cores while the phone is warm, and on its usual number once it
+     * has cooled (see [ModelHost.ease]). Loading it again takes a moment, so only with enough
+     * speech in hand to cover it.
+     */
+    private fun ease() {
+        val warm = warm()
+        if (warm == easedFor || inHand() < Cushion.RELOAD_SECONDS) return
+        easedFor = warm
+        reloaded = true
+        host.ease(model, warm)
     }
 
     /**
@@ -288,10 +394,12 @@ internal class NaturalSpeech(
     private fun feed(s: Session, index: Int, fromFrame: Int) {
         val job = s.jobs.getOrNull(index) ?: return
         val last = index == s.jobs.lastIndex
+        val askedAt = SystemClock.elapsedRealtime()
         job.whenDone { clip ->
             if (session !== s) return@whenDone
             if (clip == null && ++failures >= GIVE_UP_AFTER) {
                 session = null
+                dryAt = 0L
                 out.stop()
                 listener?.onError(s.id)
                 return@whenDone
@@ -307,14 +415,23 @@ internal class NaturalSpeech(
                     s.endsParagraph -> PARAGRAPH_MS
                     else -> SENTENCE_MS
                 }
+                // A brisker pace takes shorter breaths, though not in full proportion.
+                val pauseFrames = (breath / speed.pow(0.6f) * model.sampleRate / 1000f).toInt()
+                val ratio = speed / clip.speed
+                noteDry(clip, fromFrame, pauseFrames, ratio, askedAt)
                 out.play(
                     PcmOut.Item(
                         clip = clip,
                         fromFrame = fromFrame,
-                        // A brisker pace takes shorter breaths, though not in full proportion.
-                        pauseFrames = (breath / speed.pow(0.6f) * model.sampleRate / 1000f).toInt(),
-                        ratio = speed / clip.speed,
-                        onWord = { word -> if (session === s) listener?.onRange(s.id, (offset + word.start) until (offset + word.end)) },
+                        pauseFrames = pauseFrames,
+                        ratio = ratio,
+                        onWord = { word ->
+                            if (session === s) {
+                                s.heardPiece = index
+                                s.heardFrame = word.frame
+                                listener?.onRange(s.id, (offset + word.start) until (offset + word.end))
+                            }
+                        },
                         onSpoken = { if (session === s && last) finish(s) },
                     ),
                 )
@@ -329,67 +446,94 @@ internal class NaturalSpeech(
     }
 
     /**
-     * Watches the pace. A phone that struggles gets a slightly rougher, quicker voice before it
-     * gets gaps, and its full voice back once it has room again (see [QualityGuard]); one that
-     * can't keep up even so is reported as [VoiceHealth.slow], for the reader to suggest another
-     * voice.
+     * Keeps [dryAt] up to date as [clip] goes to the speaker, and logs the times the listener was
+     * kept waiting for the voice: the sound had run out, and the next words, asked for at
+     * [askedAt], weren't made yet. (A reader slow to ask, at the turn of a chapter say, isn't the
+     * voice's wait.)
+     */
+    private fun noteDry(clip: Clip, fromFrame: Int, pauseFrames: Int, ratio: Float, askedAt: Long) {
+        val now = SystemClock.elapsedRealtime()
+        val waited = now - maxOf(dryAt, askedAt)
+        if (dryAt > 0L && waited > GAP_MS) {
+            Log.i(TAG, "Waited $waited ms for the next words: the speech in hand ran out (${synth.steps} steps, aiming for ${aim.roundToInt()} s ahead)")
+        }
+        val frames = (clip.pcm.size - fromFrame).coerceAtLeast(0) / ratio.coerceAtLeast(0.25f) + pauseFrames
+        dryAt = maxOf(now, dryAt) + (frames * 1000f / clip.sampleRate).toLong()
+    }
+
+    /**
+     * Watches the pace, and the speech in hand. A phone that falls behind keeps its finest voice
+     * while the cushion covers for it; only when that is about to run dry does it get a slightly
+     * rougher, quicker voice, and its full voice back once there is room again (see
+     * [QualityGuard]). One that can't keep up even so is reported as [VoiceHealth.slow], for the
+     * reader to suggest another voice.
      *
-     * To see it at work on a phone: `adb shell setprop log.tag.JacketVoice DEBUG`.
+     * To see every sentence on a phone: `adb shell setprop log.tag.JacketVoice DEBUG`.
      */
     private fun measure(clip: Clip, madeWith: Int) {
         made++
+        val inHand = inHand()
         // The first sentence after loading pays for the model warming up, and a very short one is
         // mostly overhead: neither says how the phone will fare.
         val untold = when {
             made == 1 -> "the first one"
+            reloaded -> "the first one after loading again"
             !tellsThePace(clip.millis, clip.speed) -> "too short to tell"
             // (Made before the quality last changed: it says nothing of the one in use.)
             madeWith != guard.steps -> "made at another quality"
+            // Finished after the listener stopped: there is no cushion to speak of, and no hurry.
+            session == null -> "nobody listening"
             else -> null
         }
+        reloaded = false
         if (untold != null) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "Made ${clip.millis} ms of speech in ${clip.synthMillis} ms with $madeWith steps (not counted: $untold)")
+                Log.d(TAG, "Made ${clip.millis} ms of speech in ${clip.synthMillis} ms with $madeWith steps, ${"%.1f".format(inHand)} s in hand (not counted: $untold)")
             }
             return
         }
         val sample = clip.synthMillis / clip.millis.toFloat()
-        val warm = hot()
+        val hot = hot()
         val before = guard
-        guard = before.after(sample, warm)
+        guard = before.after(sample, inHand, caughtUp())
         synth.steps = guard.steps
-        health.value = VoiceHealth(guard.pace, slow = guard.slow, hot = warm)
+        health.value = VoiceHealth(guard.pace, slow = guard.slow, hot = hot)
         if (guard.steps != before.steps) {
             // Rare, and the one thing to know when a voice sounds rougher than it did: said without being asked.
-            Log.i(TAG, "Steps ${before.steps} to ${guard.steps}: pace ${"%.2f".format(guard.pace)}" + if (warm) ", the phone is hot" else "")
+            Log.i(
+                TAG,
+                "Steps ${before.steps} to ${guard.steps}: pace ${"%.2f".format(guard.pace)}, ${"%.1f".format(inHand)} s in hand" +
+                    (if (warm()) ", the phone is warm" else "") + (if (hot) " (hot)" else ""),
+            )
         }
         if (Log.isLoggable(TAG, Log.DEBUG)) {
             val up = if (guard.oneStepUp > 0f) ", one step up about ${"%.2f".format(guard.oneStepUp)}" else ""
             Log.d(
                 TAG,
                 "Made ${clip.millis} ms of speech in ${clip.synthMillis} ms with $madeWith steps: pace ${"%.2f".format(sample)}, " +
-                    "going by ${"%.2f".format(guard.pace)}$up; steps now ${guard.steps}" + (if (warm) ", hot" else "") + (if (guard.slow) ", can't keep up" else ""),
+                    "going by ${"%.2f".format(guard.pace)}$up; ${"%.1f".format(inHand)} s in hand of ${aim.roundToInt()}; " +
+                    "steps now ${guard.steps}" + (if (warm()) ", warm" else "") + (if (guard.slow) ", can't keep up" else ""),
             )
         }
     }
 
     internal companion object {
         private const val TAG = "JacketVoice"
-        private const val CURRENT = 100
-        private const val UPCOMING = 50
 
-        /** Sentences made ahead of the one being spoken, at the voice's own pace. */
-        private const val AHEAD = 2
-
-        /** The most that are made ahead, however fast it reads. */
-        const val MOST_AHEAD = 6
+        /** The sentence being spoken comes first; the pieces after it follow in the order they will be heard. */
+        private const val CURRENT = 1_000
+        private const val UPCOMING = 500
 
         /**
-         * How many sentences are made ahead of the one being spoken at [speed]. A voice reading
-         * three times as fast gets through them three times as fast: it is the seconds in hand
-         * that are kept the same, so a quick reader has no less of a margin than a slow one.
+         * The most sentences the reader is asked for, after the one being spoken. How many of them
+         * are made is the cushion's to say, by their seconds: a voice reading three times as fast
+         * gets through them three times as fast, so it makes three times as many, and a quick
+         * reader has no less of a margin than a slow one.
          */
-        fun sentencesAhead(speed: Float): Int = kotlin.math.ceil(AHEAD * speed.coerceAtLeast(1f)).toInt().coerceAtMost(MOST_AHEAD)
+        const val MOST_AHEAD = 24
+
+        /** A wait longer than this between the sound handed over and the next is a gap the listener heard. */
+        private const val GAP_MS = 250L
 
         /**
          * Whether a clip of [millis] made at [speed] says how the phone is keeping up: one whose

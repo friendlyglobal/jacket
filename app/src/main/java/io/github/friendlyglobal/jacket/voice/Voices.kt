@@ -19,7 +19,10 @@ import kotlinx.coroutines.flow.update
 class Voices(private val context: Context) {
     private val host = ModelHost(context)
     private val _health = MutableStateFlow(VoiceHealth())
-    private var hot = false
+
+    /** The phone's own word on its temperature (PowerManager.THERMAL_STATUS_*), as it last said. */
+    @Volatile
+    private var thermal = 0
 
     /** The voices in this build: those in the catalog whose files really are in the app. */
     val packs: List<VoicePack> = runCatching {
@@ -43,16 +46,24 @@ class Voices(private val context: Context) {
     val health: StateFlow<VoiceHealth> = _health.asStateFlow()
 
     init {
-        // A phone that is running hot gets a lighter voice (see NaturalSpeech).
+        // A phone that is warming up gets the same voice with less strain (see NaturalSpeech).
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             runCatching {
-                context.getSystemService(PowerManager::class.java)?.addThermalStatusListener { status ->
-                    hot = status >= PowerManager.THERMAL_STATUS_SEVERE
+                val power = context.getSystemService(PowerManager::class.java) ?: return@runCatching
+                thermal = power.currentThermalStatus
+                power.addThermalStatusListener { status ->
+                    thermal = status
                     if (!hot && _health.value.hot) _health.update { it.copy(hot = false) }
                 }
             }
         }
     }
+
+    /** Warming up: Android has started holding the processor back. The voice works further ahead, on fewer cores. */
+    private val warm: Boolean get() = thermal >= PowerManager.THERMAL_STATUS_MODERATE
+
+    /** Running hot: Android is holding the processor back hard. */
+    private val hot: Boolean get() = thermal >= PowerManager.THERMAL_STATUS_SEVERE
 
     fun pack(id: String): VoicePack? = packs.firstOrNull { it.id == id }
 
@@ -64,10 +75,10 @@ class Voices(private val context: Context) {
     internal suspend fun open(ref: VoiceRef): NaturalSpeech? {
         val pack = pack(ref.pack) ?: return null
         val voice = pack.voice(ref.voice) ?: return null
-        val model = runCatching { host.acquire(pack) }
+        val model = runCatching { host.acquire(pack, warm) }
             .onFailure { Log.e(TAG, "Couldn't load ${ref.pack}", it) }
             .getOrNull() ?: return null
-        return NaturalSpeech(host, model, voice.speaker, _health) { hot }
+        return NaturalSpeech(host, model, voice.speaker, _health, warm = { warm }, hot = { hot })
     }
 
     /**

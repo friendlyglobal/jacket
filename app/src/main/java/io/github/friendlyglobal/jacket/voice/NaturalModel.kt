@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
+import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import com.k2fsa.sherpa.onnx.GenerationConfig
@@ -24,18 +25,31 @@ import java.util.concurrent.Executors
  * phone's own processor. Its files are read straight from the installed app. Everything here
  * blocks, and belongs on [ModelHost]'s thread.
  */
-internal class NaturalModel(context: Context, val pack: VoicePack, threads: Int) {
-    private val tts: OfflineTts
+internal class NaturalModel(private val context: Context, val pack: VoicePack, threads: Int) {
+    /** The engine; null only if loading it again failed (see [rethread]), and then every sentence fails. */
+    private var tts: OfflineTts?
     val sampleRate: Int
+
+    /** How many processor cores it runs on. sherpa-onnx fixes that when it loads: see [rethread]. */
+    var threads: Int = threads
+        private set
 
     /** A voice that reads sounds rather than letters: Jacket writes the sounds for it (see voice/ptbr). */
     private val readsSounds = pack.engine == ENGINE_PIPER
 
     init {
-        val assets = context.assets
-        val present = assets.list(pack.folder).orEmpty().toSet()
+        val present = context.assets.list(pack.folder).orEmpty().toSet()
         val missing = pack.files.values.filterNot { it in present }
         require(missing.isEmpty()) { "Voice files missing from the app: ${missing.joinToString()}" }
+        val loaded = load(threads)
+        tts = loaded
+        sampleRate = loaded.sampleRate()
+    }
+
+    /** False once loading it again has failed: the host loads it afresh for the next reader. */
+    val alive: Boolean get() = tts != null
+
+    private fun load(threads: Int): OfflineTts {
         fun path(role: String): String = pack.files[role]?.let { "${pack.folder}/$it" }.orEmpty()
         val model = if (readsSounds) {
             // No dictionary and no data folder: the sounds come from Jacket, ready-made.
@@ -59,9 +73,29 @@ internal class NaturalModel(context: Context, val pack: VoicePack, threads: Int)
                 provider = "cpu",
             )
         }
-        tts = OfflineTts(assetManager = assets, config = OfflineTtsConfig(model = model, maxNumSentences = 1))
-        sampleRate = tts.sampleRate()
+        return OfflineTts(assetManager = context.assets, config = OfflineTtsConfig(model = model, maxNumSentences = 1))
     }
+
+    /**
+     * Loads the model again to run on [count] cores. sherpa-onnx has no way to change that once
+     * loaded, so the old one is let go first (two would need twice the memory) and the new one
+     * read in its place: a moment without a voice, taken when there is speech in hand. Should
+     * loading fail, it goes back to what it had; should that fail too, the sentences after it
+     * fail as they would with no model (and the voice stops, with its message).
+     */
+    fun rethread(count: Int) {
+        if (count == threads || tts == null) return
+        tts?.release()
+        tts = null
+        tts = runCatching { load(count) }
+            .onSuccess { threads = count }
+            .getOrElse { error ->
+                Log.w(TAG, "Couldn't load ${pack.id} on $count threads; back to $threads", error)
+                runCatching { load(threads) }.onFailure { Log.e(TAG, "Couldn't load ${pack.id} again", it) }.getOrNull()
+            }
+    }
+
+    private fun engine(): OfflineTts = checkNotNull(tts) { "${pack.id} couldn't be loaded again" }
 
     /**
      * Speaks [text]: samples between -1 and 1, or null if it was [cancelled] on the way or the
@@ -77,7 +111,7 @@ internal class NaturalModel(context: Context, val pack: VoicePack, threads: Int)
             numSteps = steps,
             extra = mapOf("lang" to language),
         )
-        val audio = tts.generateWithConfigAndCallback(text, config, KeepGoing(cancelled))
+        val audio = engine().generateWithConfigAndCallback(text, config, KeepGoing(cancelled))
         return audio.samples.takeIf { it.isNotEmpty() && !cancelled() }
     }
 
@@ -95,14 +129,19 @@ internal class NaturalModel(context: Context, val pack: VoicePack, threads: Int)
             silenceScale = 1f,
             phonemeCodepoints = sounds,
         )
-        val audio = tts.generateWithConfigAndCallback("", config, KeepGoing(cancelled))
+        val audio = engine().generateWithConfigAndCallback("", config, KeepGoing(cancelled))
         // This voice learnt a little of the room it was recorded in: its silences are tidied.
         return audio.samples.takeIf { it.isNotEmpty() && !cancelled() }?.let { SpeechCleanup.clean(it, sampleRate) }
     }
 
-    fun release() = tts.release()
+    fun release() {
+        tts?.release()
+        tts = null
+    }
 
     private companion object {
+        const val TAG = "JacketVoice"
+
         /**
          * How many sentences have gone by since one in the old spelling ("elle", "theatro"). Kept
          * for as long as the app runs, not with the model: a pause lets the model go, but the
@@ -140,7 +179,16 @@ internal class ModelHost(private val context: Context) {
         var users = 0
     }
 
-    private val executor = Executors.newSingleThreadExecutor { task -> Thread(task, "jacket-voice").apply { isDaemon = true } }
+    private val executor = Executors.newSingleThreadExecutor { task ->
+        Thread({
+            // A little behind the screen and well behind the sound: when the phone is short of
+            // processor (hot, or busy), the page and the voice already made come first, and the
+            // speech in hand covers for the making. The engine's own threads are started from
+            // this one when a model loads, and take its priority with them.
+            Process.setThreadPriority(VOICE_PRIORITY)
+            task.run()
+        }, "jacket-voice").apply { isDaemon = true }
+    }
     private val thread = executor.asCoroutineDispatcher()
     private val main = Handler(Looper.getMainLooper())
 
@@ -148,15 +196,18 @@ internal class ModelHost(private val context: Context) {
     private val entries = ArrayList<Entry>()
     private val unload = Runnable { executor.execute(::dropIdle) }
 
-    /** Loads [pack]'s model (or hands back the one in memory). Throws if it can't be read. */
-    suspend fun acquire(pack: VoicePack): NaturalModel = withContext(thread) {
+    /**
+     * Loads [pack]'s model (or hands back the one in memory). Throws if it can't be read. [warm]
+     * while the phone is warm: it loads on fewer cores (see [threadsFor]).
+     */
+    suspend fun acquire(pack: VoicePack, warm: Boolean = false): NaturalModel = withContext(thread) {
         main.removeCallbacks(unload)
-        val entry = entries.firstOrNull { it.model.pack.id == pack.id } ?: run {
+        val entry = entries.firstOrNull { it.model.pack.id == pack.id && it.model.alive } ?: run {
             dropIdle()
             val started = SystemClock.elapsedRealtime()
-            val threads = threads()
+            val threads = threads(warm)
             val model = NaturalModel(context, pack, threads)
-            // (How many cores it was given is kept for as long as it is in memory: fewer in battery saver.)
+            // (How many cores it was given is kept until the phone warms or cools: see ease.)
             Log.i(TAG, "Loaded ${pack.id} in ${SystemClock.elapsedRealtime() - started} ms, on $threads threads")
             Entry(model).also(entries::add)
         }
@@ -176,26 +227,63 @@ internal class ModelHost(private val context: Context) {
     /** Runs [work] on the voice thread. */
     fun run(work: () -> Unit) = executor.execute(work)
 
+    /**
+     * Has [model] run on fewer cores while the phone is [warm], and on its usual number once it
+     * has cooled (see [threadsFor]). Done on the voice thread, after the sentence being made: the
+     * caller asks only when there is speech in hand to cover the moment it takes.
+     */
+    fun ease(model: NaturalModel, warm: Boolean) = executor.execute {
+        // Let go of meanwhile: nothing to do.
+        if (entries.none { it.model === model } || !model.alive) return@execute
+        val wanted = threads(warm)
+        if (wanted == model.threads) return@execute
+        val was = model.threads
+        val started = SystemClock.elapsedRealtime()
+        model.rethread(wanted)
+        Log.i(
+            TAG,
+            "Threads $was to ${model.threads}" + (if (warm) ", the phone is warm" else ", the phone has cooled") +
+                " (loaded again in ${SystemClock.elapsedRealtime() - started} ms)",
+        )
+    }
+
     private fun dropIdle() {
         val idle = entries.filter { it.users == 0 }
         entries.removeAll(idle)
         idle.forEach { runCatching { it.model.release() } }
     }
 
-    /**
-     * How many processor cores the voice may use. Half of them, four at most: phones pair fast
-     * cores with slow ones, and spilling onto the slow ones makes the voice slower, not faster.
-     * In battery saver, two.
-     */
-    private fun threads(): Int {
-        val cores = Runtime.getRuntime().availableProcessors()
-        val saving = context.getSystemService(PowerManager::class.java)?.isPowerSaveMode == true
-        return if (saving) 2.coerceAtMost(cores) else (cores / 2).coerceIn(1, 4)
-    }
+    private fun threads(warm: Boolean): Int = threadsFor(
+        cores = Runtime.getRuntime().availableProcessors(),
+        saving = context.getSystemService(PowerManager::class.java)?.isPowerSaveMode == true,
+        warm = warm,
+    )
 
-    private companion object {
-        const val TAG = "JacketVoice"
-        const val KEEP_MS = 45_000L
+    internal companion object {
+        private const val TAG = "JacketVoice"
+        private const val KEEP_MS = 45_000L
+
+        /** Slightly less favoured than the app's other work (0), and nowhere near the background (10, the slow cores). */
+        private const val VOICE_PRIORITY = Process.THREAD_PRIORITY_DEFAULT + 2 * Process.THREAD_PRIORITY_LESS_FAVORABLE
+
+        /** The most cores the voice uses while the phone is warm. */
+        const val WARM_THREADS = 2
+
+        /**
+         * How many of the phone's [cores] the voice may use. Half of them, four at most: phones
+         * pair fast cores with slow ones, and spilling onto the slow ones makes the voice slower,
+         * not faster. In battery saver ([saving]), two; and two while the phone is [warm].
+         *
+         * Why two when warm: the engine's threads wait for each other by spinning, which keeps a
+         * core busy doing nothing. Measured on a laptop with the same models, four threads made
+         * a sentence 1 to 20 % faster than two (10 % on most), for twice the processor time; and
+         * processor time is what heats a phone. The voice stays as fine as it was, and takes a
+         * little longer over each sentence, with the speech in hand to cover it.
+         */
+        fun threadsFor(cores: Int, saving: Boolean, warm: Boolean): Int {
+            val usual = if (saving) 2.coerceAtMost(cores) else (cores / 2).coerceIn(1, 4)
+            return if (warm) usual.coerceAtMost(WARM_THREADS) else usual
+        }
     }
 }
 

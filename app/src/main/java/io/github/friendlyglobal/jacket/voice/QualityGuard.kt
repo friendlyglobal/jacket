@@ -3,13 +3,16 @@ package io.github.friendlyglobal.jacket.voice
 /*
  * How finely a natural voice is made, kept to what the phone can do.
  *
- * The model refines its sound a few times over: more passes sound smoother, and take longer. A
- * phone that makes a second of speech in well under a second is given them all. One that falls
- * behind is given fewer, so the listener hears a slightly rougher voice rather than gaps between
- * sentences; and once it has room again, the passes come back, one at a time.
+ * The model refines its sound a few times over: more passes sound smoother, and take longer. The
+ * voice works ahead of the listener (see [Cushion]), so a phone that slows down for a while only
+ * eats into the speech made ahead, and the voice stays at its finest for as long as that lasts.
+ * Only when the cushion is about to run dry and the phone still can't keep up is it given fewer
+ * passes: a slightly rougher voice rather than a gap after every sentence. Once there is speech in
+ * hand again and the phone has room, the passes come back, one at a time.
  *
- * What it goes by is the pace of each sentence as it is made: the seconds it took to make a second
- * of speech. Under 1 the voice keeps ahead of the listener; over 1 it can't.
+ * What it goes by is the pace of each sentence as it is made (the seconds it took to make a second
+ * of speech: under 1 the voice keeps ahead of the listener, over 1 it can't), and how many seconds
+ * of speech were ready ahead of the listener when it was made.
  */
 
 /**
@@ -18,15 +21,16 @@ package io.github.friendlyglobal.jacket.voice
  * touches the phone, so it can be tested with sentences made up for the purpose.
  *
  * The rules, in the order they are tried:
- * - A phone running hot is given the fewest passes at once, for as long as it is hot.
- * - It eases off when two of the last three sentences were slow ([EASE]): by one pass, or straight
- *   to the fewest when they couldn't keep up at all ([BEHIND]). One slow sentence alone changes
- *   nothing: opening a book, a page loading or another app taking the processor for a moment is
- *   not the phone being slow. Two are acted on at once, while the sentences made ahead still cover
- *   for them.
- * - It climbs back, a pass at a time, when two of the last three sentences would each have left
- *   room with one pass more ([CLIMB], reckoned by [paceWith]). The gap between the two lines is
- *   what keeps it from going back and forth.
+ * - It eases off only when the cushion is about to run dry (under [Cushion.LOW_SECONDS] in hand)
+ *   and two of the last three sentences fell behind the listener ([BEHIND]): by one pass, or
+ *   straight to the fewest when one pass fewer still wouldn't keep up. One slow sentence alone
+ *   changes nothing; nor do any number of them while there is speech in hand to cover for them.
+ *   A phone running hot isn't eased here at all: it gets a bigger cushion and less work at once
+ *   (see NaturalSpeech), and keeps its finest voice for as long as that keeps up.
+ * - It climbs back, a pass at a time, when there is room ([Cushion.ROOMY_SECONDS] in hand, or all
+ *   there is to make made) and two of the last three sentences would each have kept up with one
+ *   pass more, with a little to spare ([CLIMB], reckoned by [paceWith]). The gap between the two
+ *   lines, and between running dry and having room, is what keeps it from going back and forth.
  * - A climb that had to be undone makes the next one wait twice as long ([patience]), up to
  *   [MOST_PATIENCE] sentences; one that has held that long clears the slate.
  *
@@ -56,10 +60,18 @@ internal data class QualityGuard(
     val slow: Boolean get() = steps == FEWEST_STEPS && recent.count { it > CANT_KEEP_UP } >= AGREE
 
     /**
-     * The guard after a sentence made at [steps] passes at [sentencePace] (the seconds it took to
-     * make a second of it). [hot] while the phone is running hot.
+     * The voice is behind, or only just keeping up, or has had to be made rougher: it should
+     * work further ahead (see [Cushion.target]).
      */
-    fun after(sentencePace: Float, hot: Boolean = false): QualityGuard {
+    val struggling: Boolean get() = steps < FULL_STEPS || pace > EASE
+
+    /**
+     * The guard after a sentence made at [steps] passes at [sentencePace] (the seconds it took to
+     * make a second of it), with [inHand] seconds of speech ready ahead of the listener once it
+     * was made. [caughtUp] when everything the voice can see to make is made: a cushion can't be
+     * any bigger than that (a page of one-line paragraphs, say), and has as much room as it can.
+     */
+    fun after(sentencePace: Float, inHand: Float, caughtUp: Boolean = false): QualityGuard {
         val seen = (recent + sentencePace).takeLast(RECENT)
         val count = settled + 1
         val middle = seen.sorted()[seen.size / 2]
@@ -74,11 +86,12 @@ internal data class QualityGuard(
             patience = if (held) CLIMB_AFTER else patience,
             trying = trying && !held,
         )
+        val runningDry = inHand < Cushion.LOW_SECONDS
+        val room = caughtUp || inHand >= Cushion.ROOMY_SECONDS
         val to = when {
-            hot -> FEWEST_STEPS
-            twoAgree { it > BEHIND } -> FEWEST_STEPS
-            twoAgree { it > EASE } -> (steps - 1).coerceAtLeast(FEWEST_STEPS)
-            steps < FULL_STEPS && count >= patience && twoAgree { paceWith(steps + 1, it, steps) < CLIMB } -> steps + 1
+            steps > FEWEST_STEPS && runningDry && twoAgree { it > BEHIND } ->
+                if (twoAgree { paceWith(steps - 1, it, steps) >= BEHIND }) FEWEST_STEPS else steps - 1
+            steps < FULL_STEPS && room && count >= patience && twoAgree { paceWith(steps + 1, it, steps) < CLIMB } -> steps + 1
             else -> steps
         }
         if (to == steps) return now
@@ -88,7 +101,7 @@ internal data class QualityGuard(
             settled = 0,
             trying = to > steps,
             // Eased straight after climbing: that pass was one too many. It isn't tried again so soon.
-            patience = if (to < steps && now.trying && !hot) (now.patience * 2).coerceAtMost(MOST_PATIENCE) else now.patience,
+            patience = if (to < steps && now.trying) (now.patience * 2).coerceAtMost(MOST_PATIENCE) else now.patience,
         )
     }
 
@@ -96,17 +109,17 @@ internal data class QualityGuard(
         /** The most passes: the voice at its finest. */
         const val FULL_STEPS = 5
 
-        /** The fewest: a little rougher, and the quickest to make. */
+        /** The fewest: a little rougher, and the quickest to make. (Two passes sound clearly worse, and aren't used.) */
         const val FEWEST_STEPS = 3
 
-        /** A sentence slower than this is a slow one: the phone has less than a fifth of its time in hand. */
+        /** Slower than this, the phone only just keeps up: the voice works further ahead. */
         const val EASE = 0.8f
 
-        /** Slower than this, the voice is falling behind the listener: gaps are on their way. */
+        /** Slower than this, the voice is falling behind the listener: the cushion is shrinking. */
         const val BEHIND = 1f
 
         /** A pass is added only where the pace with it is reckoned to stay under this. */
-        const val CLIMB = 0.7f
+        const val CLIMB = 0.9f
 
         /** With the fewest passes and still slower than this, the phone can't keep this voice up. */
         const val CANT_KEEP_UP = 0.95f
@@ -121,8 +134,10 @@ internal data class QualityGuard(
 
         /**
          * What a sentence costs to make besides its passes (reading its text, and turning the
-         * result into sound), counted in passes. Taken low on purpose: the lower it is, the more
-         * a pass is reckoned to cost, and the surer a climb is to hold.
+         * result into sound), counted in passes. Measured on a laptop it is a quarter to three
+         * quarters of a pass (the passes are 86 to 91 % of the work at five), so this is on the
+         * high side: a pass taken off gains at least what was reckoned, and one added costs a
+         * little more than reckoned, which [CLIMB]'s margin and the speech in hand cover.
          */
         const val FIXED_COST = 1f
 
