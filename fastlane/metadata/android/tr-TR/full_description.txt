@@ -7,7 +7,7 @@ KAPAK, DIŞARIDA
 • Galaxy Z Flip: bir kapak ekranı widget'ı. Motorola Razr: Jacket'i harici ekranda açın.
 
 DİNLEME
-• Doğal sesler Jacket'le birlikte gelir ve internet olmadan 31 dil konuşur. Geri kalan dilleri telefonunuzun kendi sesi okur.
+• Doğal sesler 31 dili doğrudan telefonunuzda konuşur. Kitabınızın ihtiyaç duyduğu ses, ilk dinlediğinizde bir kez indirilir ve sonra internet olmadan çalışır. Geri kalan dilleri telefonunuzun kendi sesi okur.
 • Her kelime söylendiği anda sayfada parlar ve sayfa sesle birlikte çevrilir.
 • Herhangi bir cümleye dokunun, oradan dinleyin. Durduğunuzda, bir dahaki sefere kaldığınız cümleden devam eder.
 • Ekran kapalıyken de sürer; kilit ekranından ve kulaklıktan kontrol edilir.
@@ -39,7 +39,7 @@ KENDİ DİLİNİZDE
 Türkçe, İngilizce, İspanyolca, Brezilya Portekizcesi, Fransızca, İtalyanca, Almanca, Felemenkçe, Lehçe, Rusça, Ukraynaca, Arapça, Hintçe, Endonezce, Japonca, Korece, Basitleştirilmiş ve Geleneksel Çince.
 
 GİZLİLİK
-• İnternet izni yok: ne Jacket ne de onda açtığınız kitaplar ağa bağlanabilir. Sesler doğrudan telefonunuzda konuşur.
+• İnternet yalnızca tek bir iş için: siz kabul ederseniz Jacket bir sesi GitHub'dan bir kez indirir. Hiçbir şey yüklenmez ve onda açtığınız kitaplar ağa bağlanamaz. Sesler doğrudan telefonunuzda konuşur.
 • Hesap yok, reklam yok, analiz yok, izleme yok.
 • Seçtiğiniz bir dosyaya yedekleme: kitap listesi, konumlar, yer işaretleri, vurgular ve ayarlar (kitap dosyaları hariç).
 • Apache License 2.0 kapsamında ücretsiz ve açık kaynak: https://github.com/friendlyglobal/jacket

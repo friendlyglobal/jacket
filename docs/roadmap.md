@@ -7,8 +7,10 @@ with line numbers as of 1.0.1 (`ce1a143`), so they will drift.
 The research behind this list (November 2026) leaned on reader forums, other apps' feature pages
 and Google's own guidelines. It shows which way to go, not how many people asked.
 
-Every item has to keep Jacket's rules: no internet permission, no GPL code, no ads or tracking,
-plain-language UI, and nothing labelled "AI".
+Every item has to keep Jacket's rules: no use of the internet beyond downloading a voice from
+GitHub when the listener agrees (one class, `voice/VoiceDownload.kt`, and a test that fails if
+anything else connects), no GPL code, no ads or tracking, plain-language UI, and nothing labelled
+"AI".
 
 ## Shipped in 1.1 (11 November 2026)
 
@@ -520,6 +522,15 @@ From a hands-on review of the reader.
 
 ## Next
 
+### Voices download on first listen (M, in review)
+The natural voices left the APK (213 MB to about 36 MB). The first Listen offers the voice the
+book's language needs (145 MB for Supertonic's 31 languages, 32 MB for the Brazilian voice),
+downloaded once from the `voices-1` GitHub release and checked against the catalog's SHA-256;
+the phone's voice reads meanwhile, and the natural one takes over at the next sentence. Jacket
+gets the INTERNET permission for this alone; a book's pages are kept offline (`reader/OfflinePages.kt`).
+A changed voice is a new release (`voices-2`) and a catalog change; older versions keep reading
+`voices-1`, so never delete a voices release.
+
 ### Android Auto (M)
 Choose a book on the car's screen and have it read from where it was left.
 - The groundwork is in 1.3: `reader/ListenService.kt` lists "Continue listening" and "Recent
@@ -534,12 +545,14 @@ Choose a book on the car's screen and have it read from where it was left.
 - Risk: Android Auto apps get their own Play review, on every release from then on.
 
 ## Not planned
-- **A natural voice for Chinese:** a voice that reads Chinese well would push the app past
-  Google Play's 200 MB download limit (see Size budget). The phone's own voice reads Chinese.
+- **A natural voice for Chinese:** a voice that reads Chinese well is far larger than the others
+  (see Size budget). Now that voices download on their own it no longer weighs on the app, but it
+  would on the people who download it. The phone's own voice reads Chinese.
 - **Listening to a book in another language, translated on the phone:** translation on the
   phone needs either the internet or models far larger than the whole app.
 - **"Currently reading" from Hardcover and Open Library, and ISBN scanning for covers:** both
-  need the internet, which Jacket doesn't use. Jacket already makes covers and lets you design one.
+  need the internet, which Jacket uses only to download voices. Jacket already makes covers and
+  lets you design one.
 - **Cloud sync, accounts, online catalogues (OPDS), fetching web articles:** all need the internet.
   Handing a word off to a dictionary or translate app already works (`reader/EpubReader.kt:718`).
 - **Orientation lock:** Android 16 ignores it on screens 600dp and wider
@@ -553,5 +566,6 @@ Choose a book on the car's screen and have it read from where it was left.
 - **Auto-scroll:** read-aloud already turns the pages.
 
 ## Size budget
-Play's download is about 177 MB against Play's 200 MB limit (see `RELEASING.md`), so any feature
-that adds weight, such as a new voice, needs a plan for where those megabytes come from.
+The APK is about 36 MB, most of it the voice engine for three kinds of processor (Play sends a
+phone only its own). The voices are downloaded separately, so a new voice adds to what its
+listeners download, not to the app; keep each pack to what its languages need.

@@ -7,7 +7,7 @@ SAMPUL, DI BAGIAN LUAR
 • Galaxy Z Flip: widget layar depan. Motorola Razr: buka Jacket di layar eksternal.
 
 MENDENGARKAN
-• Suara alami sudah termasuk di Jacket dan menguasai 31 bahasa tanpa internet. Bahasa lainnya dibacakan suara ponsel.
+• Suara alami menguasai 31 bahasa, langsung di ponsel Anda. Suara yang dibutuhkan buku Anda diunduh sekali, saat pertama kali Anda mendengarkan, lalu berfungsi tanpa internet. Bahasa lainnya dibacakan suara ponsel.
 • Setiap kata menyala di halaman saat diucapkan, dan halaman berganti mengikuti suara.
 • Ketuk kalimat mana pun untuk mendengarkan dari situ. Kalau berhenti, lain kali bacaan berlanjut dari kalimat terakhir Anda.
 • Tetap berjalan saat layar mati, dengan kontrol di layar kunci dan headphone.
@@ -39,7 +39,7 @@ DALAM BAHASA ANDA
 Indonesia, Inggris, Spanyol, Portugis Brasil, Prancis, Italia, Jerman, Belanda, Polandia, Rusia, Ukraina, Turki, Arab, Hindi, Jepang, Korea, serta Mandarin Sederhana dan Tradisional.
 
 PRIVASI
-• Tanpa izin internet: Jacket maupun buku yang Anda buka di dalamnya tidak bisa terhubung ke jaringan. Suaranya berbicara langsung di ponsel Anda.
+• Online hanya untuk satu hal: Jacket mengunduh suara dari GitHub, sekali, jika Anda setuju. Tidak ada yang diunggah, dan buku yang Anda buka di dalamnya tidak bisa terhubung ke jaringan. Suaranya berbicara langsung di ponsel Anda.
 • Tanpa akun, iklan, analitik, atau pelacakan.
 • Cadangkan ke file pilihan Anda: daftar buku, posisi baca, bookmark, sorotan, dan setelan (tanpa file bukunya).
 • Gratis dan open source dengan lisensi Apache License 2.0: https://github.com/friendlyglobal/jacket

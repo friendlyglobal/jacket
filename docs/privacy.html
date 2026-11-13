@@ -85,9 +85,11 @@
 
   <section class="summary" aria-labelledby="summary">
     <h2 id="summary">Summary</h2>
-    <p>Jacket does not collect or transmit any personal data. It does not have Android&rsquo;s
-    internet permission, so neither the app nor the books you open in it can connect to the
-    network. There are no analytics, no ads and no accounts. Jacket sends the developer nothing.</p>
+    <p>Jacket does not collect or transmit any personal data. It uses the internet for one thing
+    only: downloading a natural voice from GitHub, once, after you agree (see
+    <a href="#voice-download">Downloading a voice</a>). Nothing is uploaded. The books you open
+    in Jacket cannot connect to the network. There are no analytics, no ads and no accounts.
+    Jacket sends the developer nothing.</p>
   </section>
 
   <section aria-labelledby="stored">
@@ -107,9 +109,9 @@
     <h2 id="read-aloud">Read-aloud</h2>
     <p>Jacket can read aloud with two kinds of voice.</p>
     <ul>
-      <li><strong>Natural voices</strong> are part of Jacket and run inside the app, on your
-      phone. The text they read is turned into sound on the device and is not passed to any
-      other app or sent anywhere. Nothing is downloaded to use them.</li>
+      <li><strong>Natural voices</strong> run inside Jacket, on your phone. The text they read is
+      turned into sound on the device and is not passed to any other app or sent anywhere. The
+      voices themselves are downloaded once, when you agree (see below).</li>
       <li><strong>Your phone&rsquo;s voice</strong> is the text-to-speech engine installed on
       your phone, such as Google Speech Services. That engine is a separate app with its own
       privacy policy. When you read aloud with it, Jacket passes the engine the text being
@@ -117,6 +119,43 @@
     </ul>
     <p>You choose the voice in Jacket&rsquo;s Settings or on the player. The natural voices
     read the languages they know; for any other language, the phone&rsquo;s voice is used.</p>
+  </section>
+
+  <section aria-labelledby="voice-download">
+    <h2 id="voice-download">Downloading a voice</h2>
+    <p>The natural voices are not inside the app. The first time you listen to a book whose voice
+    is not on your phone, Jacket asks whether to download it. Settings &rsaquo; Voice can also
+    download or remove each set of voices.</p>
+    <ul>
+      <li><strong>Only when you agree.</strong> Nothing is downloaded until you choose Download.
+      If you choose your phone&rsquo;s voice instead, Jacket does not ask again. On mobile data,
+      Jacket tells you the size and asks before it starts. When you are not looking at Jacket
+      (listening from the notification, headphones or a car), it never downloads anything new
+      and uses a voice already on your phone. A download you started and that was interrupted
+      (for example because Android closed Jacket) carries on the next time you open Jacket, over
+      Wi-Fi.</li>
+      <li><strong>Where from.</strong> The voice files come from Jacket&rsquo;s own release on
+      GitHub (github.com/friendlyglobal/jacket, release &ldquo;voices-1&rdquo;), served by GitHub.
+      Jacket connects to GitHub over an encrypted connection (HTTPS) and to no other place.</li>
+      <li><strong>What GitHub sees.</strong> Like any download, GitHub sees your IP address, and
+      the file asked for. Jacket sends no account, no identifier, no cookie and nothing about
+      you, your phone or your books; it does not even send the usual description of the phone
+      that apps send by default. GitHub handles the request under
+      <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">its
+      own privacy statement</a>.</li>
+      <li><strong>Nothing is uploaded.</strong> The download only receives files. The text you
+      read never leaves the device.</li>
+      <li><strong>Checked before use.</strong> Each file is checked against a size and
+      fingerprint (SHA-256) built into Jacket. A file that doesn&rsquo;t match is deleted, never
+      used.</li>
+      <li><strong>Stored on your phone, outside backups.</strong> Downloaded voices are kept in
+      Jacket&rsquo;s private storage, in a place that Android&rsquo;s device backup and
+      phone-to-phone transfer leave out, and they are not part of backup files you export. They
+      take about 145&nbsp;MB (31 languages) or 32&nbsp;MB (the Brazilian voice). Settings
+      &rsaquo; Voice removes them; uninstalling Jacket deletes them.</li>
+    </ul>
+    <p>In the source code, this download is one file, <code>voice/VoiceDownload.kt</code>, and an
+    automatic test fails the build if any other part of Jacket opens a network connection.</p>
   </section>
 
   <section aria-labelledby="backups">
@@ -150,12 +189,16 @@
 
   <section aria-labelledby="permissions">
     <h2 id="permissions">Permissions</h2>
-    <p>Jacket does not request the internet, location, contacts, camera, microphone or storage
-    permissions. You choose files through Android&rsquo;s own file picker. Jacket uses a
-    foreground service so that read-aloud can keep playing with the screen off. Android
-    libraries that Jacket uses for its widget also declare permissions to schedule widget
-    updates (including &ldquo;view network connections&rdquo;, which only lets the app check
-    whether the phone is online; it cannot connect).</p>
+    <p>Jacket has Android&rsquo;s internet permission (&ldquo;have full network access&rdquo;) for
+    one use only: downloading a natural voice, as described above. It also uses &ldquo;view
+    network connections&rdquo; to know whether the phone is online, and whether it is on mobile
+    data so it can ask first; that permission cannot connect to anything. Jacket does not request
+    the location, contacts, camera, microphone or storage permissions. You choose files through
+    Android&rsquo;s own file picker. Jacket uses a foreground service so that read-aloud can keep
+    playing with the screen off. Android libraries that Jacket uses for its widget also declare
+    permissions to schedule widget updates.</p>
+    <p>The books you open cannot use the internet permission: the pages of a book are shown with
+    their network access blocked, and a book&rsquo;s own scripts cannot open connections.</p>
   </section>
 
   <section aria-labelledby="play">
@@ -168,7 +211,8 @@
 
   <section aria-labelledby="deleting">
     <h2 id="deleting">Deleting your data</h2>
-    <p>Uninstalling Jacket deletes all of its data from your device. Backup files you exported,
+    <p>Uninstalling Jacket deletes all of its data from your device, downloaded voices included.
+    Backup files you exported,
     and any Android backup in your Google account, are not affected; you manage those
     yourself.</p>
   </section>
