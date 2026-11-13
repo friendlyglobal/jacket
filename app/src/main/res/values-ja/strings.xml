@@ -95,7 +95,7 @@
     <string name="library_empty_message">EPUB、PDF、FB2、CBZ コミック、テキスト ファイルを追加してください。Jacket は非公開のコピーを保存し、読書中は表紙を外側の画面またはカバー画面のウィジェットに表示します。</string>
     <string name="onboarding_next">次へ</string>
     <string name="onboarding_skip">スキップ</string>
-    <string name="onboarding_private">本はこのスマートフォンの中だけに保存されます。Jacket にアカウントは不要で、インターネットにも接続しません。</string>
+    <string name="onboarding_private">本はこのスマートフォンの中だけに保存されます。Jacket にアカウントは不要で、インターネットに接続するのは、頼まれて音声をダウンロードするときだけです。</string>
 
     <string name="settings_title">設定</string>
     <string name="settings_subtitle">プロフィール、カバー画面、読書</string>

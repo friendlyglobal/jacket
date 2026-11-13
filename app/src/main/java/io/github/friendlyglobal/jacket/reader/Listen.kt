@@ -213,8 +213,12 @@ class ListenState {
     val held: Boolean get() = sleepMenu || rateMenu || warning
 }
 
-/** The voice reading the book, for the player: its name, whether it's a natural one, and whether the phone is keeping up with it. */
-class ListenVoice(val label: String, val natural: Boolean, val struggling: Boolean, val onClick: () -> Unit)
+/**
+ * The voice reading the book, for the player: its name, whether it's a natural one, and whether
+ * the phone is keeping up with it. [downloading]: how far the natural voice that will read it has
+ * downloaded (0 to 1), while the phone's own reads; null when none is on its way.
+ */
+class ListenVoice(val label: String, val natural: Boolean, val struggling: Boolean, val downloading: Float? = null, val onClick: () -> Unit)
 
 /** Implemented by each format that can be read aloud (EPUB and plain text). */
 interface ListenController {
@@ -352,6 +356,7 @@ internal fun PlayerLine(
             ) {
                 VoiceChip(
                     voice.label, voice.natural, voice.struggling,
+                    downloading = voice.downloading,
                     onClick = { haptics.tick(); voice.onClick() },
                     modifier = Modifier.widthIn(max = 300.dp).padding(bottom = 10.dp),
                 )
@@ -818,7 +823,18 @@ private fun VoiceButton(voice: ListenVoice, listen: ListenState, haptics: Haptic
                     contentDescription = if (voice.struggling) slow else "${voice.label}, $change"
                 },
             ) {
-                BadgedBox(badge = { if (voice.struggling) Badge() }) { Icon(JacketIcons.Voice, null) }
+                BadgedBox(badge = { if (voice.struggling) Badge() }) {
+                    // A natural voice on its way: a ring round the icon fills as it arrives.
+                    val downloading = voice.downloading
+                    if (downloading != null) {
+                        Box(contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(progress = { downloading }, modifier = Modifier.size(32.dp), strokeWidth = 2.dp)
+                            Icon(JacketIcons.Voice, null, Modifier.size(18.dp))
+                        }
+                    } else {
+                        Icon(JacketIcons.Voice, null)
+                    }
+                }
             }
         }
     }

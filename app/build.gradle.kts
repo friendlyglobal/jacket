@@ -27,9 +27,10 @@ android {
         versionName = "1.5.0"
 
         // The voice engine is native code. 32-bit x86 is left out: no phone that runs Android 8+
-        // needs it. The APK carries the engine for all three (about 9 MB each): beside the
-        // voices' 145 MB, an APK per processor would save a tenth and cost people a choice, and
-        // AGP can't build split APKs and the Play bundle in one go. Play splits the bundle itself.
+        // needs it. The APK carries the engine for all three (about 9 MB each, compressed): most
+        // of the APK now that the voices are downloaded (see the end of this file), but an APK
+        // per processor would cost people a choice they can't be expected to make, and AGP can't
+        // build split APKs and the Play bundle in one go. Play splits the bundle itself.
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
         }
@@ -79,8 +80,9 @@ android {
     androidResources {
         // Lists the app's languages for Android 13+'s per-app language setting.
         generateLocaleConfig = true
-        // The natural voices' models are read straight out of the installed app, which only
-        // works without copying if they're stored as they are. (They hardly compress anyway.)
+        // In a build that carries the natural voices (-PjacketVoicesInApk, below), their models
+        // are read straight out of the installed app, which only works without copying if they're
+        // stored as they are. (They hardly compress anyway.)
         noCompress += listOf("onnx", "bin")
     }
 }
@@ -124,7 +126,7 @@ dependencies {
     implementation(libs.jsoup)
 
     implementation(libs.media3.session)
-    // Natural voices: the engine. The voices themselves are fetched below.
+    // Natural voices: the engine. The voices themselves are downloaded by the app (see below).
     implementation(variantOf(libs.sherpa.onnx) { artifactType("aar") })
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     testImplementation(libs.junit)
@@ -133,10 +135,19 @@ dependencies {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Natural voices. The engine (sherpa-onnx) and the voices (Supertonic 3, and a Brazilian one) are too big for git and
-// aren't on Maven Central: both come from sherpa-onnx's GitHub releases, and both are checked
-// against a pinned SHA-256 before anything is built with them. Change a version and its checksum
-// together, after reviewing the new release.
+// Natural voices. The engine (sherpa-onnx) is too big for git and isn't on Maven Central: it
+// comes from sherpa-onnx's GitHub releases (see settings.gradle.kts) and is checked against a
+// pinned SHA-256 before anything is built with it. Change its version and checksum together,
+// after reviewing the new release.
+//
+// The voices (Supertonic 3, and a Brazilian one) are not in the app. The app downloads the one a
+// book needs from Jacket's own GitHub release (voices-1), when the listener agrees; the release,
+// and each file's size and SHA-256, are in src/main/assets/voices/catalog.json, the one place
+// they are written down. The files in that release were made by the tasks below, from
+// sherpa-onnx's own releases (pinned by their SHA-256 here); `./gradlew :app:checkVoiceCatalog`
+// makes them again and fails if any differs from the catalog. With -PjacketVoicesInApk=true a
+// local build also carries them inside the app, for working with no network; the app uses those
+// and downloads nothing.
 // ---------------------------------------------------------------------------------------------
 
 val sherpaOnnxSha256 = "07e042d97f3a6bd5b7fe74d4eef0513dc01a714b16c15a903250095aba43a575"
@@ -166,8 +177,9 @@ val verifySherpaOnnx = tasks.register("verifySherpaOnnx") {
 tasks.named("preBuild") { dependsOn(verifySherpaOnnx) }
 
 /**
- * Downloads the voices (once; the archive is kept in .gradle/voices), checks them, and unpacks the
- * model's files as app assets under voices/<id>/. To build offline, put the archive there yourself.
+ * Makes a pack's files from sherpa-onnx's release: downloads the archive (once; it is kept in
+ * .gradle/voices), checks it, and unpacks the model's files under voices/<id>/. To work offline,
+ * put the archive there yourself. Only run for checkVoiceCatalog, or with -PjacketVoicesInApk.
  */
 abstract class FetchVoices : DefaultTask() {
     @get:Input abstract val url: Property<String>
@@ -432,9 +444,72 @@ val fetchBrazilianVoice = tasks.register<FetchVoices>("fetchBrazilianVoice") {
     assets = layout.buildDirectory.dir("generated/voices-pt-br")
 }
 
-androidComponents {
-    onVariants { variant ->
-        variant.sources.assets?.addGeneratedSourceDirectory(fetchVoices, FetchVoices::assets)
-        variant.sources.assets?.addGeneratedSourceDirectory(fetchBrazilianVoice, FetchVoices::assets)
+/**
+ * Checks the files [FetchVoices] makes against the catalog the app downloads by: each must be
+ * listed there, with the same size and SHA-256. So the release the app downloads from and the
+ * recipe that made it can't drift apart unnoticed. Run it when making a new voices release.
+ */
+abstract class CheckVoiceCatalog : DefaultTask() {
+    @get:InputFile abstract val catalog: RegularFileProperty
+    @get:InputFiles abstract val made: ConfigurableFileCollection
+    @get:OutputFile abstract val stamp: RegularFileProperty
+
+    @TaskAction
+    fun check() {
+        @Suppress("UNCHECKED_CAST")
+        val root = groovy.json.JsonSlurper().parse(catalog.get().asFile) as Map<String, Any?>
+        val listed = HashMap<String, Pair<Long, String>>()
+        @Suppress("UNCHECKED_CAST")
+        for (pack in root["packs"] as List<Map<String, Any?>>) {
+            for (file in (pack["files"] as Map<String, Any?>).values) {
+                val f = file as? Map<*, *> ?: continue
+                listed["voices/${pack["id"]}/${f["name"]}"] = (f["bytes"] as Number).toLong() to (f["sha256"] as String)
+            }
+        }
+        val problems = ArrayList<String>()
+        val found = HashSet<String>()
+        for (dir in made.files) {
+            dir.walkTopDown().filter { it.isFile }.forEach { file ->
+                val path = file.relativeTo(dir).invariantSeparatorsPath
+                found += path
+                val (bytes, sha256) = listed[path] ?: return@forEach run { problems += "$path isn't in the catalog" }
+                val digest = MessageDigest.getInstance("SHA-256")
+                file.inputStream().use { input ->
+                    val buffer = ByteArray(1 shl 16)
+                    while (true) {
+                        val n = input.read(buffer)
+                        if (n < 0) break
+                        digest.update(buffer, 0, n)
+                    }
+                }
+                val actual = digest.digest().joinToString("") { "%02x".format(it) }
+                if (file.length() != bytes || actual != sha256) {
+                    problems += "$path is ${file.length()} bytes with SHA-256 $actual; the catalog says $bytes bytes, $sha256"
+                }
+            }
+        }
+        (listed.keys - found).forEach { problems += "$it is in the catalog but wasn't made" }
+        check(problems.isEmpty()) { "The voice catalog doesn't match the voices:\n" + problems.joinToString("\n") }
+        stamp.get().asFile.writeText("ok\n")
     }
+}
+
+val checkVoiceCatalog = tasks.register<CheckVoiceCatalog>("checkVoiceCatalog") {
+    group = "verification"
+    description = "Makes the natural voices from sherpa-onnx's releases and checks them against assets/voices/catalog.json."
+    catalog = layout.projectDirectory.file("src/main/assets/voices/catalog.json")
+    made.from(fetchVoices.flatMap { it.assets }, fetchBrazilianVoice.flatMap { it.assets })
+    stamp = layout.buildDirectory.file("verified/voice-catalog")
+}
+
+// A local build that carries the voices inside the app: -PjacketVoicesInApk=true. Checked against
+// the catalog first, so it carries the very files the app would otherwise download.
+if (providers.gradleProperty("jacketVoicesInApk").orNull == "true") {
+    androidComponents {
+        onVariants { variant ->
+            variant.sources.assets?.addGeneratedSourceDirectory(fetchVoices, FetchVoices::assets)
+            variant.sources.assets?.addGeneratedSourceDirectory(fetchBrazilianVoice, FetchVoices::assets)
+        }
+    }
+    tasks.named("preBuild") { dependsOn(checkVoiceCatalog) }
 }

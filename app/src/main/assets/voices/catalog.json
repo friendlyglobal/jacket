@@ -1,18 +1,47 @@
 {
-  "_comment": "The natural voices shipped inside Jacket. Their model files are put next to this file, in voices/<id>/, by the fetchVoices task in app/build.gradle.kts.",
+  "_comment": "The natural voices Jacket knows. Their files aren't in the app: each pack is downloaded the first time someone listens with it, from the GitHub release named in \"download\" (the asset is \"<pack id>.<file name>\"), and kept only if its size and SHA-256 are the ones listed here. A new or changed voice is a new release (voices-2, ...) and a change to this file: older Jacket versions keep reading voices-1. A local build can still carry the files inside the app (see -PjacketVoicesInApk in app/build.gradle.kts).",
+  "download": "https://github.com/friendlyglobal/jacket/releases/download/voices-1/",
   "packs": [
     {
       "id": "supertonic3",
       "name": "Supertonic 3",
       "engine": "supertonic",
       "files": {
-        "durationPredictor": "duration_predictor.int8.onnx",
-        "textEncoder": "text_encoder.int8.onnx",
-        "vectorEstimator": "vector_estimator.int8.onnx",
-        "vocoder": "vocoder.int8.onnx",
-        "ttsJson": "tts.json",
-        "unicodeIndexer": "unicode_indexer.bin",
-        "voiceStyle": "voice.bin"
+        "durationPredictor": {
+          "name": "duration_predictor.int8.onnx",
+          "bytes": 3700147,
+          "sha256": "c3eb91414d5ff8a7a239b7fe9e34e7e2bf8a8140d8375ffb14718b1c639325db"
+        },
+        "textEncoder": {
+          "name": "text_encoder.int8.onnx",
+          "bytes": 36416150,
+          "sha256": "c7befd5ea8c3119769e8a6c1486c4edc6a3bc8365c67621c881bbb774b9902ff"
+        },
+        "vectorEstimator": {
+          "name": "vector_estimator.int8.onnx",
+          "bytes": 78400833,
+          "sha256": "20cd86fa5c6effedfda0e7cffe5b0569ca401c440a0c3a1d72bf39286c0db3fd"
+        },
+        "vocoder": {
+          "name": "vocoder.int8.onnx",
+          "bytes": 25991073,
+          "sha256": "e923d60f53f95eb1ce235f1dc33ec56d9c057823c96fa6f8acf98f32b0da6152"
+        },
+        "ttsJson": {
+          "name": "tts.json",
+          "bytes": 8253,
+          "sha256": "42078d3aef1cd43ab43021f3c54f47d2d75ceb4e75f627f118890128b06a0d09"
+        },
+        "unicodeIndexer": {
+          "name": "unicode_indexer.bin",
+          "bytes": 262144,
+          "sha256": "8402ca48e5189a8950138580b0fff64db6f072f24ac07cd54ba8b2fbb9883b30"
+        },
+        "voiceStyle": {
+          "name": "voice.bin",
+          "bytes": 517168,
+          "sha256": "67d5209b0ee8ce6c74105ffbe12fe6a7628aea3b4ba2fcb308a4a67938a93ce8"
+        }
       },
       "languages": [
         "ar",
@@ -170,8 +199,16 @@
       "name": "Piper (cadu)",
       "engine": "piper",
       "files": {
-        "model": "pt_BR-cadu-medium.onnx",
-        "tokens": "tokens.txt"
+        "model": {
+          "name": "pt_BR-cadu-medium.onnx",
+          "bytes": 31789481,
+          "sha256": "6b0004622a15255d6670a797268ba9001386e6efda2a7e51d12151cdb6367404"
+        },
+        "tokens": {
+          "name": "tokens.txt",
+          "bytes": 968,
+          "sha256": "e8a50ae0c75612d18cfcf3f90800dca79f961e3ed97f9574f3535194469187fd"
+        }
       },
       "languages": [
         "pt"

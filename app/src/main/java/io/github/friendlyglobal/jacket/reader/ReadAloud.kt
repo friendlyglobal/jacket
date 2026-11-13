@@ -33,6 +33,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -382,6 +383,12 @@ internal class ReadAloud(
 
     /** The voice and the language the running voice was opened with (see [retune]). */
     private var tuned: Tuning? = null
+
+    /** The natural voices that were on the phone when the running voice was opened: one not among them has been downloaded since. */
+    private var readyAtOpen: Set<String> = emptySet()
+
+    /** A natural voice that has just arrived waits for the sentence being read to end before it takes over (see [retune]). */
+    private var arriving: Job? = null
 
     /** The natural voice that reads this book, or null for the phone's own. */
     var voice: VoiceRef? = null
@@ -956,6 +963,7 @@ internal class ReadAloud(
         }
         val forced = language?.let(::Language)
         tuned = Tuning(voice, language, phoneVoiceLanguage)
+        readyAtOpen = context.voices.ready.value
         // Before Readium cuts the first paragraph into sentences: the notes' numbers in it.
         readNotes(from?.href ?: navigator()?.currentLocator?.value?.href)
         voice?.let { ref ->
@@ -990,16 +998,46 @@ internal class ReadAloud(
         val running = tts ?: return
         // The voice and the language it is reading with already: a reader that opens the book the
         // voice is reading sets them as they are, and nothing is to be heard of it.
-        if (tuned == Tuning(voice, language, phoneVoiceLanguage)) return
+        if (tuned == Tuning(voice, language, phoneVoiceLanguage)) {
+            arriving?.cancel()
+            arriving = null
+            return
+        }
+        // The natural voice has just been downloaded, while another (the phone's, mostly) read: it
+        // takes over where a sentence ends, rather than cut one off and say it again. Its model is
+        // loaded meanwhile, so the moment between the two voices is short. A voice the listener
+        // chose themselves is heard at once, as ever.
+        val now = voice
+        val arrived = now != null && now.pack !in readyAtOpen && tuned?.copy(voice = now) == Tuning(now, language, phoneVoiceLanguage)
+        if (arrived && running.playback.value.playWhenReady) {
+            if (arriving?.isActive == true) return
+            val from = running.location.value.utteranceLocator
+            arriving = scope.launch {
+                launch { context.voices.preload(now) }
+                // The next sentence has begun (or the listener paused): the place to change voices.
+                val next = combine(running.location, running.playback) { at, playback -> at.utteranceLocator to playback.playWhenReady }
+                    .first { (at, playing) -> at != from || !playing }
+                arriving = null
+                if (tts === running) switchVoice(running, next.first.takeIf { it != from })
+            }
+            return
+        }
+        arriving?.cancel()
+        arriving = null
+        switchVoice(running, null)
+    }
+
+    /** Closes the [running] voice and opens the one now chosen, at the sentence [at] (or the one it was on), playing if it was. */
+    private fun switchVoice(running: TtsNavigator<*, *, *, *>, at: Locator?) {
         // Another voice speaks at a pace of its own: the time left in the chapter goes by it once it is heard.
         pace.forget()
         listen.lettersPerMs = 0f
         val playing = running.playback.value.playWhenReady
-        val at = lastSpoken
+        val from = at ?: lastSpoken
         session?.cancel()
         running.close()
         tts = null
-        begin(at, playing)
+        begin(from, playing)
     }
 
     /**
@@ -1250,6 +1288,8 @@ internal class ReadAloud(
         }
         pausedAt = 0L
         chapterJob?.cancel()
+        arriving?.cancel()
+        arriving = null
         session?.cancel()
         session = null
         listen.spokenFile = -1

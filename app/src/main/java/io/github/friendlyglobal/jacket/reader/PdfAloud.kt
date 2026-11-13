@@ -50,6 +50,7 @@ import io.github.friendlyglobal.jacket.listening
 import io.github.friendlyglobal.jacket.ui.Haptics
 import io.github.friendlyglobal.jacket.ui.PageColors
 import io.github.friendlyglobal.jacket.ui.motionRemoved
+import io.github.friendlyglobal.jacket.ui.voices.rememberVoice
 import io.github.friendlyglobal.jacket.voice.Respelling
 import io.github.friendlyglobal.jacket.voices
 import kotlinx.coroutines.CancellationException
@@ -507,7 +508,7 @@ internal fun rememberPdfAloud(
     LaunchedEffect(book.id, said) { if (book.language == null && said != null) library.setLanguage(book.id, said) }
     val phoneLanguage = LocalConfiguration.current.locales[0]?.toLanguageTag()
     val voicing = voicing(book.language, said, phoneLanguage, text = true)
-    val natural = remember(settings.voice, settings.voices, voicing.readIn) { voices.choose(voicing.readIn, settings) }
+    val natural = rememberVoice(voicing.readIn, settings)
     voice.voice = natural
     voice.language = voicing.chosen
     voice.phoneVoiceLanguage = voicing.phoneVoice

@@ -20,7 +20,7 @@
     <string name="voice_not_in_language">%1$s: de natuurlijke stemmen spreken deze taal nog niet, dus leest de stem van je telefoon voor.</string>
     <string name="voice_private">Natuurlijke stemmen spreken op je telefoon zelf. Niets van wat je leest wordt ergens naartoe gestuurd.</string>
     <string name="voice_about">Over deze stemmen</string>
-    <string name="voice_about_text">De natuurlijke stemmen horen bij Jacket en werken zonder internet. Je mag ze vrij gebruiken, maar niet om iemand te misleiden of te schaden, bijvoorbeeld door een stem voor een echt persoon te laten doorgaan. De volledige voorwaarden staan in Instellingen, onder Licenties.</string>
+    <string name="voice_about_text">De natuurlijke stemmen download je één keer, van GitHub, en daarna werken ze zonder internet. Je mag ze vrij gebruiken, maar niet om iemand te misleiden of te schaden, bijvoorbeeld door een stem voor een echt persoon te laten doorgaan. De volledige voorwaarden staan in Instellingen, onder Licenties.</string>
     <string name="voice_slow">Deze stem is te zwaar voor deze telefoon. Tik om te wijzigen.</string>
     <string name="listen_preparing">Stem wordt voorbereid…</string>
     <string name="voice_fell_back">De natuurlijke stem kon niet starten, dus leest de stem van je telefoon voor.</string>
@@ -56,4 +56,41 @@
     <string name="say_empty">Nog geen woorden. Houd een woord op de pagina ingedrukt en kies ‘Zeg het zo’, of voeg er hier een toe.</string>
     <string name="listen_skip_notes">Nootnummers overslaan</string>
     <string name="listen_skip_notes_description">De stem leest de kleine cijfers die naar noten verwijzen niet voor.</string>
+
+    <string name="voice_offer_title">Een natuurlijke stem downloaden?</string>
+    <string name="voice_offer_title_updated">Natuurlijke stemmen download je nu apart</string>
+    <string name="voice_offer_updated">Om Jacket klein te houden, zitten de stemmen niet meer in de app. Download de jouwe één keer en hij leest zoals voorheen. De stem die je koos, blijft gekozen.</string>
+    <string name="voice_offer_body">Een stem die als een mens klinkt, leest je boeken voor, gewoon op je telefoon. Je downloadt hem één keer: %1$s.</string>
+    <string name="voice_offer_privacy">Jacket maakt één keer verbinding met GitHub om de stem op te halen. GitHub ziet je IP-adres, zoals bij elke download. Er wordt niets over jou of je boeken verstuurd.</string>
+    <string name="voice_offer_mobile">Je gebruikt mobiele data: dit kost %1$s.</string>
+    <string name="voice_offer_meanwhile">Tot hij klaar is, leest de stem van je telefoon.</string>
+    <string name="voice_download">Downloaden (%1$s)</string>
+    <string name="voice_download_mobile">Downloaden via mobiele data (%1$s)</string>
+    <string name="voice_download_named">%1$s downloaden</string>
+    <string name="voice_use_phone">Stem van de telefoon gebruiken</string>
+    <string name="voice_offer_meanwhile_natural">Tot hij klaar is, leest de huidige stem verder.</string>
+    <string name="voice_keep_current">Huidige stem houden</string>
+    <string name="voice_download_ready">De natuurlijke stem is klaar.</string>
+    <string name="voice_downloading">Stem downloaden, %1$s</string>
+    <string name="voice_download_again">Opnieuw proberen</string>
+    <string name="voice_packs_title">Stemmen downloaden</string>
+    <plurals name="voice_pack_many">
+        <item quantity="one">Natuurlijke stemmen in %1$d taal</item>
+        <item quantity="other">Natuurlijke stemmen in %1$d talen</item>
+    </plurals>
+    <string name="voice_pack_one">Natuurlijke stem in het %1$s</string>
+    <string name="voice_pack_in_app">Zit in dit exemplaar van Jacket</string>
+    <string name="voice_pack_ready">Op deze telefoon · %1$s</string>
+    <string name="voice_pack_downloading">Downloaden · %1$s van %2$s</string>
+    <string name="voice_pack_paused">Gestopt bij %1$s van %2$s</string>
+    <string name="voice_pack_size">Download van %1$s</string>
+    <string name="voice_remove">Verwijderen</string>
+    <string name="voice_remove_title">Deze stem verwijderen?</string>
+    <string name="voice_remove_body">Zo komt er %1$s vrij op je telefoon. De stem van je telefoon leest dan, en je kunt deze altijd opnieuw downloaden.</string>
+    <string name="voice_problem_offline">Je hebt geen internetverbinding. Maak verbinding en probeer het opnieuw.</string>
+    <string name="voice_problem_unreachable">GitHub is niet bereikbaar. Probeer het later opnieuw.</string>
+    <string name="voice_problem_damaged">De download was beschadigd en is verwijderd. Probeer het opnieuw.</string>
+    <string name="voice_problem_space">Niet genoeg ruimte: de stem heeft %1$s vrij nodig op je telefoon.</string>
+    <string name="voice_problem_mobile">Gestopt omdat je telefoon overschakelde op mobiele data.</string>
+    <string name="voice_problem_storage">De stem kon niet op deze telefoon worden bewaard. Probeer het opnieuw.</string>
 </resources>

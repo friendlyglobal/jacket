@@ -4,7 +4,7 @@
     <string name="catch_up_group">你的其他裝置</string>
     <string name="catch_up_title">在裝置之間接著讀</string>
     <string name="catch_up_description">在兩台裝置上閱讀，在一台上從另一台讀到的地方接著讀。</string>
-    <string name="catch_up_setup_body">選擇一個所有裝置都能共用的資料夾：由 Google 雲端硬碟、Dropbox 或 Syncthing 這類應用程式在各台裝置上保持一致的資料夾，或是你在裝置之間來回插拔的 USB 隨身碟。\n\nJacket 會在那裡儲存一個小檔案，記錄你的閱讀位置、書籤、畫線、筆記和合輯，並讀取其他裝置儲存在那裡的檔案。Jacket 本身從不連上網路：連網的是共用該資料夾的應用程式。你的書籍、封面和設定仍留在各自的裝置上。\n\n接著在另一台裝置上選擇同一個資料夾，做同樣的設定。</string>
+    <string name="catch_up_setup_body">選擇一個所有裝置都能共用的資料夾：由 Google 雲端硬碟、Dropbox 或 Syncthing 這類應用程式在各台裝置上保持一致的資料夾，或是你在裝置之間來回插拔的 USB 隨身碟。\n\nJacket 會在那裡儲存一個小檔案，記錄你的閱讀位置、書籤、畫線、筆記和合輯，並讀取其他裝置儲存在那裡的檔案。Jacket 本身不會傳送任何內容：這由共用該資料夾的應用程式完成。你的書籍、封面和設定仍留在各自的裝置上。\n\n接著在另一台裝置上選擇同一個資料夾，做同樣的設定。</string>
     <string name="catch_up_device_name">這台裝置的名稱</string>
     <string name="catch_up_choose_folder">選擇資料夾</string>
     <string name="catch_up_setup_files_hint">無法選擇想用的資料夾？可以改為把這台裝置的檔案儲存到其中，再逐一加入其他裝置的檔案。</string>

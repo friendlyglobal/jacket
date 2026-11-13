@@ -97,7 +97,7 @@
     <string name="library_empty_message">Füge eine EPUB-, PDF-, FB2-, CBZ-Comic- oder Textdatei hinzu. Jacket legt eine private Kopie an und zeigt beim Lesen das Cover auf dem Außendisplay oder in einem Cover-Display-Widget.</string>
     <string name="onboarding_next">Weiter</string>
     <string name="onboarding_skip">Überspringen</string>
-    <string name="onboarding_private">Deine Bücher bleiben auf diesem Smartphone. Jacket braucht kein Konto und geht nie online.</string>
+    <string name="onboarding_private">Deine Bücher bleiben auf diesem Smartphone. Jacket braucht kein Konto und geht nur online, um auf deinen Wunsch eine Stimme herunterzuladen.</string>
 
     <string name="settings_title">Einstellungen</string>
     <string name="settings_subtitle">Profil, Cover-Display und Lesen</string>

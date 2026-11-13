@@ -100,7 +100,7 @@
     <string name="library_empty_message">Adicione um EPUB, PDF, FB2, quadrinho CBZ ou arquivo de texto. O Jacket guarda uma cópia privada e mostra a capa na sua tela externa, ou em um widget, enquanto você lê.</string>
     <string name="onboarding_next">Avançar</string>
     <string name="onboarding_skip">Pular</string>
-    <string name="onboarding_private">Seus livros ficam neste celular. O Jacket não tem conta e nunca se conecta à internet.</string>
+    <string name="onboarding_private">Seus livros ficam neste celular. O Jacket não tem conta e só se conecta à internet para baixar uma voz, quando você pede.</string>
 
     <string name="settings_title">Configurações</string>
     <string name="settings_subtitle">Perfil, tela externa e leitura</string>

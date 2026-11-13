@@ -31,7 +31,7 @@
     <string name="voice_not_in_language">The natural voices don\'t speak %1$s yet, so your phone\'s voice reads this.</string>
     <string name="voice_private">Natural voices speak on your phone itself. Nothing you read is sent anywhere.</string>
     <string name="voice_about">About these voices</string>
-    <string name="voice_about_text">The natural voices come with Jacket and work without the internet. They are free to use, but must not be used to deceive or harm anyone, for example by passing a voice off as a real person. The full terms are in Settings, under Licenses.</string>
+    <string name="voice_about_text">Natural voices are downloaded once, from GitHub, and then work without the internet. They are free to use, but must not be used to deceive or harm anyone, for example by passing a voice off as a real person. The full terms are in Settings, under Licenses.</string>
     <!-- On the player, when the phone is too slow for the natural voice. Keep it short. -->
     <string name="voice_slow">This voice is too much for this phone. Tap to change it.</string>
     <!-- On the player's button while a natural voice loads, before its first word. -->
@@ -86,4 +86,64 @@
     <!-- A switch: the voice doesn't say the small numbers in the text that point to footnotes and endnotes. -->
     <string name="listen_skip_notes">Skip note numbers</string>
     <string name="listen_skip_notes_description">The voice doesn\'t read out the small numbers that point to notes.</string>
+
+    <!-- Downloading the natural voices (see voice/VoiceDownloads.kt). -->
+    <!-- The natural voices are downloaded once, from GitHub, the first time someone listens. Plain words: no "model", "TTS" or "AI". -->
+    <!-- Shown in a sheet on the first Listen of a book whose voice isn't on the phone yet; the phone's own voice reads meanwhile. -->
+    <string name="voice_offer_title">Download a natural voice?</string>
+    <!-- The same sheet's title for someone updating from a version that had the voices inside the app. -->
+    <string name="voice_offer_title_updated">Natural voices now download separately</string>
+    <string name="voice_offer_updated">To keep Jacket small, the voices are no longer inside the app. Download yours once and it reads as before. The voice you chose is kept.</string>
+    <!-- %1$s is a size, e.g. "145 MB". -->
+    <string name="voice_offer_body">A voice that sounds like a person reads your books, right on your phone. It\'s a one-time download of %1$s.</string>
+    <!-- What the download reveals, plainly. Keep "GitHub" and "IP address". -->
+    <string name="voice_offer_privacy">Jacket connects once, to GitHub, to get the voice. GitHub sees your IP address, as with any download. Nothing about you or your books is sent.</string>
+    <!-- Shown when the phone is on mobile data. %1$s is a size, e.g. "145 MB". -->
+    <string name="voice_offer_mobile">You\'re on mobile data: this uses %1$s of it.</string>
+    <string name="voice_offer_meanwhile">Your phone\'s voice reads until it\'s ready.</string>
+    <!-- Buttons. %1$s is a size, e.g. "145 MB". -->
+    <string name="voice_download">Download (%1$s)</string>
+    <string name="voice_download_mobile">Download on mobile data (%1$s)</string>
+    <!-- For screen readers, on the button beside a voice that isn't on the phone yet. %1$s is the voice's name. -->
+    <string name="voice_download_named">Download %1$s</string>
+    <string name="voice_use_phone">Use the phone\'s voice</string>
+    <!-- The same sheet when another natural voice (one already on the phone) is reading meanwhile. -->
+    <string name="voice_offer_meanwhile_natural">The voice reading now carries on until it\'s ready.</string>
+    <string name="voice_keep_current">Keep the voice reading now</string>
+    <!-- A short message once a voice has downloaded. -->
+    <string name="voice_download_ready">The natural voice is ready.</string>
+    <!-- On the player and beside a voice while it downloads. %1$s is a percentage, e.g. "42%". -->
+    <string name="voice_downloading">Downloading voice, %1$s</string>
+    <string name="voice_download_again">Try again</string>
+    <!-- Settings › Voice: the natural voices, each to download or remove. -->
+    <string name="voice_packs_title">Voice downloads</string>
+    <!-- What a set of voices is: "Natural voices in 31 languages". -->
+    <plurals name="voice_pack_many">
+        <item quantity="one">Natural voices in %1$d language</item>
+        <item quantity="other">Natural voices in %1$d languages</item>
+    </plurals>
+    <!-- A voice for one language. %1$s is a language with its country, e.g. "Portuguese (Brazil)". -->
+    <string name="voice_pack_one">Natural voice in %1$s</string>
+    <!-- A voice that came inside the app (only in builds made that way). -->
+    <string name="voice_pack_in_app">Comes with this copy of Jacket</string>
+    <!-- %1$s is a size, e.g. "145 MB". -->
+    <string name="voice_pack_ready">On this phone · %1$s</string>
+    <!-- %1$s is a percentage, %2$s a size: "Downloading · 42% of 145 MB". -->
+    <string name="voice_pack_downloading">Downloading · %1$s of %2$s</string>
+    <!-- Part of it is on the phone. %1$s and %2$s are sizes: "Stopped at 61 MB of 145 MB". -->
+    <string name="voice_pack_paused">Stopped at %1$s of %2$s</string>
+    <!-- A voice not on the phone yet. %1$s is a size: "145 MB download". -->
+    <string name="voice_pack_size">%1$s download</string>
+    <string name="voice_remove">Remove</string>
+    <string name="voice_remove_title">Remove this voice?</string>
+    <!-- %1$s is a size, e.g. "145 MB". -->
+    <string name="voice_remove_body">This frees %1$s on your phone. Your phone\'s voice reads instead, and you can download this one again any time.</string>
+    <!-- Why a download stopped, in plain words. -->
+    <string name="voice_problem_offline">You\'re not connected to the internet. Connect, then try again.</string>
+    <string name="voice_problem_unreachable">Couldn\'t reach GitHub. Try again later.</string>
+    <string name="voice_problem_damaged">The download was damaged, so it was deleted. Try again.</string>
+    <!-- %1$s is a size, e.g. "195 MB". -->
+    <string name="voice_problem_space">Not enough space: the voice needs %1$s free on your phone.</string>
+    <string name="voice_problem_mobile">Stopped because your phone switched to mobile data.</string>
+    <string name="voice_problem_storage">Couldn\'t save the voice on this phone. Try again.</string>
 </resources>

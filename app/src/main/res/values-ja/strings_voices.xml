@@ -20,7 +20,7 @@
     <string name="voice_not_in_language">%1$s：ナチュラル音声はまだこの言語に対応していないため、スマートフォンの音声で読み上げます。</string>
     <string name="voice_private">ナチュラル音声はスマートフォンの中だけで動きます。読んでいる内容がどこかに送信されることはありません。</string>
     <string name="voice_about">この音声について</string>
-    <string name="voice_about_text">ナチュラル音声は Jacket に含まれており、インターネットなしで使えます。自由に使えますが、実在の人物の声と偽るなど、人をだましたり傷つけたりする目的には使えません。条件の全文は、設定のライセンスにあります。</string>
+    <string name="voice_about_text">ナチュラル音声は GitHub から一度だけダウンロードし、その後はインターネットなしで使えます。自由に使えますが、実在の人物の声と偽るなど、人をだましたり傷つけたりする目的には使えません。条件の全文は、設定のライセンスにあります。</string>
     <string name="voice_slow">この音声はこのスマートフォンには重すぎます。タップして変更できます。</string>
     <string name="listen_preparing">音声を準備しています…</string>
     <string name="voice_fell_back">ナチュラル音声を開始できなかったため、スマートフォンの音声で読み上げています。</string>
@@ -56,4 +56,40 @@
     <string name="say_empty">まだ言葉がありません。ページ上の言葉を長押しして「読み方を教える」を選ぶか、ここで追加してください。</string>
     <string name="listen_skip_notes">注の番号を読まない</string>
     <string name="listen_skip_notes_description">注を示す小さな番号を、音声は読み上げません。</string>
+
+    <string name="voice_offer_title">ナチュラル音声をダウンロードしますか？</string>
+    <string name="voice_offer_title_updated">ナチュラル音声は別にダウンロードするようになりました</string>
+    <string name="voice_offer_updated">Jacket を小さく保つため、音声はアプリに含まれなくなりました。一度ダウンロードすれば、これまでどおり読み上げます。選んでいた音声はそのままです。</string>
+    <string name="voice_offer_body">人の声のように聞こえる音声が、スマートフォンの中で本を読み上げます。ダウンロードは一度だけです（%1$s）。</string>
+    <string name="voice_offer_privacy">音声を取得するため、Jacket は一度だけ GitHub に接続します。ほかのダウンロードと同じく、GitHub にはあなたの IP アドレスが伝わります。あなたや本についての情報は何も送信されません。</string>
+    <string name="voice_offer_mobile">モバイルデータ通信を使っています。%1$s のデータを使います。</string>
+    <string name="voice_offer_meanwhile">準備ができるまでは、スマートフォンの音声が読み上げます。</string>
+    <string name="voice_download">ダウンロード（%1$s）</string>
+    <string name="voice_download_mobile">モバイルデータでダウンロード（%1$s）</string>
+    <string name="voice_download_named">%1$s をダウンロード</string>
+    <string name="voice_use_phone">スマートフォンの音声を使う</string>
+    <string name="voice_offer_meanwhile_natural">準備ができるまでは、今の音声が読み上げを続けます。</string>
+    <string name="voice_keep_current">今の音声のままにする</string>
+    <string name="voice_download_ready">ナチュラル音声の準備ができました。</string>
+    <string name="voice_downloading">音声をダウンロード中、%1$s</string>
+    <string name="voice_download_again">もう一度試す</string>
+    <string name="voice_packs_title">音声のダウンロード</string>
+    <plurals name="voice_pack_many">
+        <item quantity="other">%1$d 言語のナチュラル音声</item>
+    </plurals>
+    <string name="voice_pack_one">%1$sのナチュラル音声</string>
+    <string name="voice_pack_in_app">この Jacket に含まれています</string>
+    <string name="voice_pack_ready">このスマートフォンにあります · %1$s</string>
+    <string name="voice_pack_downloading">ダウンロード中 · %2$s 中 %1$s</string>
+    <string name="voice_pack_paused">%2$s 中 %1$s で停止</string>
+    <string name="voice_pack_size">ダウンロード %1$s</string>
+    <string name="voice_remove">削除</string>
+    <string name="voice_remove_title">この音声を削除しますか？</string>
+    <string name="voice_remove_body">スマートフォンの空き容量が %1$s 増えます。代わりにスマートフォンの音声が読み上げます。この音声はいつでも再ダウンロードできます。</string>
+    <string name="voice_problem_offline">インターネットに接続されていません。接続してから、もう一度お試しください。</string>
+    <string name="voice_problem_unreachable">GitHub に接続できませんでした。しばらくしてからもう一度お試しください。</string>
+    <string name="voice_problem_damaged">ダウンロードしたファイルが壊れていたため、削除しました。もう一度お試しください。</string>
+    <string name="voice_problem_space">空き容量が足りません。この音声には %1$s の空き容量が必要です。</string>
+    <string name="voice_problem_mobile">スマートフォンがモバイルデータ通信に切り替わったため、停止しました。</string>
+    <string name="voice_problem_storage">このスマートフォンに音声を保存できませんでした。もう一度お試しください。</string>
 </resources>

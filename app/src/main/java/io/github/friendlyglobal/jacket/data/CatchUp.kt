@@ -43,8 +43,8 @@ import java.util.concurrent.ConcurrentHashMap
  * theirs (Google Drive, Dropbox, Syncthing) keeps the same on all of them, or a USB stick. Jacket
  * keeps one small file there for this device ("Jacket – Tablet.json", see [DeviceFile]), which it
  * alone writes, and reads the files the other devices keep there. It only ever reads and writes
- * files through Android's file picker: the app that holds the folder does any sending, so Jacket
- * still never goes online.
+ * files through Android's file picker: the app that holds the folder does any sending, and Jacket
+ * sends nothing.
  *
  * Where a folder can't be chosen (some apps only offer single files, and Google Drive only
  * offers folders on Android 11 and later), the reader chooses the files one by one instead: this

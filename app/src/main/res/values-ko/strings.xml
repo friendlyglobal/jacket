@@ -95,7 +95,7 @@
     <string name="library_empty_message">EPUB, PDF, FB2, CBZ 만화 또는 텍스트 파일을 추가하세요. Jacket은 비공개 사본을 보관하고, 읽는 동안 외부 화면이나 커버 화면 위젯에 표지를 보여 줍니다.</string>
     <string name="onboarding_next">다음</string>
     <string name="onboarding_skip">건너뛰기</string>
-    <string name="onboarding_private">책은 이 휴대전화에만 저장됩니다. Jacket은 계정이 필요 없고 인터넷에 연결하지 않습니다.</string>
+    <string name="onboarding_private">책은 이 휴대전화에만 저장됩니다. Jacket은 계정이 필요 없으며, 요청할 때 음성을 다운로드하는 경우에만 인터넷에 연결합니다.</string>
 
     <string name="settings_title">설정</string>
     <string name="settings_subtitle">프로필, 커버 화면, 읽기</string>

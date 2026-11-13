@@ -20,7 +20,7 @@
     <string name="voice_not_in_language">%1$s: الأصوات الطبيعية لا تتحدث هذه اللغة بعد، لذا يقرأ صوت الهاتف.</string>
     <string name="voice_private">الأصوات الطبيعية تتحدث على هاتفك نفسه. لا يُرسَل أي شيء مما تقرؤه إلى أي مكان.</string>
     <string name="voice_about">عن هذه الأصوات</string>
-    <string name="voice_about_text">الأصوات الطبيعية تأتي مع Jacket وتعمل بدون إنترنت. استخدامها مجاني، لكن لا يجوز استخدامها لخداع أحد أو إيذائه، مثل تقديم صوت على أنه صوت شخص حقيقي. الشروط الكاملة موجودة في الإعدادات، ضمن التراخيص.</string>
+    <string name="voice_about_text">تُنزَّل الأصوات الطبيعية مرة واحدة من GitHub، ثم تعمل بدون إنترنت. استخدامها مجاني، لكن لا يجوز استخدامها لخداع أحد أو إيذائه، مثل تقديم صوت على أنه صوت شخص حقيقي. الشروط الكاملة موجودة في الإعدادات، ضمن التراخيص.</string>
     <string name="voice_slow">هذا الصوت ثقيل على هذا الهاتف. انقر لتغييره.</string>
     <string name="listen_preparing">جارٍ تجهيز الصوت…</string>
     <string name="voice_fell_back">تعذّر تشغيل الصوت الطبيعي، لذا يقرأ صوت الهاتف.</string>
@@ -56,4 +56,45 @@
     <string name="say_empty">لا توجد كلمات بعد. اضغط مطولًا على كلمة في الصفحة واختر «انطقها هكذا»، أو أضف كلمة هنا.</string>
     <string name="listen_skip_notes">تخطي أرقام الحواشي</string>
     <string name="listen_skip_notes_description">لا يقرأ الصوت الأرقام الصغيرة التي تشير إلى الحواشي.</string>
+
+    <string name="voice_offer_title">تنزيل صوت طبيعي؟</string>
+    <string name="voice_offer_title_updated">الأصوات الطبيعية تُنزَّل الآن بشكل منفصل</string>
+    <string name="voice_offer_updated">ليبقى Jacket صغير الحجم، لم تعد الأصوات داخل التطبيق. نزّل صوتك مرة واحدة ليقرأ كما كان. الصوت الذي اخترته يبقى كما هو.</string>
+    <string name="voice_offer_body">صوت يشبه صوت إنسان يقرأ كتبك على هاتفك مباشرة. يُنزَّل مرة واحدة فقط: %1$s.</string>
+    <string name="voice_offer_privacy">يتصل Jacket بـGitHub مرة واحدة لجلب الصوت. يرى GitHub عنوان IP الخاص بك، كما في أي تنزيل. لا يُرسَل أي شيء عنك أو عن كتبك.</string>
+    <string name="voice_offer_mobile">أنت تستخدم بيانات الجوّال: سيستهلك هذا %1$s منها.</string>
+    <string name="voice_offer_meanwhile">إلى أن يجهز، يقرأ صوت هاتفك.</string>
+    <string name="voice_download">تنزيل (%1$s)</string>
+    <string name="voice_download_mobile">تنزيل عبر بيانات الجوّال (%1$s)</string>
+    <string name="voice_download_named">تنزيل %1$s</string>
+    <string name="voice_use_phone">استخدام صوت الهاتف</string>
+    <string name="voice_offer_meanwhile_natural">إلى أن يجهز، يواصل الصوت الحالي القراءة.</string>
+    <string name="voice_keep_current">الإبقاء على الصوت الحالي</string>
+    <string name="voice_download_ready">الصوت الطبيعي جاهز.</string>
+    <string name="voice_downloading">جارٍ تنزيل الصوت، %1$s</string>
+    <string name="voice_download_again">إعادة المحاولة</string>
+    <string name="voice_packs_title">تنزيلات الأصوات</string>
+    <plurals name="voice_pack_many">
+        <item quantity="zero">أصوات طبيعية بـ%1$d لغة</item>
+        <item quantity="one">أصوات طبيعية بـ%1$d لغة</item>
+        <item quantity="two">أصوات طبيعية بـ%1$d لغة</item>
+        <item quantity="few">أصوات طبيعية بـ%1$d لغات</item>
+        <item quantity="many">أصوات طبيعية بـ%1$d لغة</item>
+        <item quantity="other">أصوات طبيعية بـ%1$d لغة</item>
+    </plurals>
+    <string name="voice_pack_one">صوت طبيعي باللغة %1$s</string>
+    <string name="voice_pack_in_app">مضمّن في هذه النسخة من Jacket</string>
+    <string name="voice_pack_ready">على هذا الهاتف · %1$s</string>
+    <string name="voice_pack_downloading">جارٍ التنزيل · %1$s من %2$s</string>
+    <string name="voice_pack_paused">توقّف عند %1$s من %2$s</string>
+    <string name="voice_pack_size">تنزيل بحجم %1$s</string>
+    <string name="voice_remove">إزالة</string>
+    <string name="voice_remove_title">إزالة هذا الصوت؟</string>
+    <string name="voice_remove_body">سيحرّر هذا %1$s على هاتفك. سيقرأ صوت هاتفك بدلًا منه، ويمكنك تنزيل هذا الصوت مجددًا في أي وقت.</string>
+    <string name="voice_problem_offline">أنت غير متصل بالإنترنت. اتصل ثم أعد المحاولة.</string>
+    <string name="voice_problem_unreachable">تعذّر الوصول إلى GitHub. أعد المحاولة لاحقًا.</string>
+    <string name="voice_problem_damaged">كان التنزيل تالفًا فحُذف. أعد المحاولة.</string>
+    <string name="voice_problem_space">المساحة غير كافية: يحتاج الصوت إلى %1$s من المساحة الفارغة على هاتفك.</string>
+    <string name="voice_problem_mobile">توقّف لأن هاتفك انتقل إلى بيانات الجوّال.</string>
+    <string name="voice_problem_storage">تعذّر حفظ الصوت على هذا الهاتف. أعد المحاولة.</string>
 </resources>

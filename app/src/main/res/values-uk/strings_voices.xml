@@ -20,7 +20,7 @@
     <string name="voice_not_in_language">%1$s: природні голоси ще не розмовляють цією мовою, тому читає голос телефона.</string>
     <string name="voice_private">Природні голоси звучать просто на вашому телефоні. Нічого з того, що ви читаєте, нікуди не надсилається.</string>
     <string name="voice_about">Про ці голоси</string>
-    <string name="voice_about_text">Природні голоси входять до Jacket і працюють без інтернету. Користуватися ними можна вільно, але не можна використовувати їх, щоб обманювати чи шкодити комусь, наприклад видаючи голос за справжню людину. Повні умови — у Налаштуваннях, у розділі «Ліцензії».</string>
+    <string name="voice_about_text">Природні голоси завантажуються один раз із GitHub, а потім працюють без інтернету. Користуватися ними можна вільно, але не можна використовувати їх, щоб обманювати чи шкодити комусь, наприклад видаючи голос за справжню людину. Повні умови — у Налаштуваннях, у розділі «Ліцензії».</string>
     <string name="voice_slow">Цей голос заважкий для цього телефона. Торкніться, щоб змінити.</string>
     <string name="listen_preparing">Голос готується…</string>
     <string name="voice_fell_back">Природний голос не вдалося запустити, тому читає голос телефона.</string>
@@ -56,4 +56,43 @@
     <string name="say_empty">Слів поки немає. Натисніть і утримуйте слово на сторінці та виберіть «Вимовляти так» або додайте слово тут.</string>
     <string name="listen_skip_notes">Пропускати номери приміток</string>
     <string name="listen_skip_notes_description">Голос не читає маленькі цифри, що відсилають до приміток.</string>
+
+    <string name="voice_offer_title">Завантажити природний голос?</string>
+    <string name="voice_offer_title_updated">Природні голоси тепер завантажуються окремо</string>
+    <string name="voice_offer_updated">Щоб Jacket займав мало місця, голосів більше немає всередині застосунку. Завантажте свій один раз, і він читатиме як раніше. Вибраний голос збережеться.</string>
+    <string name="voice_offer_body">Голос, що звучить як жива людина, читає ваші книжки просто на телефоні. Він завантажується один раз: %1$s.</string>
+    <string name="voice_offer_privacy">Jacket один раз підключається до GitHub, щоб отримати голос. GitHub бачить вашу IP-адресу, як під час будь-якого завантаження. Нічого про вас і ваші книжки не надсилається.</string>
+    <string name="voice_offer_mobile">Ви користуєтеся мобільним інтернетом: це займе %1$s трафіку.</string>
+    <string name="voice_offer_meanwhile">Поки він завантажується, читає голос телефона.</string>
+    <string name="voice_download">Завантажити (%1$s)</string>
+    <string name="voice_download_mobile">Завантажити через мобільний інтернет (%1$s)</string>
+    <string name="voice_download_named">Завантажити: %1$s</string>
+    <string name="voice_use_phone">Використовувати голос телефона</string>
+    <string name="voice_offer_meanwhile_natural">Поки він завантажується, читає теперішній голос.</string>
+    <string name="voice_keep_current">Залишити теперішній голос</string>
+    <string name="voice_download_ready">Природний голос готовий.</string>
+    <string name="voice_downloading">Завантаження голосу, %1$s</string>
+    <string name="voice_download_again">Спробувати ще раз</string>
+    <string name="voice_packs_title">Голоси для завантаження</string>
+    <plurals name="voice_pack_many">
+        <item quantity="one">Природні голоси: %1$d мова</item>
+        <item quantity="few">Природні голоси: %1$d мови</item>
+        <item quantity="many">Природні голоси: %1$d мов</item>
+        <item quantity="other">Природні голоси: %1$d мови</item>
+    </plurals>
+    <string name="voice_pack_one">Природний голос: %1$s</string>
+    <string name="voice_pack_in_app">Входить до цієї копії Jacket</string>
+    <string name="voice_pack_ready">На цьому телефоні · %1$s</string>
+    <string name="voice_pack_downloading">Завантаження · %1$s з %2$s</string>
+    <string name="voice_pack_paused">Зупинено на %1$s з %2$s</string>
+    <string name="voice_pack_size">Розмір: %1$s</string>
+    <string name="voice_remove">Видалити</string>
+    <string name="voice_remove_title">Видалити цей голос?</string>
+    <string name="voice_remove_body">На телефоні звільниться %1$s. Замість нього читатиме голос телефона, а цей можна завантажити знову будь-коли.</string>
+    <string name="voice_problem_offline">Немає з’єднання з інтернетом. Підключіться й спробуйте ще раз.</string>
+    <string name="voice_problem_unreachable">Не вдалося зв’язатися з GitHub. Спробуйте пізніше.</string>
+    <string name="voice_problem_damaged">Завантажений файл пошкоджено, тому його видалено. Спробуйте ще раз.</string>
+    <string name="voice_problem_space">Недостатньо місця: голосу потрібно %1$s вільного місця на телефоні.</string>
+    <string name="voice_problem_mobile">Зупинено: телефон перейшов на мобільний інтернет.</string>
+    <string name="voice_problem_storage">Не вдалося зберегти голос на цьому телефоні. Спробуйте ще раз.</string>
 </resources>

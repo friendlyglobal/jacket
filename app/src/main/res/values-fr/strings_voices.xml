@@ -20,7 +20,7 @@
     <string name="voice_not_in_language">%1$s : les voix naturelles ne parlent pas encore cette langue, c\'est donc la voix du téléphone qui lit.</string>
     <string name="voice_private">Les voix naturelles parlent sur votre téléphone même. Rien de ce que vous lisez n\'est envoyé où que ce soit.</string>
     <string name="voice_about">À propos de ces voix</string>
-    <string name="voice_about_text">Les voix naturelles sont fournies avec Jacket et fonctionnent sans Internet. Leur usage est libre, mais elles ne doivent pas servir à tromper ou à nuire, par exemple en faisant passer une voix pour celle d\'une personne réelle. Les conditions complètes se trouvent dans Paramètres, sous Licences.</string>
+    <string name="voice_about_text">Les voix naturelles se téléchargent une fois, depuis GitHub, puis fonctionnent sans Internet. Leur usage est libre, mais elles ne doivent pas servir à tromper ou à nuire, par exemple en faisant passer une voix pour celle d\'une personne réelle. Les conditions complètes se trouvent dans Paramètres, sous Licences.</string>
     <string name="voice_slow">Cette voix est trop lourde pour ce téléphone. Touchez pour en changer.</string>
     <string name="listen_preparing">Préparation de la voix…</string>
     <string name="voice_fell_back">La voix naturelle n\'a pas pu démarrer : la voix du téléphone lit à sa place.</string>
@@ -56,4 +56,42 @@
     <string name="say_empty">Aucun mot pour l\'instant. Appuyez longuement sur un mot de la page et choisissez « Le dire ainsi », ou ajoutez-en un ici.</string>
     <string name="listen_skip_notes">Sauter les numéros de notes</string>
     <string name="listen_skip_notes_description">La voix ne lit pas les petits numéros qui renvoient aux notes.</string>
+
+    <string name="voice_offer_title">Télécharger une voix naturelle ?</string>
+    <string name="voice_offer_title_updated">Les voix naturelles se téléchargent désormais à part</string>
+    <string name="voice_offer_updated">Pour que Jacket reste léger, les voix ne sont plus dans l\'appli. Téléchargez la vôtre une fois et elle lit comme avant. La voix que vous aviez choisie est conservée.</string>
+    <string name="voice_offer_body">Une voix qui sonne comme une vraie personne lit vos livres, directement sur votre téléphone. Elle se télécharge une seule fois : %1$s.</string>
+    <string name="voice_offer_privacy">Jacket se connecte une fois à GitHub pour obtenir la voix. GitHub voit votre adresse IP, comme pour tout téléchargement. Rien sur vous ni sur vos livres n\'est envoyé.</string>
+    <string name="voice_offer_mobile">Vous êtes en données mobiles : cela en utilise %1$s.</string>
+    <string name="voice_offer_meanwhile">En attendant, la voix du téléphone lit.</string>
+    <string name="voice_download">Télécharger (%1$s)</string>
+    <string name="voice_download_mobile">Télécharger en données mobiles (%1$s)</string>
+    <string name="voice_download_named">Télécharger %1$s</string>
+    <string name="voice_use_phone">Utiliser la voix du téléphone</string>
+    <string name="voice_offer_meanwhile_natural">En attendant, la voix actuelle continue de lire.</string>
+    <string name="voice_keep_current">Garder la voix actuelle</string>
+    <string name="voice_download_ready">La voix naturelle est prête.</string>
+    <string name="voice_downloading">Téléchargement de la voix, %1$s</string>
+    <string name="voice_download_again">Réessayer</string>
+    <string name="voice_packs_title">Voix à télécharger</string>
+    <plurals name="voice_pack_many">
+        <item quantity="one">Voix naturelles en %1$d langue</item>
+        <item quantity="many">Voix naturelles en %1$d langues</item>
+        <item quantity="other">Voix naturelles en %1$d langues</item>
+    </plurals>
+    <string name="voice_pack_one">Voix naturelle en %1$s</string>
+    <string name="voice_pack_in_app">Incluse dans cet exemplaire de Jacket</string>
+    <string name="voice_pack_ready">Sur ce téléphone · %1$s</string>
+    <string name="voice_pack_downloading">Téléchargement · %1$s sur %2$s</string>
+    <string name="voice_pack_paused">Arrêté à %1$s sur %2$s</string>
+    <string name="voice_pack_size">Téléchargement de %1$s</string>
+    <string name="voice_remove">Supprimer</string>
+    <string name="voice_remove_title">Supprimer cette voix ?</string>
+    <string name="voice_remove_body">Cela libère %1$s sur votre téléphone. La voix du téléphone lira à la place, et vous pourrez retélécharger celle-ci à tout moment.</string>
+    <string name="voice_problem_offline">Vous n\'êtes pas connecté à Internet. Connectez-vous, puis réessayez.</string>
+    <string name="voice_problem_unreachable">Impossible de joindre GitHub. Réessayez plus tard.</string>
+    <string name="voice_problem_damaged">Le téléchargement était endommagé et a été supprimé. Réessayez.</string>
+    <string name="voice_problem_space">Pas assez d\'espace : la voix a besoin de %1$s libres sur votre téléphone.</string>
+    <string name="voice_problem_mobile">Arrêté, car votre téléphone est passé aux données mobiles.</string>
+    <string name="voice_problem_storage">Impossible d\'enregistrer la voix sur ce téléphone. Réessayez.</string>
 </resources>

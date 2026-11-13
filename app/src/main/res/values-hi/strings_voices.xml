@@ -20,7 +20,7 @@
     <string name="voice_not_in_language">%1$s: स्वाभाविक आवाज़ें अभी यह भाषा नहीं बोलतीं, इसलिए फ़ोन की आवाज़ पढ़ती है।</string>
     <string name="voice_private">स्वाभाविक आवाज़ें आपके फ़ोन पर ही बोलती हैं। आप जो पढ़ते हैं, वह कहीं नहीं भेजा जाता।</string>
     <string name="voice_about">इन आवाज़ों के बारे में</string>
-    <string name="voice_about_text">स्वाभाविक आवाज़ें Jacket के साथ आती हैं और इंटरनेट के बिना काम करती हैं। इनका इस्तेमाल मुफ़्त है, लेकिन किसी को धोखा देने या नुकसान पहुँचाने के लिए इनका इस्तेमाल नहीं किया जा सकता, जैसे किसी आवाज़ को असली व्यक्ति की आवाज़ बताना। पूरी शर्तें सेटिंग में, लाइसेंस के अंतर्गत हैं।</string>
+    <string name="voice_about_text">स्वाभाविक आवाज़ें एक बार GitHub से डाउनलोड होती हैं और फिर इंटरनेट के बिना काम करती हैं। इनका इस्तेमाल मुफ़्त है, लेकिन किसी को धोखा देने या नुकसान पहुँचाने के लिए इनका इस्तेमाल नहीं किया जा सकता, जैसे किसी आवाज़ को असली व्यक्ति की आवाज़ बताना। पूरी शर्तें सेटिंग में, लाइसेंस के अंतर्गत हैं।</string>
     <string name="voice_slow">यह आवाज़ इस फ़ोन के लिए भारी है। बदलने के लिए टैप करें।</string>
     <string name="listen_preparing">आवाज़ तैयार हो रही है…</string>
     <string name="voice_fell_back">स्वाभाविक आवाज़ शुरू नहीं हो सकी, इसलिए फ़ोन की आवाज़ पढ़ रही है।</string>
@@ -56,4 +56,41 @@
     <string name="say_empty">अभी कोई शब्द नहीं है। पेज पर किसी शब्द को दबाकर रखें और “इसे ऐसे बोलें” चुनें, या यहाँ जोड़ें।</string>
     <string name="listen_skip_notes">नोट के नंबर छोड़ें</string>
     <string name="listen_skip_notes_description">आवाज़ उन छोटे नंबरों को नहीं पढ़ती जो नोट की ओर इशारा करते हैं।</string>
+
+    <string name="voice_offer_title">स्वाभाविक आवाज़ डाउनलोड करें?</string>
+    <string name="voice_offer_title_updated">स्वाभाविक आवाज़ें अब अलग से डाउनलोड होती हैं</string>
+    <string name="voice_offer_updated">Jacket को छोटा रखने के लिए आवाज़ें अब ऐप के अंदर नहीं हैं। अपनी आवाज़ एक बार डाउनलोड करें, फिर वह पहले की तरह पढ़ेगी। आपकी चुनी हुई आवाज़ बनी रहती है।</string>
+    <string name="voice_offer_body">इंसान जैसी लगने वाली आवाज़ आपकी किताबें सीधे आपके फ़ोन पर पढ़ती है। इसे सिर्फ़ एक बार डाउनलोड करना होता है: %1$s।</string>
+    <string name="voice_offer_privacy">आवाज़ लाने के लिए Jacket एक बार GitHub से जुड़ता है। हर डाउनलोड की तरह GitHub आपका IP पता देखता है। आपके या आपकी किताबों के बारे में कुछ भी नहीं भेजा जाता।</string>
+    <string name="voice_offer_mobile">आप मोबाइल डेटा पर हैं: इसमें %1$s डेटा लगेगा।</string>
+    <string name="voice_offer_meanwhile">तैयार होने तक फ़ोन की आवाज़ पढ़ती है।</string>
+    <string name="voice_download">डाउनलोड करें (%1$s)</string>
+    <string name="voice_download_mobile">मोबाइल डेटा से डाउनलोड करें (%1$s)</string>
+    <string name="voice_download_named">%1$s डाउनलोड करें</string>
+    <string name="voice_use_phone">फ़ोन की आवाज़ इस्तेमाल करें</string>
+    <string name="voice_offer_meanwhile_natural">तैयार होने तक अभी वाली आवाज़ पढ़ती रहती है।</string>
+    <string name="voice_keep_current">अभी वाली आवाज़ रखें</string>
+    <string name="voice_download_ready">स्वाभाविक आवाज़ तैयार है।</string>
+    <string name="voice_downloading">आवाज़ डाउनलोड हो रही है, %1$s</string>
+    <string name="voice_download_again">फिर से कोशिश करें</string>
+    <string name="voice_packs_title">आवाज़ डाउनलोड</string>
+    <plurals name="voice_pack_many">
+        <item quantity="one">%1$d भाषा में स्वाभाविक आवाज़ें</item>
+        <item quantity="other">%1$d भाषाओं में स्वाभाविक आवाज़ें</item>
+    </plurals>
+    <string name="voice_pack_one">%1$s में स्वाभाविक आवाज़</string>
+    <string name="voice_pack_in_app">Jacket की इस कॉपी में शामिल</string>
+    <string name="voice_pack_ready">इस फ़ोन पर · %1$s</string>
+    <string name="voice_pack_downloading">डाउनलोड हो रहा है · %2$s में से %1$s</string>
+    <string name="voice_pack_paused">%2$s में से %1$s पर रुका</string>
+    <string name="voice_pack_size">%1$s का डाउनलोड</string>
+    <string name="voice_remove">हटाएँ</string>
+    <string name="voice_remove_title">यह आवाज़ हटाएँ?</string>
+    <string name="voice_remove_body">इससे आपके फ़ोन पर %1$s जगह खाली होगी। इसकी जगह फ़ोन की आवाज़ पढ़ेगी, और आप इसे कभी भी फिर से डाउनलोड कर सकते हैं।</string>
+    <string name="voice_problem_offline">आप इंटरनेट से जुड़े नहीं हैं। जुड़ें और फिर से कोशिश करें।</string>
+    <string name="voice_problem_unreachable">GitHub तक नहीं पहुँच सके। बाद में फिर से कोशिश करें।</string>
+    <string name="voice_problem_damaged">डाउनलोड खराब था, इसलिए उसे मिटा दिया गया। फिर से कोशिश करें।</string>
+    <string name="voice_problem_space">जगह कम है: इस आवाज़ के लिए आपके फ़ोन पर %1$s खाली जगह चाहिए।</string>
+    <string name="voice_problem_mobile">रुक गया, क्योंकि आपका फ़ोन मोबाइल डेटा पर चला गया।</string>
+    <string name="voice_problem_storage">आवाज़ इस फ़ोन पर सेव नहीं हो सकी। फिर से कोशिश करें।</string>
 </resources>

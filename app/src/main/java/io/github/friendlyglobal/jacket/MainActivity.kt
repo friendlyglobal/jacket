@@ -128,6 +128,8 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         lifecycleScope.launch { library.scanWatchedFolder()?.let(reports::tryEmit) }
         catchUp.look()
+        // A voice download the listener asked for, stopped when Android closed Jacket, carries on.
+        voices.downloads.resume()
     }
 
     /**
