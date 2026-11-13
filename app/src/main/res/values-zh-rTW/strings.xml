@@ -208,6 +208,7 @@
     <string name="reader_listen">聆聽：朗讀</string>
     <string name="reader_previous_chapter">上一章</string>
     <string name="reader_next_chapter">下一章</string>
+    <string name="reader_chapter_numbered">第%1$s章</string>
     <string name="reader_previous_page">上一頁</string>
     <string name="reader_next_page">下一頁</string>
     <string name="reader_page_number">第 %1$d 頁</string>

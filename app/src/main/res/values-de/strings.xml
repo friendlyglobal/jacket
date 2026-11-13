@@ -214,6 +214,7 @@
     <string name="reader_listen">Anhören: vorlesen lassen</string>
     <string name="reader_previous_chapter">Vorheriges Kapitel</string>
     <string name="reader_next_chapter">Nächstes Kapitel</string>
+    <string name="reader_chapter_numbered">Kapitel %1$s</string>
     <string name="reader_previous_page">Vorherige Seite</string>
     <string name="reader_next_page">Nächste Seite</string>
     <string name="reader_page_number">Seite %1$d</string>

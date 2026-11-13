@@ -59,7 +59,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.viewinterop.AndroidView
-import io.github.friendlyglobal.jacket.data.PageColor
 import io.github.friendlyglobal.jacket.ui.rememberTabletopFold
 import kotlin.math.ceil
 import androidx.compose.foundation.layout.Box
@@ -402,9 +401,7 @@ fun ReaderScreen(
         onDispose { readAloud.left(book.id, nav.listen) }
     }
     // "Dark pages at night": with the phone in dark theme, Paper gives way to Dark.
-    val page = rememberPageColors(
-        if (settings.nightPages && settings.pageColor == PageColor.PAPER && isSystemInDarkTheme()) PageColor.DARK else settings.pageColor,
-    )
+    val page = rememberPageColors(shownPageColor(settings, isSystemInDarkTheme()))
     var chrome by rememberSaveable(book.id) { mutableStateOf(true) }
     // The toolbar by itself, without the bars around it: the player, shown for a moment when
     // listening starts so its controls are found, and while it turns back into the reading
@@ -947,7 +944,12 @@ fun ReaderScreen(
                 book, nav, haptics, visible = opening.settled && !closing,
                 modifier = Modifier.align(Alignment.TopCenter).absolutePadding(left = besideSpine).keyboardControls(controlFocus, "catch-up"),
             )
-            EdgeLevel(levels)
+            // Where to swipe for brightness and warmth: a handle on each edge, with the controls (see EdgeHandles).
+            EdgeHandles(
+                levels, enabled = settings.edgeSwipes && opening.settled && !coverUp,
+                controlsUp = chrome && sheet == Sheet.NONE, hints = settings.edgeHints,
+                onHinted = { onSettings { it.copy(edgeHints = (it.edgeHints + 1).coerceAtMost(EDGE_HINTS)) } },
+            )
 
             AnimatedVisibility(
                 visible = chrome && entrance >= 1,
@@ -1539,7 +1541,8 @@ private fun ReaderTopBar(
                 // the bar, level with the icons, instead of riding above an empty line.
                 val motion = MaterialTheme.motionScheme
                 AnimatedContent(
-                    targetState = nav.title.trim(),
+                    // ("Chapter II" for a chapter called only "II", as the chapter control has it.)
+                    targetState = chapterName(nav.title),
                     transitionSpec = {
                         (slideInVertically(motion.fastSpatialSpec()) { it / 2 } + fadeIn(motion.fastEffectsSpec()))
                             .togetherWith(slideOutVertically(motion.fastSpatialSpec()) { -it / 2 } + fadeOut(motion.fastEffectsSpec()))

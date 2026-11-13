@@ -491,6 +491,20 @@ pages show a spread at a time, like an open book (`reader/PagePairs.kt`, `reader
   opens (a 361-page PDF opened on its spread in under a second on the emulator; after 1.5 s it
   opens one page at a time and goes to pages side by side once they are known).
 
+### The reader's look and touch (M)
+From a hands-on review of the reader.
+- Selected words in an EPUB, FB2 or text book get the PDF's menu: the colours, Note, Copy, Share,
+  "Say it this way", "Read aloud from here" and the phone's text actions (`reader/SelectionChoices.kt`,
+  `reader/EpubSelection.kt`). The web view's own menu is kept empty; "Read aloud from here" finds
+  the selection's sentence in the voice's reading of the file (`ReadAloud.listenFrom`).
+- Book text follows Android's font size on top of the reader's size, capped at the largest reader
+  size (`reader/BookTextSize.kt`); the open book re-flows in place when it changes.
+- The reader's controls dress like the page: dark on Dark and Black pages, light on Paper, the
+  phone's theme on Book pages (`reader/ReaderLook.kt`).
+- A chapter called only "II" is shown as "Chapter II" (`reader/ChapterName.kt`).
+- The brightness and warmth edges have a small handle each, with the controls and, the first
+  three times a book opens, by themselves (`reader/EdgeHandles.kt`); the strips are 40 dp wide.
+
 ## Next
 
 ### Android Auto (M)

@@ -215,6 +215,7 @@
     <string name="reader_listen">Dinle: sesli oku</string>
     <string name="reader_previous_chapter">Önceki bölüm</string>
     <string name="reader_next_chapter">Sonraki bölüm</string>
+    <string name="reader_chapter_numbered">Bölüm %1$s</string>
     <string name="reader_previous_page">Önceki sayfa</string>
     <string name="reader_next_page">Sonraki sayfa</string>
     <string name="reader_page_number">Sayfa %1$d</string>

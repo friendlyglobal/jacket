@@ -1,20 +1,21 @@
 package io.github.friendlyglobal.jacket.reader
 
 import android.content.Context
-import android.content.Intent
-import android.content.pm.ResolveInfo
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.ColorInt
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.view.isEmpty
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import androidx.fragment.app.FragmentManager
-import io.github.friendlyglobal.jacket.R
 import io.github.friendlyglobal.jacket.data.LineSpacing
 import io.github.friendlyglobal.jacket.data.PageLayout
 import io.github.friendlyglobal.jacket.data.TextAlignment
@@ -214,65 +215,62 @@ class Marker(@ColorInt val color: Int, val noted: Boolean = false) : Decoration.
 }
 
 /**
- * The menu over selected text. Readium's custom menu replaces the web view's own, so it brings
- * back Copy, Share and the phone's text actions (Translate, Define, ...) next to Highlight and Note,
- * and "Say it this way" for a name the voice gets wrong.
+ * Words selected on a book's page, as the phone's web view tells of them.
+ *
+ * The web view selects the words and draws their handles; Readium hands its menu for them to
+ * this. Jacket's own menu goes by the words instead, the same one as over a PDF's (see
+ * [SelectionMenu] and EpubSelection.kt), so the web view's is kept empty: with nothing in it, the
+ * phone has no floating menu to show. (Saying no to it altogether would have the web view drop
+ * the selection.) What is left is knowing when there is a selection, and ending it.
  */
-class SelectionMenu(private val context: Context) : ActionMode.Callback {
-    enum class Action { HIGHLIGHT, NOTE, COPY, SAY, SHARE, PROCESS }
+class WebSelection : ActionMode.Callback {
+    /** Words are selected on the page: from when the web view starts its menu for them until it ends it. */
+    var active by mutableStateOf(false)
+        private set
 
-    /** Called with the action and, for [Action.PROCESS], the text-processing activity to send to. */
-    var onAction: (Action, ResolveInfo?) -> Unit = { _, _ -> }
-    private var processors: List<ResolveInfo> = emptyList()
+    /** A finger is on the page (dragging a handle, choosing words, scrolling): Jacket's menu waits for it to lift. */
+    var touching by mutableStateOf(false)
+
+    private var mode: ActionMode? = null
 
     override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-        menu.add(Menu.NONE, ID_HIGHLIGHT, 0, R.string.selection_highlight)
-        menu.add(Menu.NONE, ID_NOTE, 1, R.string.selection_note)
-        menu.add(Menu.NONE, ID_COPY, 2, android.R.string.copy)
-        menu.add(Menu.NONE, ID_SAY, 3, R.string.say_title)
-        menu.add(Menu.NONE, ID_SHARE, 4, R.string.selection_share)
-        val pm = context.packageManager
-        processors = runCatching {
-            pm.queryIntentActivities(Intent(Intent.ACTION_PROCESS_TEXT).setType("text/plain"), 0)
-        }.getOrDefault(emptyList()).filter { it.activityInfo.packageName != context.packageName }.take(4)
-        processors.forEachIndexed { i, info ->
-            menu.add(Menu.NONE, ID_PROCESS + i, 10 + i, info.loadLabel(pm))
-        }
+        menu.clear()
+        this.mode = mode
+        active = true
         return true
     }
 
-    override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
-
-    override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-        when (item.itemId) {
-            ID_HIGHLIGHT -> onAction(Action.HIGHLIGHT, null)
-            ID_NOTE -> onAction(Action.NOTE, null)
-            ID_COPY -> onAction(Action.COPY, null)
-            ID_SAY -> onAction(Action.SAY, null)
-            ID_SHARE -> onAction(Action.SHARE, null)
-            else -> onAction(Action.PROCESS, processors.getOrNull(item.itemId - ID_PROCESS) ?: return false)
-        }
-        mode.finish()
+    override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+        if (menu.isEmpty()) return false
+        menu.clear()
         return true
     }
 
-    override fun onDestroyActionMode(mode: ActionMode) {}
+    override fun onActionItemClicked(mode: ActionMode, item: MenuItem) = false
 
-    private companion object {
-        const val ID_HIGHLIGHT = 1
-        const val ID_NOTE = 2
-        const val ID_COPY = 3
-        const val ID_SHARE = 4
-        const val ID_SAY = 5
-        const val ID_PROCESS = 100
+    override fun onDestroyActionMode(mode: ActionMode) {
+        if (this.mode !== mode) return
+        this.mode = null
+        active = false
+    }
+
+    /** Ends the selection's menu; the page clears the words themselves (see [EpubNavigatorFragment.clearSelection]). */
+    fun finish() {
+        mode?.finish()
     }
 }
 
 /**
  * Maps Jacket's reading settings onto Readium preferences. [spread] while the phone is held
- * half-open like a book: the pages are laid out about its fold (see [BookPosture]).
+ * half-open like a book: the pages are laid out about its fold (see [BookPosture]). [textSize] is
+ * the size of the words, the reader's own size with the phone's font size on it (see [BookTextSize]).
  */
-internal fun epubPreferences(settings: Settings, page: PageColors, spread: BookSpread? = null): EpubPreferences = EpubPreferences(
+internal fun epubPreferences(
+    settings: Settings,
+    page: PageColors,
+    spread: BookSpread? = null,
+    textSize: Float = settings.textScale,
+): EpubPreferences = EpubPreferences(
     fontFamily = when (settings.font) {
         ReadingFont.LITERATA -> LITERATA
         ReadingFont.HYPERLEGIBLE -> HYPERLEGIBLE
@@ -281,7 +279,7 @@ internal fun epubPreferences(settings: Settings, page: PageColors, spread: BookS
         ReadingFont.SANS -> FontFamily.SANS_SERIF
         ReadingFont.ORIGINAL -> null
     },
-    fontSize = settings.textScale.toDouble(),
+    fontSize = textSize.toDouble(),
     scroll = settings.layout == PageLayout.SCROLL,
     theme = if (page.background.luminance() < 0.4f) Theme.DARK else Theme.LIGHT,
     backgroundColor = Color(page.background.toArgb()),

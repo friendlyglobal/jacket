@@ -214,6 +214,7 @@
     <string name="reader_listen">Luisteren: voorlezen</string>
     <string name="reader_previous_chapter">Vorig hoofdstuk</string>
     <string name="reader_next_chapter">Volgend hoofdstuk</string>
+    <string name="reader_chapter_numbered">Hoofdstuk %1$s</string>
     <string name="reader_previous_page">Vorige pagina</string>
     <string name="reader_next_page">Volgende pagina</string>
     <string name="reader_page_number">Pagina %1$d</string>

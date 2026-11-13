@@ -228,6 +228,7 @@
     <string name="reader_listen">Слухати: читання вголос</string>
     <string name="reader_previous_chapter">Попередній розділ</string>
     <string name="reader_next_chapter">Наступний розділ</string>
+    <string name="reader_chapter_numbered">Розділ %1$s</string>
     <string name="reader_previous_page">Попередня сторінка</string>
     <string name="reader_next_page">Наступна сторінка</string>
     <string name="reader_page_number">Сторінка %1$d</string>

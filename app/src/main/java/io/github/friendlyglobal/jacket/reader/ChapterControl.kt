@@ -240,10 +240,11 @@ private fun ChapterSurface(
 
     // Where a drag on the slider would land, while it is being dragged: the card names that place.
     val preview = remember { mutableStateOf<Float?>(null) }
-    val pillName = chapters?.title.orEmpty()
+    // A chapter called only "II" is shown as "Chapter II": by itself between the two buttons it looks like one more (see ChapterNames).
+    val pillName = chapterName(chapters?.title.orEmpty())
     // The pill and the card name the same chapter in most books; in a PDF with an outline the card
     // names the page. The same words stay as they are on the way; different ones fade over.
-    val sameName = pillName == nav.title
+    val sameName = pillName == chapterName(nav.title)
     val corner = (MaterialTheme.shapes.extraLarge as? CornerBasedShape)?.topStart
 
     Layout(
@@ -412,7 +413,7 @@ private fun StepButton(chapters: ChapterSteps, by: Int, haptics: Haptics, modifi
 private fun CardName(nav: ReaderNav, preview: MutableState<Float?>, modifier: Modifier = Modifier) {
     val landing = preview.value?.roundToInt()
     Text(
-        if (landing != null) nav.sectionName(landing) else nav.title,
+        chapterName(if (landing != null) nav.sectionName(landing) else nav.title),
         style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis,
         modifier = modifier.clearAndSetSemantics {},
     )
@@ -455,7 +456,7 @@ private fun PlaceSlider(
     // the book and in which chapter ("Place in the book, 42% read, Chapter 3"), not a bare
     // "420". The words above it are the same thing, for the eye.
     val percent = if (landing != null) landing * 100 / last else book.percent
-    val chapter = if (landing != null) nav.sectionName(landing) else nav.title
+    val chapter = chapterName(if (landing != null) nav.sectionName(landing) else nav.title)
     val place = stringResource(R.string.reader_place_in_book)
     val where = listOf(stringResource(R.string.reader_percent_read, percent), chapter.trim())
         .filter { it.isNotEmpty() }.joinToString(stringResource(R.string.list_separator))

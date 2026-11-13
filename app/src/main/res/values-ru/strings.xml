@@ -228,6 +228,7 @@
     <string name="reader_listen">Слушать: чтение вслух</string>
     <string name="reader_previous_chapter">Предыдущая глава</string>
     <string name="reader_next_chapter">Следующая глава</string>
+    <string name="reader_chapter_numbered">Глава %1$s</string>
     <string name="reader_previous_page">Предыдущая страница</string>
     <string name="reader_next_page">Следующая страница</string>
     <string name="reader_page_number">Страница %1$d</string>
