@@ -721,7 +721,7 @@ internal fun Modifier.chooseWords(words: PageWords, haptics: Haptics): Modifier 
     val marking = words.marking
     val cantMark = words.aloud?.cantMark
     return when {
-        marking != null -> pointerInput(marking) {
+        marking != null -> pointerInput(marking, words) {
             selectGestures(
                 handleAt = { at ->
                     val reach = HANDLE_REACH.toPx()
@@ -751,7 +751,7 @@ internal fun Modifier.chooseWords(words: PageWords, haptics: Haptics): Modifier 
                 },
             )
         }
-        cantMark != null -> pointerInput(cantMark) {
+        cantMark != null -> pointerInput(cantMark, words) {
             selectGestures(
                 handleAt = { null },
                 wordsAt = { !words.told[0] },
