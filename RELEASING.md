@@ -166,6 +166,12 @@ On any device:
       whenever the voice is made a little rougher or finer to suit the phone ("Steps 5 to 4").
       After `adb shell setprop log.tag.JacketVoice DEBUG` it has a line for every sentence made:
       how long it took, the pace the phone is going by, and what a finer voice would cost.
+- [ ] Listening with a book open, the screen turns off after the phone's own timeout while the
+      voice reads on; turned on again, the page is at the sentence being read, inked as far as
+      the voice has got. Paused, the screen stays on. With Settings › Listening › *Keep the
+      screen on while listening* on, it stays on while the voice reads too. About once a minute
+      `adb logcat -s JacketVoice` says what listening costs ("Listening: 9.4 s of processor time
+      per minute of speech ..., 2 threads, 5 steps, ... thermal status none, screen off").
 - [ ] A book in a language the natural voices don't speak (Chinese) is read by the phone's voice.
 - [ ] A Portuguese book on a phone set to Portuguese (Brazil) starts on the Brazilian voice, and
       one in the old spelling (a free edition of *Dom Casmurro*) is read naturally: "elle" as
