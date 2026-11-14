@@ -21,4 +21,6 @@
     <string name="book_time_spent">与这本书共度 %1$s</string>
     <string name="reader_webview_old">要显示页面，Jacket 需要更新版本的 %1$s。请在 Play 商店中更新，然后重新打开这本书。</string>
     <string name="reader_webview_update">打开 Play 商店</string>
+    <string name="listen_screen_on">听书时保持屏幕常亮</string>
+    <string name="listen_screen_on_description">关闭时，朗读期间屏幕会像平常一样熄灭。这样更省电，手机也不容易发热。</string>
 </resources>

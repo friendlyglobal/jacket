@@ -26,4 +26,6 @@
     <string name="book_time_spent">%1$s مع هذا الكتاب</string>
     <string name="reader_webview_old">لعرض الصفحات، يحتاج Jacket إلى إصدار أحدث من %1$s. حدّثه من متجر Play ثم افتح الكتاب مجددًا.</string>
     <string name="reader_webview_update">فتح متجر Play</string>
+    <string name="listen_screen_on">إبقاء الشاشة مضاءة أثناء الاستماع</string>
+    <string name="listen_screen_on_description">عند إيقاف هذا الخيار، تنطفئ الشاشة كالمعتاد بينما يقرأ الصوت. هذا يوفّر البطارية ويُبقي الهاتف أبرد.</string>
 </resources>

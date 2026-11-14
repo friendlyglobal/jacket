@@ -23,4 +23,6 @@
     <string name="book_time_spent">%1$s con este libro</string>
     <string name="reader_webview_old">Para mostrar las páginas, Jacket necesita una versión más reciente de %1$s. Actualízala desde Play Store y vuelve a abrir el libro.</string>
     <string name="reader_webview_update">Abrir Play Store</string>
+    <string name="listen_screen_on">Mantener la pantalla encendida al escuchar</string>
+    <string name="listen_screen_on_description">Si está desactivado, la pantalla se apaga como siempre mientras la voz lee. Así ahorras batería y el teléfono se calienta menos.</string>
 </resources>

@@ -22,4 +22,6 @@
     <string name="book_time_spent">%1$s met dit boek</string>
     <string name="reader_webview_old">Om pagina\'s te tonen heeft Jacket een nieuwere versie van %1$s nodig. Werk die bij via de Play Store en open het boek daarna opnieuw.</string>
     <string name="reader_webview_update">Play Store openen</string>
+    <string name="listen_screen_on">Scherm aan laten tijdens luisteren</string>
+    <string name="listen_screen_on_description">Staat dit uit, dan gaat het scherm zoals gewoonlijk uit terwijl de stem voorleest. Dat spaart de batterij en houdt de telefoon koeler.</string>
 </resources>

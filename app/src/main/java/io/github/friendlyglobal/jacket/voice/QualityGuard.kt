@@ -66,6 +66,14 @@ internal data class QualityGuard(
     val struggling: Boolean get() = steps < FULL_STEPS || pace > EASE
 
     /**
+     * The phone is short of speed for this voice, as far as the sentences say: it has had to be
+     * made rougher, or the middle one of the last three was only just kept up with. One slow
+     * sentence (the phone busy with something else for a moment) doesn't say so. The voice then
+     * runs on more cores, while the phone is cool (see [ModelHost.threadsFor]).
+     */
+    val shortOfSpeed: Boolean get() = steps < FULL_STEPS || (recent.size >= RECENT && pace > EASE)
+
+    /**
      * The guard after a sentence made at [steps] passes at [sentencePace] (the seconds it took to
      * make a second of it), with [inHand] seconds of speech ready ahead of the listener once it
      * was made. [caughtUp] when everything the voice can see to make is made: a cushion can't be

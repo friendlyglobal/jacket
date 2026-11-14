@@ -57,6 +57,7 @@ import io.github.friendlyglobal.jacket.data.LibrarySort
 import io.github.friendlyglobal.jacket.importer.titleOfSharedText
 import io.github.friendlyglobal.jacket.outer.OuterCoverHost
 import io.github.friendlyglobal.jacket.outer.OuterDisplay
+import io.github.friendlyglobal.jacket.reader.Listening
 import io.github.friendlyglobal.jacket.reader.ReaderFragments
 import io.github.friendlyglobal.jacket.reader.ReaderKeys
 import io.github.friendlyglobal.jacket.reader.ReaderScreen
@@ -386,7 +387,7 @@ private fun JacketRoot(
     }
     // Here rather than in the reader: switching books composes two readers for a moment, and the
     // outgoing one must not turn the screen timeout back on.
-    if (reading) KeepScreenOn()
+    if (reading) ScreenOnForReading(readAloud, state.settings.screenOnWhileListening)
 
     // "Cover when closed": folded shut on an open book, the screen wears its cover and reading
     // waits until the phone is opened. Back on the cover reads here anyway, until the next unfold.
@@ -585,6 +586,27 @@ private fun JacketRoot(
 
 /** How far back the library sits while a book is open in front of it. */
 private const val RECEDED = 0.92f
+
+/**
+ * Keeps the screen on while a book is open, as reading by eye needs: a page can take longer to
+ * read than the phone's timeout.
+ *
+ * Not while the voice reads it, unless [whileListening] (a setting, off as it starts): then the
+ * screen goes dark after the phone's own timeout, as it would in any other app, and the voice
+ * reads on behind the lock screen. Kept lit for nobody, the screen and the page redrawn under it
+ * as each word is spoken cost more battery than the voice itself, and warm the phone. Turned on
+ * again, the page catches up with the voice: it goes to the sentence being read and inks it as
+ * far as it has got (see EpubPages and ReadAloud.seen). Paused or stopped, the screen stays on
+ * again, for reading on by eye.
+ *
+ * In a composable of its own, so the voice starting and pausing redraws nothing else.
+ */
+@Composable
+private fun ScreenOnForReading(readAloud: Listening, whileListening: Boolean) {
+    val listen = readAloud.voice?.listen
+    val voiceReading = listen != null && listen.active && listen.playing
+    if (!voiceReading || whileListening) KeepScreenOn()
+}
 
 /** Swallows every touch on the screen it is composed in. */
 @Composable

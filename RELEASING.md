@@ -185,6 +185,12 @@ On any device:
       whenever the voice is made a little rougher or finer to suit the phone ("Steps 5 to 4").
       After `adb shell setprop log.tag.JacketVoice DEBUG` it has a line for every sentence made:
       how long it took, the pace the phone is going by, and what a finer voice would cost.
+- [ ] Listening with a book open, the screen turns off after the phone's own timeout while the
+      voice reads on; turned on again, the page is at the sentence being read, inked as far as
+      the voice has got. Paused, the screen stays on. With Settings › Listening › *Keep the
+      screen on while listening* on, it stays on while the voice reads too. About once a minute
+      `adb logcat -s JacketVoice` says what listening costs ("Listening: 9.4 s of processor time
+      per minute of speech ..., 2 threads, 5 steps, ... thermal status none, screen off").
 - [ ] Voices, starting with none on the phone (Settings › Voice › Remove): the first Listen
       offers the download (its size, GitHub, the IP address) while the phone's voice reads
       already; the player shows the download's progress, and the natural voice takes over at the

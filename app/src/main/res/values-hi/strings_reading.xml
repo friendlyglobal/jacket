@@ -22,4 +22,6 @@
     <string name="book_time_spent">इस किताब के साथ %1$s</string>
     <string name="reader_webview_old">पेज दिखाने के लिए Jacket को %1$s का नया वर्शन चाहिए। इसे Play Store से अपडेट करें, फिर किताब दोबारा खोलें।</string>
     <string name="reader_webview_update">Play Store खोलें</string>
+    <string name="listen_screen_on">सुनते समय स्क्रीन चालू रखें</string>
+    <string name="listen_screen_on_description">यह बंद हो, तो आवाज़ के पढ़ते समय स्क्रीन हमेशा की तरह बंद हो जाती है। इससे बैटरी बचती है और फ़ोन कम गर्म होता है।</string>
 </resources>

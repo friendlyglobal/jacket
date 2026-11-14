@@ -22,4 +22,6 @@
     <string name="book_time_spent">Bu kitapla %1$s</string>
     <string name="reader_webview_old">Sayfaları göstermek için Jacket’ın daha yeni bir %1$s sürümüne ihtiyacı var. Play Store’dan güncelleyin, sonra kitabı yeniden açın.</string>
     <string name="reader_webview_update">Play Store’u aç</string>
+    <string name="listen_screen_on">Dinlerken ekranı açık tut</string>
+    <string name="listen_screen_on_description">Kapalıyken, ses okurken ekran her zamanki gibi kapanır. Böylece pil daha uzun gider ve telefon daha az ısınır.</string>
 </resources>

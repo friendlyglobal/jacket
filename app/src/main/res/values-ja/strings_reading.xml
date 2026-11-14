@@ -21,4 +21,6 @@
     <string name="book_time_spent">この本と過ごした時間 %1$s</string>
     <string name="reader_webview_old">ページを表示するには、%1$s を新しいバージョンに更新する必要があります。Play ストアで更新してから、もう一度本を開いてください。</string>
     <string name="reader_webview_update">Play ストアを開く</string>
+    <string name="listen_screen_on">聴いている間は画面をつけたままにする</string>
+    <string name="listen_screen_on_description">オフにすると、音声の読み上げ中も画面はいつもどおり消えます。電池が長持ちし、スマートフォンも熱くなりにくくなります。</string>
 </resources>
