@@ -1,0 +1,7 @@
+Jacket 1.6
+• Dużo mniejsza aplikacja: 36 MB zamiast 213 MB
+• Naturalne głosy pobierają się raz, z GitHuba, gdy pierwszy raz słuchasz i się zgodzisz. W tym czasie czyta głos telefonu
+• Jacket łączy się z internetem tylko w tym celu. Nic o Tobie ani Twoich książkach nie jest wysyłane
+• Słuchanie zużywa mniej baterii i mniej grzeje telefon, a głos brzmi tak samo
+• Ekran gaśnie sam, gdy głos czyta; ustawienie pozwala go nie wyłączać
+• Ustawienia › Głos pobiera lub usuwa głosy

@@ -520,9 +520,11 @@ From a hands-on review of the reader.
 - The brightness and warmth edges have a small handle each, with the controls and, the first
   three times a book opens, by themselves (`reader/EdgeHandles.kt`); the strips are 40 dp wide.
 
-## Next
+## Shipped in 1.6 (13 November 2026)
 
-### Voices download on first listen (M, in review)
+A lean app, and a cooler phone while listening.
+
+### Voices download on first listen (M)
 The natural voices left the APK (213 MB to about 36 MB). The first Listen offers the voice the
 book's language needs (145 MB for Supertonic's 31 languages, 32 MB for the Brazilian voice),
 downloaded once from the `voices-1` GitHub release and checked against the catalog's SHA-256;
@@ -530,6 +532,26 @@ the phone's voice reads meanwhile, and the natural one takes over at the next se
 gets the INTERNET permission for this alone; a book's pages are kept offline (`reader/OfflinePages.kt`).
 A changed voice is a new release (`voices-2`) and a catalog change; older versions keep reading
 `voices-1`, so never delete a voices release.
+
+### Cooler listening (M)
+"When I use voice mode it gets kinda hot." Measured on the emulator, in processor-seconds per
+minute of speech:
+- The voice engine's threads sleep while they wait for each other instead of spinning (ONNX
+  Runtime's `allow_spinning=0`, passed through sherpa-onnx's provider settings file:
+  `EngineSettings` in `voice/NaturalModel.kt`), and the voice runs on two threads whatever the
+  phone (an 8-core phone had four): making speech went from 28.6 to 14.6. A voice that can't keep
+  up on two while the phone is cool gets up to four, so the quality never drops.
+- The screen times out as usual while the voice reads (Settings › Listening › Keep the screen on
+  while listening, off as it starts); woken, the page is at the sentence being read. Listening with
+  the screen allowed to sleep went from 25.3 to 18.2, before counting the display's own power.
+- The sound stream holds a second of sound, asks for Android's power-saving output, and is topped
+  up when a word is due instead of every 12 ms: about 4.5 wake-ups a second instead of 75
+  (`voice/PcmOut.kt`).
+- A `Listening: …` line under the `JacketVoice` log tag about once a minute tells what it costs on
+  a real phone. The sound is unchanged: with a fixed seed, Supertonic's output is identical sample
+  for sample.
+
+## Next
 
 ### Android Auto (M)
 Choose a book on the car's screen and have it read from where it was left.

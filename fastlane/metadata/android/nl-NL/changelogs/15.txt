@@ -1,0 +1,7 @@
+Jacket 1.6
+• Een veel kleinere app: 36 MB in plaats van 213 MB
+• Natuurlijke stemmen worden één keer van GitHub gedownload, als je voor het eerst luistert en akkoord gaat. Tot dan leest je telefoonstem
+• Alleen daarvoor gaat Jacket online. Niets over jou of je boeken wordt verstuurd
+• Luisteren kost minder batterij en warmt minder op, met dezelfde stem
+• Het scherm gaat vanzelf uit terwijl de stem leest; een instelling houdt het aan
+• Instellingen › Stem downloadt of verwijdert stemmen

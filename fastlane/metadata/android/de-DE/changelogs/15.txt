@@ -1,0 +1,7 @@
+Jacket 1.6
+• Eine viel kleinere App: 36 MB statt 213 MB
+• Natürliche Stimmen werden einmal von GitHub geladen, wenn du zum ersten Mal zuhörst und zustimmst. Bis dahin liest die Stimme des Handys
+• Nur dafür geht Jacket online. Nichts über dich oder deine Bücher wird gesendet
+• Zuhören braucht weniger Akku und wärmt das Handy weniger, mit derselben Stimme
+• Der Bildschirm geht beim Vorlesen von selbst aus; eine Einstellung lässt ihn an
+• Einstellungen › Stimme lädt Stimmen oder entfernt sie
