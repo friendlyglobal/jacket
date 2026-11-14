@@ -1,0 +1,7 @@
+Jacket 1.6
+• Um app bem menor: 36 MB em vez de 213 MB
+• As vozes naturais são baixadas uma vez, do GitHub, quando você ouve pela primeira vez e concorda. A voz do celular lê enquanto isso
+• O Jacket só usa a internet para isso. Nada sobre você ou seus livros é enviado
+• Ouvir gasta menos bateria e esquenta menos o celular, com a mesma voz
+• A tela apaga sozinha enquanto a voz lê; uma opção a mantém ligada
+• Configurações › Voz baixa ou remove vozes

@@ -1,0 +1,7 @@
+Jacket 1.6
+• Aplikasi jauh lebih kecil: 36 MB, bukan 213 MB
+• Suara alami diunduh sekali dari GitHub saat Anda pertama kali mendengarkan dan setuju. Sementara itu, suara ponsel yang membaca
+• Jacket terhubung ke internet hanya untuk itu. Tidak ada data tentang Anda atau buku Anda yang dikirim
+• Mendengarkan lebih hemat baterai dan ponsel lebih dingin, suaranya sama
+• Layar mati sendiri saat suara membaca; ada setelan agar tetap menyala
+• Setelan › Suara mengunduh atau menghapus suara

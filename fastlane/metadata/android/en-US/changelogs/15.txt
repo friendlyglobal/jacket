@@ -1,0 +1,7 @@
+Jacket 1.6
+• A much smaller app: 36 MB instead of 213 MB
+• Natural voices download once, from GitHub, the first time you listen and agree. Your phone's voice reads meanwhile
+• Jacket goes online only for that. Nothing about you or your books is sent
+• Listening uses less battery and keeps the phone cooler, with the same voice
+• The screen turns off on its own while the voice reads; a setting keeps it on
+• Settings › Voice downloads or removes voices

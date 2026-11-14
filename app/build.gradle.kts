@@ -23,8 +23,8 @@ android {
         applicationId = "app.usefriendly.jacket"
         minSdk = 26
         targetSdk = 37
-        versionCode = 14
-        versionName = "1.5.0"
+        versionCode = 15
+        versionName = "1.6.0"
 
         // The voice engine is native code. 32-bit x86 is left out: no phone that runs Android 8+
         // needs it. The APK carries the engine for all three (about 9 MB each, compressed): most

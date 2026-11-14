@@ -1,0 +1,7 @@
+Jacket 1.6
+• Çok daha küçük bir uygulama: 213 MB yerine 36 MB
+• Doğal sesler, ilk kez dinleyip onay verdiğinizde GitHub'dan bir kez indirilir. Bu sırada telefonun sesi okur
+• Jacket yalnızca bunun için internete bağlanır. Sizin ya da kitaplarınız hakkında hiçbir şey gönderilmez
+• Dinlemek daha az pil harcar ve telefonu daha az ısıtır, ses aynı kalır
+• Ses okurken ekran kendiliğinden kapanır; bir ayar onu açık tutar
+• Ayarlar › Ses, sesleri indirir veya kaldırır
