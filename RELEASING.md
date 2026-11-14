@@ -60,13 +60,12 @@ Build:
 ./gradlew :app:assembleRelease   # app/build/outputs/apk/release/app-release.apk (GitHub)
 ```
 
-The natural voices ship inside the app, which makes each of these about 200 MB (the APK about 212 MB, the bundle about 195 MB, and what Play sends a phone about 177 MB). The APK runs on
-any phone (it carries the voice engine for 64-bit and 32-bit ARM and for x86-64). The first build
-downloads them (about 200 MB, in two archives) and the voice engine from sherpa-onnx's GitHub releases and checks
-both against the SHA-256 checksums in `app/build.gradle.kts`; after that it works offline. Play
-allows a bundle whose download for one phone is up to 200 MB: check the size Play Console
-reports after uploading (*App bundle explorer → Downloads*), and if it ever comes close, the
-voices can move into an install-time asset pack without changing the app's code much.
+The natural voices aren't in the app: it downloads the one a book needs the first time someone
+listens (see "Natural voices" in section 6). The APK is about 36 MB and the bundle about 43 MB,
+most of either the voice engine for three kinds of processor; Play sends each phone only its own.
+The APK runs on any phone (it carries the voice engine for 64-bit and 32-bit ARM and for
+x86-64). The first build downloads the voice engine from sherpa-onnx's GitHub releases and checks
+it against the SHA-256 checksum in `app/build.gradle.kts`; after that it builds offline.
 
 Without `keystore.properties`, the release build falls back to the debug key, so test builds
 keep installing over each other. Play rejects debug-signed bundles, so check the signature
@@ -77,9 +76,13 @@ keytool -list -v -keystore ~/keys/jacket-release.jks -alias jacket | grep 'SHA25
 keytool -printcert -jarfile app/build/outputs/bundle/release/app-release.aab | grep 'SHA256:'
 ```
 
-The two SHA-256 fingerprints must match. Also confirm there is no `INTERNET` permission:
+The two SHA-256 fingerprints must match. Also check the permissions:
 `aapt2 dump permissions app/build/outputs/apk/release/app-release.apk`
-(`aapt2` is in `$ANDROID_HOME/build-tools/<version>/`).
+(`aapt2` is in `$ANDROID_HOME/build-tools/<version>/`). `INTERNET` is there for one use only:
+downloading a natural voice. Only `voice/VoiceDownload.kt` may use it: `NetworkUseTest` fails the
+build if any other source file opens a connection, and `reader/OfflinePages.kt` keeps books'
+pages off the network. Read any change to those three files, and any new network permission,
+with care before a release.
 
 Signatures and existing installs:
 
@@ -144,6 +147,22 @@ the older standalone copy; you don't need to turn on GitHub Pages for it.
   package name and signing certificate. Check Play Console's developer verification page and
   register the package name and your upload certificate so the GitHub APK keeps installing.
 
+### Natural voices (a separate release)
+
+The voices are assets of the GitHub pre-release
+[`voices-1`](https://github.com/friendlyglobal/jacket/releases/tag/voices-1), one asset per file,
+named `<pack>.<file>` (`supertonic3.vocoder.int8.onnx`), with `SHA256SUMS` and the licence texts.
+`app/src/main/assets/voices/catalog.json` names the release and each file's size and SHA-256;
+the app keeps a downloaded file only if both match.
+
+- Never delete a voices release or replace a file in it: every Jacket that shipped with its
+  catalog downloads from it. Never mark it as the latest release.
+- A changed or new voice is a new release, `voices-2`: change the recipe in
+  `app/build.gradle.kts` (the `FetchVoices` tasks), make the files, upload them under the same
+  names, and change the catalog (its `download` address, and each file's `bytes` and `sha256`).
+  Then `./gradlew :app:checkVoiceCatalog` must pass: it makes the files again and compares them
+  with the catalog.
+
 ## 7. Real-device test matrix
 
 | Device | Check |
@@ -172,6 +191,17 @@ On any device:
       screen on while listening* on, it stays on while the voice reads too. About once a minute
       `adb logcat -s JacketVoice` says what listening costs ("Listening: 9.4 s of processor time
       per minute of speech ..., 2 threads, 5 steps, ... thermal status none, screen off").
+- [ ] Voices, starting with none on the phone (Settings › Voice › Remove): the first Listen
+      offers the download (its size, GitHub, the IP address) while the phone's voice reads
+      already; the player shows the download's progress, and the natural voice takes over at the
+      end of a sentence. Cancel, then Download, carries on where it stopped; so does opening
+      Jacket again after force-stopping it mid-download. On mobile data it says the size and
+      asks first. Remove frees the space. `adb logcat -s JacketVoice` shows the byte each file
+      starts from and that its size and SHA-256 matched.
+- [ ] Updating from 1.5 (voices inside the app): the first Listen says once that voices now
+      download separately, and the voice chosen before is the one that reads once it's here.
+- [ ] Listening started from headphones, the notification or a car never asks anything: a voice
+      already on the phone reads, or the phone's own.
 - [ ] A book in a language the natural voices don't speak (Chinese) is read by the phone's voice.
 - [ ] A Portuguese book on a phone set to Portuguese (Brazil) starts on the Brazilian voice, and
       one in the old spelling (a free edition of *Dom Casmurro*) is read naturally: "elle" as

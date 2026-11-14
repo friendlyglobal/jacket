@@ -167,12 +167,18 @@ import io.github.friendlyglobal.jacket.ui.SystemBarsHidden
 import io.github.friendlyglobal.jacket.ui.motionRemoved
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import io.github.friendlyglobal.jacket.ui.fitOnOneLine
 import io.github.friendlyglobal.jacket.ui.rememberScreenReader
 import io.github.friendlyglobal.jacket.ui.rememberTimeToAct
 import io.github.friendlyglobal.jacket.ui.screenReaderOn
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
 import io.github.friendlyglobal.jacket.ui.rememberPageColors
+import io.github.friendlyglobal.jacket.ui.voices.VoiceOfferSheet
+import io.github.friendlyglobal.jacket.ui.voices.percentText
+import io.github.friendlyglobal.jacket.ui.voices.rememberVoice
+import io.github.friendlyglobal.jacket.voice.VoiceDownloads
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -384,7 +390,7 @@ fun ReaderScreen(
     val phoneLanguage = LocalConfiguration.current.locales[0]?.toLanguageTag()
     // (So is a PDF whose language couldn't be told from its words.)
     val readIn = book.language ?: if (book.format == BookFormat.TXT || book.format == BookFormat.PDF || book.format == BookFormat.FB2) phoneLanguage else null
-    val voice = remember(settings.voice, settings.voices, readIn) { voices.choose(readIn, settings) }
+    val voice = rememberVoice(readIn, settings)
     // On the player: who is reading, and whether the phone is keeping up with them.
     val health by voices.health.collectAsStateWithLifecycle()
     val voiceLabel = voiceLabel(readIn, settings)
@@ -686,6 +692,34 @@ fun ReaderScreen(
     }
     // A voice the phone can't keep up with says so on the player: bring it up to be seen.
     val struggling = voice != null && health.slow
+
+    // The natural voice that would read this book, while it is downloading (the phone's voice,
+    // or another one already here, reads meanwhile): the player shows how far it has got.
+    val downloadStates by voices.downloads.states.collectAsStateWithLifecycle()
+    val ready by voices.ready.collectAsStateWithLifecycle()
+    val wanted = remember(settings.voice, settings.voices, readIn, ready) { voices.wanted(readIn, settings) }
+    val fetching = wanted?.takeIf { it != voice }?.let { downloadStates[it.pack] }?.takeIf { it.downloading }
+    val playerLabel = if (fetching != null) stringResource(R.string.voice_downloading, percentText(fetching.progress)) else voiceLabel
+
+    // The first Listen of a book whose natural voice isn't on the phone offers it, while the
+    // phone's own voice starts reading (nothing waits for an answer). Only when listening starts
+    // with this screen in front of the listener: never from a headset, the notification or a car
+    // with Jacket out of sight, and not on a closed phone's cover.
+    var offer by remember { mutableStateOf<VoiceDownloads.Offer?>(null) }
+    val offerLanguage by rememberUpdatedState(readIn)
+    val offerSettings by rememberUpdatedState(settings)
+    val offerOnCover by rememberUpdatedState(coverUp)
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(listen) {
+        var was = listen.active
+        snapshotFlow { listen.active }.collect { active ->
+            if (active && !was && !offerOnCover && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                voices.downloads.offerFor(offerLanguage, offerSettings)?.let { offer = it }
+            }
+            was = active
+        }
+    }
+    offer?.let { VoiceOfferSheet(it, onDismiss = { offer = null }) }
     LaunchedEffect(struggling, listening) {
         if (!struggling) listen.warned = false else if (listening && !listen.warned && !chrome) peek = true
     }
@@ -910,7 +944,7 @@ fun ReaderScreen(
 
             // The footer line, in the room every page keeps under it: its quiet words while you
             // read, the mini player while you listen. The toolbar sits over it when it is up.
-            val playerVoice = ListenVoice(voiceLabel, natural = voice != null, struggling = struggling) { sheet = Sheet.VOICE }
+            val playerVoice = ListenVoice(playerLabel, natural = voice != null, struggling = struggling, downloading = fetching?.progress) { sheet = Sheet.VOICE }
             // It gives way at once to the toolbar, and hops back up once the toolbar has dropped
             // away, rather than through it.
             val footerUp by produceState(!barUp, barUp) {

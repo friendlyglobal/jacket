@@ -126,7 +126,7 @@
     <!-- Welcome, shown once before the first book (its other words are the library's and the settings' own) -->
     <string name="onboarding_next">Next</string>
     <string name="onboarding_skip">Skip</string>
-    <string name="onboarding_private">Your books stay on this phone. Jacket has no account and never goes online.</string>
+    <string name="onboarding_private">Your books stay on this phone. Jacket has no account, and only goes online to download a voice when you ask.</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>

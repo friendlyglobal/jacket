@@ -32,19 +32,22 @@ Google Play: coming soon ·
   with a player while it reads aloud. On a Galaxy Z Flip it's a cover-screen widget.
 - **Real pages.** The page lifts under your finger and turns like paper. Unfold the phone for a
   two-page spread.
-- **Or just listen.** Natural voices come with the app and speak 31 languages, with no internet.
-  Each word lights up as it's read, and the page turns with the voice.
+- **Or just listen.** Natural voices speak 31 languages, right on your phone. The one your book
+  needs downloads once, the first time you listen, and then works with no internet. Each word
+  lights up as it's read, and the page turns with the voice.
 - **Your own books, and free ones.** EPUB, PDF, FB2, CBZ comics and plain text, plus 114 classics in
   16 languages to download for free.
-- **Nothing leaves your phone.** Jacket has no internet permission: no accounts, no ads, no
-  analytics, no tracking.
+- **Nothing leaves your phone.** Jacket goes online for one thing only: to download a voice from
+  GitHub, once, when you say yes. Nothing is uploaded: no accounts, no ads, no analytics, no
+  tracking.
 - **In 18 languages**, with a Brazilian voice for Brazilian readers.
 
 ## Install
 
 - **From GitHub:** open the [latest release](https://github.com/friendlyglobal/jacket/releases/latest),
   download `Jacket-1.5.0.apk` and open it. Your browser asks once to be allowed to install apps.
-  It's about 200 MB, because the voices are inside, and it runs on Android 8 and later. Later
+  It's about 36 MB, and it runs on Android 8 and later; the natural voice downloads the first
+  time you listen. Later
   versions install over it the same way, keeping your books and places.
 - **Google Play:** coming soon.
 
@@ -130,13 +133,17 @@ Reports from Pixel Fold, Galaxy Z Fold/Flip and Razr owners are very welcome in
   latest Google Play system update; older phones say why they can't.)
 
 ### Listening
-- **Natural voices, on the phone.** Ten voices that sound like a person reading come with the
-  app ([Supertonic 3](https://huggingface.co/Supertone/supertonic-3), run by
-  [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)). They speak 31 languages, work with no
-  internet, and the text they read never leaves the device. There is nothing to download or set
-  up: a book is read in its own language, and where the natural voices don't know a language
-  (Chinese, for now) the phone's own voice reads instead. Pick a voice in Settings or on the
-  player, with a button to hear each one first.
+- **Natural voices, on the phone.** Ten voices that sound like a person reading
+  ([Supertonic 3](https://huggingface.co/Supertone/supertonic-3), run by
+  [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx)). They speak 31 languages and run on the
+  phone itself: the text they read never leaves the device. They aren't inside the app, to keep
+  it small: the first time you listen, Jacket offers to download the voice your book needs, once,
+  from GitHub (145 MB for the 31 languages, 32 MB for the Brazilian voice), and your phone's own
+  voice reads meanwhile, so listening never waits. On mobile data it says the size and asks
+  first. After that the voices work with no internet. A book is read in its own language, and
+  where the natural voices don't know a language (Chinese, for now) the phone's own voice reads
+  instead. Pick a voice in Settings or on the player, with a button to hear each one first; the
+  same screen downloads, cancels or removes each set of voices.
 - **A Brazilian voice for Brazilian readers.** Portuguese books are read with a Brazilian accent
   on a Brazilian phone (and wherever nothing says the reader is from Portugal), by a voice made
   from recordings a volunteer gave to the public domain. Jacket works out the sounds itself, by
@@ -205,8 +212,8 @@ are a first pass; corrections from native speakers are welcome (`app/src/main/re
   each one finds its place and notes. Android's own device backup keeps the same data.
 - **Catch up between devices:** on each device, pick a folder that your sync app (Google Drive and
   others) keeps in step. When another device is further on in a book, Jacket offers to go there;
-  bookmarks, highlights, notes and collections carry over. Jacket itself never goes online: it
-  only reads and writes a file in that folder.
+  bookmarks, highlights, notes and collections carry over. Jacket itself sends nothing: it only
+  reads and writes a file in that folder, and the sync app does the rest.
 
 ### The cover, where people can see it
 
@@ -248,9 +255,13 @@ are a first pass; corrections from native speakers are welcome (`app/src/main/re
 Read the [privacy policy](https://usefriendly.app/products/jacket/privacy/) (its source is
 [PRIVACY.md](PRIVACY.md)).
 
-Everything stays on the device. Jacket has no internet permission, so neither the app nor the
-books you open in it can reach the network. The natural voices are part of the app and speak on
-the phone itself.
+Everything stays on the device. Jacket uses the internet for one thing: downloading a natural
+voice from Jacket's own release on GitHub, once, after you agree. GitHub sees your IP address, as
+with any download; nothing about you or your books is sent, and nothing is uploaded. That
+download is one small file of code,
+[`voice/VoiceDownload.kt`](app/src/main/java/io/github/friendlyglobal/jacket/voice/VoiceDownload.kt),
+and a test fails the build if anything else in Jacket opens a connection. The books you open
+can't reach the network: their pages are kept offline. The voices speak on the phone itself.
 
 ## Building
 
@@ -261,13 +272,17 @@ Requirements: JDK 17+ (Android Studio's bundled JDK works) and the Android SDK w
 # app/build/outputs/apk/debug/app-debug.apk
 ```
 
-The first build downloads the voice engine (about 40 MB) and the natural voices (about 200 MB,
-in two archives) from sherpa-onnx's GitHub releases, checks each against a SHA-256 checksum
-pinned in `app/build.gradle.kts`, and keeps the voices in `.gradle/voices/`. To build offline,
-put the archives named there in that folder yourself. The Brazilian voice is fetched at full
-size and its weights are stored at half size by the build (the ready-made 8-bit version is
-smaller, but hisses). The voices make the app about 180 MB larger; the
-APK runs on any phone (64-bit and 32-bit ARM, and x86-64 for emulators and Chromebooks).
+The first build downloads the voice engine (about 40 MB) from sherpa-onnx's GitHub releases and
+checks it against a SHA-256 checksum pinned in `app/build.gradle.kts`. The natural voices aren't
+part of the build: the app downloads them from the
+[`voices-1`](https://github.com/friendlyglobal/jacket/releases/tag/voices-1) release, and keeps a
+file only if its size and SHA-256 are the ones in `app/src/main/assets/voices/catalog.json`.
+`./gradlew :app:checkVoiceCatalog` makes those files again from sherpa-onnx's releases (about
+200 MB, in two archives kept in `.gradle/voices/`) and fails if any differs from the catalog. The
+Brazilian voice is fetched at full size and its weights are stored at half size by the build (the
+ready-made 8-bit version is smaller, but hisses). To build with the voices inside the app, for
+working with no network, add `-PjacketVoicesInApk=true`. The APK runs on any phone (64-bit and
+32-bit ARM, and x86-64 for emulators and Chromebooks).
 
 Stack: AGP 9.5, Kotlin 2.4, Jetpack Compose (BOM 2026.09) with Material 3 1.5, WindowManager 1.5,
 Glance 1.2, Readium kotlin-toolkit 3.4, sherpa-onnx 2.0 with Supertonic 3 voices and a Brazilian

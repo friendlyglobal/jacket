@@ -20,7 +20,7 @@
     <string name="voice_not_in_language">%1$s: naturalne głosy nie znają jeszcze tego języka, więc czyta głos telefonu.</string>
     <string name="voice_private">Naturalne głosy mówią na Twoim telefonie. Nic z tego, co czytasz, nie jest nigdzie wysyłane.</string>
     <string name="voice_about">O tych głosach</string>
-    <string name="voice_about_text">Naturalne głosy są częścią Jacket i działają bez internetu. Można z nich korzystać bezpłatnie, ale nie wolno ich używać, by kogoś oszukać lub skrzywdzić, na przykład podając głos za prawdziwą osobę. Pełne warunki znajdziesz w Ustawieniach, w sekcji Licencje.</string>
+    <string name="voice_about_text">Naturalne głosy pobiera się raz, z GitHuba, a potem działają bez internetu. Można z nich korzystać bezpłatnie, ale nie wolno ich używać, by kogoś oszukać lub skrzywdzić, na przykład podając głos za prawdziwą osobę. Pełne warunki znajdziesz w Ustawieniach, w sekcji Licencje.</string>
     <string name="voice_slow">Ten głos to za dużo dla tego telefonu. Dotknij, aby go zmienić.</string>
     <string name="listen_preparing">Przygotowywanie głosu…</string>
     <string name="voice_fell_back">Naturalny głos nie mógł się uruchomić, więc czyta głos telefonu.</string>
@@ -56,4 +56,43 @@
     <string name="say_empty">Nie ma jeszcze słów. Przytrzymaj słowo na stronie i wybierz „Powiedz to tak” albo dodaj je tutaj.</string>
     <string name="listen_skip_notes">Pomijaj numery przypisów</string>
     <string name="listen_skip_notes_description">Głos nie czyta małych cyferek odsyłających do przypisów.</string>
+
+    <string name="voice_offer_title">Pobrać naturalny głos?</string>
+    <string name="voice_offer_title_updated">Naturalne głosy pobiera się teraz osobno</string>
+    <string name="voice_offer_updated">Żeby Jacket zajmował mniej miejsca, głosów nie ma już w aplikacji. Pobierz swój raz, a będzie czytał jak dotąd. Wybrany głos zostaje.</string>
+    <string name="voice_offer_body">Głos, który brzmi jak człowiek, czyta Twoje książki prosto na telefonie. Pobierasz go tylko raz: %1$s.</string>
+    <string name="voice_offer_privacy">Jacket łączy się raz z GitHubem, żeby pobrać głos. GitHub widzi Twój adres IP, jak przy każdym pobieraniu. Nic o Tobie ani o Twoich książkach nie jest wysyłane.</string>
+    <string name="voice_offer_mobile">Korzystasz z danych komórkowych: to zużyje %1$s.</string>
+    <string name="voice_offer_meanwhile">Do tego czasu czyta głos telefonu.</string>
+    <string name="voice_download">Pobierz (%1$s)</string>
+    <string name="voice_download_mobile">Pobierz przez dane komórkowe (%1$s)</string>
+    <string name="voice_download_named">Pobierz: %1$s</string>
+    <string name="voice_use_phone">Użyj głosu telefonu</string>
+    <string name="voice_offer_meanwhile_natural">Do tego czasu czyta obecny głos.</string>
+    <string name="voice_keep_current">Zostaw obecny głos</string>
+    <string name="voice_download_ready">Naturalny głos jest gotowy.</string>
+    <string name="voice_downloading">Pobieranie głosu, %1$s</string>
+    <string name="voice_download_again">Spróbuj ponownie</string>
+    <string name="voice_packs_title">Głosy do pobrania</string>
+    <plurals name="voice_pack_many">
+        <item quantity="one">Naturalne głosy w %1$d języku</item>
+        <item quantity="few">Naturalne głosy w %1$d językach</item>
+        <item quantity="many">Naturalne głosy w %1$d językach</item>
+        <item quantity="other">Naturalne głosy w %1$d językach</item>
+    </plurals>
+    <string name="voice_pack_one">Naturalny głos: %1$s</string>
+    <string name="voice_pack_in_app">Dołączony do tej kopii Jacket</string>
+    <string name="voice_pack_ready">Na tym telefonie · %1$s</string>
+    <string name="voice_pack_downloading">Pobieranie · %1$s z %2$s</string>
+    <string name="voice_pack_paused">Zatrzymano na %1$s z %2$s</string>
+    <string name="voice_pack_size">Do pobrania: %1$s</string>
+    <string name="voice_remove">Usuń</string>
+    <string name="voice_remove_title">Usunąć ten głos?</string>
+    <string name="voice_remove_body">Zwolnisz %1$s na telefonie. Zamiast niego będzie czytał głos telefonu, a ten możesz pobrać ponownie w każdej chwili.</string>
+    <string name="voice_problem_offline">Brak połączenia z internetem. Połącz się i spróbuj ponownie.</string>
+    <string name="voice_problem_unreachable">Nie udało się połączyć z GitHubem. Spróbuj później.</string>
+    <string name="voice_problem_damaged">Pobrany plik był uszkodzony, więc został usunięty. Spróbuj ponownie.</string>
+    <string name="voice_problem_space">Za mało miejsca: głos potrzebuje %1$s wolnego miejsca na telefonie.</string>
+    <string name="voice_problem_mobile">Zatrzymano, bo telefon przełączył się na dane komórkowe.</string>
+    <string name="voice_problem_storage">Nie udało się zapisać głosu na tym telefonie. Spróbuj ponownie.</string>
 </resources>

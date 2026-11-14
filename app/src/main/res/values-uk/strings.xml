@@ -103,7 +103,7 @@
     <string name="library_empty_message">Додайте файл EPUB, PDF, FB2, комікс CBZ або текстовий файл. Jacket зберігає приватну копію і, поки ви читаєте, показує обкладинку на зовнішньому екрані або у віджеті зовнішнього екрана.</string>
     <string name="onboarding_next">Далі</string>
     <string name="onboarding_skip">Пропустити</string>
-    <string name="onboarding_private">Ваші книжки залишаються на цьому телефоні. Jacket не потребує облікового запису й ніколи не виходить в інтернет.</string>
+    <string name="onboarding_private">Ваші книжки залишаються на цьому телефоні. Jacket не потребує облікового запису й виходить в інтернет, лише щоб на ваше прохання завантажити голос.</string>
 
     <string name="settings_title">Налаштування</string>
     <string name="settings_subtitle">Профіль, зовнішній екран і читання</string>

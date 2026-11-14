@@ -110,7 +110,7 @@
     <string name="library_empty_message">أضف ملف EPUB أو PDF أو FB2 أو قصة مصوّرة CBZ أو ملفًا نصيًا. يحتفظ تطبيق Jacket بنسخة خاصة، ويعرض غلافها على الشاشة الخارجية أو في أداة شاشة الغطاء أثناء قراءتك.</string>
     <string name="onboarding_next">التالي</string>
     <string name="onboarding_skip">تخطٍّ</string>
-    <string name="onboarding_private">كتبك تبقى على هذا الهاتف. لا يحتاج Jacket إلى حساب ولا يتصل بالإنترنت أبدًا.</string>
+    <string name="onboarding_private">كتبك تبقى على هذا الهاتف. لا يحتاج Jacket إلى حساب، ولا يتصل بالإنترنت إلا لتنزيل صوت عندما تطلب ذلك.</string>
 
     <string name="settings_title">الإعدادات</string>
     <string name="settings_subtitle">الملف الشخصي وشاشة الغطاء والقراءة</string>

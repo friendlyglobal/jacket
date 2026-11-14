@@ -5,9 +5,9 @@ import org.json.JSONObject
 import java.util.Locale
 
 /*
- * A natural voice is a speech model that turns text into sound on the phone itself. Jacket ships
- * one set of them inside the app (see assets/voices/catalog.json): nothing is downloaded, and the
- * text being read never leaves the device.
+ * A natural voice is a speech model that turns text into sound on the phone itself. Jacket knows
+ * the ones in assets/voices/catalog.json; their files are downloaded once, when the listener agrees
+ * (see VoiceDownload), and the text being read never leaves the device.
  */
 
 enum class VoiceGender { FEMALE, MALE }
@@ -24,6 +24,19 @@ data class PackVoice(
     val number: Int = 0,
 )
 
+/**
+ * One of a pack's files as it is published: where it is downloaded from, how big it is, and its
+ * SHA-256. A file that doesn't match both is thrown away, never used.
+ */
+data class VoiceFile(
+    /** Its name in the pack's folder ("vocoder.int8.onnx"). */
+    val name: String,
+    val url: String,
+    val bytes: Long,
+    /** Lower-case hex. */
+    val sha256: String,
+)
+
 data class PackLicense(
     val name: String,
     val url: String = "",
@@ -37,7 +50,7 @@ data class PackLicense(
 data class VoicePack(
     val id: String,
     val name: String,
-    /** The model's files by role (see [NaturalModel]), inside the app's assets under voices/[id]/. */
+    /** The model's files' names by role (see [NaturalModel]), in the pack's folder (see [folder]). */
     val files: Map<String, String>,
     /** Languages it speaks, as lower-case primary subtags ("en", "pt"). */
     val languages: List<String>,
@@ -60,9 +73,17 @@ data class VoicePack(
      * Jacket writes for it, so it speaks only the languages Jacket can write the sounds of.
      */
     val engine: String = ENGINE_SUPERTONIC,
+    /** Its files as they are downloaded; empty for a pack that can only come inside the app. */
+    val downloads: List<VoiceFile> = emptyList(),
 ) {
-    /** Where its files are in the app's assets. */
+    /** Where its files are in the app's assets, in a build that carries them, and under the folder downloaded voices are kept in. */
     val folder: String get() = "voices/$id"
+
+    /** How much there is to download, in bytes. */
+    val bytes: Long get() = downloads.sumOf { it.bytes }
+
+    /** Whether every one of its files can be downloaded. */
+    val downloadable: Boolean get() = downloads.isNotEmpty() && files.values.toSet() == downloads.map { it.name }.toSet()
 
     val defaultVoice: PackVoice get() = voice(default) ?: voices.first()
 
@@ -213,15 +234,40 @@ fun voicesFor(language: String?, packs: List<VoicePack>, phone: Locale = Locale.
         .flatMap { pack -> pack.voices.map { pack to it } }
 }
 
-/** Reads the catalog of voices shipped in the app. */
+/** Reads the catalog of voices (assets/voices/catalog.json). */
 object VoiceCatalog {
     fun parse(text: String): List<VoicePack> {
-        val packs = JSONObject(text).optJSONArray("packs") ?: JSONArray()
-        return (0 until packs.length()).mapNotNull { i -> runCatching { pack(packs.getJSONObject(i)) }.getOrNull() }
+        val root = JSONObject(text)
+        val packs = root.optJSONArray("packs") ?: JSONArray()
+        val from = root.optString("download")
+        return (0 until packs.length()).mapNotNull { i -> runCatching { pack(packs.getJSONObject(i), from) }.getOrNull() }
     }
 
-    private fun pack(root: JSONObject): VoicePack {
+    private fun pack(root: JSONObject, from: String): VoicePack {
         val id = root.getString("id")
+        // A file is its name alone (a pack that only comes inside the app), or its name with its
+        // size and SHA-256, downloaded from the release named at the top (or by the pack itself)
+        // as "<pack>.<name>".
+        val release = root.optString("download").ifBlank { from }
+        val listed = root.getJSONObject("files")
+        val files = LinkedHashMap<String, String>()
+        val downloads = ArrayList<VoiceFile>()
+        for (role in listed.keys()) {
+            val file = listed.optJSONObject(role)
+            if (file == null) {
+                files[role] = listed.getString(role)
+                continue
+            }
+            val name = file.getString("name")
+            files[role] = name
+            if (downloads.any { it.name == name }) continue
+            val sha256 = file.getString("sha256").lowercase(Locale.ROOT)
+            val bytes = file.getLong("bytes")
+            val url = release + file.optString("asset").ifBlank { "$id.$name" }
+            require(SHA256.matches(sha256) && bytes > 0 && url.startsWith("https://")) { "$id has a file it can't check: $name" }
+            require('/' !in name && name != "." && name != "..") { "$id has a file outside its folder: $name" }
+            downloads += VoiceFile(name, url, bytes, sha256)
+        }
         val voices = root.getJSONArray("voices").let { array ->
             (0 until array.length()).map { i ->
                 val v = array.getJSONObject(i)
@@ -248,7 +294,7 @@ object VoiceCatalog {
         return VoicePack(
             id = id,
             name = root.optString("name").ifBlank { id },
-            files = root.getJSONObject("files").strings(),
+            files = files,
             languages = languages,
             voices = voices,
             license = PackLicense(
@@ -262,8 +308,11 @@ object VoiceCatalog {
             default = root.optString("default"),
             accents = accents,
             engine = root.optString("engine").ifBlank { ENGINE_SUPERTONIC },
+            downloads = downloads,
         )
     }
+
+    private val SHA256 = Regex("[0-9a-f]{64}")
 
     private fun JSONObject.strings(): Map<String, String> = keys().asSequence().associateWith { optString(it) }
 

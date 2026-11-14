@@ -41,7 +41,7 @@ import org.readium.r2.navigator.preferences.TextAlign as ReadiumTextAlign
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.util.asset.AssetRetriever
 import org.readium.r2.shared.util.getOrElse
-import org.readium.r2.shared.util.http.DefaultHttpClient
+import org.readium.r2.shared.util.resource.TransformingContainer
 import org.readium.r2.streamer.PublicationOpener
 import org.readium.r2.streamer.parser.DefaultPublicationParser
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +54,8 @@ import java.io.IOException
  * reading apps: pagination, publisher CSS, spreads, contents and read-aloud.
  */
 class ReadiumBooks(context: Context) {
-    private val httpClient = DefaultHttpClient()
+    // Books are opened from files on the phone, never from the internet (see NoInternet).
+    private val httpClient = NoInternet
     private val assets = AssetRetriever(context.contentResolver, httpClient)
     private val opener = PublicationOpener(
         publicationParser = DefaultPublicationParser(context, httpClient, assets, pdfFactory = null),
@@ -63,7 +64,8 @@ class ReadiumBooks(context: Context) {
     /** Opens a book file; the caller closes the [Publication] when done. */
     suspend fun open(file: File): Publication = withContext(Dispatchers.IO) {
         val asset = assets.retrieve(file).getOrElse { throw IOException(it.message) }
-        opener.open(asset, allowUserInteraction = false).getOrElse {
+        // Each page carries the rule that keeps its scripts off the internet (see PageRules).
+        opener.open(asset, allowUserInteraction = false, onCreatePublication = { container = TransformingContainer(container, PageRules::addTo) }).getOrElse {
             asset.close()
             throw IOException(it.message)
         }

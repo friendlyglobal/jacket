@@ -7,6 +7,7 @@ import android.os.Process
 import android.os.SystemClock
 import android.util.Log
 import android.widget.TextView
+import io.github.friendlyglobal.jacket.voices
 import java.io.DataOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -30,7 +31,8 @@ import kotlin.math.roundToInt
  *
  * A setting is threads and "s" (spinning, as ONNX Runtime does by itself) or "q" (sleeping, as
  * Jacket has it). The processor time is the whole app's, of which making speech is nearly all
- * while this runs; leave the phone alone meanwhile.
+ * while this runs; leave the phone alone meanwhile. Only voices on the phone are measured:
+ * download them in Jacket first.
  */
 // (A tool for developers, in debug builds only: what it shows is for them, in English.)
 @SuppressLint("SetTextI18n")
@@ -61,9 +63,9 @@ class VoiceBench : Activity() {
     }
 
     private fun run(configs: List<String>, rounds: Int, wavs: Set<String>, only: Set<String>?, speed: Float) {
-        val packs = VoiceCatalog.parse(assets.open("voices/catalog.json").use { it.readBytes().toString(Charsets.UTF_8) })
-            .filter { pack -> assets.list(pack.folder).orEmpty().toSet().containsAll(pack.files.values) }
-            .associateBy { it.id }
+        // The voices on this phone, wherever they are (downloaded, or inside a build that carries them).
+        val voices = applicationContext.voices
+        val packs = voices.packs.filter { it.id in voices.ready.value }.associateBy { it.id }
         val texts = TEXTS.filter { (only == null || it.name in only) && it.pack in packs }
         val folder = File(getExternalFilesDir(null), "bench").apply { mkdirs() }
         val tallies = LinkedHashMap<String, Tally>()

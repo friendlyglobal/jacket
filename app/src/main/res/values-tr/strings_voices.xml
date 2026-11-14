@@ -20,7 +20,7 @@
     <string name="voice_not_in_language">%1$s: doğal sesler henüz bu dili konuşmuyor, bu yüzden telefonun sesi okuyor.</string>
     <string name="voice_private">Doğal sesler doğrudan telefonunuzda konuşur. Okuduğunuz hiçbir şey hiçbir yere gönderilmez.</string>
     <string name="voice_about">Bu sesler hakkında</string>
-    <string name="voice_about_text">Doğal sesler Jacket ile birlikte gelir ve internet olmadan çalışır. Kullanımı serbesttir, ancak kimseyi kandırmak veya kimseye zarar vermek için, örneğin bir sesi gerçek bir kişininmiş gibi göstererek kullanılamaz. Koşulların tamamı Ayarlar\'da, Lisanslar bölümündedir.</string>
+    <string name="voice_about_text">Doğal sesler GitHub\'dan bir kez indirilir, sonra internet olmadan çalışır. Kullanımı serbesttir, ancak kimseyi kandırmak veya kimseye zarar vermek için, örneğin bir sesi gerçek bir kişininmiş gibi göstererek kullanılamaz. Koşulların tamamı Ayarlar\'da, Lisanslar bölümündedir.</string>
     <string name="voice_slow">Bu ses bu telefon için fazla ağır. Değiştirmek için dokunun.</string>
     <string name="listen_preparing">Ses hazırlanıyor…</string>
     <string name="voice_fell_back">Doğal ses başlatılamadı, bu yüzden telefonun sesi okuyor.</string>
@@ -56,4 +56,41 @@
     <string name="say_empty">Henüz kelime yok. Sayfadaki bir kelimeye basılı tutup “Böyle söyle”yi seçin veya buradan ekleyin.</string>
     <string name="listen_skip_notes">Dipnot numaralarını atla</string>
     <string name="listen_skip_notes_description">Ses, notlara gönderme yapan küçük rakamları okumaz.</string>
+
+    <string name="voice_offer_title">Doğal bir ses indirilsin mi?</string>
+    <string name="voice_offer_title_updated">Doğal sesler artık ayrı indiriliyor</string>
+    <string name="voice_offer_updated">Jacket\'in küçük kalması için sesler artık uygulamanın içinde değil. Sesinizi bir kez indirin, eskisi gibi okusun. Seçtiğiniz ses korunur.</string>
+    <string name="voice_offer_body">İnsan gibi konuşan bir ses, kitaplarınızı doğrudan telefonunuzda okur. Yalnızca bir kez indirilir: %1$s.</string>
+    <string name="voice_offer_privacy">Jacket sesi almak için GitHub\'a bir kez bağlanır. Her indirmede olduğu gibi GitHub IP adresinizi görür. Sizinle veya kitaplarınızla ilgili hiçbir şey gönderilmez.</string>
+    <string name="voice_offer_mobile">Mobil veri kullanıyorsunuz: bu, %1$s harcar.</string>
+    <string name="voice_offer_meanwhile">Hazır olana kadar telefonunuzun sesi okur.</string>
+    <string name="voice_download">İndir (%1$s)</string>
+    <string name="voice_download_mobile">Mobil veriyle indir (%1$s)</string>
+    <string name="voice_download_named">İndir: %1$s</string>
+    <string name="voice_use_phone">Telefonun sesini kullan</string>
+    <string name="voice_offer_meanwhile_natural">Hazır olana kadar şu anki ses okumaya devam eder.</string>
+    <string name="voice_keep_current">Şu anki sesi koru</string>
+    <string name="voice_download_ready">Doğal ses hazır.</string>
+    <string name="voice_downloading">Ses indiriliyor, %1$s</string>
+    <string name="voice_download_again">Tekrar dene</string>
+    <string name="voice_packs_title">İndirilebilir sesler</string>
+    <plurals name="voice_pack_many">
+        <item quantity="one">%1$d dilde doğal sesler</item>
+        <item quantity="other">%1$d dilde doğal sesler</item>
+    </plurals>
+    <string name="voice_pack_one">Doğal ses: %1$s</string>
+    <string name="voice_pack_in_app">Jacket\'in bu kopyasına dahil</string>
+    <string name="voice_pack_ready">Bu telefonda · %1$s</string>
+    <string name="voice_pack_downloading">İndiriliyor · %1$s / %2$s</string>
+    <string name="voice_pack_paused">Durduruldu · %1$s / %2$s</string>
+    <string name="voice_pack_size">%1$s indirme</string>
+    <string name="voice_remove">Kaldır</string>
+    <string name="voice_remove_title">Bu ses kaldırılsın mı?</string>
+    <string name="voice_remove_body">Telefonunuzda %1$s yer açılır. Bunun yerine telefonunuzun sesi okur; bu sesi istediğiniz zaman yeniden indirebilirsiniz.</string>
+    <string name="voice_problem_offline">İnternete bağlı değilsiniz. Bağlanıp tekrar deneyin.</string>
+    <string name="voice_problem_unreachable">GitHub\'a ulaşılamadı. Daha sonra tekrar deneyin.</string>
+    <string name="voice_problem_damaged">İndirilen dosya bozuktu, bu yüzden silindi. Tekrar deneyin.</string>
+    <string name="voice_problem_space">Yer yetersiz: ses için telefonunuzda %1$s boş alan gerekiyor.</string>
+    <string name="voice_problem_mobile">Telefonunuz mobil veriye geçtiği için durduruldu.</string>
+    <string name="voice_problem_storage">Ses bu telefona kaydedilemedi. Tekrar deneyin.</string>
 </resources>

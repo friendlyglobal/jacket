@@ -14,9 +14,9 @@ import io.github.friendlyglobal.jacket.R
 
 /**
  * Free books: a shelf of classics whose copyright has run out everywhere, kept by the Jacket
- * project on its own GitHub release so every link points to one place we look after. Jacket has
- * no internet permission of its own, so the shelf opens in the browser; a book downloaded there
- * opens in Jacket like any other file.
+ * project on its own GitHub release so every link points to one place we look after. Jacket uses
+ * the internet only to download voices (see voice/VoiceDownload.kt), so the shelf opens in the
+ * browser; a book downloaded there opens in Jacket like any other file.
  */
 object FreeBooks {
     /** The catalogue: the release notes list the books by language, each linking to its file. */

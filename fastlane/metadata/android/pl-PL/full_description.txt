@@ -7,7 +7,7 @@ OKŁADKA NA ZEWNĄTRZ
 • Galaxy Z Flip: widżet na ekran zewnętrzny. Motorola Razr: otwórz Jacket na ekranie zewnętrznym.
 
 SŁUCHANIE
-• Naturalne głosy są w zestawie z Jacket i mówią w 31 językach bez internetu. Resztę czyta głos telefonu.
+• Naturalne głosy mówią w 31 językach, prosto na telefonie. Głos, którego potrzebuje Twoja książka, pobiera się raz, przy pierwszym słuchaniu, a potem działa bez internetu. Resztę czyta głos telefonu.
 • Każde słowo podświetla się na stronie, gdy jest wymawiane, a strona przewraca się razem z głosem.
 • Dotknij dowolnego zdania, by słuchać od tego miejsca. Gdy przerwiesz, następnym razem czytanie ruszy od tego samego zdania.
 • Czytanie trwa przy wyłączonym ekranie, ze sterowaniem na ekranie blokady i w słuchawkach.
@@ -39,7 +39,7 @@ W TWOIM JĘZYKU
 Polski, angielski, hiszpański, portugalski (Brazylia), francuski, włoski, niemiecki, niderlandzki, rosyjski, ukraiński, turecki, arabski, hindi, indonezyjski, japoński, koreański oraz chiński uproszczony i tradycyjny.
 
 PRYWATNOŚĆ
-• Bez uprawnień do internetu: ani Jacket, ani otwierane w nim książki nie mogą połączyć się z siecią. Głosy mówią na samym telefonie.
+• Internet tylko do jednego: Jacket raz pobiera głos z GitHuba, jeśli się zgodzisz. Nic nie jest wysyłane, a otwierane w nim książki nie mogą połączyć się z siecią. Głosy mówią na samym telefonie.
 • Bez kont, reklam, analityki i śledzenia.
 • Kopia zapasowa do wybranego pliku: lista książek, pozycje, zakładki, zaznaczenia i ustawienia (bez plików książek).
 • Darmowe i otwarte oprogramowanie na licencji Apache License 2.0: https://github.com/friendlyglobal/jacket

@@ -19,11 +19,17 @@ Store listing text lives in `fastlane/metadata/android/en-US/` (`title.txt`,
 When you answer No, the form skips the per-data-type, encryption-in-transit and deletion
 questions, and the listing shows "No data collected" and "No data shared with third parties".
 
-**Why this is accurate.** The merged manifest has no `android.permission.INTERNET`, so the app
-cannot send anything off the device. Play defines collection as transmitting data off the
-device, and everything Jacket handles (book files, covers, reading positions, bookmarks,
-highlights, notes, settings) stays in app-private storage. There are no SDKs for analytics,
-ads, crash reporting or sign-in.
+**Why this is accurate.** Play defines collection as transmitting user data off the device, and
+everything Jacket handles (book files, covers, reading positions, bookmarks, highlights, notes,
+settings) stays in app-private storage. Jacket has `android.permission.INTERNET` for one use
+only: downloading a natural voice's files from Jacket's public GitHub release
+(`friendlyglobal/jacket`, release `voices-1`), after the user agrees. That is an HTTPS GET of a
+public file; the request carries no user data (no account, identifier, cookie, or device model:
+the user agent is a plain "Jacket"), and nothing is uploaded. GitHub sees the IP address, as any
+server does for any download; the developer does not receive or have access to it. One file,
+`voice/VoiceDownload.kt`, does this, and a unit test (`NetworkUseTest`) fails the build if any
+other source file opens a connection. There are no SDKs for analytics, ads, crash reporting or
+sign-in.
 
 Edge cases, in case a reviewer asks (verify against the current form wording):
 
@@ -31,8 +37,11 @@ Edge cases, in case a reviewer asks (verify against the current form wording):
   list, reading positions, bookmarks, highlights, notes and settings (not book files) to the
   user's Google account backup. That is a Google-run device backup the developer cannot
   access; Play's form does not count it as collection by the developer.
-- **Read-aloud.** Jacket's natural voices are part of the app and turn text into speech inside
-  it, on the device: nothing is passed on. If the user chooses the phone's own voice instead
+- **Voice download.** The only network use, described above. If Play's current wording counts
+  an IP address seen by a third-party file host as collected data, revisit this answer; as of
+  this writing the request sends no data type from Play's list.
+- **Read-aloud.** Jacket's natural voices (downloaded once, as above) turn text into speech
+  inside the app, on the device: nothing is passed on. If the user chooses the phone's own voice instead
   (or the book is in a language the natural voices don't speak), Jacket passes the text being
   read to the text-to-speech engine installed on the phone (a separate app, such as Google
   Speech Services). That is a user-initiated, on-device hand-off, not sharing by the developer.
@@ -48,8 +57,9 @@ Edge cases, in case a reviewer asks (verify against the current form wording):
   gambling and crude humour.
 - **User-supplied content:** books stay on the user's device and are never shown to other users.
 - **Interaction:** no user-to-user communication or content sharing, no sharing of location,
-  no purchases, no unrestricted internet access (no browser, no INTERNET permission). Answer
-  **No** to each.
+  no purchases, no unrestricted internet access (no browser; the INTERNET permission is used only
+  to download voice files from GitHub, and a book's pages are kept offline). Answer **No** to
+  each.
 - **Expected result:** the lowest rating in each region (for example, IARC 3+ / Everyone).
 
 ## 3. Listing settings and other declarations
@@ -77,7 +87,8 @@ Check the final list before you submit: Android Studio's *Merged Manifest* tab f
 `aapt2 dump permissions app/build/outputs/apk/release/app-release.apk`. The last build
 (versionCode 3) merged in `ACCESS_NETWORK_STATE`, `WAKE_LOCK`, `RECEIVE_BOOT_COMPLETED` and
 `FOREGROUND_SERVICE`; tonight's background read-aloud adds `FOREGROUND_SERVICE_MEDIA_PLAYBACK`.
-`INTERNET` must not appear.
+Since the voices are downloaded, Jacket's own manifest declares `INTERNET` and
+`ACCESS_NETWORK_STATE`; nothing else may add network permissions.
 
 | Permission | Source | Justification |
 | --- | --- | --- |
@@ -86,7 +97,8 @@ Check the final list before you submit: Android Studio's *Merged Manifest* tab f
 | `POST_NOTIFICATIONS` (only if present) | Jacket or Media3 | Shows the read-aloud playback notification with play/pause and skip. Media-session notifications are exempt from this permission on Android 13+, so it may not be declared at all; if it isn't, skip this line. |
 | `RECEIVE_BOOT_COMPLETED` | AndroidX WorkManager (used by the Glance widget) | WorkManager reschedules pending widget update work after a reboot. Jacket starts nothing of its own at boot. |
 | `WAKE_LOCK` | AndroidX WorkManager (used by the Glance widget) | Held briefly while widget update work runs. |
-| `ACCESS_NETWORK_STATE` | AndroidX WorkManager (used by the Glance widget) | Lets WorkManager evaluate network constraints on scheduled work. Jacket schedules no network work and, without `INTERNET`, cannot connect; this permission only reports whether a connection exists. |
+| `INTERNET` | Jacket | Downloads a natural (text-to-speech) voice's files from Jacket's GitHub release, once, after the user agrees, so the app itself stays small. Used by one class only (`voice/VoiceDownload.kt`); HTTPS GET to github.com and its download host, nothing uploaded. |
+| `ACCESS_NETWORK_STATE` | Jacket; also AndroidX WorkManager (used by the Glance widget) | Tells Jacket whether the phone is online and whether it is on mobile data, so it can say the voice's size and ask first. Only reports on the connection; it cannot connect. |
 | `app.usefriendly.jacket.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` | AndroidX Core (generated) | Signature-level, internal to the app. No declaration needed. |
 
 Play asks for a declaration only for the foreground service type; the other rows are normal
@@ -95,7 +107,7 @@ permissions, listed here for reviewer or user questions.
 **Foreground service declaration** (*App content → Foreground service permissions*):
 
 - Type: **Media playback**.
-- Description: "Jacket reads the user's book aloud, with voices built into the app or with the
+- Description: "Jacket reads the user's book aloud, with natural voices that run on the phone or with the
   phone's text-to-speech engine. The media playback foreground service keeps reading while the
   screen is off or another app is in front, and provides the media notification and lock-screen
   controls. It runs only while the user is listening."

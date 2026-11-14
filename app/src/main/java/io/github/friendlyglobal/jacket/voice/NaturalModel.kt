@@ -13,6 +13,7 @@ import com.k2fsa.sherpa.onnx.OfflineTtsConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsSupertonicModelConfig
 import com.k2fsa.sherpa.onnx.OfflineTtsVitsModelConfig
+import io.github.friendlyglobal.jacket.voices
 import io.github.friendlyglobal.jacket.voice.ptbr.PtBrOldSpelling
 import io.github.friendlyglobal.jacket.voice.ptbr.PtBrPhonemes
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -24,8 +25,9 @@ import java.util.concurrent.Executors
 
 /**
  * A pack's model in memory, run by sherpa-onnx (https://github.com/k2-fsa/sherpa-onnx) on the
- * phone's own processor. Its files are read straight from the installed app. Everything here
- * blocks, and belongs on [ModelHost]'s thread.
+ * phone's own processor. Its files are read where they are (see [PackPlace]): downloaded, or
+ * straight from the installed app in a build that carries them. Everything here blocks, and
+ * belongs on [ModelHost]'s thread.
  *
  * [spinning] leaves the engine's threads to wait for each other as ONNX Runtime does by itself,
  * by spinning: only for measuring against (see [EngineSettings]).
@@ -48,10 +50,10 @@ internal class NaturalModel(
     /** A voice that reads sounds rather than letters: Jacket writes the sounds for it (see voice/ptbr). */
     private val readsSounds = pack.engine == ENGINE_PIPER
 
+    /** Where its files are. */
+    private val place = requireNotNull(context.voices.placeOf(pack)) { "${pack.id} isn't on this phone" }
+
     init {
-        val present = context.assets.list(pack.folder).orEmpty().toSet()
-        val missing = pack.files.values.filterNot { it in present }
-        require(missing.isEmpty()) { "Voice files missing from the app: ${missing.joinToString()}" }
         val loaded = load(threads)
         tts = loaded
         sampleRate = loaded.sampleRate()
@@ -61,7 +63,7 @@ internal class NaturalModel(
     val alive: Boolean get() = tts != null
 
     private fun load(threads: Int): OfflineTts {
-        fun path(role: String): String = pack.files[role]?.let { "${pack.folder}/$it" }.orEmpty()
+        fun path(role: String): String = pack.files[role]?.let(place::path).orEmpty()
         val provider = EngineSettings.provider(context, spinning)
         val model = if (readsSounds) {
             // No dictionary and no data folder: the sounds come from Jacket, ready-made.
@@ -85,7 +87,7 @@ internal class NaturalModel(
                 provider = provider,
             )
         }
-        return OfflineTts(assetManager = context.assets, config = OfflineTtsConfig(model = model, maxNumSentences = 1))
+        return OfflineTts(assetManager = place.assets, config = OfflineTtsConfig(model = model, maxNumSentences = 1))
     }
 
     /**

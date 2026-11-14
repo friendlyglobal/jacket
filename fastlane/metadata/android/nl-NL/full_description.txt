@@ -7,7 +7,7 @@ DE OMSLAG, AAN DE BUITENKANT
 • Galaxy Z Flip: een coverschermwidget. Motorola Razr: open Jacket op het externe scherm.
 
 LUISTEREN
-• Natuurlijke stemmen zitten in Jacket en spreken 31 talen zonder internet. De stem van je telefoon leest de rest.
+• Natuurlijke stemmen spreken 31 talen, gewoon op je telefoon. De stem die je boek nodig heeft, download je één keer, de eerste keer dat je luistert, en daarna werkt hij zonder internet. De stem van je telefoon leest de rest.
 • Elk woord licht op de pagina op terwijl het wordt uitgesproken, en de pagina slaat met de stem mee om.
 • Tik op een zin om vanaf daar te luisteren. Stop je, dan gaat het de volgende keer verder bij de zin waar je was.
 • Gaat door met het scherm uit, met bediening op het vergrendelscherm en via je koptelefoon.
@@ -39,7 +39,7 @@ IN JOUW TAAL
 Nederlands, Engels, Spaans, Braziliaans-Portugees, Frans, Italiaans, Duits, Pools, Russisch, Oekraïens, Turks, Arabisch, Hindi, Indonesisch, Japans, Koreaans, en vereenvoudigd en traditioneel Chinees.
 
 PRIVACY
-• Geen internettoestemming: Jacket en de boeken die je erin opent kunnen geen verbinding met het netwerk maken. De stemmen spreken op je telefoon zelf.
+• Alleen online voor één ding: Jacket downloadt één keer een stem van GitHub, als je dat goedvindt. Er wordt niets geüpload, en de boeken die je erin opent kunnen geen verbinding met het netwerk maken. De stemmen spreken op je telefoon zelf.
 • Geen accounts, geen advertenties, geen analyses, geen tracking.
 • Back-up naar een bestand naar keuze: je boekenlijst, posities, bladwijzers, markeringen en instellingen (niet de boekbestanden zelf).
 • Gratis en opensource onder de Apache License 2.0: https://github.com/friendlyglobal/jacket

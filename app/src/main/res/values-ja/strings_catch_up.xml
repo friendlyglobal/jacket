@@ -4,7 +4,7 @@
     <string name="catch_up_group">ほかのデバイス</string>
     <string name="catch_up_title">デバイス間で続きから読む</string>
     <string name="catch_up_description">2 台のデバイスで読み、一方で読み終えたところからもう一方で続けられます。</string>
-    <string name="catch_up_setup_body">すべてのデバイスで共有しているフォルダを選んでください。Google ドライブ、Dropbox、Syncthing などのアプリが各デバイスで同じ内容に保つフォルダや、デバイス間で持ち運ぶ USB メモリが使えます。\n\nJacket はそこに、読書位置、ブックマーク、ハイライト、メモ、コレクションを収めた小さなファイルを置き、ほかのデバイスがそこに置いたファイルを読み取ります。Jacket 自体がインターネットに接続することはありません。それを行うのはフォルダを共有するアプリです。本、表紙、設定はそれぞれのデバイスに残ります。\n\n次に、もう一方のデバイスでも同じフォルダを選んで同じ設定をしてください。</string>
+    <string name="catch_up_setup_body">すべてのデバイスで共有しているフォルダを選んでください。Google ドライブ、Dropbox、Syncthing などのアプリが各デバイスで同じ内容に保つフォルダや、デバイス間で持ち運ぶ USB メモリが使えます。\n\nJacket はそこに、読書位置、ブックマーク、ハイライト、メモ、コレクションを収めた小さなファイルを置き、ほかのデバイスがそこに置いたファイルを読み取ります。Jacket 自体は何も送信しません。それを行うのはフォルダを共有するアプリです。本、表紙、設定はそれぞれのデバイスに残ります。\n\n次に、もう一方のデバイスでも同じフォルダを選んで同じ設定をしてください。</string>
     <string name="catch_up_device_name">このデバイスの名前</string>
     <string name="catch_up_choose_folder">フォルダを選択</string>
     <string name="catch_up_setup_files_hint">使いたいフォルダを選べない場合は、代わりにこのデバイスのファイルをそこに保存し、ほかのデバイスのファイルを 1 つずつ追加してください。</string>
