@@ -20,7 +20,7 @@
     <string name="voice_not_in_language">%1$s: as vozes naturais ainda não falam este idioma, então a voz do celular lê.</string>
     <string name="voice_private">As vozes naturais falam no seu próprio celular. Nada do que você lê é enviado a lugar nenhum.</string>
     <string name="voice_about">Sobre estas vozes</string>
-    <string name="voice_about_text">As vozes naturais vêm com o Jacket e funcionam sem internet. O uso é livre, mas elas não devem ser usadas para enganar ou prejudicar ninguém; por exemplo, fazendo uma voz se passar por uma pessoa real. Os termos completos estão em Configurações, em Licenças.</string>
+    <string name="voice_about_text">As vozes naturais são baixadas uma vez, do GitHub, e depois funcionam sem internet. O uso é livre, mas elas não devem ser usadas para enganar ou prejudicar ninguém; por exemplo, fazendo uma voz se passar por uma pessoa real. Os termos completos estão em Configurações, em Licenças.</string>
     <string name="voice_slow">Esta voz é pesada demais para este celular. Toque para trocar.</string>
     <string name="listen_preparing">Preparando a voz…</string>
     <string name="voice_fell_back">A voz natural não conseguiu iniciar, então a voz do celular está lendo.</string>
@@ -56,4 +56,42 @@
     <string name="say_empty">Nenhuma palavra ainda. Toque e segure uma palavra na página e escolha “Falar deste jeito”, ou adicione uma aqui.</string>
     <string name="listen_skip_notes">Pular números de notas</string>
     <string name="listen_skip_notes_description">A voz não lê os numerozinhos que apontam para as notas.</string>
+
+    <string name="voice_offer_title">Baixar uma voz natural?</string>
+    <string name="voice_offer_title_updated">As vozes naturais agora são baixadas à parte</string>
+    <string name="voice_offer_updated">Para o Jacket ficar leve, as vozes não vêm mais dentro do app. Baixe a sua uma vez e ela lê como antes. A voz que você escolheu continua escolhida.</string>
+    <string name="voice_offer_body">Uma voz que soa como uma pessoa lê seus livros, no seu próprio celular. Ela é baixada uma única vez: %1$s.</string>
+    <string name="voice_offer_privacy">O Jacket se conecta uma vez ao GitHub para buscar a voz. O GitHub vê o seu endereço IP, como em qualquer download. Nada sobre você ou seus livros é enviado.</string>
+    <string name="voice_offer_mobile">Você está usando dados móveis: isso gasta %1$s.</string>
+    <string name="voice_offer_meanwhile">Enquanto isso, a voz do celular lê.</string>
+    <string name="voice_download">Baixar (%1$s)</string>
+    <string name="voice_download_mobile">Baixar com dados móveis (%1$s)</string>
+    <string name="voice_download_named">Baixar %1$s</string>
+    <string name="voice_use_phone">Usar a voz do celular</string>
+    <string name="voice_offer_meanwhile_natural">Enquanto isso, a voz de agora continua lendo.</string>
+    <string name="voice_keep_current">Manter a voz de agora</string>
+    <string name="voice_download_ready">A voz natural está pronta.</string>
+    <string name="voice_downloading">Baixando a voz, %1$s</string>
+    <string name="voice_download_again">Tentar de novo</string>
+    <string name="voice_packs_title">Vozes para baixar</string>
+    <plurals name="voice_pack_many">
+        <item quantity="one">Vozes naturais em %1$d idioma</item>
+        <item quantity="many">Vozes naturais em %1$d idiomas</item>
+        <item quantity="other">Vozes naturais em %1$d idiomas</item>
+    </plurals>
+    <string name="voice_pack_one">Voz natural em %1$s</string>
+    <string name="voice_pack_in_app">Já vem nesta cópia do Jacket</string>
+    <string name="voice_pack_ready">Neste celular · %1$s</string>
+    <string name="voice_pack_downloading">Baixando · %1$s de %2$s</string>
+    <string name="voice_pack_paused">Parou em %1$s de %2$s</string>
+    <string name="voice_pack_size">Download de %1$s</string>
+    <string name="voice_remove">Remover</string>
+    <string name="voice_remove_title">Remover esta voz?</string>
+    <string name="voice_remove_body">Isso libera %1$s no seu celular. A voz do celular passa a ler, e você pode baixar esta de novo quando quiser.</string>
+    <string name="voice_problem_offline">Você não está conectado à internet. Conecte-se e tente de novo.</string>
+    <string name="voice_problem_unreachable">Não foi possível acessar o GitHub. Tente mais tarde.</string>
+    <string name="voice_problem_damaged">O download veio com defeito e foi apagado. Tente de novo.</string>
+    <string name="voice_problem_space">Falta espaço: a voz precisa de %1$s livres no seu celular.</string>
+    <string name="voice_problem_mobile">Parou porque o celular passou a usar dados móveis.</string>
+    <string name="voice_problem_storage">Não foi possível salvar a voz neste celular. Tente de novo.</string>
 </resources>

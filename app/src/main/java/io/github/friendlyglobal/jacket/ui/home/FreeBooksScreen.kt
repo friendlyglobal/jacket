@@ -164,7 +164,7 @@ internal fun inLibrary(free: FreeBook, state: LibraryState): Book? {
 
 /**
  * Free books, inside Jacket: the collection's covers by language, the reader's own first. A book's
- * sheet hands its download to the browser (Jacket never goes online); once added, it opens here.
+ * sheet hands its download to the browser (Jacket downloads nothing but voices); once added, it opens here.
  */
 @Composable
 fun FreeBooksScreen(state: LibraryState, onBack: () -> Unit, onOpen: (Book) -> Unit) {

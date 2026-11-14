@@ -66,7 +66,7 @@
     <string name="listen_back_to_voice">Back to the voice</string>
     <!-- For screen readers, on the small player in the reader's footer line while a book is read aloud: what a tap on it does (it brings up the full player) -->
     <string name="listen_show_controls">Show the player\'s controls</string>
-    <!-- Settings › Backup: a backup file the reader chooses once (for example in Google Drive) that Jacket keeps rewriting after changes. Jacket itself never goes online; the app holding the file uploads it -->
+    <!-- Settings › Backup: a backup file the reader chooses once (for example in Google Drive) that Jacket keeps rewriting after changes. Jacket itself uploads nothing; the app holding the file uploads it -->
     <string name="settings_backup_auto">Keep a backup up to date</string>
     <string name="settings_backup_auto_description">In a file you choose, such as one in Google Drive. Jacket updates it after your library changes.</string>
     <!-- %1$s is a relative time, e.g. "5 minutes ago" -->

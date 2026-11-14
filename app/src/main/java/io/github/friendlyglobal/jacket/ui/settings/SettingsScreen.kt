@@ -85,6 +85,7 @@ import io.github.friendlyglobal.jacket.autoBackup
 import io.github.friendlyglobal.jacket.data.AutoBackup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.friendlyglobal.jacket.ui.asHeading
+import io.github.friendlyglobal.jacket.ui.voices.rememberVoice
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -440,8 +441,8 @@ fun SettingsScreen(
                         leadingContent = { Icon(JacketIcons.Info, null) },
                         supportingContent = { Text(stringResource(R.string.settings_about_version, version)) },
                     ) { Text(stringResource(R.string.app_name)) }
-                    // Play asks for the policy inside the app too; the browser opens it, so Jacket
-                    // itself still needs no internet permission.
+                    // Play asks for the policy inside the app too; the browser opens it (Jacket's own
+                    // use of the internet is the voice download alone).
                     SegmentedListItem(
                         onClick = {
                             haptics.tick()
@@ -501,7 +502,7 @@ fun SettingsScreen(
             // From here a new word is for every book.
             bookId = null,
             // Heard in the voice that reads the listener's own language.
-            voice = remember(settings.voice, settings.voices, phoneLanguage) { context.voices.choose(phoneLanguage, settings) },
+            voice = rememberVoice(phoneLanguage, settings),
             language = phoneLanguage,
             haptics = haptics,
             onSave = {

@@ -78,6 +78,8 @@ import io.github.friendlyglobal.jacket.ui.Foldables
 import io.github.friendlyglobal.jacket.ui.rememberFoldable
 import io.github.friendlyglobal.jacket.ui.rememberFoldedShut
 import android.widget.Toast
+import androidx.core.view.LayoutInflaterCompat
+import io.github.friendlyglobal.jacket.reader.OfflinePages
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import io.github.friendlyglobal.jacket.ui.rememberHaptics
@@ -101,6 +103,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var outer: OuterDisplay
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // A book's pages can't reach the internet (see OfflinePages). Before super.onCreate, which
+        // would otherwise put AppCompat's own view maker here; it is passed everything else.
+        LayoutInflaterCompat.setFactory2(layoutInflater, OfflinePages { parent, name, context, attrs -> delegate.createView(parent, name, context, attrs) })
         enableEdgeToEdge()
         // Must be in place before super.onCreate, which restores fragments.
         supportFragmentManager.fragmentFactory = ReaderFragments
@@ -123,6 +128,8 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         lifecycleScope.launch { library.scanWatchedFolder()?.let(reports::tryEmit) }
         catchUp.look()
+        // A voice download the listener asked for, stopped when Android closed Jacket, carries on.
+        voices.downloads.resume()
     }
 
     /**

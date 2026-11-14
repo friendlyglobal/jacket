@@ -25,6 +25,7 @@ import io.github.friendlyglobal.jacket.importer.NothingToRead
 import io.github.friendlyglobal.jacket.importer.PdfWords
 import io.github.friendlyglobal.jacket.importer.PdfWordsUnavailable
 import io.github.friendlyglobal.jacket.library
+import io.github.friendlyglobal.jacket.voices
 import io.github.friendlyglobal.jacket.widget.canListen
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -180,6 +181,16 @@ class Listening(private val app: Application) {
                     reading.tune(library.state.value, app.resources.configuration.locales[0]?.toLanguageTag())
                     reading.retune()
                 }
+        }
+        // A natural voice downloaded while the phone's voice reads takes over (at the end of a
+        // sentence: see ReadAloud.retune), and one removed gives way to the phone's. Seen to here
+        // whether or not a reader has the book open: with the screen off, a reader can't.
+        scope.launch {
+            app.voices.ready.drop(1).collect {
+                val reading = hand.reading ?: return@collect
+                reading.tune(library.state.value, app.resources.configuration.locales[0]?.toLanguageTag())
+                reading.retune()
+            }
         }
         // A book removed from the library can't go on being read.
         scope.launch {

@@ -20,7 +20,7 @@
     <string name="voice_not_in_language">%1$s: le voci naturali non parlano ancora questa lingua, quindi legge la voce del telefono.</string>
     <string name="voice_private">Le voci naturali parlano direttamente sul tuo telefono. Niente di ciò che leggi viene inviato altrove.</string>
     <string name="voice_about">Informazioni su queste voci</string>
-    <string name="voice_about_text">Le voci naturali sono incluse in Jacket e funzionano senza internet. Sono libere da usare, ma non devono servire a ingannare o danneggiare nessuno, ad esempio facendo passare una voce per quella di una persona reale. Le condizioni complete sono in Impostazioni, alla voce Licenze.</string>
+    <string name="voice_about_text">Le voci naturali si scaricano una volta, da GitHub, e poi funzionano senza internet. Sono libere da usare, ma non devono servire a ingannare o danneggiare nessuno, ad esempio facendo passare una voce per quella di una persona reale. Le condizioni complete sono in Impostazioni, alla voce Licenze.</string>
     <string name="voice_slow">Questa voce è troppo pesante per questo telefono. Tocca per cambiarla.</string>
     <string name="listen_preparing">Preparazione della voce…</string>
     <string name="voice_fell_back">La voce naturale non è riuscita ad avviarsi, quindi legge la voce del telefono.</string>
@@ -56,4 +56,42 @@
     <string name="say_empty">Ancora nessuna parola. Tieni premuta una parola sulla pagina e scegli “Dillo così”, oppure aggiungine una qui.</string>
     <string name="listen_skip_notes">Salta i numeri delle note</string>
     <string name="listen_skip_notes_description">La voce non legge i numerini che rimandano alle note.</string>
+
+    <string name="voice_offer_title">Scaricare una voce naturale?</string>
+    <string name="voice_offer_title_updated">Le voci naturali ora si scaricano a parte</string>
+    <string name="voice_offer_updated">Per mantenere Jacket leggera, le voci non sono più dentro l\'app. Scarica la tua una volta e leggerà come prima. La voce che avevi scelto resta.</string>
+    <string name="voice_offer_body">Una voce che suona come una persona legge i tuoi libri, direttamente sul telefono. Si scarica una volta sola: %1$s.</string>
+    <string name="voice_offer_privacy">Jacket si collega una volta a GitHub per scaricare la voce. GitHub vede il tuo indirizzo IP, come per qualsiasi download. Non viene inviato nulla su di te o sui tuoi libri.</string>
+    <string name="voice_offer_mobile">Stai usando i dati mobili: questo ne consuma %1$s.</string>
+    <string name="voice_offer_meanwhile">Intanto legge la voce del telefono.</string>
+    <string name="voice_download">Scarica (%1$s)</string>
+    <string name="voice_download_mobile">Scarica con i dati mobili (%1$s)</string>
+    <string name="voice_download_named">Scarica %1$s</string>
+    <string name="voice_use_phone">Usa la voce del telefono</string>
+    <string name="voice_offer_meanwhile_natural">Intanto continua a leggere la voce attuale.</string>
+    <string name="voice_keep_current">Tieni la voce attuale</string>
+    <string name="voice_download_ready">La voce naturale è pronta.</string>
+    <string name="voice_downloading">Download della voce, %1$s</string>
+    <string name="voice_download_again">Riprova</string>
+    <string name="voice_packs_title">Voci da scaricare</string>
+    <plurals name="voice_pack_many">
+        <item quantity="one">Voci naturali in %1$d lingua</item>
+        <item quantity="many">Voci naturali in %1$d lingue</item>
+        <item quantity="other">Voci naturali in %1$d lingue</item>
+    </plurals>
+    <string name="voice_pack_one">Voce naturale in %1$s</string>
+    <string name="voice_pack_in_app">Inclusa in questa copia di Jacket</string>
+    <string name="voice_pack_ready">Su questo telefono · %1$s</string>
+    <string name="voice_pack_downloading">Download · %1$s di %2$s</string>
+    <string name="voice_pack_paused">Interrotto a %1$s di %2$s</string>
+    <string name="voice_pack_size">Download di %1$s</string>
+    <string name="voice_remove">Rimuovi</string>
+    <string name="voice_remove_title">Rimuovere questa voce?</string>
+    <string name="voice_remove_body">Liberi %1$s sul telefono. Al suo posto leggerà la voce del telefono, e potrai scaricare di nuovo questa quando vuoi.</string>
+    <string name="voice_problem_offline">Non sei connesso a internet. Connettiti e riprova.</string>
+    <string name="voice_problem_unreachable">Impossibile raggiungere GitHub. Riprova più tardi.</string>
+    <string name="voice_problem_damaged">Il download era danneggiato ed è stato eliminato. Riprova.</string>
+    <string name="voice_problem_space">Spazio insufficiente: la voce richiede %1$s liberi sul telefono.</string>
+    <string name="voice_problem_mobile">Interrotto perché il telefono è passato ai dati mobili.</string>
+    <string name="voice_problem_storage">Impossibile salvare la voce su questo telefono. Riprova.</string>
 </resources>

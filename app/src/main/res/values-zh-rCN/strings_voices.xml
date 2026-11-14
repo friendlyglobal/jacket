@@ -20,7 +20,7 @@
     <string name="voice_not_in_language">%1$s：自然语音暂时还不会这种语言，所以由手机语音朗读。</string>
     <string name="voice_private">自然语音就在你的手机上发声。你读的内容不会发送到任何地方。</string>
     <string name="voice_about">关于这些语音</string>
-    <string name="voice_about_text">自然语音随 Jacket 提供，无需联网即可使用。可以免费使用，但不得用于欺骗或伤害他人，例如把语音冒充成真人。完整条款见“设置”中的“许可”。</string>
+    <string name="voice_about_text">自然语音只需从 GitHub 下载一次，之后无需联网即可使用。可以免费使用，但不得用于欺骗或伤害他人，例如把语音冒充成真人。完整条款见“设置”中的“许可”。</string>
     <string name="voice_slow">这部手机带不动这个语音。点按即可更换。</string>
     <string name="listen_preparing">正在准备语音…</string>
     <string name="voice_fell_back">自然语音无法启动，现在由手机语音朗读。</string>
@@ -56,4 +56,40 @@
     <string name="say_empty">还没有词。在页面上长按一个词并选择“这样读”，或在这里添加。</string>
     <string name="listen_skip_notes">跳过注释编号</string>
     <string name="listen_skip_notes_description">语音不会读出指向注释的小数字。</string>
+
+    <string name="voice_offer_title">下载自然语音？</string>
+    <string name="voice_offer_title_updated">自然语音现在需要单独下载</string>
+    <string name="voice_offer_updated">为了让 Jacket 保持小巧，语音不再内置在应用里。下载一次，就能像以前一样朗读。你选好的语音会保留。</string>
+    <string name="voice_offer_body">听起来像真人的语音，直接在你的手机上朗读你的书。只需下载一次（%1$s）。</string>
+    <string name="voice_offer_privacy">Jacket 只会连接 GitHub 一次来获取语音。和任何下载一样，GitHub 会看到你的 IP 地址。不会发送任何关于你或你的书的信息。</string>
+    <string name="voice_offer_mobile">你正在使用移动数据：这会用掉 %1$s 流量。</string>
+    <string name="voice_offer_meanwhile">在它准备好之前，由手机自带的语音朗读。</string>
+    <string name="voice_download">下载（%1$s）</string>
+    <string name="voice_download_mobile">使用移动数据下载（%1$s）</string>
+    <string name="voice_download_named">下载%1$s</string>
+    <string name="voice_use_phone">使用手机的语音</string>
+    <string name="voice_offer_meanwhile_natural">在它准备好之前，由当前的语音继续朗读。</string>
+    <string name="voice_keep_current">继续使用当前语音</string>
+    <string name="voice_download_ready">自然语音已准备好。</string>
+    <string name="voice_downloading">正在下载语音，%1$s</string>
+    <string name="voice_download_again">重试</string>
+    <string name="voice_packs_title">语音下载</string>
+    <plurals name="voice_pack_many">
+        <item quantity="other">支持 %1$d 种语言的自然语音</item>
+    </plurals>
+    <string name="voice_pack_one">%1$s自然语音</string>
+    <string name="voice_pack_in_app">已包含在此 Jacket 中</string>
+    <string name="voice_pack_ready">已在此手机上 · %1$s</string>
+    <string name="voice_pack_downloading">正在下载 · %1$s / %2$s</string>
+    <string name="voice_pack_paused">已停在 %1$s / %2$s</string>
+    <string name="voice_pack_size">需下载 %1$s</string>
+    <string name="voice_remove">移除</string>
+    <string name="voice_remove_title">移除此语音？</string>
+    <string name="voice_remove_body">这会在手机上释放 %1$s 空间。之后由手机自带的语音朗读，你随时可以重新下载这个语音。</string>
+    <string name="voice_problem_offline">未连接到互联网。请连接后重试。</string>
+    <string name="voice_problem_unreachable">无法连接 GitHub。请稍后重试。</string>
+    <string name="voice_problem_damaged">下载的文件已损坏，已将其删除。请重试。</string>
+    <string name="voice_problem_space">空间不足：此语音需要手机上有 %1$s 可用空间。</string>
+    <string name="voice_problem_mobile">已停止，因为手机切换到了移动数据。</string>
+    <string name="voice_problem_storage">无法在此手机上保存语音。请重试。</string>
 </resources>

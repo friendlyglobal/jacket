@@ -98,7 +98,7 @@
     <string name="library_empty_message">कोई EPUB, PDF, FB2, CBZ कॉमिक या टेक्स्ट फ़ाइल जोड़ें। Jacket उसकी एक निजी कॉपी रखता है और आपके पढ़ते समय उसका कवर बाहरी स्क्रीन पर या कवर-स्क्रीन विजेट में दिखाता है।</string>
     <string name="onboarding_next">आगे</string>
     <string name="onboarding_skip">छोड़ें</string>
-    <string name="onboarding_private">आपकी किताबें इसी फ़ोन में रहती हैं। Jacket में कोई खाता नहीं है और यह कभी ऑनलाइन नहीं जाता।</string>
+    <string name="onboarding_private">आपकी किताबें इसी फ़ोन में रहती हैं। Jacket में कोई खाता नहीं है, और यह सिर्फ़ आपके कहने पर आवाज़ डाउनलोड करने के लिए ऑनलाइन जाता है।</string>
 
     <string name="settings_title">सेटिंग</string>
     <string name="settings_subtitle">प्रोफ़ाइल, कवर स्क्रीन और पढ़ना</string>

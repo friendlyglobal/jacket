@@ -95,7 +95,7 @@
     <string name="library_empty_message">新增 EPUB、PDF、FB2、CBZ 漫畫或文字檔。Jacket 會保留一份私人副本，並在你閱讀時將封面顯示在外螢幕或外螢幕小工具上。</string>
     <string name="onboarding_next">下一步</string>
     <string name="onboarding_skip">略過</string>
-    <string name="onboarding_private">你的書只儲存在這支手機上。Jacket 不需要帳號，也從不連線上網。</string>
+    <string name="onboarding_private">你的書只儲存在這支手機上。Jacket 不需要帳號，只會在你要求時連線下載語音。</string>
 
     <string name="settings_title">設定</string>
     <string name="settings_subtitle">個人資料、外螢幕和閱讀</string>

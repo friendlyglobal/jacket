@@ -20,7 +20,7 @@
     <string name="voice_not_in_language">%1$s: Die natürlichen Stimmen sprechen diese Sprache noch nicht, deshalb liest die Stimme des Smartphones.</string>
     <string name="voice_private">Natürliche Stimmen sprechen direkt auf deinem Smartphone. Nichts von dem, was du liest, wird irgendwohin gesendet.</string>
     <string name="voice_about">Über diese Stimmen</string>
-    <string name="voice_about_text">Die natürlichen Stimmen gehören zu Jacket und funktionieren ohne Internet. Sie dürfen frei genutzt werden, aber nicht, um jemanden zu täuschen oder zu schädigen, etwa indem eine Stimme als echte Person ausgegeben wird. Die vollständigen Bedingungen stehen in den Einstellungen unter Lizenzen.</string>
+    <string name="voice_about_text">Die natürlichen Stimmen werden einmal von GitHub heruntergeladen und funktionieren danach ohne Internet. Sie dürfen frei genutzt werden, aber nicht, um jemanden zu täuschen oder zu schädigen, etwa indem eine Stimme als echte Person ausgegeben wird. Die vollständigen Bedingungen stehen in den Einstellungen unter Lizenzen.</string>
     <string name="voice_slow">Diese Stimme ist zu viel für dieses Smartphone. Tippe, um sie zu ändern.</string>
     <string name="listen_preparing">Stimme wird vorbereitet …</string>
     <string name="voice_fell_back">Die natürliche Stimme konnte nicht starten, deshalb liest die Stimme des Smartphones.</string>
@@ -56,4 +56,41 @@
     <string name="say_empty">Noch keine Wörter. Halte ein Wort auf der Seite gedrückt und wähle „So aussprechen“ oder füge hier eines hinzu.</string>
     <string name="listen_skip_notes">Fußnotenzahlen überspringen</string>
     <string name="listen_skip_notes_description">Die Stimme liest die kleinen Zahlen, die auf Anmerkungen verweisen, nicht vor.</string>
+
+    <string name="voice_offer_title">Eine natürliche Stimme herunterladen?</string>
+    <string name="voice_offer_title_updated">Natürliche Stimmen werden jetzt separat geladen</string>
+    <string name="voice_offer_updated">Damit Jacket klein bleibt, sind die Stimmen nicht mehr in der App. Lade deine einmal herunter, dann liest sie wie bisher. Die Stimme, die du gewählt hast, bleibt eingestellt.</string>
+    <string name="voice_offer_body">Eine Stimme, die wie ein Mensch klingt, liest deine Bücher vor, direkt auf deinem Smartphone. Sie wird nur einmal heruntergeladen: %1$s.</string>
+    <string name="voice_offer_privacy">Jacket verbindet sich dafür einmal mit GitHub. GitHub sieht deine IP-Adresse, wie bei jedem Download. Nichts über dich oder deine Bücher wird gesendet.</string>
+    <string name="voice_offer_mobile">Du nutzt mobile Daten: Das verbraucht %1$s davon.</string>
+    <string name="voice_offer_meanwhile">Bis sie bereit ist, liest die Stimme deines Smartphones.</string>
+    <string name="voice_download">Herunterladen (%1$s)</string>
+    <string name="voice_download_mobile">Über mobile Daten laden (%1$s)</string>
+    <string name="voice_download_named">%1$s herunterladen</string>
+    <string name="voice_use_phone">Stimme des Smartphones nutzen</string>
+    <string name="voice_offer_meanwhile_natural">Bis sie bereit ist, liest die jetzige Stimme weiter.</string>
+    <string name="voice_keep_current">Jetzige Stimme behalten</string>
+    <string name="voice_download_ready">Die natürliche Stimme ist bereit.</string>
+    <string name="voice_downloading">Stimme wird geladen, %1$s</string>
+    <string name="voice_download_again">Erneut versuchen</string>
+    <string name="voice_packs_title">Stimmen zum Herunterladen</string>
+    <plurals name="voice_pack_many">
+        <item quantity="one">Natürliche Stimmen in %1$d Sprache</item>
+        <item quantity="other">Natürliche Stimmen in %1$d Sprachen</item>
+    </plurals>
+    <string name="voice_pack_one">Natürliche Stimme für %1$s</string>
+    <string name="voice_pack_in_app">In dieser Jacket-Version enthalten</string>
+    <string name="voice_pack_ready">Auf diesem Smartphone · %1$s</string>
+    <string name="voice_pack_downloading">Wird geladen · %1$s von %2$s</string>
+    <string name="voice_pack_paused">Angehalten bei %1$s von %2$s</string>
+    <string name="voice_pack_size">%1$s zum Herunterladen</string>
+    <string name="voice_remove">Entfernen</string>
+    <string name="voice_remove_title">Diese Stimme entfernen?</string>
+    <string name="voice_remove_body">Das gibt %1$s auf deinem Smartphone frei. Stattdessen liest die Stimme deines Smartphones, und du kannst diese jederzeit wieder herunterladen.</string>
+    <string name="voice_problem_offline">Du bist nicht mit dem Internet verbunden. Verbinde dich und versuche es erneut.</string>
+    <string name="voice_problem_unreachable">GitHub ist nicht erreichbar. Versuche es später erneut.</string>
+    <string name="voice_problem_damaged">Der Download war beschädigt und wurde gelöscht. Versuche es erneut.</string>
+    <string name="voice_problem_space">Nicht genug Speicher: Die Stimme braucht %1$s freien Platz auf deinem Smartphone.</string>
+    <string name="voice_problem_mobile">Angehalten, weil dein Smartphone zu mobilen Daten gewechselt ist.</string>
+    <string name="voice_problem_storage">Die Stimme konnte nicht auf diesem Smartphone gespeichert werden. Versuche es erneut.</string>
 </resources>

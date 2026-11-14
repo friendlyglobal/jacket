@@ -98,7 +98,7 @@
     <string name="library_empty_message">Bir EPUB, PDF, FB2, CBZ çizgi roman veya metin dosyası ekleyin. Jacket özel bir kopya saklar ve siz okurken kitabın kapağını dış ekranda ya da kapak ekranı widget\'ında gösterir.</string>
     <string name="onboarding_next">İleri</string>
     <string name="onboarding_skip">Atla</string>
-    <string name="onboarding_private">Kitaplarınız bu telefonda kalır. Jacket hesap gerektirmez ve asla internete bağlanmaz.</string>
+    <string name="onboarding_private">Kitaplarınız bu telefonda kalır. Jacket hesap gerektirmez ve yalnızca siz istediğinizde bir ses indirmek için internete bağlanır.</string>
 
     <string name="settings_title">Ayarlar</string>
     <string name="settings_subtitle">Profil, kapak ekranı ve okuma</string>

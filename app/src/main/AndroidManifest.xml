@@ -7,6 +7,15 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
+    <!-- For one thing only: downloading a natural voice from GitHub, once, after the listener
+         agrees (voice/VoiceDownload.kt, the only code that opens a connection; a unit test,
+         NetworkUseTest, keeps it that way). Books can't use it: their pages' web views are kept
+         off the network (reader/OfflinePages.kt). -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Whether the phone is online, and on mobile data, so the voice's size is said and agreed to
+         first. (WorkManager, under the widgets, asked for it already.) -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.TTS_SERVICE" />

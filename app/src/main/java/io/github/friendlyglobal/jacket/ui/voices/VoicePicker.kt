@@ -26,6 +26,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,10 +68,12 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.toShape
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 /** What a natural voice is called: "Female voice 2", or its maker's name for it where that says more. */
 @Composable
@@ -81,11 +84,24 @@ fun voiceName(voice: PackVoice): String = when {
     else -> voice.name
 }
 
+/**
+ * The natural voice that reads [language] now, or null for the phone's own: as the settings choose
+ * it, among the voices on the phone, and again when one is downloaded or removed.
+ */
+@Composable
+fun rememberVoice(language: String?, settings: Settings): VoiceRef? {
+    val voices = LocalContext.current.voices
+    // (Followed while Jacket is out of sight too: a voice that arrives with the screen off is
+    // already the one the reader sets when it comes back, not the one it had.)
+    val ready by voices.ready.collectAsState()
+    return remember(language, settings.voice, settings.voices, ready) { voices.choose(language, settings) }
+}
+
 /** What the voice reading [language] is called, for the player and for Settings. */
 @Composable
 fun voiceLabel(language: String?, settings: Settings): String {
     val voices = LocalContext.current.voices
-    val ref = remember(language, settings.voice, settings.voices) { voices.choose(language, settings) }
+    val ref = rememberVoice(language, settings)
     val voice = ref?.let { voices.pack(it.pack)?.voice(it.voice) }
     return if (voice != null) voiceName(voice) else stringResource(R.string.voice_phone)
 }
@@ -122,11 +138,16 @@ fun VoicePicker(
     val haptics = rememberHaptics()
     val previewer = rememberVoicePreviewer()
     val key = languageKey(language)
-    val current = remember(language, settings.voice, settings.voices) { voices.choose(language, settings) }
+    val current = rememberVoice(language, settings)
     val onlyHere = key in settings.voices
     val named = languageName(language)
     var about by remember { mutableStateOf(false) }
     var choosingLanguage by remember { mutableStateOf(false) }
+    // The natural voices on the phone, and those on their way: a voice that isn't here yet is
+    // offered for download when it is tapped, or its sample is.
+    val ready by voices.ready.collectAsState()
+    val downloadStates by voices.downloads.states.collectAsStateWithLifecycle()
+    var offering by remember { mutableStateOf<VoiceRef?>(null) }
 
     // Where a language has a voice with the reader's own accent (Brazil's Portuguese), a voice
     // picked here is picked for this language: the reader's own for it alone, any other for every
@@ -193,19 +214,46 @@ fun VoicePicker(
                 val selected = current == ref
                 val name = voiceName(voice)
                 val hearing = previewer.playing == ref.toString()
+                val here = pack.id in ready
+                val coming = downloadStates[pack.id]?.takeIf { !here }
+                // Not on the phone yet: tapped, it is offered for download (and chosen if it is
+                // downloaded); on its way, it is chosen, and reads once it has arrived.
+                val pick = {
+                    if (!here && coming?.downloading != true) {
+                        haptics.tick()
+                        offering = ref
+                    } else if (!selected) {
+                        choose(ref.toString())
+                    }
+                }
                 SegmentedListItem(
                     selected = selected,
-                    onClick = { if (!selected) choose(ref.toString()) },
+                    onClick = pick,
                     shapes = ListItemDefaults.segmentedShapes(index + 1, count),
                     leadingContent = {
-                        FilledTonalIconButton(onClick = { haptics.tick(); previewer.toggle(ref, language) }) {
+                        FilledTonalIconButton(onClick = { if (here) { haptics.tick(); previewer.toggle(ref, language) } else pick() }) {
                             Icon(
-                                if (hearing) JacketIcons.Stop else JacketIcons.Play,
-                                if (hearing) stringResource(R.string.voice_stop_sample) else stringResource(R.string.voice_hear, name),
+                                when {
+                                    !here -> JacketIcons.Download
+                                    hearing -> JacketIcons.Stop
+                                    else -> JacketIcons.Play
+                                },
+                                when {
+                                    !here -> stringResource(R.string.voice_download_named, name)
+                                    hearing -> stringResource(R.string.voice_stop_sample)
+                                    else -> stringResource(R.string.voice_hear, name)
+                                },
                             )
                         }
                     },
-                    supportingContent = { NaturalTag(pack.accents[key]) },
+                    supportingContent = {
+                        val status = when {
+                            here || coming == null -> null
+                            coming.downloading -> stringResource(R.string.voice_downloading, percentText(coming.progress))
+                            else -> stringResource(R.string.voice_pack_size, sizeText(coming.left.takeIf { it > 0 } ?: pack.bytes))
+                        }
+                        NaturalTag(pack.accents[key], status)
+                    },
                     trailingContent = if (selected) {
                         { Icon(JacketIcons.Check, null) }
                     } else null,
@@ -271,6 +319,9 @@ fun VoicePicker(
             }
         }
 
+        // Each pack of voices, to download, follow, cancel or remove.
+        VoicePacks(haptics, Modifier.padding(top = 20.dp))
+
         if (voices.packs.isNotEmpty()) {
             Text(
                 stringResource(R.string.voice_private),
@@ -305,6 +356,21 @@ fun VoicePicker(
         )
     }
 
+    offering?.let { ref ->
+        voices.pack(ref.pack)?.let { pack ->
+            DownloadVoiceDialog(
+                pack,
+                onDownload = { mobile ->
+                    haptics.confirm()
+                    voices.downloads.download(pack, mobileData = mobile)
+                    choose(ref.toString())
+                    offering = null
+                },
+                onDismiss = { offering = null },
+            )
+        }
+    }
+
     if (choosingLanguage && onLanguage != null) {
         LanguageDialog(
             current = key,
@@ -325,10 +391,11 @@ private val EXTRA_LANGUAGES = listOf("zh", "he", "th", "nb", "ca", "fa", "bn", "
 
 /**
  * The small "Natural" mark on a voice that isn't the phone's: a plain word, like any other detail;
- * with its accent where the language has several ("Natural · Portugal accent").
+ * with its accent where the language has several ("Natural · Portugal accent"), and, for one not on
+ * the phone yet, its download ("Natural · 145 MB download").
  */
 @Composable
-private fun NaturalTag(accent: String?) {
+private fun NaturalTag(accent: String?, status: String? = null) {
     val locale = LocalConfiguration.current.locales[0] ?: Locale.ROOT
     val region = remember(accent, locale) { accent?.let { Locale("", it).getDisplayCountry(locale) }?.takeIf { it.isNotBlank() } }
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -337,6 +404,12 @@ private fun NaturalTag(accent: String?) {
             Text(
                 stringResource(R.string.separator) + stringResource(R.string.voice_accent, region),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (status != null) {
+            Text(
+                stringResource(R.string.separator) + status,
+                color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis,
             )
         }
     }
@@ -391,7 +464,7 @@ private fun LanguageDialog(current: String, bookLanguage: String?, offered: List
  * springs to its new width.
  */
 @Composable
-fun VoiceChip(label: String, natural: Boolean, struggling: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun VoiceChip(label: String, natural: Boolean, struggling: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier, downloading: Float? = null) {
     val scheme = MaterialTheme.colorScheme
     val motion = MaterialTheme.motionScheme
     val containerColor by animateColorAsState(if (struggling) scheme.errorContainer else scheme.secondaryContainer, motion.defaultEffectsSpec(), label = "voice-container")
@@ -404,7 +477,15 @@ fun VoiceChip(label: String, natural: Boolean, struggling: Boolean, onClick: () 
         modifier = modifier.animateContentSize(motion.defaultSpatialSpec()),
     ) {
         // The same voice icon for every voice: a natural one is simply a better voice, not a feature of its own.
-        Icon(JacketIcons.Voice, null, Modifier.size(ButtonDefaults.IconSize))
+        // While one is on its way, a ring that fills as it arrives.
+        if (downloading != null) {
+            CircularProgressIndicator(
+                progress = { downloading }, modifier = Modifier.size(ButtonDefaults.IconSize), strokeWidth = 2.dp,
+                color = contentColor, trackColor = contentColor.copy(alpha = 0.24f),
+            )
+        } else {
+            Icon(JacketIcons.Voice, null, Modifier.size(ButtonDefaults.IconSize))
+        }
         Spacer(Modifier.width(ButtonDefaults.IconSpacing))
         AnimatedContent(
             targetState = if (struggling) stringResource(R.string.voice_slow) else label,

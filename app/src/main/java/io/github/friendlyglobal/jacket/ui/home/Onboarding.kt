@@ -110,6 +110,7 @@ import kotlin.math.cos
 import androidx.compose.ui.semantics.contentDescription
 import io.github.friendlyglobal.jacket.ui.asHeading
 import io.github.friendlyglobal.jacket.ui.decorative
+import io.github.friendlyglobal.jacket.ui.voices.rememberVoice
 
 /** The welcome's pages. Which of them a phone sees, and in what order, depends on whether it folds. */
 private enum class Welcome { COVER, READ, LISTEN, YOURS, START }
@@ -380,7 +381,7 @@ private fun YoursPage(index: Int, pager: PagerState, settings: Settings, onSetti
 
             if (voices.packs.isNotEmpty()) {
                 YoursLabel(stringResource(R.string.voice_title))
-                val ref = remember(language, settings.voice, settings.voices) { voices.choose(language, settings) }
+                val ref = rememberVoice(language, settings)
                 val hearing = ref != null && previewer.playing == ref.toString()
                 Surface(
                     onClick = { haptics.tick(); choosingVoice = true },

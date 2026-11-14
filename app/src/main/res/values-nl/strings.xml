@@ -97,7 +97,7 @@
     <string name="library_empty_message">Voeg een EPUB-, PDF-, FB2-, CBZ-strip- of tekstbestand toe. Jacket bewaart een privékopie en zet de omslag op je buitenscherm, of in een coverschermwidget, terwijl je leest.</string>
     <string name="onboarding_next">Volgende</string>
     <string name="onboarding_skip">Overslaan</string>
-    <string name="onboarding_private">Je boeken blijven op deze telefoon. Jacket heeft geen account en gaat nooit online.</string>
+    <string name="onboarding_private">Je boeken blijven op deze telefoon. Jacket heeft geen account en gaat alleen online om een stem te downloaden als jij dat vraagt.</string>
 
     <string name="settings_title">Instellingen</string>
     <string name="settings_subtitle">Profiel, coverscherm en lezen</string>

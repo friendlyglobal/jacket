@@ -73,6 +73,7 @@ import io.github.friendlyglobal.jacket.importer.Epub
 import io.github.friendlyglobal.jacket.importer.NothingToRead
 import io.github.friendlyglobal.jacket.importer.TextLayout
 import io.github.friendlyglobal.jacket.data.TextPages
+import io.github.friendlyglobal.jacket.ui.voices.rememberVoice
 import io.github.friendlyglobal.jacket.voice.Respelling
 import io.github.friendlyglobal.jacket.voice.SayIt
 import io.github.friendlyglobal.jacket.voices
@@ -1109,7 +1110,7 @@ private fun EpubPages(
     // (Worked out as a voice started with no reader open works it out: see [voicing].)
     val voicing = voicing(book.language, said, phoneLanguage, text = textFile != null)
     val readIn = voicing.readIn
-    val voice = remember(settings.voice, settings.voices, readIn) { voices.choose(readIn, settings) }
+    val voice = rememberVoice(readIn, settings)
     val chosenLanguage = voicing.chosen
     listen.voice = voice
     listen.language = chosenLanguage

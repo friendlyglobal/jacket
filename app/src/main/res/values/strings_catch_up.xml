@@ -6,7 +6,7 @@
     <string name="catch_up_title">Catch up between devices</string>
     <string name="catch_up_description">Read on two devices, and pick up on one where you left off on the other.</string>
     <!-- Shown before the folder is chosen. Keep the two blank lines (\n\n) between the paragraphs. -->
-    <string name="catch_up_setup_body">Choose a folder that all your devices share: one that an app like Google Drive, Dropbox or Syncthing keeps the same on each of them, or a USB stick you carry between them.\n\nJacket keeps a small file there with your places, bookmarks, highlights, notes and collections, and reads the files your other devices keep there. Jacket itself never goes online: the app that shares the folder does that. Your books, covers and settings stay on each device.\n\nThen do the same on your other device, with the same folder.</string>
+    <string name="catch_up_setup_body">Choose a folder that all your devices share: one that an app like Google Drive, Dropbox or Syncthing keeps the same on each of them, or a USB stick you carry between them.\n\nJacket keeps a small file there with your places, bookmarks, highlights, notes and collections, and reads the files your other devices keep there. Jacket itself sends nothing: the app that shares the folder does that. Your books, covers and settings stay on each device.\n\nThen do the same on your other device, with the same folder.</string>
     <!-- The label of a text field: what this device is called on the reader's other devices, e.g. "Tablet". -->
     <string name="catch_up_device_name">This device\'s name</string>
     <string name="catch_up_choose_folder">Choose a folder</string>
